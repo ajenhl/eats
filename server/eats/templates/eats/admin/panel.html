@@ -1,0 +1,61 @@
+{% extends "eats/admin/base.html" %}
+
+{% block eats_content %}
+<h1>EATS Administration Panel</h1>
+
+{% if tm_create_status %}
+<div>
+  {% if tm_create_status == 'created' %}
+  <p>The EATS topic map has been successfully created.</p>
+  {% endif %}
+  {% if tm_create_status == 'exists' %}
+  <p>The EATS topic map already exists.</p>
+  {% endif %}
+  {% if tm_create_status == 'failed' %}
+  <p>The EATS topic map could not be created.</p>
+  {% endif %}
+</div>
+{% endif %}
+
+{% if tm_status %}
+  {% if tm_status == 'no_setting' %}
+<p>In order to begin using EATS, you must set a value for EATS_TOPIC_MAP in settings.py and refresh this page.</p>
+  {% endif %}
+  {% if tm_status == 'no_tm' %}
+<p>In order to begin using EATS, you must create a database, using the following button.</p>
+
+<form action="create_topic_map/" method="post">
+  {% csrf_token %}
+  <button name="submit" type="submit">Create EATS Topic Map</button>
+</form>
+  {% endif %}
+{% endif %}
+
+{% if has_tm %}
+<table>
+  <tr>
+    <th scope="row"><a href="authority/">Authorities</a></th>
+    <td><a href="authority/add/" class="addlink">Add</a></td>
+    <td><a href="authority/" class="changelink">Change</a></td>
+  </tr>
+  <tr>
+    <th scope="row"><a href="language/">Languages</a></th>
+    <td><a href="language/add/" class="addlik">Add</a></td>
+    <td><a href="language/" class="changelink">Change</a></td>
+  </tr>
+  <tr>
+    <td>Scripts</td>
+  </tr>
+  <tr>
+    <td>Entity types</td>
+  </tr>
+  <tr>
+    <td>Name types</td>
+  </tr>
+  <tr>
+    <td>Relationship types</td>
+  </tr>
+</table>
+{% endif %}
+
+{% endblock eats_content %}

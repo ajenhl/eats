@@ -1,0 +1,12 @@
+{% extends "eats/admin/base.html" %}
+
+{% block eats_content %}
+<table>
+  {% for authority, name in authorities %}
+  <tr>
+    <td><a href="{{ authority.identifier.id }}/">{{ name }}</a></td>
+  </tr>
+  {% endfor %}
+</table>
+
+{% endblock eats_content %}

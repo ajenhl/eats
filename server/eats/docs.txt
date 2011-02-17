@@ -1,0 +1,7 @@
+The topic map that is used by the EATS application is specified in the
+settings file, giving the IRI of the topic map. If that topic map does
+not exist, it will automatically be created (or an error thrown?).
+
+EATS views are written with the assumption that
+'django.middleware.transaction.TransactionMiddleware' is specified in
+settings.py MIDDLEWARE_CLASSES.

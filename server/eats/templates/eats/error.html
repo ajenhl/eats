@@ -1,0 +1,7 @@
+{% extends "eats/base.html" %}
+{% block eats_title %}{{ block.super }} Error{% endblock eats_title %}
+{% block eats_content %}
+<h1>{% if error_heading %}{{ error_heading }}{% else %}An error has occurred!{% endif %}</h1>
+
+<p>{{ error_text }}</p>
+{% endblock eats_content %}

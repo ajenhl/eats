@@ -1,0 +1,19 @@
+{% extends "eats/admin/base.html" %}
+
+{% block eats_title %}{{ block.super }}: Add an authority{% endblock eats_title %}
+
+{% block eats_content %}
+<h1>Add an authority</h1>
+
+<form action="" method="post">
+  {% csrf_token %}
+
+  {{ form.as_p }}
+
+  <div>
+    <input type="submit" value="Save" name="_save"/>
+    <input type="submit" value="Save and add another" name="_addanother"/>
+    <input type="submit" value="Save and continue editing" name="_continue"/>
+  </div>
+</form>
+{% endblock eats_content %}

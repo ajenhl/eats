@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% comment %}
+This is the base HTML template for the entire EATS application. It is
+designed to be the sole point of template customisation for integration
+with a project. (Customisation of display particulars will of course
+require modifying other EATS templates.)
+
+It extends a project-defined template and inherits blocks from
+it. These blocks are used only as a wrapper; this template defines the
+EATS-specific blocks that are inherited by the other EATS
+templates. These latter blocks are all named with the prefix "eats_".
+
+This means that if the project template this extends uses different
+block names, they only need to be changed in this template.
+{% endcomment %}
+
+{% block title %}{{ block.super }}
+{% block eats_title %}EATS: {% endblock eats_title %}
+{% endblock title %}
+
+{% block metadata %}{{ block.super }}
+{% block eats_metadata %}{% endblock eats_metadata %}
+{% endblock metadata %}
+
+{% block style %}{{ block.super }}
+{% block eats_style %}
+{% endblock eats_style %}
+{% endblock style %}
+
+{% block js %}{{ block.super }}
+{% block eats_js %}
+{% endblock eats_js %}
+{% endblock js %}
+
+{% block content %}
+{% block eats_search %}
+{% endblock eats_search %}
+
+{% block eats_content %}
+
+{% endblock eats_content %}
+{% endblock content %}
