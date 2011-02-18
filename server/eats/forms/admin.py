@@ -1,6 +1,7 @@
 from django import forms
 
-from eats.api.topic_map import authority_exists
+from eats.api.topic_map import topic_exists
+from eats.constants import AUTHORITY_TYPE_IRI
 
 
 class AuthorityForm (forms.Form):
@@ -22,7 +23,8 @@ class AuthorityForm (forms.Form):
 
     def clean_name (self):
         name = self.cleaned_data['name']
-        if authority_exists(self._topic_map, name, self._authority_id):
+        if topic_exists(self._topic_map, AUTHORITY_TYPE_IRI, name,
+                        self._authority_id):
             raise forms.ValidationError(
                 'The name of the authority must be unique')
         return name

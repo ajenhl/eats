@@ -9,8 +9,9 @@ from django.template import RequestContext
 from tmapi.exceptions import TopicMapExistsException
 from tmapi.models import TopicMap, TopicMapSystemFactory
 
-from eats.api.authority import get_authority_admin_name
-from eats.api.topic_map import create_authority, get_authorities, get_authority
+from eats.api.topic_map import create_topic_by_type, get_admin_name, \
+    get_topic_by_id, get_topics_by_type
+from eats.constants import AUTHORITY_TYPE_IRI, LANGUAGE_TYPE_IRI
 from eats.decorators import add_topic_map
 from eats.forms.admin import AuthorityForm
 
@@ -56,55 +57,67 @@ def create_topic_map (request):
     return HttpResponseRedirect(redirect_url)
 
 @add_topic_map
-def authority_list (request, topic_map):
-    authorities = [(authority, get_authority_admin_name(topic_map, authority))
-                   for authority in get_authorities(topic_map)]
-    context_data = {'authorities': authorities}
-    return render_to_response('eats/admin/authority_list.html', context_data,
+def topic_list (request, topic_map, type_iri, name):
+    topics = get_topics_by_type(topic_map, type_iri)
+    topics_data = [(topic, get_admin_name(topic_map, topic))
+                   for topic in topics]
+    context_data = {'topics': topics_data, 'name': name}
+    return render_to_response('eats/admin/topic_list.html', context_data,
                               context_instance=RequestContext(request))
 
 @add_topic_map
-def authority_add (request, topic_map):
+def topic_add (request, topic_map, type_iri, name):
+    form_class = get_form_class(name)
     if request.method == 'POST':
-        form = AuthorityForm(topic_map, None, request.POST)
+        form = form_class(topic_map, None, request.POST)
         if form.is_valid():
-            name = form.cleaned_data['name']
-            authority = create_authority(topic_map, name)
-            redirect_url = reverse('authority-list')
-            if '_addanother' in form.data:
-                redirect_url = reverse('authority-add')
-            elif '_continue' in form.data:
-                redirect_url = reverse(
-                    'authority-change', kwargs={
-                        'authority_id': authority.identifier.id})
+            admin_name = form.cleaned_data['name']
+            topic = create_topic_by_type(topic_map, type_iri, admin_name)
+            redirect_url = get_redirect_url(form, name, topic.identifier.id)
             return HttpResponseRedirect(redirect_url)
     else:
-        form = AuthorityForm(topic_map, None)
+        form = form_class(topic_map, None)
     context_data = {'form': form}
     return render_to_response('eats/admin/authority_add.html', context_data,
                               context_instance=RequestContext(request))
 
 @add_topic_map
-def authority_change (request, topic_map, authority_id):
-    authority = get_authority(topic_map, authority_id)
-    if authority is None:
+def topic_change (request, topic_map, topic_id, type_iri, name):
+    topic = get_topic_by_id(topic_map, topic_id, type_iri)
+    if topic is None:
         raise Http404
+    form_class = get_form_class(name)
     if request.method == 'POST':
-        form = AuthorityForm(topic_map, authority_id, request.POST)
+        form = form_class(topic_map, topic_id, request.POST)
         if form.is_valid():
-            name = form.cleaned_data['name']
-            get_authority_admin_name(topic_map, authority).set_value(name)
-            redirect_url = reverse('authority-list')
-            if '_addanother' in form.data:
-                redirect_url = reverse('authority-add')
-            elif '_continue' in form.data:
-                redirect_url = reverse(
-                    'authority-change', kwargs={
-                        'authority_id': authority_id})
+            admin_name = form.cleaned_data['name']
+            get_admin_name(topic_map, topic).set_value(admin_name)
+            redirect_url = get_redirect_url(form, name, topic_id)
             return HttpResponseRedirect(redirect_url)
     else:
-        data = {'name': get_authority_admin_name(topic_map, authority)}
-        form = AuthorityForm(topic_map, authority_id, data)
+        data = {'name': get_admin_name(topic_map, topic)}
+        form = form_class(topic_map, topic_id, data)
     context_data = {'form': form}
-    return render_to_response('eats/admin/authority_change.html', context_data,
+    return render_to_response('eats/admin/topic_change.html', context_data,
                               context_instance=RequestContext(request))
+
+def get_form_class (name):
+    """Returns the class of the admin form to use for `name` topics.
+
+    :param name: name of topic type
+    :type name: string
+    :rtype: class
+
+    """
+    if name == 'authority':
+        form_class = AuthorityForm
+    return form_class
+
+def get_redirect_url (form, object_type, identifier):
+    redirect_url = reverse(object_type + '-list')
+    if '_addanother' in form.data:
+        redirect_url = reverse(object_type + '-add')
+    elif '_continue' in form.data:
+        redirect_url = reverse(object_type + '-change', kwargs={
+                object_type + '_id': identifier})
+    return redirect_url

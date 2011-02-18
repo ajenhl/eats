@@ -1,0 +1,31 @@
+{% extends "eats/admin/base.html" %}
+
+{% block eats_content %}
+<h1>Select {{ name }} to change</h1>
+
+<form id="changelist-form" action="" method="post">
+{% csrf_token %}
+<div class="actions">
+  <label>Action: <select name="action">
+<option value="" selected="selected">---------</option>
+<option value="delete_selected">Delete selected items</option>
+</select></label>
+<button type="submit" class="button" title="Run the selected action" name="index" value="0">Go</button>
+</div>
+
+<table>
+  <tr>
+    <td></td>
+    <th scope="col">{{ name|title }}</th>
+  </tr>
+  {% for topic, name in topics %}
+  <tr>
+    <td><input type="checkbox" class="action-select" value="{{ topic.identifier.id }}" name="_selected_action" /></td>
+    <td><a href="{{ topic.identifier.id }}/">{{ name }}</a></td>
+  </tr>
+  {% endfor %}
+</table>
+
+<p><a href="add/">Add a new {{ name }}</a></p>
+
+{% endblock eats_content %}
