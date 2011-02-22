@@ -9,11 +9,9 @@ from django.template import RequestContext
 from tmapi.exceptions import TopicMapExistsException
 from tmapi.models import TopicMap, TopicMapSystemFactory
 
-from eats.api.topic_map import create_topic_by_type, get_admin_name, \
-    get_topic_by_id, get_topics_by_type
-from eats.constants import AUTHORITY_TYPE_IRI, LANGUAGE_TYPE_IRI
+from eats.api.topic_map import create_topic_by_type, get_admin_name, get_topic_by_id, get_topics_by_type, update_topic_by_type, get_topic_data
 from eats.decorators import add_topic_map
-from eats.forms.admin import AuthorityForm
+from eats.forms.admin import AuthorityForm, LanguageForm, ScriptForm
 
 
 def administration_panel (request):
@@ -71,14 +69,13 @@ def topic_add (request, topic_map, type_iri, name):
     if request.method == 'POST':
         form = form_class(topic_map, None, request.POST)
         if form.is_valid():
-            admin_name = form.cleaned_data['name']
-            topic = create_topic_by_type(topic_map, type_iri, admin_name)
+            topic = create_topic_by_type(topic_map, type_iri, form.cleaned_data)
             redirect_url = get_redirect_url(form, name, topic.identifier.id)
             return HttpResponseRedirect(redirect_url)
     else:
         form = form_class(topic_map, None)
-    context_data = {'form': form}
-    return render_to_response('eats/admin/authority_add.html', context_data,
+    context_data = {'form': form, 'name': name}
+    return render_to_response('eats/admin/topic_add.html', context_data,
                               context_instance=RequestContext(request))
 
 @add_topic_map
@@ -90,14 +87,13 @@ def topic_change (request, topic_map, topic_id, type_iri, name):
     if request.method == 'POST':
         form = form_class(topic_map, topic_id, request.POST)
         if form.is_valid():
-            admin_name = form.cleaned_data['name']
-            get_admin_name(topic_map, topic).set_value(admin_name)
+            update_topic_by_type(topic_map, topic, type_iri, form.cleaned_data)
             redirect_url = get_redirect_url(form, name, topic_id)
             return HttpResponseRedirect(redirect_url)
     else:
-        data = {'name': get_admin_name(topic_map, topic)}
+        data = get_topic_data(topic_map, topic, type_iri)
         form = form_class(topic_map, topic_id, data)
-    context_data = {'form': form}
+    context_data = {'form': form, 'name': name}
     return render_to_response('eats/admin/topic_change.html', context_data,
                               context_instance=RequestContext(request))
 
@@ -111,6 +107,10 @@ def get_form_class (name):
     """
     if name == 'authority':
         form_class = AuthorityForm
+    elif name == 'language':
+        form_class = LanguageForm
+    elif name == 'script':
+        form_class = ScriptForm
     return form_class
 
 def get_redirect_url (form, object_type, identifier):
@@ -118,6 +118,6 @@ def get_redirect_url (form, object_type, identifier):
     if '_addanother' in form.data:
         redirect_url = reverse(object_type + '-add')
     elif '_continue' in form.data:
-        redirect_url = reverse(object_type + '-change', kwargs={
-                object_type + '_id': identifier})
+        redirect_url = reverse(object_type + '-change',
+                               kwargs={'topic_id': identifier})
     return redirect_url

@@ -4,27 +4,40 @@ from eats.api.topic_map import topic_exists
 from eats.constants import AUTHORITY_TYPE_IRI
 
 
-class AuthorityForm (forms.Form):
+class AdminForm (forms.Form):
 
     name = forms.CharField(max_length=100)
-
-    def __init__ (self, topic_map, authority_id, *args, **kwargs):
+    
+    def __init__ (self, topic_map, topic_id, *args, **kwargs):
         """Initialise the form.
 
         :param topic_map: the EATS Topic Map
         :type topic_map: `TopicMap`
-        :param authority_id: the `Identifier` id of the authority topic
-        :type authority_id: integer or None
+        :param topic_id: the `Identifier` id of the topic
+        :type topic_id: integer or None
 
         """
-        self._topic_map = topic_map
-        self._authority_id = authority_id
-        super(AuthorityForm, self).__init__(*args, **kwargs)
+        self.topic_map = topic_map
+        self.topic_id = topic_id
+        super(AdminForm, self).__init__(*args, **kwargs)
+
+
+class AuthorityForm (AdminForm):
 
     def clean_name (self):
         name = self.cleaned_data['name']
-        if topic_exists(self._topic_map, AUTHORITY_TYPE_IRI, name,
-                        self._authority_id):
+        if topic_exists(self.topic_map, AUTHORITY_TYPE_IRI, name,
+                        self.topic_id):
             raise forms.ValidationError(
                 'The name of the authority must be unique')
         return name
+
+
+class LanguageForm (AdminForm):
+
+    code = forms.CharField(max_length=3)
+
+
+class ScriptForm (AdminForm):
+
+    code = forms.CharField(max_length=4)
