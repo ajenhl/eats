@@ -1,2 +1,2 @@
-def display_entity (request):
+def entity_view (request):
     pass

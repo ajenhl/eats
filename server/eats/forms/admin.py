@@ -1,7 +1,7 @@
 from django import forms
 
 from eats.api.topic_map import topic_exists
-from eats.constants import AUTHORITY_TYPE_IRI
+from eats.constants import AUTHORITY_TYPE_IRI, LANGUAGE_TYPE_IRI, SCRIPT_TYPE_IRI
 
 
 class AdminForm (forms.Form):
@@ -37,7 +37,35 @@ class LanguageForm (AdminForm):
 
     code = forms.CharField(max_length=3)
 
+    def clean_code (self):
+        code = self.cleaned_data['code']
+        # QAZ: Need to ensure that the code is unique, along with the
+        # name. topic_exists checks on the admin name, and so is not
+        # suitable.
+        return code
+
+    def clean_name (self):
+        name = self.cleaned_data['name']
+        if topic_exists(self.topic_map, LANGUAGE_TYPE_IRI, name, self.topic_id):
+            raise forms.ValidationError(
+                'The name of the language must be unique')
+        return name
+    
 
 class ScriptForm (AdminForm):
 
     code = forms.CharField(max_length=4)
+
+    def clean_code (self):
+        code = self.cleaned_data['code']
+        # QAZ: Need to ensure that the code is unique, along with the
+        # name. topic_exists checks on the admin name, and so is not
+        # suitable.
+        return code
+
+    def clean_name (self):
+        name = self.cleaned_data['name']
+        if topic_exists(self.topic_map, SCRIPT_TYPE_IRI, name, self.topic_id):
+            raise forms.ValidationError(
+                'The name of the script must be unique')
+        return name

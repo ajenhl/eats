@@ -9,7 +9,6 @@ from django.template import RequestContext
 from tmapi.exceptions import TopicMapExistsException
 from tmapi.models import TopicMap, TopicMapSystemFactory
 
-from eats.api.topic_map import create_topic_by_type, get_admin_name, get_topic_by_id, get_topics_by_type, update_topic_by_type, get_topic_data
 from eats.decorators import add_topic_map
 from eats.forms.admin import AuthorityForm, LanguageForm, ScriptForm
 
@@ -56,8 +55,8 @@ def create_topic_map (request):
 
 @add_topic_map
 def topic_list (request, topic_map, type_iri, name):
-    topics = get_topics_by_type(topic_map, type_iri)
-    topics_data = [(topic, get_admin_name(topic_map, topic))
+    topics = topic_map.get_topics_by_type(type_iri)
+    topics_data = [(topic, topic_map.get_admin_name(topic))
                    for topic in topics]
     context_data = {'topics': topics_data, 'name': name}
     return render_to_response('eats/admin/topic_list.html', context_data,
@@ -69,7 +68,7 @@ def topic_add (request, topic_map, type_iri, name):
     if request.method == 'POST':
         form = form_class(topic_map, None, request.POST)
         if form.is_valid():
-            topic = create_topic_by_type(topic_map, type_iri, form.cleaned_data)
+            topic = topic_map.create_typed_topic(type_iri, form.cleaned_data)
             redirect_url = get_redirect_url(form, name, topic.identifier.id)
             return HttpResponseRedirect(redirect_url)
     else:
@@ -80,18 +79,18 @@ def topic_add (request, topic_map, type_iri, name):
 
 @add_topic_map
 def topic_change (request, topic_map, topic_id, type_iri, name):
-    topic = get_topic_by_id(topic_map, topic_id, type_iri)
+    topic = topic_map.get_topic_by_id(topic_id, type_iri)
     if topic is None:
         raise Http404
     form_class = get_form_class(name)
     if request.method == 'POST':
         form = form_class(topic_map, topic_id, request.POST)
         if form.is_valid():
-            update_topic_by_type(topic_map, topic, type_iri, form.cleaned_data)
+            topic_map.update_topic_by_type(topic, type_iri, form.cleaned_data)
             redirect_url = get_redirect_url(form, name, topic_id)
             return HttpResponseRedirect(redirect_url)
     else:
-        data = get_topic_data(topic_map, topic, type_iri)
+        data = topic_map.get_topic_data(topic, type_iri)
         form = form_class(topic_map, topic_id, data)
     context_data = {'form': form, 'name': name}
     return render_to_response('eats/admin/topic_change.html', context_data,

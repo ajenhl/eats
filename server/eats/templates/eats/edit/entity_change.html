@@ -1,0 +1,38 @@
+{% extends "eats/edit/base.html" %}
+
+{% block eats_content %}
+<h1>Edit entity</h1>
+
+<form action="" method="post">
+  {% csrf_token %}
+  {{ existence_formset.management_form }}
+
+  <table>
+    <thead>
+      <tr>
+        <th>Delete?</th>
+        <th>Authority</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for form in existence_formset %}
+      <tr>
+        <td>{{ form.DELETE }}</td>
+        <td>{{ form.authority }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <table>
+    {{ entity_type_formset }}
+  </table>
+
+  <div>
+    <input type="submit" value="Save" name="_save"/>
+  </div>
+</form>
+
+{% endblock eats_content %}
+
+

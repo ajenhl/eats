@@ -6,13 +6,15 @@ from eats.constants import AUTHORITY_TYPE_IRI, LANGUAGE_TYPE_IRI, SCRIPT_TYPE_IR
 # Displaying.
 urlpatterns = patterns(
     'eats.views.display',
-    url(r'^(?P<entity_id>\d+)/$', 'display_entity', name='display-entity'),
+    url(r'^entity/(?P<entity_id>\d+)/$', 'entity_view', name='entity-view'),
     )
 
 # Editing.
 urlpatterns += patterns(
     'eats.views.edit',
-    url(r'^edit/create_entity/$', 'create_entity', name='create-entity'),
+    url(r'^edit/entity/add/$', 'entity_add', name='entity-add'),
+    url(r'^edit/entity/(?P<entity_id>\d+)/$', 'entity_change',
+        name='entity-change'),
     )
 
 topic_data = {
