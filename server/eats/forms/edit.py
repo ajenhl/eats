@@ -1,14 +1,12 @@
 from django import forms
 from django.forms.formsets import formset_factory, BaseFormSet
 
-from eats.api.topic_map import get_admin_name
-
 
 class PropertyAssertionFormSet (BaseFormSet):
 
-    def __init__ (self, *args, **kwargs):
-        self.authority_choices = kwargs.pop('authority_choices')
-        super(PropertyAssertionFormSet, self).__init__(*args, **kwargs)
+    def __init__ (self, authority_choices, **kwargs):
+        self.authority_choices = authority_choices
+        super(PropertyAssertionFormSet, self).__init__(**kwargs)
 
     def _construct_forms (self):
         self.forms = []
@@ -44,6 +42,7 @@ class CreateEntityForm (forms.Form):
 class PropertyAssertionForm (forms.Form):
 
     authority = forms.ChoiceField(choices=[])
+    #association = forms.
 
     def __init__ (self, *args, **kwargs):
         authority_choices = kwargs.pop('authority_choices')
@@ -92,7 +91,7 @@ def create_choice_list (topic_map, queryset, default=False):
     """
     # QAZ: need a function for getting the most appropriate name,
     # based on the user's preferences.
-    choices = [(unicode(item.get_id()), get_admin_name(topic_map, item))
+    choices = [(unicode(item.get_id()), topic_map.get_admin_name(item))
                for item in queryset]
     if not (queryset.count() == 1 and default):
         choices = [('', '----------')] + choices

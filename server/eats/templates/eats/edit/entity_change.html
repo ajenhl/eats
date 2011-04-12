@@ -5,28 +5,66 @@
 
 <form action="" method="post">
   {% csrf_token %}
-  {{ existence_formset.management_form }}
 
-  <table>
-    <thead>
-      <tr>
-        <th>Delete?</th>
-        <th>Authority</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for form in existence_formset %}
-      <tr>
-        <td>{{ form.DELETE }}</td>
-        <td>{{ form.authority }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <fieldset>
+    <legend>Existences</legend>
 
-  <table>
-    {{ entity_type_formset }}
-  </table>
+    {{ existence_formset.management_form }}
+
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Delete?</th>
+          <th scope="col">Authority</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for form in existence_formset %}
+        <tr>
+          <td>{% if form.initial %}{{ form.DELETE }}{% endif %}</td>
+          <td>{{ form.authority }}</td>
+          <td class="errors">{% if form.errors %}<ul>
+          {% for error in form.errors.values %}
+          <li>{{ error }}</li>
+          {% endfor %}
+          </ul>{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </fieldset>
+
+  <fieldset>
+    <legend>Entity types</legend>
+
+    {{ entity_type_formset.management_form }}
+
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Delete?</th>
+          <th scope="col">Authority</th>
+          <th scope="col">Entity type</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for form in entity_type_formset %}
+        <tr>
+          <td>{% if form.initial %}{{ form.DELETE }}{% endif %}</td>
+          <td>{{ form.authority }}</td>
+          <td>{{ form.entity_type }}</td>
+          <td class="errors">{% if form.errors %}<ul>
+          {% for error in form.errors.values %}
+          <li>{{ error }}</li>
+          {% endfor %}
+          </ul>{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </fieldset>
 
   <div>
     <input type="submit" value="Save" name="_save"/>

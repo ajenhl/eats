@@ -42,16 +42,25 @@ def entity_change (request, topic_map, entity_id):
     # logged in users who can edit entities.
     authorities = topic_map.get_authorities()
     authority_choices = create_choice_list(topic_map, authorities)
-    post_data = request.POST or None
+    data = request.POST or None
     existences = ExistencePropertyAssertions(topic_map, entity, authorities,
-                                             authority_choices, post_data)
-    context_data['existence_non_editable'] = existences.non_editable
-    context_data['existence_formset'] = existences.formset
+                                             authority_choices, data)
     entity_types = EntityTypePropertyAssertions(topic_map, entity, authorities,
-                                                authority_choices, post_data)
+                                                authority_choices, data)
+    existences_formset = existences.formset
+    entity_types_formset = entity_types.formset
+    if request.method == 'POST':
+        is_valid = False
+        for formset in (existences_formset, entity_types_formset):
+            is_valid = formset.is_valid()
+            if not is_valid:
+                break
+        if is_valid:
+            pass
+    context_data['existence_non_editable'] = existences.non_editable
+    context_data['existence_formset'] = existences_formset
     context_data['entity_type_non_editable'] = entity_types.non_editable
-    context_data['entity_type_formset'] = entity_types.formset
-    # Create the lists of assertions, both editable (forms) and not.
+    context_data['entity_type_formset'] = entity_types_formset
     return render_to_response('eats/edit/entity_change.html', context_data,
                               context_instance=RequestContext(request))
 

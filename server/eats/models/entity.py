@@ -14,9 +14,11 @@ class Entity (Topic):
         :type authority: `Topic`
 
         """
-        assertion = self.eats_topic_map.topic_map.create_association(
+        assertion = self.eats_topic_map.create_association(
             self.eats_topic_map.existence_assertion_type, scope=[authority])
-        assertion.create_role(self.property_role_type, self.existence)
+        assertion.create_role(self.eats_topic_map.property_role_type,
+                              self.eats_topic_map.existence)
+        assertion.create_role(self.eats_topic_map.entity_role_type, self)
 
     @property
     def eats_topic_map (self):

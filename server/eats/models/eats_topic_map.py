@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 from tmapi.indices import TypeInstanceIndex
 from tmapi.models import Locator, Topic, TopicMap
 
-from eats.constants import ADMIN_NAME_TYPE_IRI, AUTHORITY_TYPE_IRI, ENTITY_ROLE_TYPE_IRI, ENTITY_TYPE_IRI, ENTITY_TYPE_ASSERTION_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, EXISTENCE_ASSERTION_TYPE_IRI, LANGUAGE_CODE_TYPE_IRI, LANGUAGE_TYPE_IRI, PROPERTY_ROLE_TYPE_IRI, SCRIPT_CODE_TYPE_IRI, SCRIPT_TYPE_IRI
+from eats.constants import ADMIN_NAME_TYPE_IRI, AUTHORITY_TYPE_IRI, ENTITY_ROLE_TYPE_IRI, ENTITY_TYPE_IRI, ENTITY_TYPE_ASSERTION_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, EXISTENCE_IRI, EXISTENCE_ASSERTION_TYPE_IRI, LANGUAGE_CODE_TYPE_IRI, LANGUAGE_TYPE_IRI, PROPERTY_ROLE_TYPE_IRI, SCRIPT_CODE_TYPE_IRI, SCRIPT_TYPE_IRI
 from entity import Entity
 
 class EATSTopicMap (TopicMap):
@@ -71,8 +71,6 @@ class EATSTopicMap (TopicMap):
         topic = self.create_topic()
         topic_type = self.create_topic_by_subject_identifier(
             Locator(type_iri))
-        print self.id
-        print topic_type.topic_map.id
         topic.add_type(topic_type)
         if data is not None:
             # Different data to save depending on the type.
@@ -91,7 +89,7 @@ class EATSTopicMap (TopicMap):
     def entity_role_type (self):
         self._entity_role_type = getattr(self, '_entity_role_type', None)
         if self._entity_role_type is None:
-            self._entity_role_type = self.get_topic_by_subject_identifier(
+            self._entity_role_type = self.create_topic_by_subject_identifier(
                 Locator(ENTITY_ROLE_TYPE_IRI))
         return self._entity_role_type
 
@@ -100,7 +98,7 @@ class EATSTopicMap (TopicMap):
         self._entity_type_assertion_type = getattr(
             self, '_entity_type_assertion_type', None)
         if self._entity_type_assertion_type is None:
-            self._entity_type_assertion_type = self.get_topic_by_subject_identifier(Locator(ENTITY_TYPE_ASSERTION_TYPE_IRI))
+            self._entity_type_assertion_type = self.create_topic_by_subject_identifier(Locator(ENTITY_TYPE_ASSERTION_TYPE_IRI))
         return self._entity_type_assertion_type
     
     @property
@@ -121,11 +119,25 @@ class EATSTopicMap (TopicMap):
         return self.get_topics_by_type(ENTITY_TYPE_TYPE_IRI)
 
     @property
+    def existence (self):
+        """Returns the existence topic, that serves as the property
+        topic for all existences.
+
+        :rtype: `Topic`
+        
+        """
+        self._existence = getattr(self, '_existence', None)
+        if self._existence is None:
+            self._existence = self.create_topic_by_subject_identifier(
+                Locator(EXISTENCE_IRI))
+        return self._existence
+    
+    @property
     def existence_assertion_type (self):
         self._existence_assertion_type = getattr(
             self, '_existence_assertion_type', None)
         if self._existence_assertion_type is None:
-            self._existence_assertion_type = self.get_topic_by_subject_identifier(Locator(EXISTENCE_ASSERTION_TYPE_IRI))
+            self._existence_assertion_type = self.create_topic_by_subject_identifier(Locator(EXISTENCE_ASSERTION_TYPE_IRI))
         return self._existence_assertion_type
     
     def get_admin_name (self, topic):
@@ -158,7 +170,11 @@ class EATSTopicMap (TopicMap):
 
         """
         topic = self.get_construct_by_id(entity_id)
-        return self.convert_topic_to_entity(topic)
+        if topic is None:
+            entity = None
+        else:
+            entity = self.convert_topic_to_entity(topic)
+        return entity
 
     def get_topic_by_id (self, topic_id, type_iri):
         """Returns the topic with `topic_id`, or None if there is no
@@ -223,7 +239,7 @@ class EATSTopicMap (TopicMap):
         self._property_role_type = getattr(self, '_property_role_type',
                                            None)
         if self._property_role_type is None:
-            self._property_role_type = self.get_topic_by_subject_identifier(
+            self._property_role_type = self.create_topic_by_subject_identifier(
                 Locator(PROPERTY_ROLE_TYPE_IRI))
         return self._property_role_type
     
