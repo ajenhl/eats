@@ -4,29 +4,68 @@ from django.forms.formsets import formset_factory, BaseFormSet
 
 class PropertyAssertionFormSet (BaseFormSet):
 
-    def __init__ (self, authority_choices, **kwargs):
+    def __init__ (self, topic_map, entity, authority_choices, **kwargs):
+        self.topic_map = topic_map
+        self.entity = entity
         self.authority_choices = authority_choices
         super(PropertyAssertionFormSet, self).__init__(**kwargs)
 
-    def _construct_forms (self):
-        self.forms = []
-        for i in xrange(self.total_form_count()):
-            self.forms.append(self._construct_form(
-                    i, authority_choices=self.authority_choices))
+    def _construct_form (self, i, **kwargs):
+        kwargs.update({'topic_map': self.topic_map, 'entity': self.entity,
+                       'authority_choices': self.authority_choices})
+        return super(PropertyAssertionFormSet, self)._construct_form(
+            i, **kwargs)
+
+
+class ExistenceAssertionFormSet (PropertyAssertionFormSet):
+
+    pass
+
+
+class EntityRelationshipAssertionFormSet (PropertyAssertionFormSet):
+
+    def __init__ (self, **kwargs):
+        self.relationship_choices = kwargs.pop('relationship_choices')
+        super(EntityRelationshipAssertionFormSet, self).__init__(**kwargs)
+
+    def _construct_form (self, i, **kwargs):
+        kwargs.update({'relationship_choices': self.relationship_choices})
+        return super(EntityRelationshipAssertionFormSet, self)._construct_form(
+            i, **kwargs)
 
 
 class EntityTypeAssertionFormSet (PropertyAssertionFormSet):
 
-    def __init__ (self, *args, **kwargs):
+    def __init__ (self, **kwargs):
         self.entity_type_choices = kwargs.pop('entity_type_choices')
-        super(EntityTypeAssertionFormSet, self).__init__(*args, **kwargs)
+        super(EntityTypeAssertionFormSet, self).__init__(**kwargs)
 
-    def _construct_forms (self):
-        self.forms = []
-        for i in xrange(self.total_form_count()):
-            self.forms.append(self._construct_form(
-                    i, authority_choices=self.authority_choices,
-                    entity_type_choices=self.entity_type_choices))
+    def _construct_form (self, i, **kwargs):
+        kwargs.update({'entity_type_choices': self.entity_type_choices})
+        return super(EntityTypeAssertionFormSet, self)._construct_form(
+            i, **kwargs)
+
+
+class NameAssertionFormSet (PropertyAssertionFormSet):
+
+    def __init__ (self, **kwargs):
+        self.name_type_choices = kwargs.pop('name_type_choices')
+        self.language_choices = kwargs.pop('language_choices')
+        self.script_choices = kwargs.pop('script_choices')
+        super(NameAssertionFormSet, self).__init__(**kwargs)
+
+    def _construct_form (self, i, **kwargs):
+        kwargs.update({'name_type_choices': self.name_type_choices,
+                       'language_choices': self.language_choices,
+                       'script_choices': self.script_choices})
+        return super(NameAssertionFormSet, self)._construct_form(
+            i, **kwargs)
+
+
+class NoteAssertionFormSet (PropertyAssertionFormSet):
+
+    pass
+        
 
 
 class CreateEntityForm (forms.Form):
@@ -42,19 +81,82 @@ class CreateEntityForm (forms.Form):
 class PropertyAssertionForm (forms.Form):
 
     authority = forms.ChoiceField(choices=[])
-    #association = forms.
+    assertion = forms.IntegerField(widget=forms.HiddenInput, required=False)
 
     def __init__ (self, *args, **kwargs):
+        self.topic_map = kwargs.pop('topic_map')
+        self.entity = kwargs.pop('entity')
         authority_choices = kwargs.pop('authority_choices')
         super(PropertyAssertionForm, self).__init__(*args, **kwargs)
         if 'initial' in kwargs:
             authority_choices = authority_choices[1:]
         self.fields['authority'].choices = authority_choices
+
+    def _get_construct (self, name):
+        """Returns the construct specified by `name`.
+
+        `name` corresponds to the name of one of the form's fields.
+
+        :param name: name of the construct to return
+        :type name: string
+        :rtype: `Construct`
+
+        """
+        construct_id = self.cleaned_data[name]
+        construct = None
+        if construct_id is not None:
+            construct = self.topic_map.get_construct_by_id(construct_id)
+        return construct
+        
+    def delete (self):
+        """Deletes the assertion."""
+        assertion = self._get_construct('assertion')
+        if assertion is None:
+            return
+        assertion.remove()
+
+    def _replace_scope (self, scoped, scope):
+        """Replaces the scope of `scoped` with `scope`.
+
+        :param scoped: scoped construct
+        :type scoped: `Scoped` `Construct`
+        :param scope: scoping topic
+        :type scope: `Topic`
+
+        """
+        for theme in scoped.get_scope():
+            scoped.remove_theme(theme)
+        scoped.add_theme(scope)
+        
+    def save (self):
+        raise NotImplementedError
         
         
 class ExistenceForm (PropertyAssertionForm):
 
-    pass
+    def save (self):
+        authority = self._get_construct('authority')
+        assertion = self._get_construct('assertion')
+        if assertion is None:
+            # Create a new assertion.
+            self.entity.create_existence_property_assertion(authority)
+        else:
+            # Update an existing assertion.
+            self._replace_scope(assertion, authority)
+
+
+class EntityRelationshipForm (PropertyAssertionForm):
+
+    domain_entity = forms.CharField()
+    relationship = forms.ChoiceField(choices=[])
+    range_entity = forms.CharField()
+
+    def __init__ (self, *args, **kwargs):
+        relationship_choices = kwargs.pop('relationship_choices')
+        super(EntityRelationshipForm, self).__init__(*args, **kwargs)
+        if 'initial' in kwargs:
+            relationship_choices = relationship_choices[1:]
+        self.fields['relationship'].choices = relationship_choices
 
 
 class EntityTypeForm (PropertyAssertionForm):
@@ -68,11 +170,83 @@ class EntityTypeForm (PropertyAssertionForm):
             entity_type_choices = entity_type_choices[1:]
         self.fields['entity_type'].choices = entity_type_choices
 
+    def save (self):
+        authority = self._get_construct('authority')
+        assertion = self._get_construct('assertion')
+        entity_type = self._get_construct('entity_type')
+        if assertion is None:
+            # Create a new assertion.
+            self.entity.create_entity_type_property_assertion(authority,
+                                                              entity_type)
+        else:
+            # Update an existing assertion.
+            self._replace_scope(assertion, authority)
 
+
+class NameForm (PropertyAssertionForm):
+
+    name_type = forms.ChoiceField(choices=[])
+    language = forms.ChoiceField(choices=[])
+    script = forms.ChoiceField(choices=[])
+    display_form = forms.CharField()
+
+    def __init__ (self, *args, **kwargs):
+        name_type_choices = kwargs.pop('name_type_choices')
+        language_choices = kwargs.pop('language_choices')
+        script_choices = kwargs.pop('script_choices')
+        super(NameForm, self).__init__(*args, **kwargs)
+        if 'initial' in kwargs:
+            name_type_choices = name_type_choices[1:]
+        self.fields['name_type'].choices = name_type_choices
+        self.fields['language'].choices = language_choices
+        self.fields['script'].choices = script_choices
+
+    def save (self):
+        authority = self._get_construct('authority')
+        assertion = self._get_construct('assertion')
+        name_type = self._get_construct('name_type')
+        language = self._get_construct('language')
+        script = self._get_construct('script')
+        display_form = self.cleaned_data['display_form']
+        if assertion is None:
+            # Create a new assertion.
+            self.entity.create_name_property_assertion(
+                authority, name_type, language, script, display_form)
+        else:
+            # Update an existing assertion.
+            self.entity.update_name_property_assertion(
+                assertion, name_type, language, script, display_form)
+            self._replace_scope(assertion, authority)
+
+
+class NoteForm (PropertyAssertionForm):
+
+    note = forms.CharField(widget=forms.Textarea)
+
+    def save (self):
+        authority = self._get_construct('authority')
+        assertion = self._get_construct('assertion')
+        note = self.cleaned_data['note']
+        if assertion is None:
+            # Create a new assertion.
+            self.entity.create_note_property_assertion(authority, note)
+        else:
+            # Update an existing assertion.
+            assertion.set_value(note)
+            self._replace_scope(assertion, authority)
+
+        
 ExistenceFormSet = formset_factory(ExistenceForm, can_delete=True,
-                                   formset=PropertyAssertionFormSet)
+                                   formset=ExistenceAssertionFormSet)
+EntityRelationshipFormSet = formset_factory(
+    EntityRelationshipForm, can_delete=True,
+    formset=EntityRelationshipAssertionFormSet)
 EntityTypeFormSet = formset_factory(EntityTypeForm, can_delete=True,
                                     formset=EntityTypeAssertionFormSet)
+NameFormSet = formset_factory(NameForm, can_delete=True,
+                              formset=NameAssertionFormSet)
+NoteFormSet = formset_factory(NoteForm, can_delete=True,
+                              formset=NoteAssertionFormSet)
 
 
 def create_choice_list (topic_map, queryset, default=False):

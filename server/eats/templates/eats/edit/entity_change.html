@@ -22,7 +22,7 @@
       <tbody>
         {% for form in existence_formset %}
         <tr>
-          <td>{% if form.initial %}{{ form.DELETE }}{% endif %}</td>
+          <td>{% if form.initial or form.is_bound %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
           <td>{{ form.authority }}</td>
           <td class="errors">{% if form.errors %}<ul>
           {% for error in form.errors.values %}
@@ -52,14 +52,161 @@
       <tbody>
         {% for form in entity_type_formset %}
         <tr>
-          <td>{% if form.initial %}{{ form.DELETE }}{% endif %}</td>
-          <td>{{ form.authority }}</td>
-          <td>{{ form.entity_type }}</td>
-          <td class="errors">{% if form.errors %}<ul>
-          {% for error in form.errors.values %}
-          <li>{{ error }}</li>
-          {% endfor %}
-          </ul>{% endif %}</td>
+          <td>{% if form.initial or form.is_bound %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
+          <td>
+            <div>{{ form.authority }}</div>
+            {% if form.errors.authority %}
+            <div class="errors">{{ form.errors.authority }}</div>
+            {% endif %}
+          </td>
+          <td>
+            <div>{{ form.entity_type }}</div>
+            {% if form.errors.entity_type %}
+            <div class="errors">{{ form.errors.entity_type }}</div>
+            {% endif %}
+          </td>
+          <td class="errors"></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </fieldset>
+
+  <fieldset>
+    <legend>Names</legend>
+
+    {{ name_formset.management_form }}
+
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Delete?</th>
+          <th scope="col">Authority</th>
+          <th scope="col">Name type</th>
+          <th scope="col">Language</th>
+          <th scope="col">Script</th>
+          <th scope="col">Display form</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for form in name_formset %}
+        <tr>
+          <td>{{ form.DELETE }}{{ form.assertion }}</td>
+          <td>
+            <div>{{ form.authority }}</div>
+            {% if form.errors.authority %}
+            <div class="errors">{{ form.errors.authority }}</div>
+            {% endif %}
+          </td>
+          <td>
+            <div>{{ form.name_type }}</div>
+            {% if form.errors.name_type %}
+            <div class="errors">{{ form.errors.name_type }}</div>
+            {% endif %}
+          </td>
+          <td>
+            <div>{{ form.language }}</div>
+            {% if form.errors.language %}
+            <div class="errors">{{ form.errors.language }}</div>
+            {% endif %}
+          </td>
+          <td>
+            <div>{{ form.script }}</div>
+            {% if form.errors.script %}
+            <div class="errors">{{ form.errors.script }}</div>
+            {% endif %}
+          </td>
+          <td>
+            <div>{{ form.display_form }}</div>
+            {% if form.errors.display_form %}
+            <div class="errors">{{ form.errors.display_form }}</div>
+            {% endif %}
+          </td>
+          <td class="errors"></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </fieldset>
+
+  <fieldset>
+    <legend>Relationships</legend>
+
+    {{ entity_relationship_formset.management_form }}
+
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Delete?</th>
+          <th scope="col">Authority</th>
+          <th scope="col">Entity</th>
+          <th scope="col">Relationship</th>
+          <th scope="col">Entity</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for form in entity_relationship_formset %}
+        <tr>
+          <td>{{ form.DELETE }}{{ form.assertion }}</td>
+          <td>
+            <div>{{ form.authority }}</div>
+            {% if form.errors.authority %}
+            <div class="errors">{{ form.errors.authority }}</div>
+            {% endif %}
+          </td>
+          <td>
+            <div>{{ form.domain_entity }}</div>
+            {% if form.errors.domain_entity %}
+            <div class="errors">{{ form.errors.domain_entity }}</div>
+            {% endif %}
+          </td>
+          <td>
+            <div>{{ form.relationship }}</div>
+            {% if form.errors.relationship %}
+            <div class="errors">{{ form.errors.relationship }}</div>
+            {% endif %}
+          </td>
+          <td>
+            <div>{{ form.range_entity }}</div>
+            {% if form.errors.range_entity %}
+            <div class="errors">{{ form.errors.range_entity }}</div>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </fieldset>
+
+  <fieldset>
+    <legend>Notes</legend>
+
+    {{ note_formset.management_form }}
+
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Delete?</th>
+          <th scope="col">Authority</th>
+          <th scope="col">Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for form in note_formset %}
+        <tr>
+          <td>{% if form.initial or form.is_bound %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
+          <td>
+            <div>{{ form.authority }}</div>
+            {% if form.errors.authority %}
+            <div class="errors">{{ form.errors.authority }}</div>
+            {% endif %}
+          </td>
+          <td>
+            <div>{{ form.note }}</div>
+            {% if form.errors.note %}
+            <div class="errors">{{ form.errors.note }}</div>
+            {% endif %}
+          </td>
         </tr>
         {% endfor %}
       </tbody>

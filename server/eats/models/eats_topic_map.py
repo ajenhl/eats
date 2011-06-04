@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 from tmapi.indices import TypeInstanceIndex
 from tmapi.models import Locator, Topic, TopicMap
 
-from eats.constants import ADMIN_NAME_TYPE_IRI, AUTHORITY_TYPE_IRI, ENTITY_ROLE_TYPE_IRI, ENTITY_TYPE_IRI, ENTITY_TYPE_ASSERTION_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, EXISTENCE_IRI, EXISTENCE_ASSERTION_TYPE_IRI, LANGUAGE_CODE_TYPE_IRI, LANGUAGE_TYPE_IRI, PROPERTY_ROLE_TYPE_IRI, SCRIPT_CODE_TYPE_IRI, SCRIPT_TYPE_IRI
+from eats.constants import ADMIN_NAME_TYPE_IRI, AUTHORITY_TYPE_IRI, DOMAIN_ENTITY_ROLE_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_IRI, ENTITY_ROLE_TYPE_IRI, ENTITY_TYPE_IRI, ENTITY_TYPE_ASSERTION_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, EXISTENCE_IRI, EXISTENCE_ASSERTION_TYPE_IRI, IS_IN_LANGUAGE_TYPE_IRI, IS_IN_SCRIPT_TYPE_IRI, LANGUAGE_CODE_TYPE_IRI, LANGUAGE_ROLE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_ASSERTION_TYPE_IRI, NAME_ROLE_TYPE_IRI, NAME_TYPE_TYPE_IRI, NOTE_OCCURRENCE_TYPE_IRI, PROPERTY_ROLE_TYPE_IRI, RANGE_ENTITY_ROLE_TYPE_IRI, SCRIPT_CODE_TYPE_IRI, SCRIPT_ROLE_TYPE_IRI, SCRIPT_TYPE_IRI
 from entity import Entity
 
 class EATSTopicMap (TopicMap):
@@ -19,11 +19,8 @@ class EATSTopicMap (TopicMap):
 
     @property
     def admin_name_type (self):
-        self._admin_name_type = getattr(self, '_admin_name_type', None)
-        if self._admin_name_type is None:
-            self._admin_name_type = self.create_topic_by_subject_identifier(
-                Locator(ADMIN_NAME_TYPE_IRI))
-        return self._admin_name_type
+        return self._create_cached_topic('_admin_name_type',
+                                         ADMIN_NAME_TYPE_IRI)
 
     def convert_topic_to_entity (self, topic):
         """Returns `topic` as an instance of `Entity`.
@@ -37,6 +34,23 @@ class EATSTopicMap (TopicMap):
         entity.eats_topic_map = self
         return entity
         
+    def _create_cached_topic (self, attr, iri):
+        """Returns the topic with the subject identifier `iri`,
+        caching the result in `attr`.
+
+        :param attr: name of attribute to cache the topic
+        :type attr: string
+        :param iri: IRI of the topic to create
+        :type iri: string
+        :rtype: `Topic`
+
+        """
+        value = getattr(self, attr, None)
+        if value is None:
+            value = self.create_topic_by_subject_identifier(Locator(iri))
+            setattr(self, attr, value)
+        return value
+    
     def create_entity (self, authority):
         """Creates a new entity, using `authority` to create an
         accompanying existence property assertion.
@@ -86,29 +100,33 @@ class EATSTopicMap (TopicMap):
         return topic
 
     @property
+    def domain_entity_role_type (self):
+        return self._create_cached_topic('_domain_entity_role_type',
+                                         DOMAIN_ENTITY_ROLE_TYPE_IRI)
+    
+    @property
     def entity_role_type (self):
-        self._entity_role_type = getattr(self, '_entity_role_type', None)
-        if self._entity_role_type is None:
-            self._entity_role_type = self.create_topic_by_subject_identifier(
-                Locator(ENTITY_ROLE_TYPE_IRI))
-        return self._entity_role_type
+        return self._create_cached_topic('_entity_role_type',
+                                         ENTITY_ROLE_TYPE_IRI)
 
     @property
     def entity_type_assertion_type (self):
-        self._entity_type_assertion_type = getattr(
-            self, '_entity_type_assertion_type', None)
-        if self._entity_type_assertion_type is None:
-            self._entity_type_assertion_type = self.create_topic_by_subject_identifier(Locator(ENTITY_TYPE_ASSERTION_TYPE_IRI))
-        return self._entity_type_assertion_type
+        return self._create_cached_topic('_entity_type_assertion_type',
+                                         ENTITY_TYPE_ASSERTION_TYPE_IRI)
+
+    @property
+    def entity_relationship_types (self):
+        """Returns a `QuerySet` of entity relationship `Topic`s.
+
+        :rtype: `QuerySet` of `Topic`s
+
+        """
+        return self.get_topics_by_type(ENTITY_RELATIONSHIP_TYPE_IRI)
     
     @property
     def entity_type (self):
-        self._entity_type = getattr(self, '_entity_type', None)
-        if self._entity_type is None:
-            self._entity_type = self.create_topic_by_subject_identifier(
-                Locator(ENTITY_TYPE_IRI))
-        return self._entity_type
-
+        return self._create_cached_topic('_entity_type', ENTITY_TYPE_IRI)
+    
     @property
     def entity_types (self):
         """Returns a `QuerySet` of entity type `Topic`s.
@@ -126,19 +144,12 @@ class EATSTopicMap (TopicMap):
         :rtype: `Topic`
         
         """
-        self._existence = getattr(self, '_existence', None)
-        if self._existence is None:
-            self._existence = self.create_topic_by_subject_identifier(
-                Locator(EXISTENCE_IRI))
-        return self._existence
+        return self._create_cached_topic('_existence', EXISTENCE_IRI)
     
     @property
     def existence_assertion_type (self):
-        self._existence_assertion_type = getattr(
-            self, '_existence_assertion_type', None)
-        if self._existence_assertion_type is None:
-            self._existence_assertion_type = self.create_topic_by_subject_identifier(Locator(EXISTENCE_ASSERTION_TYPE_IRI))
-        return self._existence_assertion_type
+        return self._create_cached_topic('_existence_assertion_type',
+                                         EXISTENCE_ASSERTION_TYPE_IRI)
     
     def get_admin_name (self, topic):
         """Returns the administrative name of `topic`.
@@ -233,15 +244,77 @@ class EATSTopicMap (TopicMap):
         index = self.get_index(TypeInstanceIndex)
         index.open()
         return index.get_topics(topic_type)
-        
+
+    @property
+    def is_in_language_type (self):
+        return self._create_cached_topic('_is_in_language_type',
+                                         IS_IN_LANGUAGE_TYPE_IRI)
+
+    @property
+    def is_in_script_type (self):
+        return self._create_cached_topic('_is_in_script_type',
+                                         IS_IN_SCRIPT_TYPE_IRI)
+
+    @property
+    def language_role_type (self):
+        return self._create_cached_topic('_language_role_type',
+                                         LANGUAGE_ROLE_TYPE_IRI)
+    
+    @property
+    def languages (self):
+        """Returns a `QuerySet` of language `Topic`s.
+
+        :rtype: `QuerySet` of `Topic`s
+
+        """
+        return self.get_topics_by_type(LANGUAGE_TYPE_IRI)
+
+    @property
+    def name_assertion_type (self):
+        return self._create_cached_topic('_name_assertion_type',
+                                         NAME_ASSERTION_TYPE_IRI)
+
+    @property
+    def name_role_type (self):
+        return self._create_cached_topic('_name_role_type', NAME_ROLE_TYPE_IRI)
+
+    @property
+    def name_types (self):
+        """Returns a `QuerySet` of name type `Association`s.
+
+        :rtype: `QuerySet` of `Association`s
+
+        """
+        return self.get_topics_by_type(NAME_TYPE_TYPE_IRI)
+
+    @property
+    def note_occurrence_type (self):
+        return self._create_cached_topic('_note_occurrence_type',
+                                         NOTE_OCCURRENCE_TYPE_IRI)
+    
     @property
     def property_role_type (self):
-        self._property_role_type = getattr(self, '_property_role_type',
-                                           None)
-        if self._property_role_type is None:
-            self._property_role_type = self.create_topic_by_subject_identifier(
-                Locator(PROPERTY_ROLE_TYPE_IRI))
-        return self._property_role_type
+        return self._create_cached_topic('_property_role_type',
+                                         PROPERTY_ROLE_TYPE_IRI)
+
+    @property
+    def range_entity_role_type (self):
+        return self._create_cached_topic('_range_entity_role_type',
+                                         RANGE_ENTITY_ROLE_TYPE_IRI)
+
+    @property
+    def script_role_type (self):
+        return self._create_cached_topic('_script_role_type',
+                                         SCRIPT_ROLE_TYPE_IRI)
+
+    @property
+    def scripts (self):
+        """Returns a `QuerySet` of script `Topic`s.
+
+        :rtype: `QuerySet` of `Topic`s
+
+        """
+        return self.get_topics_by_type(SCRIPT_TYPE_IRI)
     
     def topic_exists (self, type_iri, name, topic_id):
         """Returns True if this topic map contains a topic with the
