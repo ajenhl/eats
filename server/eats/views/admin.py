@@ -10,8 +10,7 @@ from tmapi.exceptions import TopicMapExistsException
 from tmapi.models import TopicMap, TopicMapSystemFactory
 
 from eats.decorators import add_topic_map
-from eats.forms.admin import AuthorityForm, EntityTypeForm, LanguageForm, \
-    ScriptForm
+from eats.forms.admin import AuthorityForm, EntityRelationshipForm, EntityTypeForm, LanguageForm, NameTypeForm, ScriptForm
 
 
 def administration_panel (request):
@@ -113,6 +112,10 @@ def get_form_class (name):
         form_class = ScriptForm
     elif name == 'entity-type':
         form_class = EntityTypeForm
+    elif name == 'entity-relationship-type':
+        form_class = EntityRelationshipForm
+    elif name == 'name-type':
+        form_class = NameTypeForm
     return form_class
 
 def get_redirect_url (form, object_type, identifier):
