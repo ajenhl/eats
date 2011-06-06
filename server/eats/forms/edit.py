@@ -201,6 +201,10 @@ class NameForm (PropertyAssertionForm):
         self.fields['language'].choices = language_choices
         self.fields['script'].choices = script_choices
 
+    def delete (self):
+        assertion = self._get_construct('assertion')
+        self.entity.delete_name_property_assertion(assertion)
+
     def save (self):
         authority = self._get_construct('authority')
         assertion = self._get_construct('assertion')

@@ -82,6 +82,13 @@ class Entity (Topic):
         """
         self.create_occurrence(self.eats_topic_map.note_occurrence_type, note,
                                scope=[authority])
+
+    def delete_name_property_assertion (self, assertion):
+        name_topic = self.get_entity_name(assertion)
+        for role in name_topic.get_roles_played():
+            association = role.get_parent()
+            association.remove()
+        name_topic.remove()
         
     @property
     def eats_topic_map (self):
@@ -101,6 +108,17 @@ class Entity (Topic):
             self.eats_topic_map.entity_role_type,
             self.eats_topic_map.name_assertion_type)
         return [role.get_parent() for role in entity_roles]
+
+    def get_entity_name (self, assertion):
+        """Return the name entity asserted in `assertion`.
+
+        :param assertion: name property assertion
+        :type assertion: `Association`
+        :rtype: `Entity`
+
+        """
+        role = assertion.get_roles(self.eats_topic_map.property_role_type)[0]
+        return self.eats_topic_map.convert_topic_to_entity(role.get_player())
         
     def get_entity_types (self):
         """Returns this entity's entity type property assertions.
@@ -226,9 +244,7 @@ class Entity (Topic):
     
     def update_name_property_assertion (self, assertion, name_type, language,
                                         script, display_form):
-        role = assertion.get_roles(self.eats_topic_map.property_role_type)[0]
-        name_topic = self.eats_topic_map.convert_topic_to_entity(
-            role.get_player())
+        name_topic = self.get_entity_name(assertion)
         name_topic.name_language = language
         name_topic.name_script = script
         # QAZ: is there only one name?
