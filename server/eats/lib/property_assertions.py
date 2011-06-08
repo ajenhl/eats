@@ -77,7 +77,7 @@ class ExistencePropertyAssertions (PropertyAssertions):
             # QAZ: assuming that there is a single scoping topic, and
             # that it is the authority.
             existing.append(
-                {'authority': existence.get_scope()[0].get_id(),
+                {'authority': existence.get_authority().get_id(),
                  'assertion': existence.get_id()})
         return existing
 
@@ -102,7 +102,7 @@ class EntityRelationshipPropertyAssertions (PropertyAssertions):
             # QAZ: assuming that there is a single scoping topic, and
             # that it is the authority.
             existing.append(
-                {'authority': relationship.get_scope()[0].get_id(),
+                {'authority': relationship.get_authority().get_id(),
                  'assertion': relationship.get_id(),
                  'relationship_type': ''})
         return existing
@@ -128,7 +128,7 @@ class EntityTypePropertyAssertions (PropertyAssertions):
             # QAZ: assuming that there is a single scoping topic, and
             # that it is the authority.
             existing.append(
-                {'authority': entity_type.get_scope()[0].get_id(),
+                {'authority': entity_type.get_authority().get_id(),
                  'entity_type': entity_type.get_roles(self.topic_map.property_role_type)[0].get_player().get_id(),
                  'assertion': entity_type.get_id()})
         return existing
@@ -155,13 +155,12 @@ class NamePropertyAssertions (PropertyAssertions):
 
     def get_existing_data (self):
         existing = []
-        for name_assertion in self.editable:
-            name = self.topic_map.convert_topic_to_entity(
-                name_assertion.get_roles(
+        for assertion in self.editable:
+            name = self.topic_map.convert_topic_to_entity(assertion.get_roles(
                     self.topic_map.property_role_type)[0].get_player())
             existing.append(
-                {'authority': name_assertion.get_scope()[0].get_id(),
-                 'assertion': name_assertion.get_id(),
+                {'authority': assertion.get_authority().get_id(),
+                 'assertion': assertion.get_id(),
                  'display_form': name.name_value,
                  'name_type': name.name_type.get_id(),
                  'language': name.name_language.get_id(),
@@ -185,6 +184,6 @@ class NotePropertyAssertions (PropertyAssertions):
         existing = []
         for note in self.editable:
             existing.append(
-                {'authority': note.get_scope()[0].get_id(),
+                {'authority': note.get_authority().get_id(),
                  'assertion': note.get_id(), 'note': note.get_value()})
         return existing

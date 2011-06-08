@@ -115,19 +115,6 @@ class PropertyAssertionForm (forms.Form):
             return
         assertion.remove()
 
-    def _replace_scope (self, scoped, scope):
-        """Replaces the scope of `scoped` with `scope`.
-
-        :param scoped: scoped construct
-        :type scoped: `Scoped` `Construct`
-        :param scope: scoping topic
-        :type scope: `Topic`
-
-        """
-        for theme in scoped.get_scope():
-            scoped.remove_theme(theme)
-        scoped.add_theme(scope)
-        
     def save (self):
         raise NotImplementedError
         
@@ -142,7 +129,8 @@ class ExistenceForm (PropertyAssertionForm):
             self.entity.create_existence_property_assertion(authority)
         else:
             # Update an existing assertion.
-            self._replace_scope(assertion, authority)
+            self.entity.update_existence_property_assertion(
+                authority, assertion)
 
 
 class EntityRelationshipForm (PropertyAssertionForm):
@@ -180,7 +168,8 @@ class EntityTypeForm (PropertyAssertionForm):
                                                               entity_type)
         else:
             # Update an existing assertion.
-            self._replace_scope(assertion, authority)
+            self.entity.update_entity_type_property_assertion(
+                authority, assertion, entity_type)
 
 
 class NameForm (PropertyAssertionForm):
@@ -220,7 +209,6 @@ class NameForm (PropertyAssertionForm):
             # Update an existing assertion.
             self.entity.update_name_property_assertion(
                 assertion, name_type, language, script, display_form)
-            self._replace_scope(assertion, authority)
 
 
 class NoteForm (PropertyAssertionForm):
@@ -236,8 +224,8 @@ class NoteForm (PropertyAssertionForm):
             self.entity.create_note_property_assertion(authority, note)
         else:
             # Update an existing assertion.
-            assertion.set_value(note)
-            self._replace_scope(assertion, authority)
+            self.entity.update_note_property_assertion(authority, assertion,
+                                                       note)
 
         
 ExistenceFormSet = formset_factory(ExistenceForm, can_delete=True,

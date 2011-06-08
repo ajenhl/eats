@@ -45,12 +45,24 @@ class NameTest (EditTestCase):
             self.authority, self.name_type, self.language, self.script,
             'Name2')
         self.assertEqual(2, len(self.entity.get_eats_names()))
+        self.assertEqual(2, self.type_index.get_associations(
+                self.tm.is_in_language_type).count())
+        self.assertEqual(2, self.type_index.get_associations(
+                self.tm.is_in_script_type).count())
         self.entity.delete_name_property_assertion(name2_assertion)
         self.assertEqual(1, len(self.entity.get_eats_names()))
+        self.assertEqual(1, self.type_index.get_associations(
+                self.tm.is_in_language_type).count())
+        self.assertEqual(1, self.type_index.get_associations(
+                self.tm.is_in_script_type).count())
         name1 = self.entity.get_entity_name(name1_assertion)
         self.assertEqual(name1.name_value, 'Name1')
         self.entity.delete_name_property_assertion(name1_assertion)
         self.assertEqual(0, len(self.entity.get_eats_names()))
+        self.assertEqual(0, self.type_index.get_associations(
+                self.tm.is_in_language_type).count())
+        self.assertEqual(0, self.type_index.get_associations(
+                self.tm.is_in_script_type).count())
 
     def test_update_name_property_assertion (self):
         name_assertion = self.entity.create_name_property_assertion(
@@ -61,9 +73,10 @@ class NameTest (EditTestCase):
         self.assertEqual(name.name_language, self.language)
         self.assertEqual(name.name_script, self.script)
         self.assertEqual(name.name_value, 'Name')
+        authority2 = self.create_authority('Authority2')
         self.entity.update_name_property_assertion(
-            name_assertion, self.name_type2, self.language2, self.script2,
-            'Name2')
+            authority2, name_assertion, self.name_type2, self.language2,
+            self.script2, 'Name2')
         self.assertEqual(name.name_type, self.name_type2)
         self.assertEqual(name.name_language, self.language2)
         self.assertEqual(name.name_script, self.script2)

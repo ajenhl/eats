@@ -50,6 +50,7 @@ class Entity (Topic):
         :type script: `Topic`
         :param display_form: display form of the name
         :type display_form: unicode string
+        :rtype: `Association`
 
         """
         name = self.eats_topic_map.convert_topic_to_entity(
@@ -89,6 +90,12 @@ class Entity (Topic):
                                scope=[authority])
 
     def delete_name_property_assertion (self, assertion):
+        """Deletes the name property assertion `assertion`.
+
+        :param assertion: name property assertion
+        :type assertion: `Association`
+
+        """
         name_topic = self.get_entity_name(assertion)
         for role in name_topic.get_roles_played():
             association = role.get_parent()
@@ -103,6 +110,18 @@ class Entity (Topic):
     def eats_topic_map (self, value):
         self._eats_topic_map = value
 
+    def get_authority (self, assertion):
+        """Returns the authority asserting the property `assertion`.
+
+        :param assertion: property assertion
+        :type assertion: `Construct`
+        :rtype: `Topic`
+
+        """
+        # QAZ: convert a possible IndexError into a more
+        # useful/descriptive exception.
+        return assertion.get_scope()[0]
+    
     def get_eats_names (self):
         """Returns this entity's name property assertions.
 
@@ -132,6 +151,7 @@ class Entity (Topic):
         :rtype: list of `Association`s
 
         """
+        # QAZ: This should return a QuerySet.
         entity_roles = self.get_roles_played(
             self.eats_topic_map.entity_role_type,
             self.eats_topic_map.entity_type_assertion_type)
@@ -149,6 +169,7 @@ class Entity (Topic):
         :rtype: list of `Association`s
 
         """
+        # QAZ: This should return a QuerySet.
         entity_roles = self.get_roles_played(
             self.eats_topic_map.entity_role_type,
             self.eats_topic_map.existence_assertion_type)
@@ -167,7 +188,7 @@ class Entity (Topic):
     def get_notes (self):
         """Returns this entity's note property assertions.
 
-        :rtype: list of `Occurrence`s
+        :rtype: `QuerySet` of `Occurrence`s
 
         """
         return self.get_occurrences(self.eats_topic_map.note_occurrence_type)
@@ -292,10 +313,40 @@ class Entity (Topic):
         """
         self._get_name().set_value(value)
 
-    def update_name_property_assertion (self, assertion, name_type, language,
-                                        script, display_form):
+    def update_entity_type_property_assertion (self, authority, assertion,
+                                               entity_type):
+        assertion.get_roles(self.eats_topic_map.property_role_type).remove()
+        assertion.create_role(self.eats_topic_map.property_role_type,
+                              entity_type)
+        self._update_property_assertion_authority(assertion, authority)
+        
+    def update_existence_property_assertion (self, authority, assertion):
+        self._update_property_assertion_authority(assertion, authority)
+        
+    def update_name_property_assertion (self, authority, assertion, name_type,
+                                        language, script, display_form):
         name = self.get_entity_name(assertion)
         name.name_language = language
         name.name_script = script
         name.name_type = name_type
         name.name_value = display_form
+        self._update_property_assertion_authority(assertion, authority)
+
+    def update_note_property_assertion (self, authority, assertion, note):
+        assertion.set_value(note)
+        self._update_property_assertion_authority(assertion, authority)
+
+
+    def _update_property_assertion_authority (self, assertion, authority):
+        """Replaces the authority of `assertion` with `authority`.
+
+        :param assertion: property assertion
+        :type assertion: `Scoped` `Construct`
+        :param authority: authority
+        :type authority: `Topic`
+
+        """
+        for theme in assertion.get_scope():
+            assertion.remove_theme(theme)
+        assertion.add_theme(authority)
+        
