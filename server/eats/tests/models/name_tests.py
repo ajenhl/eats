@@ -1,9 +1,9 @@
 from tmapi.indices.type_instance_index import TypeInstanceIndex
 
-from edit_test_case import EditTestCase
+from model_test_case import ModelTestCase
 
 
-class NameTest (EditTestCase):
+class NameTest (ModelTestCase):
 
     def setUp (self):
         super(NameTest, self).setUp()

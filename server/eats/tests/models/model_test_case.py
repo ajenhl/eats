@@ -7,7 +7,7 @@ from eats.constants import AUTHORITY_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_TYPE_TYPE
 from eats.models import EATSTopicMap
 
 
-class EditTestCase (TestCase):
+class ModelTestCase (TestCase):
 
     def setUp (self):
         # Create a topic map.
