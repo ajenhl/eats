@@ -55,12 +55,16 @@ class Entity (Topic):
         name = self.eats_topic_map.convert_topic_to_entity(
             self.eats_topic_map.create_topic())
         name.create_name(display_form, name_type)
+        # The language of the name is specified via an association
+        # with the appropriate language topic.
         language_association = self.eats_topic_map.create_association(
             self.eats_topic_map.is_in_language_type)
         language_association.create_role(self.eats_topic_map.name_role_type,
                                          name)
         language_association.create_role(self.eats_topic_map.language_role_type,
                                          language)
+        # The script of the name is specified via an association with
+        # the appropriate script topic.
         script_association = self.eats_topic_map.create_association(
             self.eats_topic_map.is_in_script_type)
         script_association.create_role(self.eats_topic_map.name_role_type, name)
@@ -70,6 +74,7 @@ class Entity (Topic):
             self.eats_topic_map.name_assertion_type, scope=[authority])
         assertion.create_role(self.eats_topic_map.property_role_type, name)
         assertion.create_role(self.eats_topic_map.entity_role_type, self)
+        return assertion
 
     def create_note_property_assertion (self, authority, note):
         """Creates a note property assertion asserted by `authority`.
@@ -89,7 +94,7 @@ class Entity (Topic):
             association = role.get_parent()
             association.remove()
         name_topic.remove()
-        
+
     @property
     def eats_topic_map (self):
         return self._eats_topic_map
@@ -98,12 +103,23 @@ class Entity (Topic):
     def eats_topic_map (self, value):
         self._eats_topic_map = value
 
+    def get_eats_name (self):
+        """Returns this name entity's `Name`.
+
+        There should only be a single `Name` for a name entity.
+
+        :rtype: `Name`
+
+        """
+        return self.get_names()[0]
+        
     def get_eats_names (self):
         """Returns this entity's name property assertions.
 
         :rtype: list of `Association`s
 
         """
+        # QAZ: This should return a QuerySet.
         entity_roles = self.get_roles_played(
             self.eats_topic_map.entity_role_type,
             self.eats_topic_map.name_assertion_type)

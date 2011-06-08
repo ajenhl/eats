@@ -159,7 +159,7 @@ class NamePropertyAssertions (PropertyAssertions):
             name_topic = self.topic_map.convert_topic_to_entity(
                 name_assertion.get_roles(
                     self.topic_map.property_role_type)[0].get_player())
-            name = name_topic.get_names()[0]
+            name = name_topic.get_eats_name()
             existing.append(
                 {'authority': name_assertion.get_scope()[0].get_id(),
                  'assertion': name_assertion.get_id(),
