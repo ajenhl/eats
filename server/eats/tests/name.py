@@ -8,7 +8,8 @@ class NameTest (EditTestCase):
     def setUp (self):
         super(NameTest, self).setUp()
         self.entity = self.tm.create_entity(self.authority)
-        self.name_type = self.create_name_type('test')
+        self.name_type = self.create_name_type('regular')
+        self.name_type2 = self.create_name_type('irregular')
         self.language = self.create_language('English', 'en')
         self.language2 = self.create_language('Arabic', 'ar')
         self.script = self.create_script('Latin', 'Latn')
@@ -30,9 +31,9 @@ class NameTest (EditTestCase):
                 self.tm.is_in_language_type).count())
         self.assertEqual(1, self.type_index.get_associations(
                 self.tm.is_in_script_type).count())
-        name = self.entity.get_entity_name(name_assertion).get_eats_name()
-        self.assertEqual(name.get_value(), 'Name')
-        self.assertEqual(name.get_type(), self.name_type)
+        name = self.entity.get_entity_name(name_assertion)
+        self.assertEqual(name.name_value, 'Name')
+        self.assertEqual(name.name_type, self.name_type)
 
     def test_delete_name_property_assertion (self):
         self.assertEqual(0, len(self.entity.get_eats_names()))
@@ -46,8 +47,8 @@ class NameTest (EditTestCase):
         self.assertEqual(2, len(self.entity.get_eats_names()))
         self.entity.delete_name_property_assertion(name2_assertion)
         self.assertEqual(1, len(self.entity.get_eats_names()))
-        name1 = self.entity.get_entity_name(name1_assertion).get_eats_name()
-        self.assertEqual(name1.get_value(), 'Name1')
+        name1 = self.entity.get_entity_name(name1_assertion)
+        self.assertEqual(name1.name_value, 'Name1')
         self.entity.delete_name_property_assertion(name1_assertion)
         self.assertEqual(0, len(self.entity.get_eats_names()))
 
@@ -68,3 +69,21 @@ class NameTest (EditTestCase):
         self.assertEqual(self.script, name_topic.name_script)
         name_topic.name_script = self.script2
         self.assertEqual(self.script2, name_topic.name_script)
+
+    def test_name_type (self):
+        name_assertion = self.entity.create_name_property_assertion(
+            self.authority, self.name_type, self.language, self.script,
+            'Name')
+        name = self.entity.get_entity_name(name_assertion)
+        self.assertEqual(name.name_type, self.name_type)
+        name.name_type = self.name_type2
+        self.assertEqual(name.name_type, self.name_type2)
+        
+    def test_name_value (self):
+        name_assertion = self.entity.create_name_property_assertion(
+            self.authority, self.name_type, self.language, self.script,
+            'Name1')
+        name = self.entity.get_entity_name(name_assertion)
+        self.assertEqual(name.name_value, 'Name1')
+        name.name_value = 'Name2'
+        self.assertEqual(name.name_value, 'Name2')

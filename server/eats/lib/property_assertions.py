@@ -156,17 +156,16 @@ class NamePropertyAssertions (PropertyAssertions):
     def get_existing_data (self):
         existing = []
         for name_assertion in self.editable:
-            name_topic = self.topic_map.convert_topic_to_entity(
+            name = self.topic_map.convert_topic_to_entity(
                 name_assertion.get_roles(
                     self.topic_map.property_role_type)[0].get_player())
-            name = name_topic.get_eats_name()
             existing.append(
                 {'authority': name_assertion.get_scope()[0].get_id(),
                  'assertion': name_assertion.get_id(),
-                 'display_form': name.get_value(),
-                 'name_type': name.get_type().get_id(),
-                 'language': name_topic.name_language.get_id(),
-                 'script': name_topic.name_script.get_id(),
+                 'display_form': name.name_value,
+                 'name_type': name.name_type.get_id(),
+                 'language': name.name_language.get_id(),
+                 'script': name.name_script.get_id(),
                  })
         return existing
 

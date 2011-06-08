@@ -103,16 +103,6 @@ class Entity (Topic):
     def eats_topic_map (self, value):
         self._eats_topic_map = value
 
-    def get_eats_name (self):
-        """Returns this name entity's `Name`.
-
-        There should only be a single `Name` for a name entity.
-
-        :rtype: `Name`
-
-        """
-        return self.get_names()[0]
-        
     def get_eats_names (self):
         """Returns this entity's name property assertions.
 
@@ -168,6 +158,12 @@ class Entity (Topic):
                           authority in existence.get_scope()]
         return existences
 
+    def _get_name (self):
+        """Returns the `Name` associated with this name entity."""
+        # QAZ: convert a possible IndexError into a more
+        # useful/descriptive exception.
+        return self.get_names()[0]
+    
     def get_notes (self):
         """Returns this entity's note property assertions.
 
@@ -197,7 +193,7 @@ class Entity (Topic):
         :rtype: `Topic`
 
         """
-        return self.name_language_role.get_player()
+        return self._name_language_role.get_player()
 
     @name_language.setter
     def name_language (self, language):
@@ -207,10 +203,10 @@ class Entity (Topic):
         :type language: `Topic`
 
         """
-        self.name_language_role.set_player(language)
+        self._name_language_role.set_player(language)
 
     @property
-    def name_language_role (self):
+    def _name_language_role (self):
         """Returns the language role for the name this entity represents.
 
         :rtype: `Role`
@@ -231,7 +227,7 @@ class Entity (Topic):
         :rtype: `Topic`
 
         """
-        return self.name_script_role.get_player()
+        return self._name_script_role.get_player()
 
     @name_script.setter
     def name_script (self, script):
@@ -241,10 +237,10 @@ class Entity (Topic):
         :type script: `Topic`
 
         """
-        self.name_script_role.set_player(script)
+        self._name_script_role.set_player(script)
 
     @property
-    def name_script_role (self):
+    def _name_script_role (self):
         """Returns the script role for the name this entity represents.
 
         :rtype: `Role`
@@ -257,13 +253,49 @@ class Entity (Topic):
         script_role = name_role.get_parent().get_roles(
             self.eats_topic_map.script_role_type)[0]
         return script_role
+
+    @property
+    def name_type (self):
+        """Returns the type of name this entity represents.
+
+        :rtype: `Topic`
+
+        """
+        return self._get_name().get_type()
+
+    @name_type.setter
+    def name_type (self, name_type):
+        """Sets the name type for the name this entity represents.
+
+        :param name_type: type of name
+        :type name_type: `Topic`
+
+        """
+        self._get_name().set_type(name_type)
     
+    @property
+    def name_value (self):
+        """Returns the value of the name this entity represents.
+
+        :rtype: unicode string
+
+        """
+        return self._get_name().get_value()
+
+    @name_value.setter
+    def name_value (self, value):
+        """Sets the value of the name this entity represents.
+
+        :param value: value of the name
+        :type value: unicode string
+
+        """
+        self._get_name().set_value(value)
+
     def update_name_property_assertion (self, assertion, name_type, language,
                                         script, display_form):
-        name_topic = self.get_entity_name(assertion)
-        name_topic.name_language = language
-        name_topic.name_script = script
-        # QAZ: is there only one name?
-        name = name_topic.get_names()[0]
-        name.set_type(name_type)
-        name.set_value(display_form)
+        name = self.get_entity_name(assertion)
+        name.name_language = language
+        name.name_script = script
+        name.name_type = name_type
+        name.name_value = display_form
