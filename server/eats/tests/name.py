@@ -52,23 +52,40 @@ class NameTest (EditTestCase):
         self.entity.delete_name_property_assertion(name1_assertion)
         self.assertEqual(0, len(self.entity.get_eats_names()))
 
+    def test_update_name_property_assertion (self):
+        name_assertion = self.entity.create_name_property_assertion(
+            self.authority, self.name_type, self.language, self.script,
+            'Name')
+        name = self.entity.get_entity_name(name_assertion)
+        self.assertEqual(name.name_type, self.name_type)
+        self.assertEqual(name.name_language, self.language)
+        self.assertEqual(name.name_script, self.script)
+        self.assertEqual(name.name_value, 'Name')
+        self.entity.update_name_property_assertion(
+            name_assertion, self.name_type2, self.language2, self.script2,
+            'Name2')
+        self.assertEqual(name.name_type, self.name_type2)
+        self.assertEqual(name.name_language, self.language2)
+        self.assertEqual(name.name_script, self.script2)
+        self.assertEqual(name.name_value, 'Name2')        
+        
     def test_name_language (self):
         name_assertion = self.entity.create_name_property_assertion(
             self.authority, self.name_type, self.language, self.script,
             'Name')
-        name_topic = self.entity.get_entity_name(name_assertion)
-        self.assertEqual(self.language, name_topic.name_language)
-        name_topic.name_language = self.language2
-        self.assertEqual(self.language2, name_topic.name_language)
+        name = self.entity.get_entity_name(name_assertion)
+        self.assertEqual(self.language, name.name_language)
+        name.name_language = self.language2
+        self.assertEqual(self.language2, name.name_language)
         
     def test_name_script (self):
         name_assertion = self.entity.create_name_property_assertion(
             self.authority, self.name_type, self.language, self.script,
             'Name')
-        name_topic = self.entity.get_entity_name(name_assertion)
-        self.assertEqual(self.script, name_topic.name_script)
-        name_topic.name_script = self.script2
-        self.assertEqual(self.script2, name_topic.name_script)
+        name = self.entity.get_entity_name(name_assertion)
+        self.assertEqual(self.script, name.name_script)
+        name.name_script = self.script2
+        self.assertEqual(self.script2, name.name_script)
 
     def test_name_type (self):
         name_assertion = self.entity.create_name_property_assertion(
