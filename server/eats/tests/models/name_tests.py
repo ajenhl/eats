@@ -69,6 +69,8 @@ class NameTest (ModelTestCase):
             self.authority, self.name_type, self.language, self.script,
             'Name')
         name = self.entity.get_entity_name(name_assertion)
+        self.assertEqual(self.entity.get_authority(name_assertion),
+                         self.authority)
         self.assertEqual(name.name_type, self.name_type)
         self.assertEqual(name.name_language, self.language)
         self.assertEqual(name.name_script, self.script)
@@ -77,6 +79,7 @@ class NameTest (ModelTestCase):
         self.entity.update_name_property_assertion(
             authority2, name_assertion, self.name_type2, self.language2,
             self.script2, 'Name2')
+        self.assertEqual(self.entity.get_authority(name_assertion), authority2)
         self.assertEqual(name.name_type, self.name_type2)
         self.assertEqual(name.name_language, self.language2)
         self.assertEqual(name.name_script, self.script2)
