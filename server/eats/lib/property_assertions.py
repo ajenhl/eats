@@ -31,7 +31,7 @@ class PropertyAssertions (object):
         return formset_class(**defaults)
     
     def get_editable (self, scoped, authorities):
-        """Return `scoped` split into two lists, of editable and
+        """Returns `scoped` split into two lists, of editable and
         non-editable elements.
 
         Editable elements are those that are scoped by an authority in
@@ -54,9 +54,21 @@ class PropertyAssertions (object):
         return editable, non_editable
 
     def categorise_assertions (self):
+        """Returns the entity's property assertions as a tuple of
+        editable and non-editable objects.
+
+        :rtype: tuple of lists
+
+        """
         raise NotImplementedError
 
     def get_existing_data (self):
+        """Returns the data for each editable property assertion,
+        suitable for feeding into a Form.
+
+        :rtype: list of dictionaries
+
+        """
         raise NotImplementedError
 
 
@@ -77,7 +89,7 @@ class ExistencePropertyAssertions (PropertyAssertions):
             # QAZ: assuming that there is a single scoping topic, and
             # that it is the authority.
             existing.append(
-                {'authority': existence.get_authority().get_id(),
+                {'authority': self.entity.get_authority(existence).get_id(),
                  'assertion': existence.get_id()})
         return existing
 
@@ -102,7 +114,7 @@ class EntityRelationshipPropertyAssertions (PropertyAssertions):
             # QAZ: assuming that there is a single scoping topic, and
             # that it is the authority.
             existing.append(
-                {'authority': relationship.get_authority().get_id(),
+                {'authority': self.entity.get_authority(relationship).get_id(),
                  'assertion': relationship.get_id(),
                  'relationship_type': ''})
         return existing
@@ -128,8 +140,8 @@ class EntityTypePropertyAssertions (PropertyAssertions):
             # QAZ: assuming that there is a single scoping topic, and
             # that it is the authority.
             existing.append(
-                {'authority': entity_type.get_authority().get_id(),
-                 'entity_type': entity_type.get_roles(self.topic_map.property_role_type)[0].get_player().get_id(),
+                {'authority': self.entity.get_authority(entity_type).get_id(),
+                 'entity_type': self.entity.get_entity_type(entity_type).get_id(),
                  'assertion': entity_type.get_id()})
         return existing
 
@@ -159,7 +171,7 @@ class NamePropertyAssertions (PropertyAssertions):
             name = self.topic_map.convert_topic_to_entity(assertion.get_roles(
                     self.topic_map.property_role_type)[0].get_player())
             existing.append(
-                {'authority': assertion.get_authority().get_id(),
+                {'authority': self.entity.get_authority(assertion).get_id(),
                  'assertion': assertion.get_id(),
                  'display_form': name.name_value,
                  'name_type': name.name_type.get_id(),
@@ -184,6 +196,6 @@ class NotePropertyAssertions (PropertyAssertions):
         existing = []
         for note in self.editable:
             existing.append(
-                {'authority': note.get_authority().get_id(),
+                {'authority': self.entity.get_authority(note).get_id(),
                  'assertion': note.get_id(), 'note': note.get_value()})
         return existing
