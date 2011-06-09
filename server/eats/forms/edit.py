@@ -158,6 +158,10 @@ class EntityTypeForm (PropertyAssertionForm):
             entity_type_choices = entity_type_choices[1:]
         self.fields['entity_type'].choices = entity_type_choices
 
+    def delete (self):
+        assertion = self._get_construct('assertion')
+        self.entity.delete_entity_type_property_assertion(assertion)
+        
     def save (self):
         authority = self._get_construct('authority')
         assertion = self._get_construct('assertion')

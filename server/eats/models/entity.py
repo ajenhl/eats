@@ -35,6 +35,7 @@ class Entity (Topic):
         assertion.create_role(self.eats_topic_map.property_role_type,
                               entity_type)
         assertion.create_role(self.eats_topic_map.entity_role_type, self)
+        return assertion
 
     def create_name_property_assertion (self, authority, name_type, language,
                                         script, display_form):
@@ -89,6 +90,15 @@ class Entity (Topic):
         self.create_occurrence(self.eats_topic_map.note_occurrence_type, note,
                                scope=[authority])
 
+    def delete_entity_type_property_assertion (self, assertion):
+        """Deletes the entity type property assertion `assertion`.
+
+        :param assertion: entity type property assertion
+        :type assertion: `Association`
+
+        """
+        assertion.remove()
+        
     def delete_name_property_assertion (self, assertion):
         """Deletes the name property assertion `assertion`.
 
@@ -135,7 +145,7 @@ class Entity (Topic):
         return [role.get_parent() for role in entity_roles]
 
     def get_entity_name (self, assertion):
-        """Return the name entity asserted in `assertion`.
+        """Returns the name entity asserted in `assertion`.
 
         :param assertion: name property assertion
         :type assertion: `Association`
@@ -144,7 +154,18 @@ class Entity (Topic):
         """
         role = assertion.get_roles(self.eats_topic_map.property_role_type)[0]
         return self.eats_topic_map.convert_topic_to_entity(role.get_player())
-        
+
+    def get_entity_type (self, assertion):
+        """Returns the entity type asserted in `assertion`.
+
+        :param assertion: entity type property assertion
+        :type assertion: `Association`
+        :rtype: `Topic`
+
+        """
+        role = assertion.get_roles(self.eats_topic_map.property_role_type)[0]
+        return role.get_player()
+    
     def get_entity_types (self):
         """Returns this entity's entity type property assertions.
 
@@ -315,7 +336,7 @@ class Entity (Topic):
 
     def update_entity_type_property_assertion (self, authority, assertion,
                                                entity_type):
-        assertion.get_roles(self.eats_topic_map.property_role_type).remove()
+        assertion.get_roles(self.eats_topic_map.property_role_type)[0].remove()
         assertion.create_role(self.eats_topic_map.property_role_type,
                               entity_type)
         self._update_property_assertion_authority(assertion, authority)
@@ -335,7 +356,6 @@ class Entity (Topic):
     def update_note_property_assertion (self, authority, assertion, note):
         assertion.set_value(note)
         self._update_property_assertion_authority(assertion, authority)
-
 
     def _update_property_assertion_authority (self, assertion, authority):
         """Replaces the authority of `assertion` with `authority`.
