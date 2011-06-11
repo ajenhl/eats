@@ -1,10 +1,23 @@
 from tmapi.models import Topic
 
+from name_index import NameIndex
+
 
 class Entity (Topic):
 
     class Meta:
         proxy = True
+        app_label = 'eats'
+
+    def _add_name_index (self, name):
+        """Adds the forms of `name` to the name index for this entity.
+
+        :param name: the name being indexed
+        :type name: `Entity`
+
+        """
+        indexed_name = NameIndex(entity=self, name=name, form=name.name_value)
+        indexed_name.save()
 
     def create_existence_property_assertion (self, authority):
         """Creates a new existence property assertion asserted by
@@ -76,6 +89,7 @@ class Entity (Topic):
             self.eats_topic_map.name_assertion_type, scope=[authority])
         assertion.create_role(self.eats_topic_map.property_role_type, name)
         assertion.create_role(self.eats_topic_map.entity_role_type, self)
+        self._add_name_index(name)
         return assertion
 
     def create_note_property_assertion (self, authority, note):
@@ -98,6 +112,10 @@ class Entity (Topic):
 
         """
         assertion.remove()
+
+    def _delete_name_index_forms (self):
+        """Deletes the indexed forms of this name."""
+        self.indexed_name_forms.all().delete()
         
     def delete_name_property_assertion (self, assertion):
         """Deletes the name property assertion `assertion`.
@@ -241,6 +259,9 @@ class Entity (Topic):
     def name_language (self, language):
         """Sets the language of the name this entity represents.
 
+        Note that changing the language via this method does not
+        update the name index.
+
         :param language: language of the name
         :type language: `Topic`
 
@@ -274,6 +295,9 @@ class Entity (Topic):
     @name_script.setter
     def name_script (self, script):
         """Sets the script of the name this entity represents.
+
+        Note that changing the script via this method does not update
+        the name index.
 
         :param script: script of the name
         :type script: `Topic`
@@ -328,6 +352,9 @@ class Entity (Topic):
     def name_value (self, value):
         """Sets the value of the name this entity represents.
 
+        Note that changing the value via this method does not update
+        the name index.
+
         :param value: value of the name
         :type value: unicode string
 
@@ -343,6 +370,16 @@ class Entity (Topic):
         
     def update_existence_property_assertion (self, authority, assertion):
         self._update_property_assertion_authority(assertion, authority)
+
+    def update_name_index (self, name):
+        """Updates the name index forms for `name`.
+
+        :param name: Name whose index is to be updated
+        :type name: `Entity`
+
+        """
+        name._delete_name_index_forms()
+        self._add_name_index(name)
         
     def update_name_property_assertion (self, authority, assertion, name_type,
                                         language, script, display_form):
@@ -351,6 +388,7 @@ class Entity (Topic):
         name.name_script = script
         name.name_type = name_type
         name.name_value = display_form
+        self.update_name_index(name)
         self._update_property_assertion_authority(assertion, authority)
 
     def update_note_property_assertion (self, authority, assertion, note):

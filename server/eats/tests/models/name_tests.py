@@ -1,5 +1,7 @@
 from tmapi.indices.type_instance_index import TypeInstanceIndex
 
+from eats.models import NameIndex
+
 from model_test_case import ModelTestCase
 
 
@@ -120,3 +122,27 @@ class NameTest (ModelTestCase):
         self.assertEqual(name.name_value, 'Name1')
         name.name_value = 'Name2'
         self.assertEqual(name.name_value, 'Name2')
+
+    def test_name_index (self):
+        assertion = self.entity.create_name_property_assertion(
+            self.authority, self.name_type, self.language, self.script,
+            'Name')
+        index_items = NameIndex.objects.filter(entity=self.entity)
+        self.assertEqual(index_items.count(), 1)
+        self.assertEqual(index_items[0].form, 'Name')
+        name = self.entity.get_entity_name(assertion)
+        name.name_value = 'Carl Philipp Emanuel Bach'
+        index_items = NameIndex.objects.filter(entity=self.entity)
+        self.assertEqual(index_items.count(), 1)
+        self.assertEqual(index_items[0].form, 'Name')
+        self.entity.update_name_index(name)
+        self.assertEqual(index_items[0].form, 'Carl Philipp Emanuel Bach')
+        assertion2 = self.entity.create_name_property_assertion(
+            self.authority, self.name_type, self.language, self.script,
+            'Name2')
+        index_items = NameIndex.objects.filter(entity=self.entity)
+        self.assertEqual(index_items.count(), 2)
+        self.entity.delete_name_property_assertion(assertion2)
+        index_items = NameIndex.objects.filter(entity=self.entity)
+        self.assertEqual(index_items.count(), 1)
+        self.assertEqual(index_items[0].form, 'Carl Philipp Emanuel Bach')
