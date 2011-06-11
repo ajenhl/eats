@@ -183,6 +183,8 @@ class EATSTopicMap (TopicMap):
         topic = self.get_construct_by_id(entity_id)
         if topic is None:
             entity = None
+        elif self.entity_type not in topic.get_types():
+            entity = None
         else:
             entity = self.convert_topic_to_entity(topic)
         return entity
