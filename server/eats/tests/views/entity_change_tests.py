@@ -34,6 +34,7 @@ class EntityChangeViewTestCase (TestCase):
     
     def test_empty_entity (self):
         entity = self.tm.create_entity(self.authority)
+        existence = entity.get_existences()[0]
         response = self.client.get(reverse(
                 'entity-change', kwargs={'entity_id': entity.get_id()}))
         self.assertEqual(response.status_code, 200)
@@ -42,6 +43,10 @@ class EntityChangeViewTestCase (TestCase):
         existence_formset = response.context['existence_formset']
         self.assertEqual(existence_formset.initial_form_count(), 1,
                          'Expected one pre-filled existence form')
+        existence_data = existence_formset.initial_forms[0].initial
+        self.assertEqual(existence_data['assertion'], existence.get_id())
+        self.assertEqual(existence_data['authority'],
+                         entity.get_authority(existence).get_id())
         for formset in ('entity_type_formset', 'entity_relationship_formset',
                         'name_formset', 'note_formset'):
             self.assertEqual(response.context[formset].initial_form_count(), 0,
