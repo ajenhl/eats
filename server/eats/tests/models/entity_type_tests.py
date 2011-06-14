@@ -1,7 +1,7 @@
-from model_test_case import ModelTestCase
+from eats.tests.base_test_case import BaseTestCase
 
 
-class EntityTypeTest (ModelTestCase):
+class EntityTypeTest (BaseTestCase):
 
     def setUp (self):
         super(EntityTypeTest, self).setUp()
