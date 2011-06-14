@@ -16,8 +16,10 @@ class Entity (Topic):
         :type name: `Entity`
 
         """
-        indexed_name = NameIndex(entity=self, name=name, form=name.name_value)
-        indexed_name.save()
+        parts = name.name_value.split()
+        for part in parts:
+            indexed_name = NameIndex(entity=self, name=name, form=part)
+            indexed_name.save()
 
     def create_existence_property_assertion (self, authority):
         """Creates a new existence property assertion asserted by
@@ -132,11 +134,13 @@ class Entity (Topic):
 
     @property
     def eats_topic_map (self):
-        return self._eats_topic_map
-
-    @eats_topic_map.setter
-    def eats_topic_map (self, value):
-        self._eats_topic_map = value
+        value = getattr(self, '_eats_topic_map', None)
+        if value is None:
+            from eats_topic_map import EATSTopicMap
+            topic_map = self.get_parent()
+            value = EATSTopicMap.objects.get(pk=topic_map.id)
+            setattr(self, '_eats_topic_map', value)
+        return value
 
     def get_authority (self, assertion):
         """Returns the authority asserting the property `assertion`.

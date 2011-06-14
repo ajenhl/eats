@@ -136,13 +136,19 @@ class NameTest (ModelTestCase):
         self.assertEqual(index_items.count(), 1)
         self.assertEqual(index_items[0].form, 'Name')
         self.entity.update_name_index(name)
-        self.assertEqual(index_items[0].form, 'Carl Philipp Emanuel Bach')
+        index_items = NameIndex.objects.filter(entity=self.entity)
+        self.assertEqual(index_items.count(), 4)
+        indexed_names = set([item.form for item in index_items])
+        self.assertEqual(indexed_names, set(['Carl', 'Philipp', 'Emanuel',
+                                             'Bach']))
         assertion2 = self.entity.create_name_property_assertion(
             self.authority, self.name_type, self.language, self.script,
             'Name2')
         index_items = NameIndex.objects.filter(entity=self.entity)
-        self.assertEqual(index_items.count(), 2)
+        self.assertEqual(index_items.count(), 5)
         self.entity.delete_name_property_assertion(assertion2)
         index_items = NameIndex.objects.filter(entity=self.entity)
-        self.assertEqual(index_items.count(), 1)
-        self.assertEqual(index_items[0].form, 'Carl Philipp Emanuel Bach')
+        self.assertEqual(index_items.count(), 4)
+        indexed_names = set([item.form for item in index_items])
+        self.assertEqual(indexed_names, set(['Carl', 'Philipp', 'Emanuel',
+                                             'Bach']))
