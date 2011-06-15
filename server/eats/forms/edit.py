@@ -1,6 +1,10 @@
 from django import forms
 from django.forms.formsets import formset_factory, BaseFormSet
 
+import selectable.forms as selectable
+
+from eats.lookups import EntityLookup
+
 
 class PropertyAssertionFormSet (BaseFormSet):
 
@@ -135,7 +139,7 @@ class ExistenceForm (PropertyAssertionForm):
 
 class EntityRelationshipForm (PropertyAssertionForm):
 
-    domain_entity = forms.CharField()
+    domain_entity = selectable.AutoCompleteSelectField(EntityLookup)
     relationship = forms.ChoiceField(choices=[])
     range_entity = forms.CharField()
 
@@ -212,7 +216,7 @@ class NameForm (PropertyAssertionForm):
         else:
             # Update an existing assertion.
             self.entity.update_name_property_assertion(
-                assertion, name_type, language, script, display_form)
+                authority, assertion, name_type, language, script, display_form)
 
 
 class NoteForm (PropertyAssertionForm):

@@ -1,11 +1,13 @@
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 
 from tmapi.indices import TypeInstanceIndex
 from tmapi.models import Locator, Topic, TopicMap
 
 from eats.constants import ADMIN_NAME_TYPE_IRI, AUTHORITY_TYPE_IRI, DOMAIN_ENTITY_ROLE_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_IRI, ENTITY_ROLE_TYPE_IRI, ENTITY_TYPE_IRI, ENTITY_TYPE_ASSERTION_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, EXISTENCE_IRI, EXISTENCE_ASSERTION_TYPE_IRI, IS_IN_LANGUAGE_TYPE_IRI, IS_IN_SCRIPT_TYPE_IRI, LANGUAGE_CODE_TYPE_IRI, LANGUAGE_ROLE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_ASSERTION_TYPE_IRI, NAME_ROLE_TYPE_IRI, NAME_TYPE_TYPE_IRI, NOTE_OCCURRENCE_TYPE_IRI, PROPERTY_ROLE_TYPE_IRI, RANGE_ENTITY_ROLE_TYPE_IRI, SCRIPT_CODE_TYPE_IRI, SCRIPT_ROLE_TYPE_IRI, SCRIPT_TYPE_IRI
 from entity import Entity
+from name_index import NameIndex
 
 class EATSTopicMap (TopicMap):
 
@@ -31,7 +33,6 @@ class EATSTopicMap (TopicMap):
 
         """
         entity = Entity.objects.get(pk=topic.id)
-        entity.eats_topic_map = self
         return entity
         
     def _create_cached_topic (self, attr, iri):
@@ -181,7 +182,7 @@ class EATSTopicMap (TopicMap):
 
         """
         topic = self.get_construct_by_id(entity_id)
-        if topic is None:
+        if topic is None or not isinstance(topic, Topic):
             entity = None
         elif self.entity_type not in topic.get_types():
             entity = None
@@ -271,6 +272,19 @@ class EATSTopicMap (TopicMap):
         """
         return self.get_topics_by_type(LANGUAGE_TYPE_IRI)
 
+    def lookup_entities (self, query):
+        names = query.split()
+        queries = []
+        for name in names:
+            queries.append(Q(indexed_names__form__istartswith=name))
+        sets = []
+        for query in queries:
+            sets.append(set(Entity.objects.filter(query)))
+        intersected_set = sets[0]
+        for i in range(1, len(sets)):
+            intersected_set = intersected_set.intersection(sets[i])
+        return list(intersected_set)
+    
     @property
     def name_assertion_type (self):
         return self._create_cached_topic('_name_assertion_type',
