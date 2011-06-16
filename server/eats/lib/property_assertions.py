@@ -80,17 +80,17 @@ class ExistencePropertyAssertions (PropertyAssertions):
         return self._create_formset(ExistenceFormSet, data)
 
     def categorise_assertions (self):
-        existences = self.entity.get_existences()
-        return self.get_editable(existences, self.authorities)
+        assertions = self.entity.get_existences()
+        return self.get_editable(assertions, self.authorities)
     
     def get_existing_data (self):
         existing = []
-        for existence in self.editable:
+        for assertion in self.editable:
             # QAZ: assuming that there is a single scoping topic, and
             # that it is the authority.
             existing.append(
-                {'authority': self.entity.get_authority(existence).get_id(),
-                 'assertion': existence.get_id()})
+                {'authority': assertion.authority.get_id(),
+                 'assertion': assertion.get_id()})
         return existing
 
 
@@ -105,17 +105,17 @@ class EntityRelationshipPropertyAssertions (PropertyAssertions):
         return self._create_formset(EntityRelationshipFormSet, data)
 
     def categorise_assertions (self):
-        entity_relationships = self.entity.get_relationships()
-        return self.get_editable(entity_relationships, self.authorities)
+        assertions = self.entity.get_relationships()
+        return self.get_editable(assertions, self.authorities)
 
     def get_existing_data (self):
         existing = []
-        for relationship in self.editable:
+        for assertion in self.editable:
             # QAZ: assuming that there is a single scoping topic, and
             # that it is the authority.
             existing.append(
-                {'authority': self.entity.get_authority(relationship).get_id(),
-                 'assertion': relationship.get_id(),
+                {'authority': assertion.authority.get_id(),
+                 'assertion': assertion.get_id(),
                  'relationship_type': ''})
         return existing
 
@@ -131,18 +131,18 @@ class EntityTypePropertyAssertions (PropertyAssertions):
         return self._create_formset(EntityTypeFormSet, data)
 
     def categorise_assertions (self):
-        entity_types = self.entity.get_entity_types()
-        return self.get_editable(entity_types, self.authorities)
+        assertions = self.entity.get_entity_types()
+        return self.get_editable(assertions, self.authorities)
 
     def get_existing_data (self):
         existing = []
-        for entity_type in self.editable:
+        for assertion in self.editable:
             # QAZ: assuming that there is a single scoping topic, and
             # that it is the authority.
             existing.append(
-                {'authority': self.entity.get_authority(entity_type).get_id(),
-                 'entity_type': self.entity.get_entity_type(entity_type).get_id(),
-                 'assertion': entity_type.get_id()})
+                {'authority': assertion.authority.get_id(),
+                 'entity_type': assertion.entity_type.get_id(),
+                 'assertion': assertion.get_id()})
         return existing
 
 
@@ -162,21 +162,20 @@ class NamePropertyAssertions (PropertyAssertions):
         return self._create_formset(NameFormSet, data)
 
     def categorise_assertions (self):
-        names = self.entity.get_eats_names()
-        return self.get_editable(names, self.authorities)
+        assertions = self.entity.get_eats_names()
+        return self.get_editable(assertions, self.authorities)
 
     def get_existing_data (self):
         existing = []
         for assertion in self.editable:
-            name = self.topic_map.convert_topic_to_entity(assertion.get_roles(
-                    self.topic_map.property_role_type)[0].get_player())
+            name = assertion.name
             existing.append(
-                {'authority': self.entity.get_authority(assertion).get_id(),
+                {'authority': assertion.authority.get_id(),
                  'assertion': assertion.get_id(),
-                 'display_form': name.name_value,
+                 'display_form': name.display_form,
                  'name_type': name.name_type.get_id(),
-                 'language': name.name_language.get_id(),
-                 'script': name.name_script.get_id(),
+                 'language': name.language.get_id(),
+                 'script': name.script.get_id(),
                  })
         return existing
 
@@ -189,13 +188,14 @@ class NotePropertyAssertions (PropertyAssertions):
         return self._create_formset(NoteFormSet, data)
 
     def categorise_assertions (self):
-        notes = self.entity.get_notes()
-        return self.get_editable(notes, self.authorities)
+        assertions = self.entity.get_notes()
+        return self.get_editable(assertions, self.authorities)
 
     def get_existing_data (self):
         existing = []
-        for note in self.editable:
+        for assertion in self.editable:
             existing.append(
-                {'authority': self.entity.get_authority(note).get_id(),
-                 'assertion': note.get_id(), 'note': note.get_value()})
+                {'authority': assertion.authority.get_id(),
+                 'assertion': assertion.get_id(),
+                 'note': assertion.note})
         return existing

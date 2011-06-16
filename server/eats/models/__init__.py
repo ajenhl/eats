@@ -7,4 +7,9 @@ TMAPI application.
 
 from eats_topic_map import EATSTopicMap
 from entity import Entity
+from entity_type_property_assertion import EntityTypePropertyAssertion
+from existence_property_assertion import ExistencePropertyAssertion
+from name import Name
 from name_index import NameIndex
+from name_property_assertion import NamePropertyAssertion
+from note_property_assertion import NotePropertyAssertion

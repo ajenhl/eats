@@ -5,3 +5,14 @@ not exist, it will automatically be created (or an error thrown?).
 EATS views are written with the assumption that
 'django.middleware.transaction.TransactionMiddleware' is specified in
 settings.py MIDDLEWARE_CLASSES.
+
+Refactor edit_entity template to use an include tag to handle error
+messages, rather than repeating the HTML. This is dependent on being
+able to write
+
+ {% include "error_snippet.html" with errors=form.authority.errors only %}
+
+Each name and name part is a topic, with the name itself stored in
+that topic's (sole non-admin) name. The name entity API should hide
+this implementation detail, allowing the changing of the name type and
+name value without getting the Name instance.

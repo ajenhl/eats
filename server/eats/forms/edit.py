@@ -4,6 +4,7 @@ from django.forms.formsets import formset_factory, BaseFormSet
 import selectable.forms as selectable
 
 from eats.lookups import EntityLookup
+from eats.models import EntityTypePropertyAssertion, ExistencePropertyAssertion, NamePropertyAssertion, NotePropertyAssertion
 
 
 class PropertyAssertionFormSet (BaseFormSet):
@@ -96,25 +97,28 @@ class PropertyAssertionForm (forms.Form):
             authority_choices = authority_choices[1:]
         self.fields['authority'].choices = authority_choices
 
-    def _get_construct (self, name):
+    def _get_construct (self, name, proxy=None):
         """Returns the construct specified by `name`.
 
         `name` corresponds to the name of one of the form's fields.
 
         :param name: name of the construct to return
         :type name: string
-        :rtype: `Construct`
+        :param proxy: Django proxy model
+        :type proxy: class
+        :rtype: `Construct` or proxy object
 
         """
         construct_id = self.cleaned_data[name]
         construct = None
         if construct_id is not None:
-            construct = self.topic_map.get_construct_by_id(construct_id)
+            construct = self.topic_map.get_construct_by_id(construct_id, proxy)
         return construct
         
     def delete (self):
         """Deletes the assertion."""
-        assertion = self._get_construct('assertion')
+        assertion = self._get_construct('assertion',
+                                        self._property_assertion_model)
         if assertion is None:
             return
         assertion.remove()
@@ -125,16 +129,18 @@ class PropertyAssertionForm (forms.Form):
         
 class ExistenceForm (PropertyAssertionForm):
 
+    _property_assertion_model = ExistencePropertyAssertion
+    
     def save (self):
         authority = self._get_construct('authority')
-        assertion = self._get_construct('assertion')
+        assertion = self._get_construct('assertion',
+                                        self._property_assertion_model)
         if assertion is None:
             # Create a new assertion.
             self.entity.create_existence_property_assertion(authority)
         else:
             # Update an existing assertion.
-            self.entity.update_existence_property_assertion(
-                authority, assertion)
+            assertion.update(authority)
 
 
 class EntityRelationshipForm (PropertyAssertionForm):
@@ -155,6 +161,8 @@ class EntityTypeForm (PropertyAssertionForm):
 
     entity_type = forms.ChoiceField(choices=[])
 
+    _property_assertion_model = EntityTypePropertyAssertion
+
     def __init__ (self, *args, **kwargs):
         entity_type_choices = kwargs.pop('entity_type_choices')
         super(EntityTypeForm, self).__init__(*args, **kwargs)
@@ -163,21 +171,22 @@ class EntityTypeForm (PropertyAssertionForm):
         self.fields['entity_type'].choices = entity_type_choices
 
     def delete (self):
-        assertion = self._get_construct('assertion')
-        self.entity.delete_entity_type_property_assertion(assertion)
+        assertion = self._get_construct('assertion',
+                                        proxy=self._property_assertion_model)
+        assertion.remove()
         
     def save (self):
         authority = self._get_construct('authority')
-        assertion = self._get_construct('assertion')
+        assertion = self._get_construct('assertion',
+                                        proxy=self._property_assertion_model)
         entity_type = self._get_construct('entity_type')
         if assertion is None:
             # Create a new assertion.
-            self.entity.create_entity_type_property_assertion(authority,
-                                                              entity_type)
+            self.entity.create_entity_type_property_assertion(
+                authority, entity_type)
         else:
             # Update an existing assertion.
-            self.entity.update_entity_type_property_assertion(
-                authority, assertion, entity_type)
+            assertion.update(authority, entity_type)
 
 
 class NameForm (PropertyAssertionForm):
@@ -186,6 +195,8 @@ class NameForm (PropertyAssertionForm):
     language = forms.ChoiceField(choices=[])
     script = forms.ChoiceField(choices=[])
     display_form = forms.CharField()
+
+    _property_assertion_model = NamePropertyAssertion
 
     def __init__ (self, *args, **kwargs):
         name_type_choices = kwargs.pop('name_type_choices')
@@ -199,12 +210,14 @@ class NameForm (PropertyAssertionForm):
         self.fields['script'].choices = script_choices
 
     def delete (self):
-        assertion = self._get_construct('assertion')
-        self.entity.delete_name_property_assertion(assertion)
+        assertion = self._get_construct('assertion',
+                                        proxy=self._property_assertion_model)
+        assertion.remove()
 
     def save (self):
         authority = self._get_construct('authority')
-        assertion = self._get_construct('assertion')
+        assertion = self._get_construct('assertion',
+                                        proxy=self._property_assertion_model)
         name_type = self._get_construct('name_type')
         language = self._get_construct('language')
         script = self._get_construct('script')
@@ -215,25 +228,27 @@ class NameForm (PropertyAssertionForm):
                 authority, name_type, language, script, display_form)
         else:
             # Update an existing assertion.
-            self.entity.update_name_property_assertion(
-                authority, assertion, name_type, language, script, display_form)
+            assertion.update(authority, name_type, language, script,
+                             display_form)
 
 
 class NoteForm (PropertyAssertionForm):
 
     note = forms.CharField(widget=forms.Textarea)
 
+    _property_assertion_model = NotePropertyAssertion
+
     def save (self):
         authority = self._get_construct('authority')
-        assertion = self._get_construct('assertion')
+        assertion = self._get_construct('assertion',
+                                        proxy=self._property_assertion_model)
         note = self.cleaned_data['note']
         if assertion is None:
             # Create a new assertion.
             self.entity.create_note_property_assertion(authority, note)
         else:
             # Update an existing assertion.
-            self.entity.update_note_property_assertion(authority, assertion,
-                                                       note)
+            assertion.update(authority, note)
 
         
 ExistenceFormSet = formset_factory(ExistenceForm, can_delete=True,

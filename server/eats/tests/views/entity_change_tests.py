@@ -32,7 +32,7 @@ class EntityChangeViewTestCase (BaseTestCase):
         existence_data = existence_formset.initial_forms[0].initial
         self.assertEqual(existence_data['assertion'], existence.get_id())
         self.assertEqual(existence_data['authority'],
-                         entity.get_authority(existence).get_id())
+                         existence.authority.get_id())
         for formset in ('entity_type_formset', 'entity_relationship_formset',
                         'name_formset', 'note_formset'):
             self.assertEqual(response.context[formset].initial_form_count(), 0,
@@ -71,7 +71,7 @@ class EntityChangeViewTestCase (BaseTestCase):
         self.assertEqual(entity_type_data['assertion'],
                          entity_type_assertion.get_id())
         self.assertEqual(entity_type_data['authority'],
-                         entity.get_authority(entity_type_assertion).get_id())
+                         entity_type_assertion.authority.get_id())
         self.assertEqual(entity_type_data['entity_type'], entity_type.get_id())
         # Test adding another entity type and deleting the existing one.
         entity_type2 = self.create_entity_type('Place')
@@ -100,7 +100,7 @@ class EntityChangeViewTestCase (BaseTestCase):
         self.assertEqual(entity_type_data['assertion'],
                          entity_type_assertion.get_id())
         self.assertEqual(entity_type_data['authority'],
-                         entity.get_authority(entity_type_assertion).get_id())
+                         entity_type_assertion.authority.get_id())
         self.assertEqual(entity_type_data['entity_type'], entity_type2.get_id())
 
     def test_post_names (self):
@@ -130,16 +130,15 @@ class EntityChangeViewTestCase (BaseTestCase):
         name_formset = response.context['name_formset']
         self.assertEqual(name_formset.initial_form_count(), 1,
                          'Expected one pre-filled name form')
-        name_assertion = entity.get_eats_names()[0]
+        assertion = entity.get_eats_names()[0]
         name_data = name_formset.initial_forms[0].initial
-        self.assertEqual(name_data['assertion'], name_assertion.get_id())
-        self.assertEqual(name_data['authority'], entity.get_authority(
-                name_assertion).get_id())
+        self.assertEqual(name_data['assertion'], assertion.get_id())
+        self.assertEqual(name_data['authority'], assertion.authority.get_id())
         self.assertEqual(name_data['name_type'], name_type.get_id())
         self.assertEqual(name_data['language'], language.get_id())
         self.assertEqual(name_data['script'], script.get_id())
-        name = entity.get_entity_name(name_assertion)
-        self.assertEqual(name_data['display_form'], name.name_value)
+        name = assertion.name
+        self.assertEqual(name_data['display_form'], name.display_form)
         name_type2 = self.create_name_type('irregular')
         language2 = self.create_language('Sanskrit', 'sa')
         script2 = self.create_script('Devanagari', 'Deva')
@@ -150,7 +149,7 @@ class EntityChangeViewTestCase (BaseTestCase):
                 'entity_types-TOTAL_FORMS': 1, 'entity_types-INITIAL_FORMS': 0,
                 'names-TOTAL_FORMS': 2, 'names-INITIAL_FORMS': 1,
                 'names-0-DELETE': 'on', 'names-0-authority': authority_id,
-                'names-0-assertion': name_assertion.get_id(),
+                'names-0-assertion': assertion.get_id(),
                 'names-0-name_type': name_type.get_id(),
                 'names-0-language': language.get_id(),
                 'names-0-script': script.get_id(),
@@ -168,13 +167,12 @@ class EntityChangeViewTestCase (BaseTestCase):
         name_formset = response.context['name_formset']
         self.assertEqual(name_formset.initial_form_count(), 1,
                          'Expected one pre-filled name form')
-        name_assertion = entity.get_eats_names()[0]
+        assertion = entity.get_eats_names()[0]
         name_data = name_formset.initial_forms[0].initial
-        self.assertEqual(name_data['assertion'], name_assertion.get_id())
-        self.assertEqual(name_data['authority'], entity.get_authority(
-                name_assertion).get_id())
+        self.assertEqual(name_data['assertion'], assertion.get_id())
+        self.assertEqual(name_data['authority'], assertion.authority.get_id())
         self.assertEqual(name_data['name_type'], name_type2.get_id())
         self.assertEqual(name_data['language'], language2.get_id())
         self.assertEqual(name_data['script'], script2.get_id())
-        name = entity.get_entity_name(name_assertion)
-        self.assertEqual(name_data['display_form'], name.name_value)
+        name = assertion.name
+        self.assertEqual(name_data['display_form'], name.display_form)
