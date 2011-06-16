@@ -47,16 +47,32 @@ class Name (Topic):
                                        script)
         self._add_name_index()
 
-    def remove (self):
-        for role in self.get_roles_played():
-            association = role.get_parent()
-            association.remove()
-        super(Name, self).remove()
-        
     def _delete_name_index_forms (self):
         """Deletes the indexed forms of this name."""
         self.indexed_name_forms.all().delete()
         
+    @property
+    def display_form (self):
+        """Returns the display form of this name.
+
+        :rtype: unicode string
+
+        """
+        return self._get_name().get_value()
+
+    @display_form.setter
+    def display_form (self, value):
+        """Sets the display form of this name.
+
+        Note that changing the value via this method does not update
+        the name index.
+
+        :param value: value of the name
+        :type value: unicode string
+
+        """
+        self._get_name().set_value(value)
+
     @property
     def eats_topic_map (self):
         value = getattr(self, '_eats_topic_map', None)
@@ -134,6 +150,31 @@ class Name (Topic):
         return language_role
         
     @property
+    def name_type (self):
+        """Returns the name type of this name.
+
+        :rtype: `Topic`
+
+        """
+        return self._get_name().get_type()
+
+    @name_type.setter
+    def name_type (self, name_type):
+        """Sets the name type of this name.
+
+        :param name_type: type of name
+        :type name_type: `Topic`
+
+        """
+        self._get_name().set_type(name_type)
+    
+    def remove (self):
+        for role in self.get_roles_played():
+            association = role.get_parent()
+            association.remove()
+        super(Name, self).remove()
+        
+    @property
     def script (self):
         """Returns the script of this name.
 
@@ -169,47 +210,6 @@ class Name (Topic):
         script_role = name_role.get_parent().get_roles(
             self.eats_topic_map.script_role_type)[0]
         return script_role
-
-    @property
-    def name_type (self):
-        """Returns the name type of this name.
-
-        :rtype: `Topic`
-
-        """
-        return self._get_name().get_type()
-
-    @name_type.setter
-    def name_type (self, name_type):
-        """Sets the name type of this name.
-
-        :param name_type: type of name
-        :type name_type: `Topic`
-
-        """
-        self._get_name().set_type(name_type)
-    
-    @property
-    def display_form (self):
-        """Returns the display form of this name.
-
-        :rtype: unicode string
-
-        """
-        return self._get_name().get_value()
-
-    @display_form.setter
-    def display_form (self, value):
-        """Sets the display form of this name.
-
-        Note that changing the value via this method does not update
-        the name index.
-
-        :param value: value of the name
-        :type value: unicode string
-
-        """
-        self._get_name().set_value(value)
 
     def update (self, name_type, language, script, display_form):
         self.name_type = name_type
