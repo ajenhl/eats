@@ -159,7 +159,8 @@ class Entity (Topic):
         :rtype: `QuerySet` of `Occurrence`s
 
         """
-        return self.get_occurrences(self.eats_topic_map.note_occurrence_type)
+        return self.get_occurrences(self.eats_topic_map.note_occurrence_type,
+                                    proxy=NotePropertyAssertion)
 
     def get_relationships (self):
         """Returns this entity's relationships to other entities.
