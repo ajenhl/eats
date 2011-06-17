@@ -15,7 +15,7 @@ class NotePropertyAssertion (Occurrence, PropertyAssertion):
         return self.get_value()
         
     def update (self, authority, note):
-        """Update this property assertion.
+        """Updates this property assertion.
 
         :param authority: authority making the assertion
         :type authority: `Topic`

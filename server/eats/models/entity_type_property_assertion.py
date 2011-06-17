@@ -37,7 +37,7 @@ class EntityTypePropertyAssertion (Association, PropertyAssertion):
         self._entity = entity
 
     def update (self, authority, entity_type):
-        """Update this property assertion.
+        """Updates this property assertion.
 
         :param authority: authority making the assertion
         :type authority: `Topic`

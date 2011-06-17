@@ -43,7 +43,7 @@ class PropertyAssertion (object):
         raise NotImplementedError
         
     def update (self, authority, *args):
-        """Update this property assertion with the new data.
+        """Updates this property assertion with the new data.
 
         This method should be overridden by subclasses, but called via
         super.

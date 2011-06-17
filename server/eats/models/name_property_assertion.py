@@ -43,7 +43,7 @@ class NamePropertyAssertion (Association, PropertyAssertion):
         name.entity = entity
         
     def update (self, authority, name_type, language, script, display_form):
-        """Update this property assertion, and its associated name.
+        """Updates this property assertion, and its associated name.
 
         :param authority: authority making the assertion
         :type authority: `Topic`
