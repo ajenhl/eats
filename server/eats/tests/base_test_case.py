@@ -3,7 +3,7 @@ from django.test import TestCase
 
 from tmapi.models import TopicMapSystemFactory
 
-from eats.constants import AUTHORITY_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_TYPE_TYPE_IRI, SCRIPT_TYPE_IRI
+from eats.constants import AUTHORITY_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_TYPE_TYPE_IRI, SCRIPT_TYPE_IRI
 from eats.models import EATSTopicMap
 
 
@@ -22,6 +22,11 @@ class BaseTestCase (TestCase):
         return self.tm.create_typed_topic(AUTHORITY_TYPE_IRI,
                                           {'name': authority_name})
 
+    def create_entity_relationship_type (self, name, reverse_name):
+        return self.tm.create_typed_topic(ENTITY_RELATIONSHIP_TYPE_TYPE_IRI,
+                                          {'name': name,
+                                           'reverse_name': reverse_name})
+    
     def create_entity_type (self, entity_type_name):
         return self.tm.create_typed_topic(ENTITY_TYPE_TYPE_IRI,
                                           {'name': entity_type_name})

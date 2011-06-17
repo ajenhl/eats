@@ -5,7 +5,7 @@ from django.db.models import Q
 from tmapi.indices import TypeInstanceIndex
 from tmapi.models import Locator, Topic, TopicMap
 
-from eats.constants import ADMIN_NAME_TYPE_IRI, AUTHORITY_TYPE_IRI, DOMAIN_ENTITY_ROLE_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_IRI, ENTITY_ROLE_TYPE_IRI, ENTITY_TYPE_IRI, ENTITY_TYPE_ASSERTION_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, EXISTENCE_IRI, EXISTENCE_ASSERTION_TYPE_IRI, IS_IN_LANGUAGE_TYPE_IRI, IS_IN_SCRIPT_TYPE_IRI, LANGUAGE_CODE_TYPE_IRI, LANGUAGE_ROLE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_ASSERTION_TYPE_IRI, NAME_ROLE_TYPE_IRI, NAME_TYPE_TYPE_IRI, NOTE_OCCURRENCE_TYPE_IRI, PROPERTY_ROLE_TYPE_IRI, RANGE_ENTITY_ROLE_TYPE_IRI, SCRIPT_CODE_TYPE_IRI, SCRIPT_ROLE_TYPE_IRI, SCRIPT_TYPE_IRI
+from eats.constants import ADMIN_NAME_TYPE_IRI, AUTHORITY_TYPE_IRI, DOMAIN_ENTITY_ROLE_TYPE_IRI, ENTITY_RELATIONSHIP_ASSERTION_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_IRI, ENTITY_ROLE_TYPE_IRI, ENTITY_TYPE_IRI, ENTITY_TYPE_ASSERTION_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, EXISTENCE_IRI, EXISTENCE_ASSERTION_TYPE_IRI, IS_IN_LANGUAGE_TYPE_IRI, IS_IN_SCRIPT_TYPE_IRI, LANGUAGE_CODE_TYPE_IRI, LANGUAGE_ROLE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_ASSERTION_TYPE_IRI, NAME_ROLE_TYPE_IRI, NAME_TYPE_TYPE_IRI, NOTE_OCCURRENCE_TYPE_IRI, PROPERTY_ROLE_TYPE_IRI, RANGE_ENTITY_ROLE_TYPE_IRI, RELATIONSHIP_NAME_TYPE_IRI, REVERSE_RELATIONSHIP_NAME_TYPE_IRI, SCRIPT_CODE_TYPE_IRI, SCRIPT_ROLE_TYPE_IRI, SCRIPT_TYPE_IRI
 from entity import Entity
 
 
@@ -97,6 +97,11 @@ class EATSTopicMap (TopicMap):
                 occurrence_type = self.create_topic_by_subject_identifier(
                     Locator(occurrence_type_iri))
                 topic.create_occurrence(occurrence_type, data.get('code'))
+            if 'reverse_name' in data:
+                topic.create_name(data['name'],
+                                  name_type=self.relationship_name_type)
+                topic.create_name(data['reverse_name'],
+                                  name_type=self.reverse_relationship_name_type)
         return topic
 
     @property
@@ -114,6 +119,11 @@ class EATSTopicMap (TopicMap):
         return self._create_cached_topic('_entity_type_assertion_type',
                                          ENTITY_TYPE_ASSERTION_TYPE_IRI)
 
+    @property
+    def entity_relationship_assertion_type (self):
+        return self._create_cached_topic('_entity_relationship_assertion_type',
+                                         ENTITY_RELATIONSHIP_ASSERTION_TYPE_IRI)
+    
     @property
     def entity_relationship_types (self):
         """Returns a `QuerySet` of entity relationship `Topic`s.
@@ -317,6 +327,16 @@ class EATSTopicMap (TopicMap):
         return self._create_cached_topic('_range_entity_role_type',
                                          RANGE_ENTITY_ROLE_TYPE_IRI)
 
+    @property
+    def relationship_name_type (self):
+        return self._create_cached_topic('_relationship_name_type',
+                                         RELATIONSHIP_NAME_TYPE_IRI)
+
+    @property
+    def reverse_relationship_name_type (self):
+        return self._create_cached_topic('_reverse_relationship_name_type',
+                                         REVERSE_RELATIONSHIP_NAME_TYPE_IRI)
+    
     @property
     def script_role_type (self):
         return self._create_cached_topic('_script_role_type',

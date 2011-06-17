@@ -1,5 +1,6 @@
 from tmapi.models import Topic
 
+from entity_relationship_property_assertion import EntityRelationshipPropertyAssertion
 from entity_type_property_assertion import EntityTypePropertyAssertion
 from existence_property_assertion import ExistencePropertyAssertion
 from name import Name
@@ -13,6 +14,32 @@ class Entity (Topic):
         proxy = True
         app_label = 'eats'
 
+    def create_entity_relationship_property_assertion (
+        self, authority, relationship_type, domain_entity, range_entity):
+        """Creates a new entity relationship property assertion
+        asserted by `authority`.
+
+        :param authority: authority asserting the property
+        :type authority: `Topic`
+        :param relationship_type: the type of relationship
+        :type relationship_type: `Topic`
+        :param domain_entity: entity playing the domain role in the
+          relationship
+        :type domain_entity: `Entity`
+        :param range_entity: entity playing the range role in the
+          relationship
+        :type range_entity: `Entity`
+        :rtype: `EntityRelationshipPropertyAssertion`
+
+        """
+        if domain_entity != self and range_entity != self:
+            raise Exception('An entity relationship property assertion created for an entity must include that entity as one of the related entities')
+        assertion = self.eats_topic_map.create_association(
+            relationship_type, scope=[authority],
+            proxy=EntityRelationshipPropertyAssertion)
+        assertion.set_players(domain_entity, range_entity)
+        return assertion
+        
     def create_entity_type_property_assertion (self, authority, entity_type):
         """Creates a new entity type property assertion asserted by
         `authority`.
@@ -20,7 +47,8 @@ class Entity (Topic):
         :param authority: authority asserting the property
         :type authority: `Topic`
         :param entity_type: entity type
-        :type entity_type: `EntityTypePropertyAssertion`
+        :type entity_type: `Topic`
+        :rtype: `EntityTypePropertyAssertion`
 
         """
         assertion = self.eats_topic_map.create_association(
@@ -76,6 +104,7 @@ class Entity (Topic):
         :type authority: `Topic`
         :param note: text of note
         :type note: string
+        :rtype: `NotePropertyAssertion`
 
         """
         assertion = self.create_occurrence(
@@ -105,6 +134,20 @@ class Entity (Topic):
             self.eats_topic_map.name_assertion_type)
         return [role.get_parent(proxy=NamePropertyAssertion) for role
                 in entity_roles]
+
+    def get_entity_relationships (self):
+        """Returns this entity's relationships to other entities.
+
+        :rtype: list of `EntityRelationshipPropertyAssertion`s
+
+        """
+        domain_entity_roles = self.get_roles_played(
+            self.eats_topic_map.domain_entity_role_type)
+        range_entity_roles = self.get_roles_played(
+            self.eats_topic_map.range_entity_role_type)
+        relationships = [role.get_parent(proxy=EntityRelationshipPropertyAssertion) for role in domain_entity_roles] + \
+            [role.get_parent(proxy=EntityRelationshipPropertyAssertion) for role in range_entity_roles]
+        return relationships
 
     def get_entity_type (self, assertion):
         """Returns the entity type asserted in `assertion`.
@@ -161,17 +204,3 @@ class Entity (Topic):
         """
         return self.get_occurrences(self.eats_topic_map.note_occurrence_type,
                                     proxy=NotePropertyAssertion)
-
-    def get_relationships (self):
-        """Returns this entity's relationships to other entities.
-
-        :rtype: list of `Association`s
-
-        """
-        domain_entity_roles = self.get_roles_played(
-            self.eats_topic_map.domain_entity_role_type)
-        range_entity_roles = self.get_roles_played(
-            self.eats_topic_map.range_entity_role_type)
-        relationships = [role.get_parent() for role in domain_entity_roles] + \
-            [role.get_parent() for role in range_entity_roles]
-        return relationships

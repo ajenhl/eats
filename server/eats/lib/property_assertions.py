@@ -105,7 +105,7 @@ class EntityRelationshipPropertyAssertions (PropertyAssertions):
         return self._create_formset(EntityRelationshipFormSet, data)
 
     def categorise_assertions (self):
-        assertions = self.entity.get_relationships()
+        assertions = self.entity.get_entity_relationships()
         return self.get_editable(assertions, self.authorities)
 
     def get_existing_data (self):
