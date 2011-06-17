@@ -14,6 +14,8 @@ class NoteTest (BaseTestCase):
         self.assertEqual(1, self.entity.get_notes().count())
         self.assertEqual(self.authority, assertion.authority)
         self.assertEqual(assertion.note, 'Test')
+        fetched_assertion = self.entity.get_notes()[0]
+        self.assertEqual(assertion, fetched_assertion)
 
     def test_delete_note_property_assertion (self):
         self.assertEqual(0, self.entity.get_notes().count())

@@ -33,6 +33,8 @@ class NameTest (BaseTestCase):
                 self.tm.is_in_language_type).count())
         self.assertEqual(1, self.type_index.get_associations(
                 self.tm.is_in_script_type).count())
+        fetched_assertion = self.entity.get_eats_names()[0]
+        self.assertEqual(assertion, fetched_assertion)
         name = assertion.name
         self.assertEqual(name.display_form, 'Name')
         self.assertEqual(name.name_type, self.name_type)

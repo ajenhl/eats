@@ -16,6 +16,8 @@ class EntityTypeTest (BaseTestCase):
         self.assertEqual(1, len(self.entity.get_entity_types()))
         self.assertEqual(self.authority, assertion.authority)
         self.assertEqual(self.entity_type, assertion.entity_type)
+        fetched_assertion = self.entity.get_entity_types()[0]
+        self.assertEqual(assertion, fetched_assertion)
 
     def test_delete_entity_type_property_assertion (self):
         self.assertEqual(0, len(self.entity.get_entity_types()))
