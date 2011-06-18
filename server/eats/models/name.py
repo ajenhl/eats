@@ -90,6 +90,14 @@ class Name (Topic):
         :rtype: `Entity`
         
         """
+        if not hasattr(self, '_entity'):
+            from entity import Entity
+            property_role = self.get_roles_played(
+                self.eats_topic_map.property_role_type)[0]
+            assertion = property_role.get_parent()
+            entity_role = assertion.get_roles(
+                self.eats_topic_map.entity_role_type)[0]
+            self._entity = entity_role.get_player(proxy=Entity)
         return self._entity
 
     @entity.setter
