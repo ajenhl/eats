@@ -12,6 +12,11 @@ class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
     @property
     def domain_entity (self):
         """Returns the domain entity in this asserted relationship."""
+        if not hasattr(self, '_domain_entity'):
+            from entity import Entity
+            domain_role = self.get_roles(
+                self.eats_topic_map.domain_entity_role_type)[0]
+            self._domain_entity = domain_role.get_player(proxy=Entity)
         return self._domain_entity
 
     @property
@@ -23,6 +28,11 @@ class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
     @property
     def range_entity (self):
         """Returns the range entity in this asserted relationship."""
+        if not hasattr(self, '_range_entity'):
+            from entity import Entity
+            range_role = self.get_roles(
+                self.eats_topic_map.range_entity_role_type)[0]
+            self._range_entity = range_role.get_player(proxy=Entity)
         return self._range_entity
         
     def set_players (self, domain_entity, range_entity):

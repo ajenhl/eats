@@ -3,8 +3,10 @@ from django.forms.formsets import formset_factory, BaseFormSet
 
 import selectable.forms as selectable
 
+from eats.constants import FORWARD_RELATIONSHIP_MARKER, \
+    REVERSE_RELATIONSHIP_MARKER
 from eats.lookups import EntityLookup
-from eats.models import EntityTypePropertyAssertion, ExistencePropertyAssertion, NamePropertyAssertion, NotePropertyAssertion
+from eats.models import EntityRelationshipPropertyAssertion, EntityTypePropertyAssertion, ExistencePropertyAssertion, NamePropertyAssertion, NotePropertyAssertion
 
 
 class PropertyAssertionFormSet (BaseFormSet):
@@ -30,11 +32,12 @@ class ExistenceAssertionFormSet (PropertyAssertionFormSet):
 class EntityRelationshipAssertionFormSet (PropertyAssertionFormSet):
 
     def __init__ (self, **kwargs):
-        self.relationship_choices = kwargs.pop('relationship_choices')
+        self.relationship_type_choices = kwargs.pop('relationship_type_choices')
         super(EntityRelationshipAssertionFormSet, self).__init__(**kwargs)
 
     def _construct_form (self, i, **kwargs):
-        kwargs.update({'relationship_choices': self.relationship_choices})
+        kwargs.update({'relationship_type_choices':
+                           self.relationship_type_choices})
         return super(EntityRelationshipAssertionFormSet, self)._construct_form(
             i, **kwargs)
 
@@ -145,16 +148,41 @@ class ExistenceForm (PropertyAssertionForm):
 
 class EntityRelationshipForm (PropertyAssertionForm):
 
-    domain_entity = selectable.AutoCompleteSelectField(EntityLookup)
-    relationship = forms.ChoiceField(choices=[])
-    range_entity = forms.CharField()
+    relationship_type = forms.ChoiceField(choices=[])
+    related_entity = selectable.AutoCompleteSelectField(EntityLookup)
+
+    _property_assertion_model = EntityRelationshipPropertyAssertion
 
     def __init__ (self, *args, **kwargs):
-        relationship_choices = kwargs.pop('relationship_choices')
+        relationship_type_choices = kwargs.pop('relationship_type_choices')
         super(EntityRelationshipForm, self).__init__(*args, **kwargs)
         if 'initial' in kwargs:
-            relationship_choices = relationship_choices[1:]
-        self.fields['relationship'].choices = relationship_choices
+            relationship_type_choices = relationship_type_choices[1:]
+        self.fields['relationship_type'].choices = relationship_type_choices
+
+    def save (self):
+        authority = self._get_construct('authority')
+        assertion = self._get_construct('assertion',
+                                        proxy=self._property_assertion_model)
+        relationship_type_id = self.cleaned_data['relationship_type']
+        relationship_type = self.topic_map.get_construct_by_id(
+            relationship_type_id[:-1])
+        related_entity = self._get_construct('related_entity')
+        direction = relationship_type_id[-1]
+        if direction == FORWARD_RELATIONSHIP_MARKER:
+            domain_entity = self.entity
+            range_entity = related_entity
+        elif direction == REVERSE_RELATIONSHIP_MARKER:
+            domain_entity = related_entity
+            range_entity = self.entity
+        if assertion is None:
+            # Create a new assertion.
+            self.entity.create_entity_relationship_property_assertion(
+                authority, relationship_type, domain_entity, range_entity)
+        else:
+            # Update an existing assertion.
+            assertion.update(authority, relationship_type, domain_entity,
+                             range_entity)
 
 
 class EntityTypeForm (PropertyAssertionForm):

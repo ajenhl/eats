@@ -14,13 +14,19 @@ class EntityLookup (LookupBase):
         return item.get_id()
     
     def get_item_label (self, item):
-        name_assertion = item.get_eats_names()[0]
-        name = item.get_entity_name(name_assertion)
-        return name.name_value
+        try:
+            name_assertion = item.get_eats_names()[0]
+            label = name_assertion.name.display_form
+        except IndexError:
+            label = '[unnamed entity]'
+        return label
 
     def get_item_value (self, item):
-        name_assertion = item.get_eats_names()[0]
-        name = item.get_entity_name(name_assertion)
-        return name.name_value
+        try:
+            name_assertion = item.get_eats_names()[0]
+            label = name_assertion.name.display_form
+        except IndexError:
+            label = '[unnamed entity]'
+        return label
 
 registry.register(EntityLookup)

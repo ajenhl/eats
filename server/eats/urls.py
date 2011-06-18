@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import patterns, url
 
-from eats.constants import AUTHORITY_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_TYPE_TYPE_IRI, SCRIPT_TYPE_IRI
+from eats.constants import AUTHORITY_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_TYPE_TYPE_IRI, SCRIPT_TYPE_IRI
 
 
 # Displaying.
@@ -19,7 +19,7 @@ urlpatterns += patterns(
 
 topic_data = {
     'authority': {'type_iri': AUTHORITY_TYPE_IRI, 'name': 'authority'},
-    'entity_relationship_type': {'type_iri': ENTITY_RELATIONSHIP_TYPE_IRI,
+    'entity_relationship_type': {'type_iri': ENTITY_RELATIONSHIP_TYPE_TYPE_IRI,
                                  'name': 'entity-relationship-type'},
     'entity_type': {'type_iri': ENTITY_TYPE_TYPE_IRI, 'name': 'entity-type'},
     'language': {'type_iri': LANGUAGE_TYPE_IRI, 'name': 'language'},

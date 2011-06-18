@@ -2,6 +2,8 @@
 
 from django.core.urlresolvers import reverse
 
+from eats.constants import FORWARD_RELATIONSHIP_MARKER, \
+    REVERSE_RELATIONSHIP_MARKER
 from eats.tests.base_test_case import BaseTestCase
 
 
@@ -45,11 +47,42 @@ class EntityChangeViewTestCase (BaseTestCase):
             self.assertEqual(response.context[formset].initial_form_count(), 0,
                              'Expected no %ss' % formset)
 
-    def test_post_existences (self):
-        # QAZ: Need to sort out whether existences are special in
-        # terms of being required in order to make other property
-        # assertions under an authority.
-        pass
+    def test_post_entity_relationships (self):
+        entity = self.tm.create_entity(self.authority)
+        entity2 = self.tm.create_entity(self.authority)
+        rel_type = self.create_entity_relationship_type(
+            'is child of', 'is parent of')
+        existence = entity.get_existences()[0]
+        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        response = self.client.post(url, {
+                'existences-TOTAL_FORMS': 2, 'existences-INITIAL_FORMS': 1,
+                'existences-0-assertion': existence.get_id(),
+                'existences-0-authority': self.authority_id,
+                'entity_types-TOTAL_FORMS': 1, 'entity_types-INITIAL_FORMS': 0,
+                'names-TOTAL_FORMS': 1, 'names-INITIAL_FORMS': 0,
+                'entity_relationships-TOTAL_FORMS': 1,
+                'entity_relationships-INITIAL_FORMS': 0,
+                'entity_relationships-0-authority': self.authority_id,
+                'entity_relationships-0-relationship_type': str(rel_type.get_id()) + FORWARD_RELATIONSHIP_MARKER,
+                'entity_relationships-0-related_entity_1': entity2.get_id(),
+                'notes-TOTAL_FORMS': 1, 'notes-INITIAL_FORMS': 0,
+                '_save': 'Save'}, follow=True)
+        self.assertRedirects(response, url)
+        formset = response.context['entity_relationship_formset']
+        self.assertEqual(formset.initial_form_count(), 1,
+                         'Expected one pre-filled entity relationship form')
+        assertion = entity.get_entity_relationships()[0]
+        form_data = formset.initial_forms[0].initial
+        self.assertEqual(form_data['assertion'], assertion.get_id())
+        self.assertEqual(form_data['authority'], self.authority_id)
+        self.assertEqual(form_data['authority'], assertion.authority.get_id())
+        self.assertEqual(form_data['relationship_type'],
+                         str(rel_type.get_id()) + FORWARD_RELATIONSHIP_MARKER)
+        self.assertEqual(form_data['relationship_type'],
+                         str(assertion.entity_relationship_type.get_id())
+                         + FORWARD_RELATIONSHIP_MARKER)
+        self.assertEqual(form_data['related_entity'], entity2)
+        self.assertEqual(form_data['related_entity'], assertion.range_entity)
             
     def test_post_entity_types (self):
         entity = self.tm.create_entity(self.authority)
@@ -111,6 +144,12 @@ class EntityChangeViewTestCase (BaseTestCase):
         self.assertEqual(form_data['entity_type'],
                          assertion.entity_type.get_id())
 
+    def test_post_existences (self):
+        # QAZ: Need to sort out whether existences are special in
+        # terms of being required in order to make other property
+        # assertions under an authority.
+        pass
+            
     def test_post_names (self):
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]

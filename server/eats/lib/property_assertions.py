@@ -1,3 +1,5 @@
+from eats.constants import FORWARD_RELATIONSHIP_MARKER, \
+    REVERSE_RELATIONSHIP_MARKER
 from eats.forms.edit import EntityRelationshipFormSet, EntityTypeFormSet, ExistenceFormSet, NameFormSet, NoteFormSet, create_choice_list
 
 
@@ -98,9 +100,20 @@ class EntityRelationshipPropertyAssertions (PropertyAssertions):
 
     @property
     def formset (self):
-        relationship_choices = create_choice_list(
-            self.topic_map, self.topic_map.entity_relationship_types)
-        data = {'relationship_choices': relationship_choices,
+        relationship_type_choices = []
+        for relationship_type in self.topic_map.entity_relationship_types:
+            id = unicode(relationship_type.get_id())
+            name = relationship_type.get_names(
+                self.topic_map.relationship_name_type)[0].get_value()
+            reverse_name = relationship_type.get_names(
+                self.topic_map.reverse_relationship_name_type)[0].get_value()
+            relationship_type_choices.append((id + FORWARD_RELATIONSHIP_MARKER,
+                                              name ))
+            relationship_type_choices.append((id + REVERSE_RELATIONSHIP_MARKER,
+                                              reverse_name))
+        relationship_type_choices = [('', '----------')] + \
+            relationship_type_choices
+        data = {'relationship_type_choices': relationship_type_choices,
                 'prefix': 'entity_relationships'}
         return self._create_formset(EntityRelationshipFormSet, data)
 
@@ -113,10 +126,17 @@ class EntityRelationshipPropertyAssertions (PropertyAssertions):
         for assertion in self.editable:
             # QAZ: assuming that there is a single scoping topic, and
             # that it is the authority.
+            relationship_id = str(assertion.entity_relationship_type.get_id())
+            direction_marker = FORWARD_RELATIONSHIP_MARKER
+            related_entity = assertion.range_entity
+            if self.entity == assertion.range_entity:
+                direction_marker = REVERSE_RELATIONSHIP_MARKER
+                related_entity = assertion.domain_entity
             existing.append(
                 {'authority': assertion.authority.get_id(),
                  'assertion': assertion.get_id(),
-                 'relationship_type': ''})
+                 'relationship_type': relationship_id + direction_marker,
+                 'related_entity': related_entity})
         return existing
 
 

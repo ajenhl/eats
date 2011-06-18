@@ -158,9 +158,8 @@ return $( "<li></li>" )
         <tr>
           <th scope="col">Delete?</th>
           <th scope="col">Authority</th>
-          <th scope="col">Entity</th>
           <th scope="col">Relationship</th>
-          <th scope="col">Entity</th>
+          <th scope="col">Related entity</th>
         </tr>
       </thead>
       <tbody>
@@ -174,21 +173,15 @@ return $( "<li></li>" )
             {% endif %}
           </td>
           <td>
-            <div>{{ form.domain_entity }}</div>
-            {% if form.errors.domain_entity %}
-            <div class="errors">{{ form.errors.domain_entity }}</div>
+            <div>{{ form.relationship_type }}</div>
+            {% if form.errors.relationship_type %}
+            <div class="errors">{{ form.errors.relationship_type }}</div>
             {% endif %}
           </td>
           <td>
-            <div>{{ form.relationship }}</div>
-            {% if form.errors.relationship %}
-            <div class="errors">{{ form.errors.relationship }}</div>
-            {% endif %}
-          </td>
-          <td>
-            <div>{{ form.range_entity }}</div>
-            {% if form.errors.range_entity %}
-            <div class="errors">{{ form.errors.range_entity }}</div>
+            <div>{{ form.related_entity }}</div>
+            {% if form.errors.related_entity %}
+            <div class="errors">{{ form.errors.related_entity }}</div>
             {% endif %}
           </td>
         </tr>

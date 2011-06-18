@@ -1,6 +1,6 @@
 from django import forms
 
-from eats.constants import AUTHORITY_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_TYPE_TYPE_IRI, SCRIPT_TYPE_IRI
+from eats.constants import AUTHORITY_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_TYPE_TYPE_IRI, SCRIPT_TYPE_IRI
 
 
 class AdminForm (forms.Form):
@@ -33,12 +33,22 @@ class AuthorityForm (AdminForm):
 
 class EntityRelationshipForm (AdminForm):
 
+    reverse_name = forms.CharField(max_length=100)
+    
     def clean_name (self):
         name = self.cleaned_data['name']
-        if self.topic_map.topic_exists(ENTITY_RELATIONSHIP_TYPE_IRI, name,
+        if self.topic_map.topic_exists(ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, name,
                                        self.topic_id):
             raise forms.ValidationError(
                 'The name of the entity relationship type must be unique')
+        return name
+
+    def clean_reverse_name (self):
+        name = self.cleaned_data['reverse_name']
+        if self.topic_map.topic_exists(ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, name,
+                                       self.topic_id):
+            raise forms.ValidationError(
+                'The reverse name of the entity relationship type must be unique')
         return name
 
 
