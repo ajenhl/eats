@@ -136,7 +136,7 @@ class EntityRelationshipPropertyAssertions (PropertyAssertions):
                 {'authority': assertion.authority.get_id(),
                  'assertion': assertion.get_id(),
                  'relationship_type': relationship_id + direction_marker,
-                 'related_entity': related_entity})
+                 'related_entity': related_entity.get_id()})
         return existing
 
 
