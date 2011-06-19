@@ -83,7 +83,77 @@ class EntityChangeViewTestCase (BaseTestCase):
                          + FORWARD_RELATIONSHIP_MARKER)
         self.assertEqual(form_data['related_entity'], entity2)
         self.assertEqual(form_data['related_entity'], assertion.range_entity)
-            
+        # Test adding another entity relationship and deleting the
+        # existing one.
+        rel_type2 = self.create_entity_relationship_type(
+            'is born in', 'is birth place of')
+        entity3 = self.tm.create_entity(self.authority)
+        response = self.client.post(url, {
+                'existences-TOTAL_FORMS': 2, 'existences-INITIAL_FORMS': 1,
+                'existences-0-assertion': existence.get_id(),
+                'existences-0-authority': self.authority_id,
+                'entity_types-TOTAL_FORMS': 1, 'entity_types-INITIAL_FORMS': 0,
+                'names-TOTAL_FORMS': 1, 'names-INITIAL_FORMS': 0,
+                'entity_relationships-TOTAL_FORMS': 2,
+                'entity_relationships-INITIAL_FORMS': 1,
+                'entity_relationships-0-DELETE': 'on',
+                'entity_relationships-0-assertion': assertion.get_id(),
+                'entity_relationships-0-authority': self.authority_id,
+                'entity_relationships-0-relationship_type': str(rel_type.get_id()) + FORWARD_RELATIONSHIP_MARKER,
+                'entity_relationships-0-related_entity_1': entity2.get_id(),
+                'entity_relationships-1-authority': self.authority2_id,
+                'entity_relationships-1-relationship_type': str(rel_type2.get_id()) + REVERSE_RELATIONSHIP_MARKER,
+                'entity_relationships-1-related_entity_1': entity3.get_id(),
+                'notes-TOTAL_FORMS': 1, 'notes-INITIAL_FORMS': 0,
+                '_save': 'Save'}, follow=True)
+        self.assertRedirects(response, url)
+        formset = response.context['entity_relationship_formset']
+        self.assertEqual(formset.initial_form_count(), 1,
+                         'Expected one pre-filled entity relationship form')
+        assertion = entity.get_entity_relationships()[0]
+        form_data = formset.initial_forms[0].initial
+        self.assertEqual(form_data['assertion'], assertion.get_id())
+        self.assertEqual(form_data['authority'], self.authority2_id)
+        self.assertEqual(form_data['authority'], assertion.authority.get_id())
+        self.assertEqual(form_data['relationship_type'],
+                         str(rel_type2.get_id()) + REVERSE_RELATIONSHIP_MARKER)
+        self.assertEqual(form_data['relationship_type'],
+                         str(assertion.entity_relationship_type.get_id())
+                         + REVERSE_RELATIONSHIP_MARKER)
+        self.assertEqual(form_data['related_entity'], entity3)
+        self.assertEqual(form_data['related_entity'], assertion.domain_entity)
+        # Test updating an existing entity relationship.
+        response = self.client.post(url, {
+                'existences-TOTAL_FORMS': 2, 'existences-INITIAL_FORMS': 1,
+                'existences-0-assertion': existence.get_id(),
+                'existences-0-authority': self.authority_id,
+                'entity_types-TOTAL_FORMS': 1, 'entity_types-INITIAL_FORMS': 0,
+                'names-TOTAL_FORMS': 1, 'names-INITIAL_FORMS': 0,
+                'entity_relationships-TOTAL_FORMS': 2,
+                'entity_relationships-INITIAL_FORMS': 1,
+                'entity_relationships-0-assertion': assertion.get_id(),
+                'entity_relationships-0-authority': self.authority_id,
+                'entity_relationships-0-relationship_type': str(rel_type.get_id()) + FORWARD_RELATIONSHIP_MARKER,
+                'entity_relationships-0-related_entity_1': entity2.get_id(),
+                'notes-TOTAL_FORMS': 1, 'notes-INITIAL_FORMS': 0,
+                '_save': 'Save'}, follow=True)
+        self.assertRedirects(response, url)
+        formset = response.context['entity_relationship_formset']
+        self.assertEqual(formset.initial_form_count(), 1,
+                         'Expected one pre-filled entity relationship form')
+        assertion = entity.get_entity_relationships()[0]
+        form_data = formset.initial_forms[0].initial
+        self.assertEqual(form_data['assertion'], assertion.get_id())
+        self.assertEqual(form_data['authority'], self.authority_id)
+        self.assertEqual(form_data['authority'], assertion.authority.get_id())
+        self.assertEqual(form_data['relationship_type'],
+                         str(rel_type.get_id()) + FORWARD_RELATIONSHIP_MARKER)
+        self.assertEqual(form_data['relationship_type'],
+                         str(assertion.entity_relationship_type.get_id())
+                         + FORWARD_RELATIONSHIP_MARKER)
+        self.assertEqual(form_data['related_entity'], entity2)
+        self.assertEqual(form_data['related_entity'], assertion.range_entity)
+
     def test_post_entity_types (self):
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
