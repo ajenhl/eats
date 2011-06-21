@@ -168,6 +168,8 @@ class EntityRelationshipForm (PropertyAssertionForm):
         relationship_type_id = self.cleaned_data['relationship_type']
         relationship_type = self.topic_map.get_construct_by_id(
             relationship_type_id[:-1])
+        # The autocomplete selection library, via lookups.py, takes
+        # care of retrieving the entity from its id.
         related_entity = self.cleaned_data['related_entity']
         direction = relationship_type_id[-1]
         if direction == FORWARD_RELATIONSHIP_MARKER:
