@@ -5,7 +5,7 @@ from django.db.models import Q
 from tmapi.indices import TypeInstanceIndex
 from tmapi.models import Locator, Topic, TopicMap
 
-from eats.constants import ADMIN_NAME_TYPE_IRI, AUTHORITY_TYPE_IRI, DOMAIN_ENTITY_ROLE_TYPE_IRI, ENTITY_RELATIONSHIP_ASSERTION_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_ROLE_TYPE_IRI, ENTITY_TYPE_IRI, ENTITY_TYPE_ASSERTION_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, EXISTENCE_IRI, EXISTENCE_ASSERTION_TYPE_IRI, IS_IN_LANGUAGE_TYPE_IRI, IS_IN_SCRIPT_TYPE_IRI, LANGUAGE_CODE_TYPE_IRI, LANGUAGE_ROLE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_ASSERTION_TYPE_IRI, NAME_ROLE_TYPE_IRI, NAME_TYPE_TYPE_IRI, NOTE_OCCURRENCE_TYPE_IRI, PROPERTY_ROLE_TYPE_IRI, RANGE_ENTITY_ROLE_TYPE_IRI, RELATIONSHIP_NAME_TYPE_IRI, REVERSE_RELATIONSHIP_NAME_TYPE_IRI, SCRIPT_CODE_TYPE_IRI, SCRIPT_ROLE_TYPE_IRI, SCRIPT_TYPE_IRI
+from eats.constants import ADMIN_NAME_TYPE_IRI, AUTHORITY_TYPE_IRI, DATE_ROLE_TYPE_IRI, DOMAIN_ENTITY_ROLE_TYPE_IRI, ENTITY_RELATIONSHIP_ASSERTION_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_ROLE_TYPE_IRI, ENTITY_TYPE_IRI, ENTITY_TYPE_ASSERTION_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, EXISTENCE_IRI, EXISTENCE_ASSERTION_TYPE_IRI, IS_IN_LANGUAGE_TYPE_IRI, IS_IN_SCRIPT_TYPE_IRI, LANGUAGE_CODE_TYPE_IRI, LANGUAGE_ROLE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_ASSERTION_TYPE_IRI, NAME_ROLE_TYPE_IRI, NAME_TYPE_TYPE_IRI, NOTE_OCCURRENCE_TYPE_IRI, PROPERTY_ROLE_TYPE_IRI, RANGE_ENTITY_ROLE_TYPE_IRI, RELATIONSHIP_NAME_TYPE_IRI, REVERSE_RELATIONSHIP_NAME_TYPE_IRI, SCRIPT_CODE_TYPE_IRI, SCRIPT_ROLE_TYPE_IRI, SCRIPT_TYPE_IRI
 from entity import Entity
 
 
@@ -105,6 +105,10 @@ class EATSTopicMap (TopicMap):
         return topic
 
     @property
+    def date_role_type (self):
+        return self._create_cached_topic('_date_role_type', DATE_ROLE_TYPE_IRI)
+    
+    @property
     def domain_entity_role_type (self):
         return self._create_cached_topic('_domain_entity_role_type',
                                          DOMAIN_ENTITY_ROLE_TYPE_IRI)
@@ -137,15 +141,6 @@ class EATSTopicMap (TopicMap):
     def entity_type (self):
         return self._create_cached_topic('_entity_type', ENTITY_TYPE_IRI)
     
-    @property
-    def entity_types (self):
-        """Returns a `QuerySet` of entity type `Topic`s.
-
-        :rtype: `QuerySet` of `Topic`s
-
-        """
-        return self.get_topics_by_type(ENTITY_TYPE_TYPE_IRI)
-
     @property
     def existence (self):
         """Returns the existence topic, that serves as the property
@@ -198,6 +193,22 @@ class EATSTopicMap (TopicMap):
         else:
             entity = self.convert_topic_to_entity(topic)
         return entity
+
+    def get_entity_types (self, authority=None):
+        """Returns a `QuerySet` of entity type `Topic`s.
+
+        If `authority` is not None, return only those entity types
+        that have a name asserted by `authority`.
+
+        :param authority: optional authority to filter entity types on
+        :type authority: `Authority`
+        :rtype: `QuerySet` of `Topic`s
+
+        """
+        entity_types = self.get_topics_by_type(ENTITY_TYPE_TYPE_IRI)
+        if authority is not None:
+            pass
+        return entity_types
 
     def get_topic_by_id (self, topic_id, type_iri):
         """Returns the topic with `topic_id`, or None if there is no

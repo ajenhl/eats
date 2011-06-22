@@ -144,8 +144,8 @@ class EntityTypePropertyAssertions (PropertyAssertions):
 
     @property
     def formset (self):
-        entity_type_choices = create_choice_list(self.topic_map,
-                                                 self.topic_map.entity_types)
+        entity_type_choices = create_choice_list(
+            self.topic_map, self.topic_map.get_entity_types())
         data = {'entity_type_choices': entity_type_choices,
                 'prefix': 'entity_types'}
         return self._create_formset(EntityTypeFormSet, data)
