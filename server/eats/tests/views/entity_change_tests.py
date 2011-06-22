@@ -81,8 +81,9 @@ class EntityChangeViewTestCase (BaseTestCase):
         self.assertEqual(form_data['relationship_type'],
                          str(assertion.entity_relationship_type.get_id())
                          + FORWARD_RELATIONSHIP_MARKER)
-        self.assertEqual(form_data['related_entity'], entity2)
-        self.assertEqual(form_data['related_entity'], assertion.range_entity)
+        self.assertEqual(form_data['related_entity'], entity2.get_id())
+        self.assertEqual(form_data['related_entity'],
+                         assertion.range_entity.get_id())
         # Test adding another entity relationship and deleting the
         # existing one.
         rel_type2 = self.create_entity_relationship_type(
@@ -120,8 +121,9 @@ class EntityChangeViewTestCase (BaseTestCase):
         self.assertEqual(form_data['relationship_type'],
                          str(assertion.entity_relationship_type.get_id())
                          + REVERSE_RELATIONSHIP_MARKER)
-        self.assertEqual(form_data['related_entity'], entity3)
-        self.assertEqual(form_data['related_entity'], assertion.domain_entity)
+        self.assertEqual(form_data['related_entity'], entity3.get_id())
+        self.assertEqual(form_data['related_entity'],
+                         assertion.domain_entity.get_id())
         # Test updating an existing entity relationship.
         response = self.client.post(url, {
                 'existences-TOTAL_FORMS': 2, 'existences-INITIAL_FORMS': 1,
@@ -151,8 +153,9 @@ class EntityChangeViewTestCase (BaseTestCase):
         self.assertEqual(form_data['relationship_type'],
                          str(assertion.entity_relationship_type.get_id())
                          + FORWARD_RELATIONSHIP_MARKER)
-        self.assertEqual(form_data['related_entity'], entity2)
-        self.assertEqual(form_data['related_entity'], assertion.range_entity)
+        self.assertEqual(form_data['related_entity'], entity2.get_id())
+        self.assertEqual(form_data['related_entity'],
+                         assertion.range_entity.get_id())
 
     def test_post_entity_types (self):
         entity = self.tm.create_entity(self.authority)
