@@ -3,10 +3,14 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q
 
 from tmapi.indices import TypeInstanceIndex
-from tmapi.models import Locator, Topic, TopicMap
+from tmapi.models import Association, Locator, Topic, TopicMap
 
-from eats.constants import ADMIN_NAME_TYPE_IRI, AUTHORITY_TYPE_IRI, DATE_ROLE_TYPE_IRI, DOMAIN_ENTITY_ROLE_TYPE_IRI, ENTITY_RELATIONSHIP_ASSERTION_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_ROLE_TYPE_IRI, ENTITY_TYPE_IRI, ENTITY_TYPE_ASSERTION_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, EXISTENCE_IRI, EXISTENCE_ASSERTION_TYPE_IRI, IS_IN_LANGUAGE_TYPE_IRI, IS_IN_SCRIPT_TYPE_IRI, LANGUAGE_CODE_TYPE_IRI, LANGUAGE_ROLE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_ASSERTION_TYPE_IRI, NAME_ROLE_TYPE_IRI, NAME_TYPE_TYPE_IRI, NOTE_OCCURRENCE_TYPE_IRI, PROPERTY_ROLE_TYPE_IRI, RANGE_ENTITY_ROLE_TYPE_IRI, RELATIONSHIP_NAME_TYPE_IRI, REVERSE_RELATIONSHIP_NAME_TYPE_IRI, SCRIPT_CODE_TYPE_IRI, SCRIPT_ROLE_TYPE_IRI, SCRIPT_TYPE_IRI
+from eats.constants import ADMIN_NAME_TYPE_IRI, AUTHORITY_TYPE_IRI, CALENDAR_TYPE_IRI, DATE_ROLE_TYPE_IRI, DOMAIN_ENTITY_ROLE_TYPE_IRI, END_DATE_TYPE_IRI, END_TAQ_DATE_TYPE_IRI, END_TPQ_DATE_TYPE_IRI, ENTITY_RELATIONSHIP_ASSERTION_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_ROLE_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_ROLE_TYPE_IRI, ENTITY_TYPE_IRI, ENTITY_TYPE_ASSERTION_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, EXISTENCE_IRI, EXISTENCE_ASSERTION_TYPE_IRI, IS_IN_LANGUAGE_TYPE_IRI, IS_IN_SCRIPT_TYPE_IRI, LANGUAGE_CODE_TYPE_IRI, LANGUAGE_ROLE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_ASSERTION_TYPE_IRI, NAME_ROLE_TYPE_IRI, NAME_TYPE_TYPE_IRI, NOTE_OCCURRENCE_TYPE_IRI, POINT_DATE_TYPE_IRI, POINT_TAQ_DATE_TYPE_IRI, POINT_TPQ_DATE_TYPE_IRI, PROPERTY_ROLE_TYPE_IRI, RANGE_ENTITY_ROLE_TYPE_IRI, RELATIONSHIP_NAME_TYPE_IRI, REVERSE_RELATIONSHIP_NAME_TYPE_IRI, SCRIPT_CODE_TYPE_IRI, SCRIPT_ROLE_TYPE_IRI, SCRIPT_TYPE_IRI, START_DATE_TYPE_IRI, START_TAQ_DATE_TYPE_IRI, START_TPQ_DATE_TYPE_IRI
 from entity import Entity
+from entity_relationship_property_assertion import EntityRelationshipPropertyAssertion
+from entity_type_property_assertion import EntityTypePropertyAssertion
+from existence_property_assertion import ExistencePropertyAssertion
+from name_property_assertion import NamePropertyAssertion
 
 
 class EATSTopicMap (TopicMap):
@@ -24,6 +28,10 @@ class EATSTopicMap (TopicMap):
         return self._create_cached_topic('_admin_name_type',
                                          ADMIN_NAME_TYPE_IRI)
 
+    @property
+    def calendar_type (self):
+        return self._create_cached_topic('_calendar_type', CALENDAR_TYPE_IRI)
+    
     def convert_topic_to_entity (self, topic):
         """Returns `topic` as an instance of `Entity`.
 
@@ -112,6 +120,20 @@ class EATSTopicMap (TopicMap):
     def domain_entity_role_type (self):
         return self._create_cached_topic('_domain_entity_role_type',
                                          DOMAIN_ENTITY_ROLE_TYPE_IRI)
+
+    @property
+    def end_date_type (self):
+        return self._create_cached_topic('_end_date_type', END_DATE_TYPE_IRI)
+
+    @property
+    def end_taq_date_type (self):
+        return self._create_cached_topic('_end_taq_date_type',
+                                         END_TAQ_DATE_TYPE_IRI)
+
+    @property
+    def end_tpq_date_type (self):
+        return self._create_cached_topic('_end_tpq_date_type',
+                                         END_TPQ_DATE_TYPE_IRI)
     
     @property
     def entity_role_type (self):
@@ -127,6 +149,11 @@ class EATSTopicMap (TopicMap):
     def entity_relationship_assertion_type (self):
         return self._create_cached_topic('_entity_relationship_assertion_type',
                                          ENTITY_RELATIONSHIP_ASSERTION_TYPE_IRI)
+
+    @property
+    def entity_relationship_type_role_type (self):
+        return self._create_cached_topic('_entity_relationship_type_role_type',
+                                         ENTITY_RELATIONSHIP_TYPE_ROLE_TYPE_IRI)
     
     @property
     def entity_relationship_types (self):
@@ -168,6 +195,40 @@ class EATSTopicMap (TopicMap):
         # enforced at the TMAPI level. There seems little need to raise an
         # error here if there is more than one.
         return topic.get_names(self.admin_name_type)[0]
+
+    def get_assertion (self, entity, assertion_id):
+        """Returns the assertion with identifier `assertion_id` and
+        associated with `entity`, or None.
+
+        :param entity: the entity carrying the assertion
+        :type entity: `Entity`
+        :param assertion_id: the assertion's identifier
+        :type assertion_id: string
+        :rtype: `PropertyAssertion`
+
+        """
+        # Note that this is only returning assertions that are
+        # implemented as TMAPI Associations.
+        assertion = None
+        construct = self.get_construct_by_id(assertion_id)
+        if construct is not None and isinstance(construct, Association):
+            association_type = construct.get_type()
+            if association_type == self.entity_relationship_assertion_type:
+                assertion_class = EntityRelationshipPropertyAssertion
+            elif association_type == self.entity_type_assertion_type:
+                assertion_class = EntityTypePropertyAssertion
+            elif association_type == self.existence_assertion_type:
+                assertion_class = ExistencePropertyAssertion
+            elif association_type == self.name_assertion_type:
+                assertion_class = NamePropertyAssertion
+            else:
+                assertion_class = None
+            if assertion_class is not None:
+                assertion = assertion_class.objects.get(pk=construct.id)
+                # Check that this assertion is associated with the entity.
+                if assertion.entity != entity:
+                    assertion = None
+        return assertion
     
     def get_authorities (self):
         """Returns the authorities in this topic map.
@@ -327,6 +388,21 @@ class EATSTopicMap (TopicMap):
     def note_occurrence_type (self):
         return self._create_cached_topic('_note_occurrence_type',
                                          NOTE_OCCURRENCE_TYPE_IRI)
+
+    @property
+    def point_date_type (self):
+        return self._create_cached_topic('_point_date_type',
+                                         POINT_DATE_TYPE_IRI)
+
+    @property
+    def point_taq_date_type (self):
+        return self._create_cached_topic('_point_taq_date_type',
+                                         POINT_TAQ_DATE_TYPE_IRI)
+
+    @property
+    def point_tpq_date_type (self):
+        return self._create_cached_topic('_point_tpq_date_type',
+                                         POINT_TPQ_DATE_TYPE_IRI)
     
     @property
     def property_role_type (self):
@@ -361,6 +437,21 @@ class EATSTopicMap (TopicMap):
 
         """
         return self.get_topics_by_type(SCRIPT_TYPE_IRI)
+
+    @property
+    def start_date_type (self):
+        return self._create_cached_topic('_start_date_type',
+                                         START_DATE_TYPE_IRI)
+
+    @property
+    def start_taq_date_type (self):
+        return self._create_cached_topic('_start_taq_date_type',
+                                         START_TAQ_DATE_TYPE_IRI)
+
+    @property
+    def start_tpq_date_type (self):
+        return self._create_cached_topic('_start_tpq_date_type',
+                                         START_TPQ_DATE_TYPE_IRI)
     
     def topic_exists (self, type_iri, name, topic_id):
         """Returns True if this topic map contains a topic with the
