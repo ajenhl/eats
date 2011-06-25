@@ -1,7 +1,7 @@
-from tmapi.models import Occurrence
+from tmapi.models import Name
 
 
-class DatePart (Occurrence):
+class DatePart (Name):
 
     class Meta:
         proxy = True

@@ -38,24 +38,24 @@ class Date (Topic):
 
     def create_date_parts (self):
         """Creates date parts for this date."""
-        self._start_tpq = self.create_occurrence(
-            self.eats_topic_map.start_tpq_date_type, '', proxy=DatePart)
-        self._start = self.create_occurrence(
-            self.eats_topic_map.start_date_type, '', proxy=DatePart)
-        self._start_taq = self.create_occurrence(
-            self.eats_topic_map.start_taq_date_type, '', proxy=DatePart)
-        self._point_tpq = self.create_occurrence(
-            self.eats_topic_map.point_tpq_date_type, '', proxy=DatePart)
-        self._point = self.create_occurrence(
-            self.eats_topic_map.point_date_type, '', proxy=DatePart)
-        self._point_taq = self.create_occurrence(
-            self.eats_topic_map.point_taq_date_type, '', proxy=DatePart)
-        self._end_tpq = self.create_occurrence(
-            self.eats_topic_map.end_tpq_date_type, '', proxy=DatePart)
-        self._end = self.create_occurrence(
-            self.eats_topic_map.end_date_type, '', proxy=DatePart)
-        self._end_taq = self.create_occurrence(
-            self.eats_topic_map.end_taq_date_type, '', proxy=DatePart)
+        self._start_tpq = self.create_name(
+            '', self.eats_topic_map.start_tpq_date_type, proxy=DatePart)
+        self._start = self.create_name('', self.eats_topic_map.start_date_type,
+                                       proxy=DatePart)
+        self._start_taq = self.create_name(
+            '', self.eats_topic_map.start_taq_date_type, proxy=DatePart)
+        self._point_tpq = self.create_name(
+            '', self.eats_topic_map.point_tpq_date_type, proxy=DatePart)
+        self._point = self.create_name('', self.eats_topic_map.point_date_type,
+                                       proxy=DatePart)
+        self._point_taq = self.create_name(
+            '', self.eats_topic_map.point_taq_date_type, proxy=DatePart)
+        self._end_tpq = self.create_name(
+            '', self.eats_topic_map.end_tpq_date_type, proxy=DatePart)
+        self._end = self.create_name('', self.eats_topic_map.end_date_type,
+                                     proxy=DatePart)
+        self._end_taq = self.create_name(
+            '', self.eats_topic_map.end_taq_date_type, proxy=DatePart)
 
     @property
     def eats_topic_map (self):
