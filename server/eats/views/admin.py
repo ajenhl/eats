@@ -10,7 +10,7 @@ from tmapi.exceptions import TopicMapExistsException
 from tmapi.models import TopicMap, TopicMapSystemFactory
 
 from eats.decorators import add_topic_map
-from eats.forms.admin import AuthorityForm, EntityRelationshipForm, EntityTypeForm, LanguageForm, NameTypeForm, ScriptForm
+from eats.forms.admin import AuthorityForm, CalendarForm, DatePeriodForm, DateTypeForm, EntityRelationshipForm, EntityTypeForm, LanguageForm, NameTypeForm, ScriptForm
 
 
 def administration_panel (request):
@@ -106,6 +106,12 @@ def get_form_class (name):
     """
     if name == 'authority':
         form_class = AuthorityForm
+    elif name == 'calendar':
+        form_class = CalendarForm
+    elif name == 'date-period':
+        form_class = DatePeriodForm
+    elif name == 'date-type':
+        form_class = DateTypeForm
     elif name == 'language':
         form_class = LanguageForm
     elif name == 'script':

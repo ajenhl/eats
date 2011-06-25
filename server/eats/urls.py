@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import patterns, url
 
-from eats.constants import AUTHORITY_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_TYPE_TYPE_IRI, SCRIPT_TYPE_IRI
+from eats.constants import AUTHORITY_TYPE_IRI, CALENDAR_TYPE_IRI, DATE_PERIOD_TYPE_IRI, DATE_TYPE_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_TYPE_TYPE_IRI, SCRIPT_TYPE_IRI
 
 
 # Displaying.
@@ -15,10 +15,16 @@ urlpatterns += patterns(
     url(r'^edit/entity/add/$', 'entity_add', name='entity-add'),
     url(r'^edit/entity/(?P<entity_id>\d+)/$', 'entity_change',
         name='entity-change'),
+    url(r'^edit/entity/(?P<entity_id>\d+)/(?P<assertion_id>\d+)/date/add/$',
+        'date_add', name='date-add'),
+    url(r'^edit/entity/(?P<entity_id>\d+)/(?P<assertion_id>\d+)/date/(?P<date_id>\d+)/$', 'date_change', name='date-change'),
     )
 
 topic_data = {
     'authority': {'type_iri': AUTHORITY_TYPE_IRI, 'name': 'authority'},
+    'calendar': {'type_iri': CALENDAR_TYPE_IRI, 'name': 'calendar'},
+    'date_period': {'type_iri': DATE_PERIOD_TYPE_IRI, 'name': 'date-period'},
+    'date_type': {'type_iri': DATE_TYPE_TYPE_IRI, 'name': 'date-type'},
     'entity_relationship_type': {'type_iri': ENTITY_RELATIONSHIP_TYPE_TYPE_IRI,
                                  'name': 'entity-relationship-type'},
     'entity_type': {'type_iri': ENTITY_TYPE_TYPE_IRI, 'name': 'entity-type'},
@@ -39,6 +45,24 @@ urlpatterns += patterns(
         name='authority-add'),
     url(r'^administer/authority/(?P<topic_id>\d+)/$', 'topic_change',
         topic_data['authority'], name='authority-change'),
+    url(r'^administer/calendar/$', 'topic_list', topic_data['calendar'],
+        name='calendar-list'),
+    url(r'^administer/calendar/add/$', 'topic_add', topic_data['calendar'],
+        name='calendar-add'),
+    url(r'^administer/calendar/(?P<topic_id>\d+)/$', 'topic_change',
+        topic_data['calendar'], name='calendar-change'),
+    url(r'^administer/date-period/$', 'topic_list', topic_data['date_period'],
+        name='date-period-list'),
+    url(r'^administer/date-period/add/$', 'topic_add',
+        topic_data['date_period'], name='date-period-add'),
+    url(r'^administer/date-period/(?P<topic_id>\d+)/$', 'topic_change',
+        topic_data['date_period'], name='date-period-change'),
+    url(r'^administer/date-type/$', 'topic_list', topic_data['date_type'],
+        name='date-type-list'),
+    url(r'^administer/date-type/add/$', 'topic_add', topic_data['date_type'],
+        name='date-type-add'),
+    url(r'^administer/date-type/(?P<topic_id>\d+)/$', 'topic_change',
+        topic_data['date_type'], name='date-type-change'),
     url(r'^administer/entity-relationship-type/$', 'topic_list',
         topic_data['entity_relationship_type'],
         name='entity-relationship-type-list'),

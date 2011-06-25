@@ -5,6 +5,11 @@ TMAPI application.
 
 """
 
+from calendar import Calendar
+from date import Date
+from date_part import DatePart
+from date_period import DatePeriod
+from date_type import DateType
 from eats_topic_map import EATSTopicMap
 from entity import Entity
 from entity_relationship_property_assertion import EntityRelationshipPropertyAssertion

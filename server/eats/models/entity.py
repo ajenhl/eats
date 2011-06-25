@@ -35,9 +35,9 @@ class Entity (Topic):
         if domain_entity != self and range_entity != self:
             raise Exception('An entity relationship property assertion created for an entity must include that entity as one of the related entities')
         assertion = self.eats_topic_map.create_association(
-            relationship_type, scope=[authority],
-            proxy=EntityRelationshipPropertyAssertion)
-        assertion.set_players(domain_entity, range_entity)
+            self.eats_topic_map.entity_relationship_assertion_type,
+            scope=[authority], proxy=EntityRelationshipPropertyAssertion)
+        assertion.set_players(domain_entity, range_entity, relationship_type)
         return assertion
         
     def create_entity_type_property_assertion (self, authority, entity_type):

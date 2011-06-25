@@ -6,7 +6,7 @@ import selectable.forms as selectable
 from eats.constants import FORWARD_RELATIONSHIP_MARKER, \
     REVERSE_RELATIONSHIP_MARKER
 from eats.lookups import EntityLookup
-from eats.models import EntityRelationshipPropertyAssertion, EntityTypePropertyAssertion, ExistencePropertyAssertion, NamePropertyAssertion, NotePropertyAssertion
+from eats.models import Calendar, DatePeriod, DateType, EntityRelationshipPropertyAssertion, EntityTypePropertyAssertion, ExistencePropertyAssertion, NamePropertyAssertion, NotePropertyAssertion
 
 
 class PropertyAssertionFormSet (BaseFormSet):
@@ -280,6 +280,129 @@ class NoteForm (PropertyAssertionForm):
         else:
             # Update an existing assertion.
             assertion.update(authority, note)
+
+
+class DateForm (forms.Form):
+
+    date_period = forms.ChoiceField(choices=[])
+    start = forms.CharField(label='Date', required=False)
+    start_calendar = forms.ChoiceField(choices=[], label='Calendar',
+                                       required=False)
+    start_normalised = forms.CharField(label='Normalised value', required=False)
+    start_type = forms.ChoiceField(choices=[], label='Type', required=False)
+    start_certainty = forms.BooleanField(label='Certain', required=False)
+    start_tpq = forms.CharField(label='Date', required=False)
+    start_tpq_calendar = forms.ChoiceField(choices=[], label='Calendar',
+                                           required=False)
+    start_tpq_normalised = forms.CharField(label='Normalised value',
+                                           required=False)
+    start_tpq_type = forms.ChoiceField(choices=[], label='Type', required=False)
+    start_tpq_certainty = forms.BooleanField(label='Certain', required=False)
+    start_taq = forms.CharField(label='Date', required=False)
+    start_taq_calendar = forms.ChoiceField(choices=[], label='Calendar',
+                                           required=False)
+    start__taq_normalised = forms.CharField(label='Normalised value',
+                                            required=False)
+    start_taq_type = forms.ChoiceField(choices=[], label='Type', required=False)
+    start_taq_certainty = forms.BooleanField(label='Certain', required=False)
+    end = forms.CharField(label='Date', required=False)
+    end_calendar = forms.ChoiceField(choices=[], label='Calendar',
+                                     required=False)
+    end_normalised = forms.CharField(label='Normalised value', required=False)
+    end_type = forms.ChoiceField(choices=[], label='Type', required=False)
+    end_certainty = forms.BooleanField(label='Certain', required=False)
+    end_tpq = forms.CharField(label='Date', required=False)
+    end_tpq_calendar = forms.ChoiceField(choices=[], label='Calendar',
+                                         required=False)
+    end_tpq_normalised = forms.CharField(label='Normalised value',
+                                         required=False)
+    end_tpq_type = forms.ChoiceField(choices=[], label='Type', required=False)
+    end_tpq_certainty = forms.BooleanField(label='Certain', required=False)
+    end_taq = forms.CharField(label='Date', required=False)
+    end_taq_calendar = forms.ChoiceField(choices=[], label='Calendar',
+                                         required=False)
+    end_taq_normalised = forms.CharField(label='Normalised value',
+                                         required=False)
+    end_taq_type = forms.ChoiceField(choices=[], label='Type', required=False)
+    end_taq_certainty = forms.BooleanField(label='Certain', required=False)
+    point = forms.CharField(label='Date', required=False)
+    point_calendar = forms.ChoiceField(choices=[], label='Calendar',
+                                       required=False)
+    point_normalised = forms.CharField(label='Normalised value', required=False)
+    point_type = forms.ChoiceField(choices=[], label='Type', required=False)
+    point_certainty = forms.BooleanField(label='Certain', required=False)
+    point_tpq = forms.CharField(label='Date', required=False)
+    point_tpq_calendar = forms.ChoiceField(choices=[], label='Calendar',
+                                           required=False)
+    point_tpq__normalised = forms.CharField(label='Normalised value',
+                                            required=False)
+    point_tpq_type = forms.ChoiceField(choices=[], label='Type', required=False)
+    point_tpq_certainty = forms.BooleanField(label='Certain', required=False)
+    point_taq = forms.CharField(label='Date', required=False)
+    point_taq_calendar = forms.ChoiceField(choices=[], label='Calendar',
+                                           required=False)
+    point_taq_normalised = forms.CharField(label='Normalised value',
+                                           required=False)
+    point_taq_type = forms.ChoiceField(choices=[], label='Type', required=False)
+    point_taq_certainty = forms.BooleanField(label='Certain', required=False)
+
+    def __init__ (self, *args, **kwargs):
+        calendar_choices = kwargs.pop('calendar_choices')
+        date_period_choices = kwargs.pop('date_period_choices')
+        date_type_choices = kwargs.pop('date_type_choices')
+        super(DateForm, self).__init__(*args, **kwargs)
+        self.fields['date_period'].choices = date_period_choices
+        self.fields['start_calendar'].choices = calendar_choices
+        self.fields['start_taq_calendar'].choices = calendar_choices
+        self.fields['start_tpq_calendar'].choices = calendar_choices
+        self.fields['end_calendar'].choices = calendar_choices
+        self.fields['end_taq_calendar'].choices = calendar_choices
+        self.fields['end_tpq_calendar'].choices = calendar_choices
+        self.fields['point_calendar'].choices = calendar_choices
+        self.fields['point_taq_calendar'].choices = calendar_choices
+        self.fields['point_tpq_calendar'].choices = calendar_choices
+        self.fields['start_type'].choices = date_type_choices
+        self.fields['start_taq_type'].choices = date_type_choices
+        self.fields['start_tpq_type'].choices = date_type_choices
+        self.fields['end_type'].choices = date_type_choices
+        self.fields['end_taq_type'].choices = date_type_choices
+        self.fields['end_tpq_type'].choices = date_type_choices
+        self.fields['point_type'].choices = date_type_choices
+        self.fields['point_taq_type'].choices = date_type_choices
+        self.fields['point_tpq_type'].choices = date_type_choices
+
+    def _objectify_data (self, base_data):
+        data = {}
+        data['date_period'] = DatePeriod.objects.get_by_identifier(
+            base_data['date_period'])
+        for prefix in ('start', 'start_taq', 'start_tpq', 'end', 'end_taq',
+                       'end_tpq', 'point', 'point_taq', 'point_tpq'):
+            data[prefix] = base_data.get(prefix)
+            data[prefix + '_normalised'] = base_data.get(prefix + '_normalised')
+            calendar_attr = prefix + '_calendar'
+            calendar_id = base_data.get(calendar_attr)
+            if calendar_id:
+                data[calendar_attr] = Calendar.objects.get_by_identifier(
+                    calendar_id)
+            type_attr = prefix + '_type'
+            date_type_id = base_data.get(type_attr)
+            if date_type_id:
+                data[type_attr] = DateType.objects.get_by_identifier(
+                    date_type_id)
+
+        return data
+        
+    def save (self, assertion, date=None):
+        data = self._objectify_data(self.cleaned_data)
+        print data
+        raise Exception
+        if date is None:
+            # Create a new date.
+            date = assertion.create_date(data)
+        else:
+            # Update an existing date.
+            pass
+        return date.get_id()
 
         
 ExistenceFormSet = formset_factory(ExistenceForm, can_delete=True,

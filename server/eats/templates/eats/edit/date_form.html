@@ -1,0 +1,190 @@
+{{ form.non_field_errors }}
+
+<fieldset>
+  <div class="form-row">
+    {{ form.date_period.label_tag }} {{ form.date_period }} {{ form.date_period.errors }}
+  </div>
+</fieldset>
+
+<fieldset>
+  <h2>Start date</h2>
+
+  <table>
+    <tr>
+      <th rowspan="2">Point</th>
+      <th colspan="2">Bounded</th>
+    </tr>
+    <tr>
+      <th>Terminus post quem</th>
+      <th>Terminus ante quem</th>
+    </tr>
+    <tr>
+      <td>
+        <div class="form-row">
+          {{ form.start_calendar.label_tag }} {{ form.start_calendar }} {{ form.start_calendar.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.start.label_tag }} {{ form.start }} {{ form.start.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.start_type.label_tag }} {{ form.start_type }} {{ form.start_type.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.start_certainty.label_tag }} {{ form.start_certainty }} {{ form.start_date_certainty.errors }}
+        </div>
+      </td>
+      <td>
+        <div class="form-row">
+          {{ form.start_tpq_calendar.label_tag }} {{ form.start_tpq_calendar }} {{ form.start_tpq_calendar.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.start_tpq.label_tag }} {{ form.start_tpq }} {{ form.start_tpq.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.start_tpq_type.label_tag }} {{ form.start_tpq_type }} {{ form.start_tpq_type.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.start_tpq_certainty.label_tag }} {{ form.start_tpq_certainty }} {{ form.start_tpq_certainty.errors }}
+        </div>
+      </td>
+      <td>
+        <div class="form-row">
+          {{ form.start_taq_calendar.label_tag }} {{ form.start_taq_calendar }} {{ form.start_taq_calendar.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.start_taq.label_tag }} {{ form.start_taq }} {{ form.start_taq.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.start_taq_type.label_tag }} {{ form.start_taq_type }} {{ form.start_taq_type.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.start_taq_certainty.label_tag }} {{ form.start_taq_certainty }} {{ form.start_taq_certainty.errors }}
+        </div>
+      </td>
+    </tr>
+  </table>
+</fieldset>
+
+<fieldset>
+  <h2>End date</h2>
+  
+  <table>
+    <tr>
+      <th rowspan="2">Point</th>
+      <th colspan="2">Bounded</th>
+    </tr>
+    <tr>
+      <th>Terminus post quem</th>
+      <th>Terminus ante quem</th>
+    </tr>
+    <tr>
+      <td>
+        <div class="form-row">
+          {{ form.end_calendar.label_tag }} {{ form.end_calendar }} {{ form.end_calendar.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.end.label_tag }} {{ form.end }} {{ form.end.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.end_type.label_tag }} {{ form.end_type }} {{ form.end_type.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.end_certainty.label_tag }} {{ form.end_certainty }} {{ form.end_certainty.errors }}
+        </div>
+      </td>
+      <td>
+        <div class="form-row">
+          {{ form.end_tpq_calendar.label_tag }} {{ form.end_tpq_calendar }} {{ form.end_tpq_calendar.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.end_tpq.label_tag }} {{ form.end_tpq }} {{ form.end_tpq.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.end_tpq_type.label_tag }} {{ form.end_tpq_type }} {{ form.end_tpq_type.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.end_tpq_certainty.label_tag }} {{ form.end_tpq_certainty }} {{ form.end_tpq_certainty.errors }}
+        </div>
+      </td>
+      <td>
+        <div class="form-row">
+          {{ form.end_taq_calendar.label_tag }} {{ form.end_taq_calendar }} {{ form.end_taq_calendar.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.end_taq.label_tag }} {{ form.end_taq }} {{ form.end_taq.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.end_taq_type.label_tag }} {{ form.end_taq_type }} {{ form.end_taq_type.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.end_taq_certainty.label_tag }} {{ form.end_taq_certainty }} {{ form.end_taq_certainty.errors }}
+        </div>
+      </td>
+    </tr>
+  </table>
+</fieldset>
+
+<fieldset>
+  <h2>Date</h2>
+  
+  <table>
+    <tr>
+      <th rowspan="2">Point</th>
+      <th colspan="2">Bounded</th>
+    </tr>
+    <tr>
+      <th>Terminus post quem</th>
+      <th>Terminus ante quem</th>
+    </tr>
+    <tr>
+      <td>
+        <div class="form-row">
+          {{ form.point_calendar.label_tag }} {{ form.point_calendar }} {{ form.point_calendar.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.point.label_tag }} {{ form.point }} {{ form.point.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.point_type.label_tag }} {{ form.point_type }} {{ form.point_type.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.point_certainty.label_tag }} {{ form.point_certainty }} {{ form.point_certainty.errors }}
+        </div>
+      </td>
+      <td>
+        <div class="form-row">
+          {{ form.point_tpq_calendar.label_tag }} {{ form.point_tpq_calendar }} {{ form.point_tpq_calendar.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.point_tpq.label_tag }} {{ form.point_tpq }} {{ form.point_tpq.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.point_tpq_type.label_tag }} {{ form.point_tpq_type }} {{ form.point_tpq_type.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.point_tpq_certainty.label_tag }} {{ form.point_tpq_certainty }} {{ form.point_tpq_certainty.errors }}
+        </div>
+      </td>
+      <td>
+        <div class="form-row">
+          {{ form.point_taq_calendar.label_tag }} {{ form.point_taq_calendar }} {{ form.point_taq_calendar.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.point_taq.label_tag }} {{ form.point_taq }} {{ form.point_taq.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.point_taq_type.label_tag }} {{ form.point_taq_type }} {{ form.point_taq_type.errors }}
+        </div>
+        <div class="form-row">
+          {{ form.point_taq_certainty.label_tag }} {{ form.point_taq_certainty }} {{ form.point_taq_certainty.errors }}
+        </div>
+      </td>
+    </tr>
+  </table>
+</fieldset>
+
+<fieldset>
+  <div class="form-row">
+    {{ form.note.label_tag }} {{ form.note }} {{ form.note.errors }}
+  </div>
+</fieldset>

@@ -6,7 +6,7 @@ from django.template import RequestContext
 from eats.lib.property_assertions import EntityRelationshipPropertyAssertions, EntityTypePropertyAssertions, ExistencePropertyAssertions, NamePropertyAssertions, NotePropertyAssertions
 from eats.constants import AUTHORITY_TYPE_IRI
 from eats.decorators import add_topic_map
-from eats.forms.edit import CreateEntityForm, create_choice_list
+from eats.forms.edit import CreateEntityForm, create_choice_list, DateForm
 
 
 @add_topic_map
@@ -90,3 +90,43 @@ def entity_change (request, topic_map, entity_id):
     return render_to_response('eats/edit/entity_change.html', context_data,
                               context_instance=RequestContext(request))
 
+@add_topic_map
+def date_add (request, topic_map, entity_id, assertion_id):
+    entity = topic_map.get_entity(entity_id)
+    if entity is None:
+        raise Http404
+    assertion = topic_map.get_assertion(entity, assertion_id)
+    if assertion is None:
+        raise Http404
+    calendar_choices = create_choice_list(topic_map, topic_map.get_calendars())
+    date_period_choices = create_choice_list(topic_map,
+                                             topic_map.get_date_periods())
+    date_type_choices = create_choice_list(topic_map,
+                                           topic_map.get_date_types())
+    if request.method == 'POST':
+        form = DateForm(request.POST, calendar_choices=calendar_choices,
+                        date_period_choices=date_period_choices,
+                        date_type_choices=date_type_choices)
+        if form.is_valid():
+            date_id = form.save(assertion)
+            redirect_ids = {'assertion_id': assertion_id, 'date_id': date_id,
+                            'entity_id': entity_id}
+            redirect_url = reverse('date-change', kwargs=redirect_ids)
+            return HttpResponseRedirect(redirect_url)
+    else:
+        form = DateForm(calendar_choices=calendar_choices,
+                        date_period_choices=date_period_choices,
+                        date_type_choices=date_type_choices)
+    context_data = {'form': form}
+    return render_to_response('eats/edit/date_add.html', context_data,
+                              context_instance=RequestContext(request))
+
+@add_topic_map
+def date_change (request, topic_map, entity_id, assertion_id, date_id):
+    entity = topic_map.get_entity(entity_id)
+    if entity is None:
+        raise Http404
+    assertion = topic_map.get_assertion(entity, assertion_id)
+    if assertion is None:
+        raise Http404
+    date = ''

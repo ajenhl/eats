@@ -35,6 +35,7 @@ return $( "<li></li>" )
         <tr>
           <th scope="col">Delete?</th>
           <th scope="col">Authority</th>
+          <th scope="col">Dates</th>
           <th></th>
         </tr>
       </thead>
@@ -43,6 +44,9 @@ return $( "<li></li>" )
         <tr>
           <td>{% if form.initial or form.is_bound %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
           <td>{{ form.authority }}</td>
+          <td>{% if form.assertion.value %}
+
+          <p><a href="{{ form.assertion.value }}/date/add/">Add a date</a></p>{% endif %}</td>
           <td class="errors">{% if form.errors %}<ul>
           {% for error in form.errors.values %}
           <li>{{ error }}</li>

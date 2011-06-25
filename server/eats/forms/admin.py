@@ -1,6 +1,6 @@
 from django import forms
 
-from eats.constants import AUTHORITY_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_TYPE_TYPE_IRI, SCRIPT_TYPE_IRI
+from eats.constants import AUTHORITY_TYPE_IRI, CALENDAR_TYPE_IRI, DATE_PERIOD_TYPE_IRI, DATE_TYPE_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_TYPE_TYPE_IRI, SCRIPT_TYPE_IRI
 
 
 class AdminForm (forms.Form):
@@ -28,6 +28,38 @@ class AuthorityForm (AdminForm):
         if self.topic_map.topic_exists(AUTHORITY_TYPE_IRI, name, self.topic_id):
             raise forms.ValidationError(
                 'The name of the authority must be unique')
+        return name
+
+
+class CalendarForm (AdminForm):
+
+    def clean_name (self):
+        name = self.cleaned_data['name']
+        if self.topic_map.topic_exists(CALENDAR_TYPE_IRI, name, self.topic_id):
+            raise forms.ValidationError(
+                'The name of the calendar must be unique')
+        return name
+
+
+class DatePeriodForm (AdminForm):
+
+    def clean_name (self):
+        name = self.cleaned_data['name']
+        if self.topic_map.topic_exists(DATE_PERIOD_TYPE_IRI, name,
+                                       self.topic_id):
+            raise forms.ValidationError(
+                'The name of the date period must be unique')
+        return name
+
+
+class DateTypeForm (AdminForm):
+
+    def clean_name (self):
+        name = self.cleaned_data['name']
+        if self.topic_map.topic_exists(DATE_TYPE_TYPE_IRI, name,
+                                       self.topic_id):
+            raise forms.ValidationError(
+                'The name of the date type must be unique')
         return name
 
 

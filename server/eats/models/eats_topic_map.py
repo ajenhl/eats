@@ -5,7 +5,7 @@ from django.db.models import Q
 from tmapi.indices import TypeInstanceIndex
 from tmapi.models import Association, Locator, Topic, TopicMap
 
-from eats.constants import ADMIN_NAME_TYPE_IRI, AUTHORITY_TYPE_IRI, CALENDAR_TYPE_IRI, DATE_ROLE_TYPE_IRI, DOMAIN_ENTITY_ROLE_TYPE_IRI, END_DATE_TYPE_IRI, END_TAQ_DATE_TYPE_IRI, END_TPQ_DATE_TYPE_IRI, ENTITY_RELATIONSHIP_ASSERTION_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_ROLE_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_ROLE_TYPE_IRI, ENTITY_TYPE_IRI, ENTITY_TYPE_ASSERTION_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, EXISTENCE_IRI, EXISTENCE_ASSERTION_TYPE_IRI, IS_IN_LANGUAGE_TYPE_IRI, IS_IN_SCRIPT_TYPE_IRI, LANGUAGE_CODE_TYPE_IRI, LANGUAGE_ROLE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_ASSERTION_TYPE_IRI, NAME_ROLE_TYPE_IRI, NAME_TYPE_TYPE_IRI, NOTE_OCCURRENCE_TYPE_IRI, POINT_DATE_TYPE_IRI, POINT_TAQ_DATE_TYPE_IRI, POINT_TPQ_DATE_TYPE_IRI, PROPERTY_ROLE_TYPE_IRI, RANGE_ENTITY_ROLE_TYPE_IRI, RELATIONSHIP_NAME_TYPE_IRI, REVERSE_RELATIONSHIP_NAME_TYPE_IRI, SCRIPT_CODE_TYPE_IRI, SCRIPT_ROLE_TYPE_IRI, SCRIPT_TYPE_IRI, START_DATE_TYPE_IRI, START_TAQ_DATE_TYPE_IRI, START_TPQ_DATE_TYPE_IRI
+from eats.constants import ADMIN_NAME_TYPE_IRI, AUTHORITY_TYPE_IRI, CALENDAR_TYPE_IRI, DATE_CERTAINTY_TYPE_IRI, DATE_FULL_CERTAINTY_IRI, DATE_NO_CERTAINTY_IRI, DATE_PERIOD_TYPE_IRI, DATE_ROLE_TYPE_IRI, DATE_TYPE_TYPE_IRI, DOMAIN_ENTITY_ROLE_TYPE_IRI, END_DATE_TYPE_IRI, END_TAQ_DATE_TYPE_IRI, END_TPQ_DATE_TYPE_IRI, ENTITY_RELATIONSHIP_ASSERTION_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_ROLE_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_ROLE_TYPE_IRI, ENTITY_TYPE_IRI, ENTITY_TYPE_ASSERTION_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, EXISTENCE_IRI, EXISTENCE_ASSERTION_TYPE_IRI, IS_IN_LANGUAGE_TYPE_IRI, IS_IN_SCRIPT_TYPE_IRI, LANGUAGE_CODE_TYPE_IRI, LANGUAGE_ROLE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_ASSERTION_TYPE_IRI, NAME_ROLE_TYPE_IRI, NAME_TYPE_TYPE_IRI, NOTE_OCCURRENCE_TYPE_IRI, POINT_DATE_TYPE_IRI, POINT_TAQ_DATE_TYPE_IRI, POINT_TPQ_DATE_TYPE_IRI, PROPERTY_ROLE_TYPE_IRI, RANGE_ENTITY_ROLE_TYPE_IRI, RELATIONSHIP_NAME_TYPE_IRI, REVERSE_RELATIONSHIP_NAME_TYPE_IRI, SCRIPT_CODE_TYPE_IRI, SCRIPT_ROLE_TYPE_IRI, SCRIPT_TYPE_IRI, START_DATE_TYPE_IRI, START_TAQ_DATE_TYPE_IRI, START_TPQ_DATE_TYPE_IRI
 from entity import Entity
 from entity_relationship_property_assertion import EntityRelationshipPropertyAssertion
 from entity_type_property_assertion import EntityTypePropertyAssertion
@@ -113,8 +113,40 @@ class EATSTopicMap (TopicMap):
         return topic
 
     @property
+    def date_certainty_type (self):
+        return self._create_cached_topic('_date_certainty_type',
+                                         DATE_CERTAINTY_TYPE_IRI)
+    
+    @property
+    def date_full_certainty (self):
+        if not hasattr(self, '_date_full_certainty'):
+            self._date_full_certainty = self.create_typed_topic(
+                DATE_CERTAINTY_TYPE_IRI)
+            self._date_full_certainty.add_subject_identifier(Locator(
+                    DATE_FULL_CERTAINTY_IRI))
+        return self._date_full_certainty
+
+    @property
+    def date_no_certainty (self):
+        if not hasattr(self, '_date_no_certainty'):
+            self._date_no_certainty = self.create_typed_topic(
+                DATE_CERTAINTY_TYPE_IRI)
+            self._date_no_certainty.add_subject_identifier(Locator(
+                    DATE_NO_CERTAINTY_IRI))
+        return self._date_no_certainty
+    
+    @property
+    def date_period_type (self):
+        return self._create_cached_topic('_date_period_type',
+                                         DATE_PERIOD_TYPE_IRI)
+
+    @property
     def date_role_type (self):
         return self._create_cached_topic('_date_role_type', DATE_ROLE_TYPE_IRI)
+
+    @property
+    def date_type_type (self):
+        return self._create_cached_topic('_date_type_type', DATE_TYPE_TYPE_IRI)
     
     @property
     def domain_entity_role_type (self):
@@ -227,6 +259,8 @@ class EATSTopicMap (TopicMap):
                 assertion = assertion_class.objects.get(pk=construct.id)
                 # Check that this assertion is associated with the entity.
                 if assertion.entity != entity:
+                    print entity.id
+                    print assertion.entity.id
                     assertion = None
         return assertion
     
@@ -237,6 +271,30 @@ class EATSTopicMap (TopicMap):
 
         """
         return self.get_topics_by_type(AUTHORITY_TYPE_IRI)
+
+    def get_calendars (self):
+        """Returns the calendars in this topic map.
+
+        :rtype: `QuerySet` of `Topic`s
+
+        """
+        return self.get_topics_by_type(CALENDAR_TYPE_IRI)
+
+    def get_date_periods (self):
+        """Returns the date periods in this topic map.
+
+        :rtype: `QuerySet` of `Topic`s
+
+        """
+        return self.get_topics_by_type(DATE_PERIOD_TYPE_IRI)
+
+    def get_date_types (self):
+        """Returns the date types in this topic map.
+
+        :rtype: `QuerySet` of `Topic`s
+
+        """
+        return self.get_topics_by_type(DATE_TYPE_TYPE_IRI)
 
     def get_entity (self, entity_id):
         """Returns the entity with identifier `entity_id`.
