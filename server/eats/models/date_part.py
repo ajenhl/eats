@@ -102,8 +102,7 @@ class DatePart (Occurrence):
     def eats_topic_map (self):
         if not hasattr(self, '_eats_topic_map'):
             from eats_topic_map import EATSTopicMap
-            topic_map = self.get_topic_map()
-            self._eats_topic_map = EATSTopicMap.objects.get(pk=topic_map.id)
+            self._eats_topic_map = self.get_topic_map(proxy=EATSTopicMap)
         return self._eats_topic_map
         
     @property

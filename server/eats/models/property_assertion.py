@@ -45,13 +45,10 @@ class PropertyAssertion (object):
         
     @property
     def eats_topic_map (self):
-        value = getattr(self, '_eats_topic_map', None)
-        if value is None:
+        if not hasattr(self, '_eats_topic_map'):
             from eats_topic_map import EATSTopicMap
-            topic_map = self.get_parent()
-            value = EATSTopicMap.objects.get(pk=topic_map.id)
-            setattr(self, '_eats_topic_map', value)
-        return value
+            self._eats_topic_map = self.get_topic_map(proxy=EATSTopicMap)
+        return self._eats_topic_map
         
     @property
     def entity (self):
