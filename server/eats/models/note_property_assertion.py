@@ -10,6 +10,11 @@ class NotePropertyAssertion (Occurrence, PropertyAssertion):
         app_label = 'eats'
 
     @property
+    def entity (self):
+        """Returns the entity making this property assertion."""
+        return self.get_parent()
+        
+    @property
     def note (self):
         """Returns the textual content of the asserted note."""
         return self.get_value()
