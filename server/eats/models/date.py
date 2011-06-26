@@ -13,11 +13,34 @@ class Date (Topic):
     @property
     def assembled_form (self):
         """Returns the string form of the date, composed from its parts."""
-        parts = []
-        form = ''
-        if not parts:
-            form = '[unspecified date]'
-        return form
+        form = '[unspecified date]'
+        point = self.point.assembled_form
+        point_taq = self.point_taq.assembled_form
+        point_tpq = self.point_tpq.assembled_form
+        if point or point_taq or point_tpq:
+            form = self._assemble_segment(point, point_tpq, point_taq)
+        else:
+            start = self.start.assembled_form
+            start_taq = self.start_taq.assembled_form
+            start_tpq = self.start_tpq.assembled_form
+            start_date = self._assemble_segment(start, start_tpq, start_taq)
+            end = self.end.assembled_form
+            end_taq = self.end_taq.assembled_form
+            end_tpq = self.end_tpq.assembled_form
+            end_date = self._assemble_segment(end, end_tpq, end_taq)
+            if start_date or end_date:
+                form = u'%s \N{EN DASH} %s' % (start_date, end_date)
+        return form.strip()
+
+    def _assemble_segment (self, date, tpq, taq):
+        if not date:
+            if tpq:
+                date = tpq
+                if taq:
+                    date = '%s and ' % date
+            if taq:
+                date = '%s%s' % (date, taq)
+        return date
 
     def _cache_date_part (self, attr, part_type):
         """Returns the `DatePart` with the type `part_type`, caching the

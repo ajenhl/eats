@@ -8,6 +8,22 @@ class DatePart (Name):
         app_label = 'eats'
 
     @property
+    def assembled_form (self):
+        form = self.get_value()
+        if self.certainty == self.eats_topic_map.date_no_certainty:
+            form = form + '?'
+        if form:
+            if self.get_type() in (self.eats_topic_map.point_tpq_date_type,
+                                   self.eats_topic_map.start_tpq_date_type,
+                                   self.eats_topic_map.end_tpq_date_type):
+                form = 'at or after ' + form
+            elif self.get_type() in (self.eats_topic_map.point_taq_date_type,
+                                     self.eats_topic_map.start_taq_date_type,
+                                     self.eats_topic_map.end_taq_date_type):
+                form = 'at or before ' + form
+        return form
+
+    @property
     def calendar (self):
         """Returns the calendar for this date part, or None if no
         calendar is set.
