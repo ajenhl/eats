@@ -120,19 +120,17 @@ class EATSTopicMap (TopicMap):
     @property
     def date_full_certainty (self):
         if not hasattr(self, '_date_full_certainty'):
-            self._date_full_certainty = self.create_typed_topic(
-                DATE_CERTAINTY_TYPE_IRI)
-            self._date_full_certainty.add_subject_identifier(Locator(
-                    DATE_FULL_CERTAINTY_IRI))
+            self._date_full_certainty = self.create_topic_by_subject_identifier(
+                Locator(DATE_FULL_CERTAINTY_IRI))
+            self._date_full_certainty.add_type(self.date_certainty_type)
         return self._date_full_certainty
 
     @property
     def date_no_certainty (self):
         if not hasattr(self, '_date_no_certainty'):
-            self._date_no_certainty = self.create_typed_topic(
-                DATE_CERTAINTY_TYPE_IRI)
-            self._date_no_certainty.add_subject_identifier(Locator(
-                    DATE_NO_CERTAINTY_IRI))
+            self._date_no_certainty = self.create_topic_by_subject_identifier(
+                Locator(DATE_NO_CERTAINTY_IRI))
+            self._date_no_certainty.add_type(self.date_certainty_type)
         return self._date_no_certainty
 
     @property
