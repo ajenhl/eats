@@ -56,6 +56,10 @@ class Date (Topic):
                                      proxy=DatePart)
         self._end_taq = self.create_name(
             '', self.eats_topic_map.end_taq_date_type, proxy=DatePart)
+        date_period_association = self.eats_topic_map.create_association(
+            self.eats_topic_map.date_period_association_type)
+        date_period_association.create_role(self.eats_topic_map.date_role_type,
+                                self)
 
     @property
     def eats_topic_map (self):
@@ -94,6 +98,46 @@ class Date (Topic):
         return self._cache_date_part(
             '_end_tpq', self.eats_topic_map.end_tpq_date_type)
 
+    @property
+    def period (self):
+        """Returns the period (span) of this date.
+
+        :rtype: `Topic`
+        
+        """
+        return self.period_association.get_roles(
+            self.eats_topic_map.date_period_role_type)[0].get_player()
+
+    @period.setter
+    def period (self, period):
+        """Sets the period (span) of this date.
+
+        :param period: date period
+        :type period: `Topic`
+
+        """
+        try:
+            role = self.period_association.get_roles(
+                self.eats_topic_map.date_period_role_type)[0]
+            role.set_player(period)
+        except IndexError:
+            role = self.period_association.create_role(
+                self.eats_topic_map.date_period_role_type, period)
+
+    @property
+    def period_association (self):
+        """Returns the date period association for this date.
+
+        :rtype: `Association`
+
+        """
+        if not hasattr(self, '_period_association'):
+            date_role = self.get_roles_played(
+                self.eats_topic_map.date_role_type,
+                self.eats_topic_map.date_period_association_type)[0]
+            self._period_association = date_role.get_parent()
+        return self._period_association
+        
     @property
     def point (self):
         """Returns the point date part.

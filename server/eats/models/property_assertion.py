@@ -32,15 +32,16 @@ class PropertyAssertion (object):
         date = self.eats_topic_map.create_topic(proxy=Date)
         date.create_date_parts()
         self.create_role(self.eats_topic_map.date_role_type, date)
-        if data is not None:
-            for prefix in ('start', 'start_taq', 'start_tpq', 'end', 'end_taq',
-                           'end_tpq', 'point', 'point_taq', 'point_tpq'):
-                if data.get(prefix):
-                    part = getattr(date, prefix)
-                    part.set_value(data[prefix])
-                    part.calendar = data[prefix + '_calendar']
-                    part.certainty = data[prefix + '_certainty']
-                    part.date_type = data[prefix + '_type']
+        date.period = data['date_period']
+        for prefix in ('start', 'start_taq', 'start_tpq', 'end', 'end_taq',
+                       'end_tpq', 'point', 'point_taq', 'point_tpq'):
+            if data.get(prefix):
+                part = getattr(date, prefix)
+                part.set_value(data[prefix])
+                part.calendar = data[prefix + '_calendar']
+                part.certainty = data[prefix + '_certainty']
+                part.set_normalised_value(data[prefix + '_normalised'])
+                part.date_type = data[prefix + '_type']
         return date
         
     @property

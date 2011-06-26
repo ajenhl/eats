@@ -104,9 +104,39 @@ class DatePart (Name):
             from eats_topic_map import EATSTopicMap
             self._eats_topic_map = self.get_topic_map(proxy=EATSTopicMap)
         return self._eats_topic_map
-        
+
+    def get_normalised_value (self):
+        """Returns the value of the normalised form of this date part.
+
+        :rtype: Unicode string
+
+        """
+        return self.normalised.get_value()
+
+    @property
+    def normalised (self):
+        """Returns the variant name that represents the normalised
+        form of this date part.
+
+        :rtype: `Variant`
+
+        """
+        if not hasattr(self, '_normalised'):
+            self._normalised = self.create_variant(
+                '', self.eats_topic_map.normalised_date_form_type)
+        return self._normalised
+    
     @property
     def scoping_topics (self):
         if getattr(self, '_scoping_topics', None) is None:
             self._scoping_topics = self.get_scope()
         return self._scoping_topics
+
+    def set_normalised_value (self, value):
+        """Sets the value of the normalised form of this date part.
+
+        :param value: value of the normalised form
+        :type value: Unicode string
+
+        """
+        self.normalised.set_value(value)
