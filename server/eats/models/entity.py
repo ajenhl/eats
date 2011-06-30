@@ -108,7 +108,7 @@ class Entity (Topic):
 
         """
         assertion = self.create_occurrence(
-            self.eats_topic_map.note_occurrence_type, note,
+            self.eats_topic_map.note_assertion_type, note,
             scope=[authority], proxy=NotePropertyAssertion)
         return assertion
 
@@ -199,5 +199,5 @@ class Entity (Topic):
         :rtype: `QuerySet` of `Occurrence`s
 
         """
-        return self.get_occurrences(self.eats_topic_map.note_occurrence_type,
+        return self.get_occurrences(self.eats_topic_map.note_assertion_type,
                                     proxy=NotePropertyAssertion)

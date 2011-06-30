@@ -1,10 +1,24 @@
 from tmapi.models import Association
 
+from base_manager import BaseManager
 from property_assertion import PropertyAssertion
+
+
+class ExistencePropertyAssertionManager (BaseManager):
+
+    def get_by_identifier (self, identifier):
+        return self.get(identifier__pk=identifier)
+    
+    def get_query_set (self):
+        assertion_type = self.eats_topic_map.existence_assertion_type
+        qs = super(ExistencePropertyAssertionManager, self).get_query_set()
+        return qs.filter(type=assertion_type)
 
 
 class ExistencePropertyAssertion (Association, PropertyAssertion):
 
+    objects = ExistencePropertyAssertionManager()
+    
     class Meta:
         proxy = True
         app_label = 'eats'

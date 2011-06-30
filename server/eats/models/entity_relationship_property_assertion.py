@@ -1,10 +1,25 @@
 from tmapi.models import Association
 
+from base_manager import BaseManager
 from property_assertion import PropertyAssertion
+
+
+class EntityRelationshipPropertyAssertionManager (BaseManager):
+
+    def get_by_identifier (self, identifier):
+        return self.get(identifier__pk=identifier)
+    
+    def get_query_set (self):
+        assertion_type = self.eats_topic_map.entity_relationship_assertion_type
+        qs = super(EntityRelationshipPropertyAssertionManager,
+                   self).get_query_set()
+        return qs.filter(type=assertion_type)
 
 
 class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
 
+    objects = EntityRelationshipPropertyAssertionManager()
+    
     class Meta:
         proxy = True
         app_label = 'eats'
