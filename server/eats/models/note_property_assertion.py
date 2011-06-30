@@ -2,8 +2,7 @@ from tmapi.models import Occurrence
 
 from base_manager import BaseManager
 from property_assertion import PropertyAssertion
-import logging
-logger = logging.getLogger(__name__)
+
 
 class NotePropertyAssertionManager (BaseManager):
 
@@ -11,7 +10,6 @@ class NotePropertyAssertionManager (BaseManager):
         return self.get(identifier__pk=identifier)
     
     def get_query_set (self):
-        logger.debug('get_query_set')
         assertion_type = self.eats_topic_map.note_assertion_type
         qs = super(NotePropertyAssertionManager, self).get_query_set()
         return qs.filter(type=assertion_type)
