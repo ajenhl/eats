@@ -5,7 +5,7 @@ from django.db.models import Q
 from tmapi.indices import TypeInstanceIndex
 from tmapi.models import Association, Locator, Topic, TopicMap
 
-from eats.constants import ADMIN_NAME_TYPE_IRI, AUTHORITY_TYPE_IRI, CALENDAR_TYPE_IRI, DATE_CERTAINTY_TYPE_IRI, DATE_FULL_CERTAINTY_IRI, DATE_NO_CERTAINTY_IRI, DATE_PERIOD_ASSOCIATION_TYPE, DATE_PERIOD_ROLE_TYPE, DATE_PERIOD_TYPE_IRI, DATE_ROLE_TYPE_IRI, DATE_TYPE_TYPE_IRI, DOMAIN_ENTITY_ROLE_TYPE_IRI, END_DATE_TYPE_IRI, END_TAQ_DATE_TYPE_IRI, END_TPQ_DATE_TYPE_IRI, ENTITY_RELATIONSHIP_ASSERTION_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_ROLE_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_ROLE_TYPE_IRI, ENTITY_TYPE_IRI, ENTITY_TYPE_ASSERTION_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, EXISTENCE_IRI, EXISTENCE_ASSERTION_TYPE_IRI, IS_IN_LANGUAGE_TYPE_IRI, IS_IN_SCRIPT_TYPE_IRI, LANGUAGE_CODE_TYPE_IRI, LANGUAGE_ROLE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_ASSERTION_TYPE_IRI, NAME_ROLE_TYPE_IRI, NAME_TYPE_TYPE_IRI, NORMALISED_DATE_FORM_TYPE_IRI, NOTE_OCCURRENCE_TYPE_IRI, POINT_DATE_TYPE_IRI, POINT_TAQ_DATE_TYPE_IRI, POINT_TPQ_DATE_TYPE_IRI, PROPERTY_ROLE_TYPE_IRI, RANGE_ENTITY_ROLE_TYPE_IRI, RELATIONSHIP_NAME_TYPE_IRI, REVERSE_RELATIONSHIP_NAME_TYPE_IRI, SCRIPT_CODE_TYPE_IRI, SCRIPT_ROLE_TYPE_IRI, SCRIPT_TYPE_IRI, START_DATE_TYPE_IRI, START_TAQ_DATE_TYPE_IRI, START_TPQ_DATE_TYPE_IRI
+from eats.constants import ADMIN_NAME_TYPE_IRI, AUTHORITY_TYPE_IRI, CALENDAR_TYPE_IRI, DATE_CERTAINTY_TYPE_IRI, DATE_FULL_CERTAINTY_IRI, DATE_NO_CERTAINTY_IRI, DATE_PERIOD_ASSOCIATION_TYPE, DATE_PERIOD_ROLE_TYPE, DATE_PERIOD_TYPE_IRI, DATE_ROLE_TYPE_IRI, DATE_TYPE_TYPE_IRI, DOMAIN_ENTITY_ROLE_TYPE_IRI, END_DATE_TYPE_IRI, END_TAQ_DATE_TYPE_IRI, END_TPQ_DATE_TYPE_IRI, ENTITY_RELATIONSHIP_ASSERTION_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_ROLE_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_ROLE_TYPE_IRI, ENTITY_TYPE_IRI, ENTITY_TYPE_ASSERTION_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, EXISTENCE_IRI, EXISTENCE_ASSERTION_TYPE_IRI, IS_IN_LANGUAGE_TYPE_IRI, IS_IN_SCRIPT_TYPE_IRI, LANGUAGE_CODE_TYPE_IRI, LANGUAGE_ROLE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_ASSERTION_TYPE_IRI, NAME_ROLE_TYPE_IRI, NAME_TYPE_TYPE_IRI, NORMALISED_DATE_FORM_TYPE_IRI, NOTE_ASSERTION_TYPE_IRI, POINT_DATE_TYPE_IRI, POINT_TAQ_DATE_TYPE_IRI, POINT_TPQ_DATE_TYPE_IRI, PROPERTY_ROLE_TYPE_IRI, RANGE_ENTITY_ROLE_TYPE_IRI, RELATIONSHIP_NAME_TYPE_IRI, REVERSE_RELATIONSHIP_NAME_TYPE_IRI, SCRIPT_CODE_TYPE_IRI, SCRIPT_ROLE_TYPE_IRI, SCRIPT_TYPE_IRI, START_DATE_TYPE_IRI, START_TAQ_DATE_TYPE_IRI, START_TPQ_DATE_TYPE_IRI
 from entity import Entity
 from entity_relationship_property_assertion import EntityRelationshipPropertyAssertion
 from entity_type_property_assertion import EntityTypePropertyAssertion
@@ -25,12 +25,13 @@ class EATSTopicMap (TopicMap):
 
     @property
     def admin_name_type (self):
-        return self._create_cached_topic('_admin_name_type',
-                                         ADMIN_NAME_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                ADMIN_NAME_TYPE_IRI))
 
     @property
     def calendar_type (self):
-        return self._create_cached_topic('_calendar_type', CALENDAR_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                CALENDAR_TYPE_IRI))
     
     def convert_topic_to_entity (self, topic):
         """Returns `topic` as an instance of `Entity`.
@@ -43,23 +44,6 @@ class EATSTopicMap (TopicMap):
         entity = Entity.objects.get(pk=topic.id)
         return entity
         
-    def _create_cached_topic (self, attr, iri):
-        """Returns the topic with the subject identifier `iri`,
-        caching the result in `attr`.
-
-        :param attr: name of attribute to cache the topic
-        :type attr: string
-        :param iri: IRI of the topic to create
-        :type iri: string
-        :rtype: `Topic`
-
-        """
-        value = getattr(self, attr, None)
-        if value is None:
-            value = self.create_topic_by_subject_identifier(Locator(iri))
-            setattr(self, attr, value)
-        return value
-    
     def create_entity (self, authority):
         """Creates a new entity, using `authority` to create an
         accompanying existence property assertion.
@@ -114,8 +98,8 @@ class EATSTopicMap (TopicMap):
 
     @property
     def date_certainty_type (self):
-        return self._create_cached_topic('_date_certainty_type',
-                                         DATE_CERTAINTY_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                DATE_CERTAINTY_TYPE_IRI))
     
     @property
     def date_full_certainty (self):
@@ -135,65 +119,68 @@ class EATSTopicMap (TopicMap):
 
     @property
     def date_period_association_type (self):
-        return self._create_cached_topic('_date_period_association_type',
-                                         DATE_PERIOD_ASSOCIATION_TYPE)
+        return self.create_topic_by_subject_identifier(Locator(
+                DATE_PERIOD_ASSOCIATION_TYPE))
 
     @property
     def date_period_role_type (self):
-        return self._create_cached_topic('_date_period_role_type',
-                                         DATE_PERIOD_ROLE_TYPE)
+        return self.create_topic_by_subject_identifier(Locator(
+                DATE_PERIOD_ROLE_TYPE))
     
     @property
     def date_period_type (self):
-        return self._create_cached_topic('_date_period_type',
-                                         DATE_PERIOD_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                DATE_PERIOD_TYPE_IRI))
 
     @property
     def date_role_type (self):
-        return self._create_cached_topic('_date_role_type', DATE_ROLE_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                DATE_ROLE_TYPE_IRI))
 
     @property
     def date_type_type (self):
-        return self._create_cached_topic('_date_type_type', DATE_TYPE_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                DATE_TYPE_TYPE_IRI))
     
     @property
     def domain_entity_role_type (self):
-        return self._create_cached_topic('_domain_entity_role_type',
-                                         DOMAIN_ENTITY_ROLE_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                DOMAIN_ENTITY_ROLE_TYPE_IRI))
 
     @property
     def end_date_type (self):
-        return self._create_cached_topic('_end_date_type', END_DATE_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                END_DATE_TYPE_IRI))
 
     @property
     def end_taq_date_type (self):
-        return self._create_cached_topic('_end_taq_date_type',
-                                         END_TAQ_DATE_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                END_TAQ_DATE_TYPE_IRI))
 
     @property
     def end_tpq_date_type (self):
-        return self._create_cached_topic('_end_tpq_date_type',
-                                         END_TPQ_DATE_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                END_TPQ_DATE_TYPE_IRI))
     
     @property
     def entity_role_type (self):
-        return self._create_cached_topic('_entity_role_type',
-                                         ENTITY_ROLE_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                ENTITY_ROLE_TYPE_IRI))
 
     @property
     def entity_type_assertion_type (self):
-        return self._create_cached_topic('_entity_type_assertion_type',
-                                         ENTITY_TYPE_ASSERTION_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                ENTITY_TYPE_ASSERTION_TYPE_IRI))
 
     @property
     def entity_relationship_assertion_type (self):
-        return self._create_cached_topic('_entity_relationship_assertion_type',
-                                         ENTITY_RELATIONSHIP_ASSERTION_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                ENTITY_RELATIONSHIP_ASSERTION_TYPE_IRI))
 
     @property
     def entity_relationship_type_role_type (self):
-        return self._create_cached_topic('_entity_relationship_type_role_type',
-                                         ENTITY_RELATIONSHIP_TYPE_ROLE_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                ENTITY_RELATIONSHIP_TYPE_ROLE_TYPE_IRI))
     
     @property
     def entity_relationship_types (self):
@@ -206,7 +193,7 @@ class EATSTopicMap (TopicMap):
     
     @property
     def entity_type (self):
-        return self._create_cached_topic('_entity_type', ENTITY_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(ENTITY_TYPE_IRI))
     
     @property
     def existence (self):
@@ -216,12 +203,12 @@ class EATSTopicMap (TopicMap):
         :rtype: `Topic`
         
         """
-        return self._create_cached_topic('_existence', EXISTENCE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(EXISTENCE_IRI))
     
     @property
     def existence_assertion_type (self):
-        return self._create_cached_topic('_existence_assertion_type',
-                                         EXISTENCE_ASSERTION_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                EXISTENCE_ASSERTION_TYPE_IRI))
     
     def get_admin_name (self, topic):
         """Returns the administrative name of `topic`.
@@ -267,8 +254,6 @@ class EATSTopicMap (TopicMap):
                 assertion = assertion_class.objects.get(pk=construct.id)
                 # Check that this assertion is associated with the entity.
                 if assertion.entity != entity:
-                    print entity.id
-                    print assertion.entity.id
                     assertion = None
         return assertion
     
@@ -397,18 +382,18 @@ class EATSTopicMap (TopicMap):
 
     @property
     def is_in_language_type (self):
-        return self._create_cached_topic('_is_in_language_type',
-                                         IS_IN_LANGUAGE_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                IS_IN_LANGUAGE_TYPE_IRI))
 
     @property
     def is_in_script_type (self):
-        return self._create_cached_topic('_is_in_script_type',
-                                         IS_IN_SCRIPT_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                IS_IN_SCRIPT_TYPE_IRI))
 
     @property
     def language_role_type (self):
-        return self._create_cached_topic('_language_role_type',
-                                         LANGUAGE_ROLE_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                LANGUAGE_ROLE_TYPE_IRI))
     
     @property
     def languages (self):
@@ -434,12 +419,13 @@ class EATSTopicMap (TopicMap):
     
     @property
     def name_assertion_type (self):
-        return self._create_cached_topic('_name_assertion_type',
-                                         NAME_ASSERTION_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                NAME_ASSERTION_TYPE_IRI))
 
     @property
     def name_role_type (self):
-        return self._create_cached_topic('_name_role_type', NAME_ROLE_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                NAME_ROLE_TYPE_IRI))
 
     @property
     def name_types (self):
@@ -452,53 +438,53 @@ class EATSTopicMap (TopicMap):
 
     @property
     def normalised_date_form_type (self):
-        return self._create_cached_topic('_normalised_date_form_type',
-                                         NORMALISED_DATE_FORM_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                NORMALISED_DATE_FORM_TYPE_IRI))
 
     @property
-    def note_occurrence_type (self):
-        return self._create_cached_topic('_note_occurrence_type',
-                                         NOTE_OCCURRENCE_TYPE_IRI)
+    def note_assertion_type (self):
+        return self.create_topic_by_subject_identifier(Locator(
+                NOTE_ASSERTION_TYPE_IRI))
 
     @property
     def point_date_type (self):
-        return self._create_cached_topic('_point_date_type',
-                                         POINT_DATE_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                POINT_DATE_TYPE_IRI))
 
     @property
     def point_taq_date_type (self):
-        return self._create_cached_topic('_point_taq_date_type',
-                                         POINT_TAQ_DATE_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                POINT_TAQ_DATE_TYPE_IRI))
 
     @property
     def point_tpq_date_type (self):
-        return self._create_cached_topic('_point_tpq_date_type',
-                                         POINT_TPQ_DATE_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                POINT_TPQ_DATE_TYPE_IRI))
     
     @property
     def property_role_type (self):
-        return self._create_cached_topic('_property_role_type',
-                                         PROPERTY_ROLE_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                PROPERTY_ROLE_TYPE_IRI))
 
     @property
     def range_entity_role_type (self):
-        return self._create_cached_topic('_range_entity_role_type',
-                                         RANGE_ENTITY_ROLE_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                RANGE_ENTITY_ROLE_TYPE_IRI))
 
     @property
     def relationship_name_type (self):
-        return self._create_cached_topic('_relationship_name_type',
-                                         RELATIONSHIP_NAME_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                RELATIONSHIP_NAME_TYPE_IRI))
 
     @property
     def reverse_relationship_name_type (self):
-        return self._create_cached_topic('_reverse_relationship_name_type',
-                                         REVERSE_RELATIONSHIP_NAME_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                REVERSE_RELATIONSHIP_NAME_TYPE_IRI))
     
     @property
     def script_role_type (self):
-        return self._create_cached_topic('_script_role_type',
-                                         SCRIPT_ROLE_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                SCRIPT_ROLE_TYPE_IRI))
 
     @property
     def scripts (self):
@@ -511,18 +497,18 @@ class EATSTopicMap (TopicMap):
 
     @property
     def start_date_type (self):
-        return self._create_cached_topic('_start_date_type',
-                                         START_DATE_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                START_DATE_TYPE_IRI))
 
     @property
     def start_taq_date_type (self):
-        return self._create_cached_topic('_start_taq_date_type',
-                                         START_TAQ_DATE_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                START_TAQ_DATE_TYPE_IRI))
 
     @property
     def start_tpq_date_type (self):
-        return self._create_cached_topic('_start_tpq_date_type',
-                                         START_TPQ_DATE_TYPE_IRI)
+        return self.create_topic_by_subject_identifier(Locator(
+                START_TPQ_DATE_TYPE_IRI))
     
     def topic_exists (self, type_iri, name, topic_id):
         """Returns True if this topic map contains a topic with the
