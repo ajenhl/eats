@@ -130,3 +130,15 @@ class DateTest (BaseTestCase):
             self.authority)
         date = assertion.create_date({'date_period': self.date_period})
         self.assertEqual(assertion, date.property_assertion)
+
+    def test_normalised (self):
+        assertion = self.entity.create_existence_property_assertion(
+            self.authority)
+        date_data = {'point': '1 January 1990', 'point_calendar': self.calendar,
+                     'point_type': self.date_type,
+                     'point_normalised': '1990-01-01',
+                     'point_certainty': self.tm.date_full_certainty,
+                     'date_period': self.date_period}
+        assertion.create_date(date_data)
+        date = assertion.get_dates()[0]
+        self.assertEqual(date.point.get_normalised_value(), '1990-01-01')

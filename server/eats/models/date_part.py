@@ -137,9 +137,15 @@ class DatePart (Name):
         :rtype: `Variant`
 
         """
+        # QAZ: This is prone to creating multiple variants. Add test
+        # and fix.
         if not hasattr(self, '_normalised'):
-            self._normalised = self.create_variant(
-                '', self.eats_topic_map.normalised_date_form_type)
+            variants = self.get_variants()
+            if len(variants) == 0:
+                self._normalised = self.create_variant(
+                    '', self.eats_topic_map.normalised_date_form_type)
+            else:
+                self._normalised = variants[0]
         return self._normalised
     
     @property
