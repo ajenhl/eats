@@ -372,29 +372,51 @@ class DateForm (forms.Form):
         self.fields['point_taq_type'].choices = date_type_choices
         self.fields['point_tpq_type'].choices = date_type_choices
 
+    def clean (self):
+        cleaned_data = super(DateForm, self).clean()
+        for prefix in ('start', 'start_taq', 'start_tpq', 'end', 'end_taq',
+                       'end_tpq', 'point', 'point_taq', 'point_tpq'):
+            if cleaned_data.get(prefix):
+                # If a date string is given, there must be a calendar
+                # and date type for it. A normalised form is not
+                # required, and certainty may be empty (meaning no
+                # certainty).
+                for part in ('_calendar', '_type'):
+                    if not cleaned_data[prefix + part]:
+                        raise forms.ValidationError('A calendar and date type must be specified for each date part that is not blank')
+        return cleaned_data
+
     def _objectify_data (self, base_data):
+        # It would be nice to handle this process of converting
+        # submitted form data into model objects where appropriate in
+        # the same fashion as with ModelForms (that is, in each
+        # field's to_python method). However, since the rendering of
+        # the object relies on the authority and user preferences,
+        # which aren't passed in to the field, this doesn't seem
+        # possible, and so it is handled here.
         data = {}
         data['date_period'] = DatePeriod.objects.get_by_identifier(
             base_data['date_period'])
         for prefix in ('start', 'start_taq', 'start_tpq', 'end', 'end_taq',
                        'end_tpq', 'point', 'point_taq', 'point_tpq'):
-            data[prefix] = base_data.get(prefix)
-            data[prefix + '_normalised'] = base_data.get(prefix + '_normalised')
-            calendar_attr = prefix + '_calendar'
-            calendar_id = base_data.get(calendar_attr)
-            if calendar_id:
-                data[calendar_attr] = Calendar.objects.get_by_identifier(
-                    calendar_id)
-            type_attr = prefix + '_type'
-            date_type_id = base_data.get(type_attr)
-            if date_type_id:
-                data[type_attr] = DateType.objects.get_by_identifier(
-                    date_type_id)
-            certainty_attr = prefix + '_certainty'
-            if base_data[certainty_attr]:
-                data[certainty_attr] = self.topic_map.date_full_certainty
-            else:
-                data[certainty_attr] = self.topic_map.date_no_certainty
+            if base_data[prefix]:
+                data[prefix] = base_data.get(prefix)
+                data[prefix + '_normalised'] = base_data[prefix + '_normalised']
+                calendar_attr = prefix + '_calendar'
+                calendar_id = base_data[calendar_attr]
+                if calendar_id:
+                    data[calendar_attr] = Calendar.objects.get_by_identifier(
+                        calendar_id)
+                type_attr = prefix + '_type'
+                date_type_id = base_data.get(type_attr)
+                if date_type_id:
+                    data[type_attr] = DateType.objects.get_by_identifier(
+                        date_type_id)
+                certainty_attr = prefix + '_certainty'
+                if base_data[certainty_attr]:
+                    data[certainty_attr] = self.topic_map.date_full_certainty
+                else:
+                    data[certainty_attr] = self.topic_map.date_no_certainty
         return data
         
     def save (self, assertion, date=None):
