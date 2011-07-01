@@ -137,8 +137,6 @@ class DatePart (Name):
         :rtype: `Variant`
 
         """
-        # QAZ: This is prone to creating multiple variants. Add test
-        # and fix.
         if not hasattr(self, '_normalised'):
             variants = self.get_variants()
             if len(variants) == 0:
