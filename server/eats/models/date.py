@@ -11,15 +11,16 @@ class DateManager (BaseManager):
     
     def get_query_set (self):
         return super(DateManager, self).get_query_set().filter(
-            types=self.eats_topic_map.date_type_type)
+            types=self.eats_topic_map.date_type)
 
 
 class Date (Topic):
 
+    objects = DateManager()
+    
     class Meta:
         proxy = True
         app_label = 'eats'
-
 
     @property
     def assembled_form (self):

@@ -347,6 +347,7 @@ class DateForm (forms.Form):
     point_taq_certainty = forms.BooleanField(label='Certain', required=False)
 
     def __init__ (self, *args, **kwargs):
+        self.topic_map = kwargs.pop('topic_map')
         calendar_choices = kwargs.pop('calendar_choices')
         date_period_choices = kwargs.pop('date_period_choices')
         date_type_choices = kwargs.pop('date_type_choices')
@@ -389,13 +390,15 @@ class DateForm (forms.Form):
             if date_type_id:
                 data[type_attr] = DateType.objects.get_by_identifier(
                     date_type_id)
-
+            certainty_attr = prefix + '_certainty'
+            if base_data[certainty_attr]:
+                data[certainty_attr] = self.topic_map.date_full_certainty
+            else:
+                data[certainty_attr] = self.topic_map.date_no_certainty
         return data
         
     def save (self, assertion, date=None):
         data = self._objectify_data(self.cleaned_data)
-        print data
-        raise Exception
         if date is None:
             # Create a new date.
             date = assertion.create_date(data)

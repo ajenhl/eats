@@ -106,7 +106,8 @@ def date_add (request, topic_map, entity_id, assertion_id):
     if request.method == 'POST':
         form = DateForm(request.POST, calendar_choices=calendar_choices,
                         date_period_choices=date_period_choices,
-                        date_type_choices=date_type_choices)
+                        date_type_choices=date_type_choices,
+                        topic_map=topic_map)
         if form.is_valid():
             date_id = form.save(assertion)
             redirect_ids = {'assertion_id': assertion_id, 'date_id': date_id,
@@ -116,7 +117,8 @@ def date_add (request, topic_map, entity_id, assertion_id):
     else:
         form = DateForm(calendar_choices=calendar_choices,
                         date_period_choices=date_period_choices,
-                        date_type_choices=date_type_choices)
+                        date_type_choices=date_type_choices,
+                        topic_map=topic_map)
     context_data = {'form': form}
     return render_to_response('eats/edit/date_add.html', context_data,
                               context_instance=RequestContext(request))
@@ -130,3 +132,9 @@ def date_change (request, topic_map, entity_id, assertion_id, date_id):
     if assertion is None:
         raise Http404
     date = assertion.get_date(date_id)
+    if date is None:
+        raise Http404
+    context_data = {}
+    return render_to_response('eats/edit/date_change.html', context_data,
+                              context_instance=RequestContext(request))
+

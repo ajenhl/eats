@@ -31,3 +31,24 @@ class DateAddViewTestCase (BaseTestCase):
         self.assertTemplateUsed(response, 'eats/edit/date_add.html')
         form = response.context['form']
         
+    def test_valid_post_request (self):
+        entity = self.tm.create_entity(self.authority)
+        existence = entity.get_existences()[0]
+        url = reverse('date-add', kwargs={'entity_id': entity.get_id(),
+                                          'assertion_id': existence.get_id()})
+        date_period = self.create_date_period('lifespan')
+        calendar = self.create_calendar('Gregorian')
+        date_type = self.create_date_type('exact')
+        post_data = {'date_period': date_period.get_id(),
+                     'point_calendar': calendar.get_id(),
+                     'point_certainty': 'on',
+                     'point_type': date_type.get_id(),
+                     'point': '9 February 2011',
+                     'point_normalised': '2011-02-09'}
+        response = self.client.post(url, post_data)
+        date = existence.get_dates()[0]
+        redirect_url = reverse('date-change',
+                               kwargs={'entity_id': entity.get_id(),
+                                       'assertion_id': existence.get_id(),
+                                       'date_id': date.get_id()})
+        self.assertRedirects(response, redirect_url)

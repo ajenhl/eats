@@ -30,6 +30,7 @@ class PropertyAssertion (object):
     def create_date (self, data=None):
         """Creates a new date associated with this property assertion."""
         date = self.eats_topic_map.create_topic(proxy=Date)
+        date.add_type(self.eats_topic_map.date_type)
         date.create_date_parts()
         self.create_role(self.eats_topic_map.date_role_type, date)
         date.period = data['date_period']

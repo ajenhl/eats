@@ -10,7 +10,7 @@ class DateTypeManager (BaseManager):
     
     def get_query_set (self):
         return super(DateTypeManager, self).get_query_set().filter(
-            types=self.eats_topic_map.date_type)
+            types=self.eats_topic_map.date_type_type)
 
 
 class DateType (Topic):
