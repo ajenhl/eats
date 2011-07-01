@@ -125,3 +125,8 @@ class DateTest (BaseTestCase):
         self.assertEqual(date.point.assembled_form, '3 December 2010?')
         self.assertEqual(date.assembled_form, '3 December 2010?')
 
+    def test_property_assertion (self):
+        assertion = self.entity.create_existence_property_assertion(
+            self.authority)
+        date = assertion.create_date({'date_period': self.date_period})
+        self.assertEqual(assertion, date.property_assertion)

@@ -1,6 +1,17 @@
 from tmapi.models import Topic
 
+from base_manager import BaseManager
 from date_part import DatePart
+
+
+class DateManager (BaseManager):
+
+    def get_by_identifier (self, identifier):
+        return self.get(identifier__pk=identifier)
+    
+    def get_query_set (self):
+        return super(DateManager, self).get_query_set().filter(
+            types=self.eats_topic_map.date_type_type)
 
 
 class Date (Topic):
@@ -191,6 +202,25 @@ class Date (Topic):
         return self._cache_date_part(
             '_point_tpq', self.eats_topic_map.point_tpq_date_type)
 
+    @property
+    def property_assertion (self):
+        """Returns the property assertion carrying this date.
+
+        :rtype: `PropertyAssertion`
+
+        """
+        if getattr(self, '_property_assertion', None) is None:
+            date_roles = self.get_roles_played(
+                self.eats_topic_map.date_role_type)
+            for role in date_roles:
+                association = role.get_parent()
+                if association.get_type() != self.eats_topic_map.date_period_association_type:
+                    assertion = association
+            assertion_type = self.eats_topic_map.get_assertion_type(assertion)
+            self._assertion = assertion_type.objects.get_by_identifier(
+                assertion.get_id())
+        return self._assertion
+    
     @property
     def start (self):
         """Returns the start date part.

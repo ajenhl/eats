@@ -223,40 +223,27 @@ class EATSTopicMap (TopicMap):
         # error here if there is more than one.
         return topic.get_names(self.admin_name_type)[0]
 
-    def get_assertion (self, entity, assertion_id):
-        """Returns the assertion with identifier `assertion_id` and
-        associated with `entity`, or None.
+    def get_assertion_type (self, assertion):
+        """Returns the specific class of `assertion`.
 
-        :param entity: the entity carrying the assertion
-        :type entity: `Entity`
-        :param assertion_id: the assertion's identifier
-        :type assertion_id: string
-        :rtype: `PropertyAssertion`
+        :param assertion: property assertion
+        :type assertion: `PropertyAssertion`
+        :rtype: class or None
 
         """
-        # Note that this is only returning assertions that are
-        # implemented as TMAPI Associations.
-        assertion = None
-        construct = self.get_construct_by_id(assertion_id)
-        if construct is not None and isinstance(construct, Association):
-            association_type = construct.get_type()
-            if association_type == self.entity_relationship_assertion_type:
-                assertion_class = EntityRelationshipPropertyAssertion
-            elif association_type == self.entity_type_assertion_type:
-                assertion_class = EntityTypePropertyAssertion
-            elif association_type == self.existence_assertion_type:
-                assertion_class = ExistencePropertyAssertion
-            elif association_type == self.name_assertion_type:
-                assertion_class = NamePropertyAssertion
-            else:
-                assertion_class = None
-            if assertion_class is not None:
-                assertion = assertion_class.objects.get(pk=construct.id)
-                # Check that this assertion is associated with the entity.
-                if assertion.entity != entity:
-                    assertion = None
-        return assertion
-    
+        association_type = assertion.get_type()
+        if association_type == self.entity_relationship_assertion_type:
+            assertion_class = EntityRelationshipPropertyAssertion
+        elif association_type == self.entity_type_assertion_type:
+            assertion_class = EntityTypePropertyAssertion
+        elif association_type == self.existence_assertion_type:
+            assertion_class = ExistencePropertyAssertion
+        elif association_type == self.name_assertion_type:
+            assertion_class = NamePropertyAssertion
+        else:
+            assertion_class = None
+        return assertion_class
+
     def get_authorities (self):
         """Returns the authorities in this topic map.
 

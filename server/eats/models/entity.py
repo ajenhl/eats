@@ -1,4 +1,4 @@
-from tmapi.models import Topic
+from tmapi.models import Association, Topic
 
 from entity_relationship_property_assertion import EntityRelationshipPropertyAssertion
 from entity_type_property_assertion import EntityTypePropertyAssertion
@@ -119,6 +119,30 @@ class Entity (Topic):
             self._eats_topic_map = self.get_topic_map(proxy=EATSTopicMap)
         return self._eats_topic_map
 
+    def get_assertion (self, assertion_id):
+        """Returns the assertion with identifier `assertion_id` and
+        associated with this entity, or None.
+
+        :param assertion_id: the assertion's identifier
+        :type assertion_id: string
+        :rtype: `PropertyAssertion`
+
+        """
+        # Note that this is only returning assertions that are
+        # implemented as TMAPI Associations.
+        topic_map = self.eats_topic_map
+        assertion = None
+        construct = topic_map.get_construct_by_id(assertion_id)
+        if construct is not None and isinstance(construct, Association):
+            assertion_type = topic_map.get_assertion_type(construct)
+            if assertion_type is not None:
+                assertion = assertion_type.objects.get_by_identifier(
+                    assertion_id)
+                # Check that this assertion is associated with the entity.
+                if assertion.entity != self:
+                    assertion = None
+        return assertion
+    
     def get_eats_names (self):
         """Returns this entity's name property assertions.
 

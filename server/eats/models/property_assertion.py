@@ -60,6 +60,19 @@ class PropertyAssertion (object):
             self._entity = role.get_player(proxy=Entity)
         return self._entity
 
+    def get_date (self, date_id):
+        """Returns the date specified by `date_id`.
+
+        :param date_id: id of the requested date
+        :type date_id: integer
+        :rtype: `Date`
+
+        """
+        date = Date.objects.get_by_identifier(date_id)
+        if date.property_assertion != self:
+            return None
+        return date
+    
     def get_dates (self):
         """Returns a list of dates associated with this property assertion.
 

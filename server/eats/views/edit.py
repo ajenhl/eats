@@ -95,7 +95,7 @@ def date_add (request, topic_map, entity_id, assertion_id):
     entity = topic_map.get_entity(entity_id)
     if entity is None:
         raise Http404
-    assertion = topic_map.get_assertion(entity, assertion_id)
+    assertion = entity.get_assertion(assertion_id)
     if assertion is None:
         raise Http404
     calendar_choices = create_choice_list(topic_map, topic_map.get_calendars())
@@ -126,7 +126,7 @@ def date_change (request, topic_map, entity_id, assertion_id, date_id):
     entity = topic_map.get_entity(entity_id)
     if entity is None:
         raise Http404
-    assertion = topic_map.get_assertion(entity, assertion_id)
+    assertion = entity.get_assertion(assertion_id)
     if assertion is None:
         raise Http404
-    date = ''
+    date = assertion.get_date(date_id)
