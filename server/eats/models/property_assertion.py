@@ -27,7 +27,7 @@ class PropertyAssertion (object):
             self.remove_theme(theme)
         self.add_theme(authority)
 
-    def create_date (self, data=None):
+    def create_date (self, data):
         """Creates a new date associated with this property assertion."""
         date = self.eats_topic_map.create_topic(proxy=Date)
         date.add_type(self.eats_topic_map.date_type)
@@ -62,14 +62,19 @@ class PropertyAssertion (object):
         return self._entity
 
     def get_date (self, date_id):
-        """Returns the date specified by `date_id`.
+        """Returns the date specified by `date_id`. If there is no
+        such date, or the date is not associated with this property
+        assertion, returns None.
 
         :param date_id: id of the requested date
         :type date_id: integer
-        :rtype: `Date`
+        :rtype: `Date` or None
 
         """
-        date = Date.objects.get_by_identifier(date_id)
+        try:
+            date = Date.objects.get_by_identifier(date_id)
+        except Date.DoesNotExist:
+            return None
         if date.property_assertion != self:
             return None
         return date

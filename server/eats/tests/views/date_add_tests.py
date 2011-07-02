@@ -8,18 +8,26 @@ class DateAddViewTestCase (BaseTestCase):
     def test_non_matching_date_add (self):
         """Tests that the entity and assertion match when adding a
         date."""
-        response = self.client.get(reverse(
-                'date-add', kwargs={'entity_id': 0, 'assertion_id': 0}))
+        url_args = {'entity_id': 0, 'assertion_id': 0}
+        # Test with non-existent entity and assertion.
+        response = self.client.get(reverse('date-add', kwargs=url_args))
         self.assertEqual(
             response.status_code, 404,
             'Expected a 404 HTTP response code for a non-existent entity')
+        # Test with non-existent assertion.
         entity = self.tm.create_entity(self.authority)
-        response = self.client.get(reverse(
-                'date-add', kwargs={'entity_id': entity.get_id(),
-                                    'assertion_id': entity.get_id()}))
+        url_args['entity_id'] = entity.get_id()
+        response = self.client.get(reverse('date-add', kwargs=url_args))
         self.assertEqual(
             response.status_code, 404,
             'Expected a 404 HTTP response code for a non-existent assertion')
+        # Test with the assertion not belonging to the entity.
+        entity2 = self.tm.create_entity(self.authority)
+        assertion = entity2.get_existences()[0]
+        url_args['assertion_id'] = assertion.get_id()
+        response = self.client.get(reverse('date-add', kwargs=url_args))
+        self.assertEqual(response.status_code, 404,
+                         'Expected a 404 HTTP response code for an assertion that does not belong to the entity')
 
     def test_get_request (self):
         entity = self.tm.create_entity(self.authority)
