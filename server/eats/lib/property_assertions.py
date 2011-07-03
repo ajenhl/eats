@@ -12,9 +12,7 @@ class PropertyAssertions (object):
         self.authorities = set(authorities)
         self.authority_choices = authority_choices
         self.data = data
-        self._editable = self._non_editable = None
-        if data is None:
-            self._editable, self._non_editable = self.categorise_assertions()
+        self._editable, self._non_editable = self.categorise_assertions()
 
     @property
     def editable (self):

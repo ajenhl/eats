@@ -66,14 +66,10 @@ def entity_change (request, topic_map, entity_id):
             if not is_valid:
                 break
         if is_valid:
-            for form in existences_formset.forms + entity_types_formset.forms \
-                    + names_formset.forms + notes_formset.forms + \
-                    entity_relationships_formset.forms:
-                if form.cleaned_data:
-                    if form.cleaned_data.get('DELETE', False):
-                        form.delete()
-                    else:
-                        form.save()
+            for formset in (existences_formset, entity_types_formset,
+                            names_formset, notes_formset,
+                            entity_relationships_formset):
+                formset.save()
             redirect_url = reverse('entity-change',
                                    kwargs={'entity_id': entity_id})
             return HttpResponseRedirect(redirect_url)

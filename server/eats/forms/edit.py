@@ -6,10 +6,18 @@ import selectable.forms as selectable
 from eats.constants import FORWARD_RELATIONSHIP_MARKER, \
     REVERSE_RELATIONSHIP_MARKER
 from eats.lookups import EntityLookup
-from eats.models import Calendar, DatePeriod, DateType, EntityRelationshipPropertyAssertion, EntityTypePropertyAssertion, ExistencePropertyAssertion, NamePropertyAssertion, NotePropertyAssertion
+from eats.models import Calendar, DatePeriod, DateType
 
 
 class PropertyAssertionFormSet (BaseFormSet):
+
+    """Base class for the formsets of specific property assertion types.
+
+    This code is heavily influenced by Django's BaseModelFormSet,
+    since we are dealing with objects that are tied to models, just in
+    an aggregated way that makes using ModelFormSets impossible.
+
+    """
 
     def __init__ (self, topic_map, entity, authority_choices, instances,
                   **kwargs):
@@ -26,7 +34,7 @@ class PropertyAssertionFormSet (BaseFormSet):
             id_key = '%s-%s' % (self.add_prefix(i), 'assertion')
             id = self.data[id_key]
             kwargs['instance'] = self._existing_object(id)
-        if i < self.initial_form_count() and 'instance' not in kwargs:
+        if i < self.initial_form_count() and not kwargs.get('instance'):
             kwargs['instance'] = self.instances[i]
         return super(PropertyAssertionFormSet, self)._construct_form(
             i, **kwargs)
@@ -41,6 +49,47 @@ class PropertyAssertionFormSet (BaseFormSet):
         if not (self.data):
             return len(self.instances)
         return super(PropertyAssertionFormSet, self).initial_form_count()
+
+    def save (self):
+        """Saves property assertion instances for every form, adding
+        and changing instances as necessary, and returns a list of
+        instances."""
+        return self.save_existing_assertions() + self.save_new_assertions()
+
+    def save_new (self, form):
+        return form.save()
+    
+    def save_existing (self, form, assertion):
+        return form.save()
+    
+    def save_existing_assertions (self):
+        self.changed_objects = []
+        self.deleted_objects = []
+        if not self.instances:
+            return []
+        saved_assertions = []
+        for form in self.initial_forms:
+            raw_id_value = form._raw_value('assertion')
+            id_value = form.fields['assertion'].clean(raw_id_value)
+            obj = self._existing_object(id_value)
+            if self.can_delete and self._should_delete_form(form):
+                self.deleted_objects.append(obj)
+                obj.remove()
+                continue
+            if form.has_changed():
+                self.changed_objects.append((obj, form.changed_data))
+                saved_assertions.append(self.save_existing(form, obj))
+        return saved_assertions
+
+    def save_new_assertions (self):
+        self.new_objects = []
+        for form in self.extra_forms:
+            if not form.has_changed():
+                continue
+            if self.can_delete and self._should_delete_form(form):
+                continue
+            self.new_objects.append(self.save_new(form))
+        return self.new_objects            
 
 
 class ExistenceAssertionFormSet (PropertyAssertionFormSet):
@@ -128,6 +177,12 @@ class PropertyAssertionForm (forms.Form):
         self.fields['authority'].choices = authority_choices
 
     def _assertion_to_dict (self, assertion):
+        """Returns a dictionary containing the data in `assertion`
+        suitable for passing as a Form's `initial` keyword argument.
+
+        :rtype: dict
+
+        """
         data = {'authority': assertion.authority.get_id(),
                 'assertion': assertion.get_id()}
         return data
@@ -152,11 +207,7 @@ class PropertyAssertionForm (forms.Form):
         
     def delete (self):
         """Deletes the assertion."""
-        assertion = self._get_construct('assertion',
-                                        self._property_assertion_model)
-        if assertion is None:
-            return
-        assertion.remove()
+        self.instance.remove()
 
     def save (self):
         raise NotImplementedError
@@ -164,18 +215,14 @@ class PropertyAssertionForm (forms.Form):
         
 class ExistenceForm (PropertyAssertionForm):
 
-    _property_assertion_model = ExistencePropertyAssertion
-    
     def save (self):
         authority = self._get_construct('authority')
-        assertion = self._get_construct('assertion',
-                                        self._property_assertion_model)
-        if assertion is None:
+        if self.instance is None:
             # Create a new assertion.
             self.entity.create_existence_property_assertion(authority)
         else:
             # Update an existing assertion.
-            assertion.update(authority)
+            self.instance.update(authority)
 
 
 class EntityRelationshipForm (PropertyAssertionForm):
@@ -183,8 +230,6 @@ class EntityRelationshipForm (PropertyAssertionForm):
     relationship_type = forms.ChoiceField(choices=[])
     related_entity = selectable.AutoCompleteSelectField(
         lookup_class=EntityLookup)
-
-    _property_assertion_model = EntityRelationshipPropertyAssertion
 
     def __init__ (self, *args, **kwargs):
         relationship_type_choices = kwargs.pop('relationship_type_choices')
@@ -207,8 +252,6 @@ class EntityRelationshipForm (PropertyAssertionForm):
         
     def save (self):
         authority = self._get_construct('authority')
-        assertion = self._get_construct('assertion',
-                                        proxy=self._property_assertion_model)
         relationship_type_id = self.cleaned_data['relationship_type']
         relationship_type = self.topic_map.get_construct_by_id(
             relationship_type_id[:-1])
@@ -222,21 +265,19 @@ class EntityRelationshipForm (PropertyAssertionForm):
         elif direction == REVERSE_RELATIONSHIP_MARKER:
             domain_entity = related_entity
             range_entity = self.entity
-        if assertion is None:
+        if self.instance is None:
             # Create a new assertion.
             self.entity.create_entity_relationship_property_assertion(
                 authority, relationship_type, domain_entity, range_entity)
         else:
             # Update an existing assertion.
-            assertion.update(authority, relationship_type, domain_entity,
-                             range_entity)
+            self.instance.update(authority, relationship_type, domain_entity,
+                                 range_entity)
 
 
 class EntityTypeForm (PropertyAssertionForm):
 
     entity_type = forms.ChoiceField(choices=[])
-
-    _property_assertion_model = EntityTypePropertyAssertion
 
     def __init__ (self, *args, **kwargs):
         entity_type_choices = kwargs.pop('entity_type_choices')
@@ -250,23 +291,16 @@ class EntityTypeForm (PropertyAssertionForm):
         data['entity_type'] = assertion.entity_type.get_id()
         return data
         
-    def delete (self):
-        assertion = self._get_construct('assertion',
-                                        proxy=self._property_assertion_model)
-        assertion.remove()
-        
     def save (self):
         authority = self._get_construct('authority')
-        assertion = self._get_construct('assertion',
-                                        proxy=self._property_assertion_model)
         entity_type = self._get_construct('entity_type')
-        if assertion is None:
+        if self.instance is None:
             # Create a new assertion.
             self.entity.create_entity_type_property_assertion(
                 authority, entity_type)
         else:
             # Update an existing assertion.
-            assertion.update(authority, entity_type)
+            self.instance.update(authority, entity_type)
 
 
 class NameForm (PropertyAssertionForm):
@@ -275,8 +309,6 @@ class NameForm (PropertyAssertionForm):
     language = forms.ChoiceField(choices=[])
     script = forms.ChoiceField(choices=[])
     display_form = forms.CharField()
-
-    _property_assertion_model = NamePropertyAssertion
 
     def __init__ (self, *args, **kwargs):
         name_type_choices = kwargs.pop('name_type_choices')
@@ -298,34 +330,25 @@ class NameForm (PropertyAssertionForm):
         data['script'] = name.script.get_id()
         return data
 
-    def delete (self):
-        assertion = self._get_construct('assertion',
-                                        proxy=self._property_assertion_model)
-        assertion.remove()
-
     def save (self):
         authority = self._get_construct('authority')
-        assertion = self._get_construct('assertion',
-                                        proxy=self._property_assertion_model)
         name_type = self._get_construct('name_type')
         language = self._get_construct('language')
         script = self._get_construct('script')
         display_form = self.cleaned_data['display_form']
-        if assertion is None:
+        if self.instance is None:
             # Create a new assertion.
             self.entity.create_name_property_assertion(
                 authority, name_type, language, script, display_form)
         else:
             # Update an existing assertion.
-            assertion.update(authority, name_type, language, script,
-                             display_form)
+            self.instance.update(authority, name_type, language, script,
+                                 display_form)
 
 
 class NoteForm (PropertyAssertionForm):
 
     note = forms.CharField(widget=forms.Textarea)
-
-    _property_assertion_model = NotePropertyAssertion
 
     def _assertion_to_dict (self, assertion):
         data = super(NoteForm, self)._assertion_to_dict(assertion)
@@ -334,15 +357,13 @@ class NoteForm (PropertyAssertionForm):
     
     def save (self):
         authority = self._get_construct('authority')
-        assertion = self._get_construct('assertion',
-                                        proxy=self._property_assertion_model)
         note = self.cleaned_data['note']
-        if assertion is None:
+        if self.instance is None:
             # Create a new assertion.
             self.entity.create_note_property_assertion(authority, note)
         else:
             # Update an existing assertion.
-            assertion.update(authority, note)
+            self.instance.update(authority, note)
 
 
 class DateForm (forms.Form):
