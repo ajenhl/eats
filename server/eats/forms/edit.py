@@ -382,7 +382,7 @@ class DateForm (forms.Form):
                 # required, and certainty may be empty (meaning no
                 # certainty).
                 for part in ('_calendar', '_type'):
-                    if not cleaned_data[prefix + part]:
+                    if prefix + part not in cleaned_data:
                         raise forms.ValidationError('A calendar and date type must be specified for each date part that is not blank')
         return cleaned_data
 
@@ -426,7 +426,7 @@ class DateForm (forms.Form):
             date = assertion.create_date(data)
         else:
             # Update an existing date.
-            pass
+            date.update(data)
         return date.get_id()
 
         

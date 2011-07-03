@@ -134,7 +134,28 @@ def date_change (request, topic_map, entity_id, assertion_id, date_id):
     date = assertion.get_date(date_id)
     if date is None:
         raise Http404
-    context_data = {}
+    calendar_choices = create_choice_list(topic_map, topic_map.get_calendars())
+    date_period_choices = create_choice_list(topic_map,
+                                             topic_map.get_date_periods())
+    date_type_choices = create_choice_list(topic_map,
+                                           topic_map.get_date_types())
+    if request.method == 'POST':
+        form = DateForm(request.POST, calendar_choices=calendar_choices,
+                        date_period_choices=date_period_choices,
+                        date_type_choices=date_type_choices,
+                        topic_map=topic_map)
+        if form.is_valid():
+            date_id = form.save(assertion, date)
+            redirect_ids = {'assertion_id': assertion_id, 'date_id': date_id,
+                            'entity_id': entity_id}
+            redirect_url = reverse('date-change', kwargs=redirect_ids)
+            return HttpResponseRedirect(redirect_url)
+    else:
+        data = date.get_form_data()
+        form = DateForm(data, calendar_choices=calendar_choices,
+                        date_period_choices=date_period_choices,
+                        date_type_choices=date_type_choices,
+                        topic_map=topic_map)
+    context_data = {'form': form}
     return render_to_response('eats/edit/date_change.html', context_data,
                               context_instance=RequestContext(request))
-

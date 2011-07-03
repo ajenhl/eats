@@ -17,6 +17,9 @@ class DateManager (BaseManager):
 class Date (Topic):
 
     objects = DateManager()
+
+    date_part_names = ('start', 'start_taq', 'start_tpq', 'end', 'end_taq',
+                       'end_tpq', 'point', 'point_taq', 'point_tpq')
     
     class Meta:
         proxy = True
@@ -133,6 +136,18 @@ class Date (Topic):
         return self._cache_date_part(
             '_end_tpq', self.eats_topic_map.end_tpq_date_type)
 
+    def get_form_data (self):
+        """Returns the contents of this date in a format suitable for
+        a `DateForm`.
+
+        :rtype: dict
+
+        """
+        data = {'date_period': self.period.get_id()}
+        for date_part in self.date_part_names:
+            data.update(getattr(self, date_part).get_form_data(date_part))
+        return data
+    
     @property
     def period (self):
         """Returns the period (span) of this date.
@@ -251,3 +266,16 @@ class Date (Topic):
         """
         return self._cache_date_part(
             '_start_tpq', self.eats_topic_map.start_tpq_date_type)
+
+    def update (self, data):
+        self.period = data['date_period']
+        for name in self.date_part_names:
+            date_part = getattr(self, name)
+            if name in data:
+                date_part.set_value(data[name])
+                date_part.set_normalised_value(data[name+'_normalised'])
+                date_part.calendar = data[name+'_calendar']
+                date_part.date_type = data[name+'_type']
+                date_part.certainty = data[name+'_certainty']
+            else:
+                date_part.set_value('')

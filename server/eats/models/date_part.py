@@ -10,9 +10,9 @@ class DatePart (Name):
     @property
     def assembled_form (self):
         form = self.get_value()
-        if self.certainty == self.eats_topic_map.date_no_certainty:
-            form = form + '?'
         if form:
+            if self.certainty == self.eats_topic_map.date_no_certainty:
+                form = form + '?'
             if self.get_type() in (self.eats_topic_map.point_tpq_date_type,
                                    self.eats_topic_map.start_tpq_date_type,
                                    self.eats_topic_map.end_tpq_date_type):
@@ -121,6 +121,28 @@ class DatePart (Name):
             self._eats_topic_map = self.get_topic_map(proxy=EATSTopicMap)
         return self._eats_topic_map
 
+    def get_form_data (self, prefix):
+        """Returns the data for this date part in a format suitable
+        for a `DateForm`.
+
+        :param prefix: prefix for dictionary keys
+        :type prefix: string
+        :rtype: dict
+
+        """
+        data = {}
+        value = self.get_value()
+        if value:
+            certainty = False
+            if self.certainty == self.eats_topic_map.date_full_certainty:
+                certainty = True
+            data[prefix] = value
+            data[prefix+'_normalised'] = self.get_normalised_value()
+            data[prefix+'_type'] = self.date_type.get_id()
+            data[prefix+'_calendar'] = self.calendar.get_id()
+            data[prefix+'_certainty'] = certainty
+        return data
+    
     def get_normalised_value (self):
         """Returns the value of the normalised form of this date part.
 
