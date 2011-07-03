@@ -11,17 +11,36 @@ from eats.models import Calendar, DatePeriod, DateType, EntityRelationshipProper
 
 class PropertyAssertionFormSet (BaseFormSet):
 
-    def __init__ (self, topic_map, entity, authority_choices, **kwargs):
+    def __init__ (self, topic_map, entity, authority_choices, instances,
+                  **kwargs):
         self.topic_map = topic_map
         self.entity = entity
         self.authority_choices = authority_choices
+        self.instances = instances or []
         super(PropertyAssertionFormSet, self).__init__(**kwargs)
 
     def _construct_form (self, i, **kwargs):
         kwargs.update({'topic_map': self.topic_map, 'entity': self.entity,
                        'authority_choices': self.authority_choices})
+        if self.is_bound and i < self.initial_form_count():
+            id_key = '%s-%s' % (self.add_prefix(i), 'assertion')
+            id = self.data[id_key]
+            kwargs['instance'] = self._existing_object(id)
+        if i < self.initial_form_count() and 'instance' not in kwargs:
+            kwargs['instance'] = self.instances[i]
         return super(PropertyAssertionFormSet, self)._construct_form(
             i, **kwargs)
+
+    def _existing_object (self, id):
+        if not hasattr(self, '_object_dict'):
+            self._object_dict = dict([(o.get_id(), o) for o in self.instances])
+        return self._object_dict.get(id)
+    
+    def initial_form_count (self):
+        """Returns the number of forms that are required in this FormSet."""
+        if not (self.data):
+            return len(self.instances)
+        return super(PropertyAssertionFormSet, self).initial_form_count()
 
 
 class ExistenceAssertionFormSet (PropertyAssertionFormSet):
@@ -91,15 +110,28 @@ class PropertyAssertionForm (forms.Form):
     authority = forms.ChoiceField(choices=[])
     assertion = forms.IntegerField(widget=forms.HiddenInput, required=False)
 
-    def __init__ (self, *args, **kwargs):
-        self.topic_map = kwargs.pop('topic_map')
-        self.entity = kwargs.pop('entity')
-        authority_choices = kwargs.pop('authority_choices')
-        super(PropertyAssertionForm, self).__init__(*args, **kwargs)
-        if 'initial' in kwargs:
+    def __init__ (self, topic_map, entity, authority_choices, initial=None,
+                  instance=None, **kwargs):
+        self.topic_map = topic_map
+        self.entity = entity
+        self.instance = instance
+        if instance is None:
+            object_data = {}
+        else:
+            object_data = self._assertion_to_dict(instance)
+        if initial is not None:
+            object_data.update(initial)
+        super(PropertyAssertionForm, self).__init__(initial=object_data,
+                                                    **kwargs)
+        if 'instance' in kwargs:
             authority_choices = authority_choices[1:]
         self.fields['authority'].choices = authority_choices
 
+    def _assertion_to_dict (self, assertion):
+        data = {'authority': assertion.authority.get_id(),
+                'assertion': assertion.get_id()}
+        return data
+        
     def _get_construct (self, name, proxy=None):
         """Returns the construct specified by `name`.
 
@@ -161,6 +193,18 @@ class EntityRelationshipForm (PropertyAssertionForm):
             relationship_type_choices = relationship_type_choices[1:]
         self.fields['relationship_type'].choices = relationship_type_choices
 
+    def _assertion_to_dict (self, assertion):
+        data = super(EntityRelationshipForm, self)._assertion_to_dict(assertion)
+        relationship_id = str(assertion.entity_relationship_type.get_id())
+        direction_marker = FORWARD_RELATIONSHIP_MARKER
+        related_entity = assertion.range_entity
+        if self.entity == assertion.range_entity:
+            direction_marker = REVERSE_RELATIONSHIP_MARKER
+            related_entity = assertion.domain_entity
+        data['relationship_type'] = relationship_id + direction_marker
+        data['related_entity'] = related_entity.get_id()
+        return data
+        
     def save (self):
         authority = self._get_construct('authority')
         assertion = self._get_construct('assertion',
@@ -201,6 +245,11 @@ class EntityTypeForm (PropertyAssertionForm):
             entity_type_choices = entity_type_choices[1:]
         self.fields['entity_type'].choices = entity_type_choices
 
+    def _assertion_to_dict (self, assertion):
+        data = super(EntityTypeForm, self)._assertion_to_dict(assertion)
+        data['entity_type'] = assertion.entity_type.get_id()
+        return data
+        
     def delete (self):
         assertion = self._get_construct('assertion',
                                         proxy=self._property_assertion_model)
@@ -240,6 +289,15 @@ class NameForm (PropertyAssertionForm):
         self.fields['language'].choices = language_choices
         self.fields['script'].choices = script_choices
 
+    def _assertion_to_dict (self, assertion):
+        data = super(NameForm, self)._assertion_to_dict(assertion)
+        name = assertion.name
+        data['display_form'] = name.display_form
+        data['name_type'] = name.name_type.get_id()
+        data['language'] = name.language.get_id()
+        data['script'] = name.script.get_id()
+        return data
+
     def delete (self):
         assertion = self._get_construct('assertion',
                                         proxy=self._property_assertion_model)
@@ -269,6 +327,11 @@ class NoteForm (PropertyAssertionForm):
 
     _property_assertion_model = NotePropertyAssertion
 
+    def _assertion_to_dict (self, assertion):
+        data = super(NoteForm, self)._assertion_to_dict(assertion)
+        data['note'] = assertion.note
+        return data
+    
     def save (self):
         authority = self._get_construct('authority')
         assertion = self._get_construct('assertion',
@@ -382,7 +445,7 @@ class DateForm (forms.Form):
                 # required, and certainty may be empty (meaning no
                 # certainty).
                 for part in ('_calendar', '_type'):
-                    if prefix + part not in cleaned_data:
+                    if not cleaned_data.get(prefix + part):
                         raise forms.ValidationError('A calendar and date type must be specified for each date part that is not blank')
         return cleaned_data
 
