@@ -430,12 +430,18 @@ class DateForm (forms.Form):
     point_taq_type = forms.ChoiceField(choices=[], label='Type', required=False)
     point_taq_certainty = forms.BooleanField(label='Certain', required=False)
 
-    def __init__ (self, *args, **kwargs):
-        self.topic_map = kwargs.pop('topic_map')
-        calendar_choices = kwargs.pop('calendar_choices')
-        date_period_choices = kwargs.pop('date_period_choices')
-        date_type_choices = kwargs.pop('date_type_choices')
-        super(DateForm, self).__init__(*args, **kwargs)
+    def __init__ (self, topic_map, calendar_choices, date_period_choices,
+                  date_type_choices, data=None, instance=None, **kwargs):
+        self.topic_map = topic_map
+        self.instance = instance
+        calendar_choices = calendar_choices
+        date_period_choices = date_period_choices
+        date_type_choices = date_type_choices
+        if instance is None:
+            object_data = {}
+        else:
+            object_data = instance.get_form_data()
+        super(DateForm, self).__init__(data, initial=object_data, **kwargs)
         self.fields['date_period'].choices = date_period_choices
         self.fields['start_calendar'].choices = calendar_choices
         self.fields['start_taq_calendar'].choices = calendar_choices
@@ -470,6 +476,9 @@ class DateForm (forms.Form):
                         raise forms.ValidationError('A calendar and date type must be specified for each date part that is not blank')
         return cleaned_data
 
+    def delete (self):
+        self.instance.remove()
+
     def _objectify_data (self, base_data):
         # It would be nice to handle this process of converting
         # submitted form data into model objects where appropriate in
@@ -503,8 +512,9 @@ class DateForm (forms.Form):
                     data[certainty_attr] = self.topic_map.date_no_certainty
         return data
         
-    def save (self, assertion, date=None):
+    def save (self, assertion=None):
         data = self._objectify_data(self.cleaned_data)
+        date = self.instance
         if date is None:
             # Create a new date.
             date = assertion.create_date(data)

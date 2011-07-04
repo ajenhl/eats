@@ -100,10 +100,8 @@ def date_add (request, topic_map, entity_id, assertion_id):
     date_type_choices = create_choice_list(topic_map,
                                            topic_map.get_date_types())
     if request.method == 'POST':
-        form = DateForm(request.POST, calendar_choices=calendar_choices,
-                        date_period_choices=date_period_choices,
-                        date_type_choices=date_type_choices,
-                        topic_map=topic_map)
+        form = DateForm(topic_map, calendar_choices, date_period_choices,
+                        date_type_choices, request.POST)
         if form.is_valid():
             date_id = form.save(assertion)
             redirect_ids = {'assertion_id': assertion_id, 'date_id': date_id,
@@ -111,10 +109,8 @@ def date_add (request, topic_map, entity_id, assertion_id):
             redirect_url = reverse('date-change', kwargs=redirect_ids)
             return HttpResponseRedirect(redirect_url)
     else:
-        form = DateForm(calendar_choices=calendar_choices,
-                        date_period_choices=date_period_choices,
-                        date_type_choices=date_type_choices,
-                        topic_map=topic_map)
+        form = DateForm(topic_map, calendar_choices, date_period_choices,
+                        date_type_choices)
     context_data = {'form': form}
     return render_to_response('eats/edit/date_add.html', context_data,
                               context_instance=RequestContext(request))
@@ -136,22 +132,23 @@ def date_change (request, topic_map, entity_id, assertion_id, date_id):
     date_type_choices = create_choice_list(topic_map,
                                            topic_map.get_date_types())
     if request.method == 'POST':
-        form = DateForm(request.POST, calendar_choices=calendar_choices,
-                        date_period_choices=date_period_choices,
-                        date_type_choices=date_type_choices,
-                        topic_map=topic_map)
+        form = DateForm(topic_map, calendar_choices, date_period_choices,
+                        date_type_choices, request.POST, instance=date)
+        redirect_ids = {'entity_id': entity_id}
+        redirect_url = reverse('entity-change', kwargs=redirect_ids)
+        if '_delete' in form.data:
+            form.delete()
+            return HttpResponseRedirect(redirect_url)
         if form.is_valid():
-            date_id = form.save(assertion, date)
-            redirect_ids = {'assertion_id': assertion_id, 'date_id': date_id,
-                            'entity_id': entity_id}
-            redirect_url = reverse('date-change', kwargs=redirect_ids)
+            date_id = form.save()
+            if '_continue' in form.data:
+                redirect_ids['assertion_id'] = assertion_id
+                redirect_ids['date_id'] = date_id
+                redirect_url = reverse('date-change', kwargs=redirect_ids)
             return HttpResponseRedirect(redirect_url)
     else:
-        data = date.get_form_data()
-        form = DateForm(data, calendar_choices=calendar_choices,
-                        date_period_choices=date_period_choices,
-                        date_type_choices=date_type_choices,
-                        topic_map=topic_map)
+        form = DateForm(topic_map, calendar_choices, date_period_choices,
+                        date_type_choices, instance=date)
     context_data = {'form': form}
     return render_to_response('eats/edit/date_change.html', context_data,
                               context_instance=RequestContext(request))

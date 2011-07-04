@@ -236,6 +236,11 @@ class Date (Topic):
             self._assertion = assertion_type.objects.get_by_identifier(
                 assertion.get_id())
         return self._assertion
+
+    def remove (self):
+        for role in self.get_roles_played(self.eats_topic_map.date_role_type):
+            role.get_parent().remove()
+        super(Date, self).remove()
     
     @property
     def start (self):

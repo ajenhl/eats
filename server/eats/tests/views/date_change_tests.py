@@ -80,7 +80,7 @@ class DateChangeViewTestCase (BaseTestCase):
                      'point_taq_type': self.date_type.get_id(),
                      'point_taq': '9 February 2011',
                      'point_taq_normalised': '2011-02-09',
-                     }
+                     '_continue': 'Save and continue editing'}
         response = self.client.post(url, post_data, follow=True)
         self.assertRedirects(response, url)
         date = existence.get_dates()[0]
@@ -91,3 +91,43 @@ class DateChangeViewTestCase (BaseTestCase):
         self.assertEqual(date.point_taq.get_value(), '9 February 2011')
         self.assertEqual(date.point_taq.get_normalised_value(), '2011-02-09')
         self.assertEqual(date.point.get_value(), '')
+        post_data = {'date_period': self.date_period.get_id(),
+                     'start': '6 June 1812', 'start_normalised': '1812-06-06',
+                     'start_calendar': self.calendar.get_id(),
+                     'start_type': self.date_type.get_id(), '_save': 'Save'}
+        response = self.client.post(url, post_data, follow=True)
+        url2 = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        self.assertRedirects(response, url2)
+        date = existence.get_dates()[0]
+        self.assertEqual(date.period, self.date_period)
+        self.assertEqual(date.start.calendar, self.calendar)
+        self.assertEqual(date.start.certainty, self.tm.date_no_certainty)
+        self.assertEqual(date.start.date_type, self.date_type)
+        self.assertEqual(date.start.get_value(), '6 June 1812')
+        self.assertEqual(date.start.get_normalised_value(), '1812-06-06')
+        self.assertEqual(date.point.get_value(), '')
+        self.assertEqual(date.point_taq.get_value(), '')
+
+    def test_delete (self):
+        entity = self.tm.create_entity(self.authority)
+        existence = entity.get_existences()[0]
+        self.assertEqual(0, len(existence.get_dates()))
+        date_data = {'date_period': self.date_period, 'point': '1 January 1900',
+                     'point_normalised': '1900-01-01',
+                     'point_calendar': self.calendar,
+                     'point_type': self.date_type,
+                     'point_certainty': self.tm.date_full_certainty}
+        date = existence.create_date(date_data)
+        self.assertEqual(1, len(existence.get_dates()))
+        url_args = {'entity_id': entity.get_id(),
+                    'assertion_id': existence.get_id(),
+                    'date_id': date.get_id()}
+        url = reverse('date-change', kwargs=url_args)
+        post_data = {'_delete': 'Delete'}
+        response = self.client.post(url, post_data, follow=True)
+        url2 = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        self.assertRedirects(response, url2)
+        self.assertEqual(0, len(existence.get_dates()))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404,
+                         'Expected a 404 HTTP response code for a non-existent (deleted) date')
