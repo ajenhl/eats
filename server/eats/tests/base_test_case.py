@@ -3,7 +3,6 @@ from django.test import TestCase
 
 from tmapi.models import TopicMapSystemFactory
 
-from eats.constants import LANGUAGE_TYPE_IRI, NAME_TYPE_TYPE_IRI, SCRIPT_TYPE_IRI
 from eats.models import EATSTopicMap
 
 
