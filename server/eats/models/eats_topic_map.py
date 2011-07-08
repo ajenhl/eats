@@ -444,38 +444,6 @@ class EATSTopicMap (TopicMap):
             assertion_class = None
         return assertion_class
 
-    def get_authorities (self):
-        """Returns the authorities in this topic map.
-
-        :rtype: `QuerySet` of `Topic`s
-
-        """
-        return self.get_topics_by_type(AUTHORITY_TYPE_IRI)
-
-    def get_calendars (self):
-        """Returns the calendars in this topic map.
-
-        :rtype: `QuerySet` of `Topic`s
-
-        """
-        return self.get_topics_by_type(CALENDAR_TYPE_IRI)
-
-    def get_date_periods (self):
-        """Returns the date periods in this topic map.
-
-        :rtype: `QuerySet` of `Topic`s
-
-        """
-        return self.get_topics_by_type(DATE_PERIOD_TYPE_IRI)
-
-    def get_date_types (self):
-        """Returns the date types in this topic map.
-
-        :rtype: `QuerySet` of `Topic`s
-
-        """
-        return self.get_topics_by_type(DATE_TYPE_TYPE_IRI)
-
     def get_entity (self, entity_id):
         """Returns the entity with identifier `entity_id`.
 
@@ -492,22 +460,6 @@ class EATSTopicMap (TopicMap):
         else:
             entity = self.convert_topic_to_entity(topic)
         return entity
-
-    def get_entity_types (self, authority=None):
-        """Returns a `QuerySet` of entity type `Topic`s.
-
-        If `authority` is not None, return only those entity types
-        that have a name asserted by `authority`.
-
-        :param authority: optional authority to filter entity types on
-        :type authority: `Authority`
-        :rtype: `QuerySet` of `Topic`s
-
-        """
-        entity_types = self.get_topics_by_type(ENTITY_TYPE_TYPE_IRI)
-        if authority is not None:
-            pass
-        return entity_types
 
     def get_topic_by_id (self, topic_id, type_iri):
         """Returns the topic with `topic_id`, or None if there is no
@@ -638,15 +590,6 @@ class EATSTopicMap (TopicMap):
                 NAME_TYPE_TYPE_IRI))
     
     @property
-    def name_types (self):
-        """Returns a `QuerySet` of name type `Association`s.
-
-        :rtype: `QuerySet` of `Association`s
-
-        """
-        return self.get_topics_by_type(NAME_TYPE_TYPE_IRI)
-
-    @property
     def normalised_date_form_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 NORMALISED_DATE_FORM_TYPE_IRI))
@@ -705,15 +648,6 @@ class EATSTopicMap (TopicMap):
     def script_role_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 SCRIPT_ROLE_TYPE_IRI))
-
-    @property
-    def scripts (self):
-        """Returns a `QuerySet` of script `Topic`s.
-
-        :rtype: `QuerySet` of `Topic`s
-
-        """
-        return self.get_topics_by_type(SCRIPT_TYPE_IRI)
 
     @property
     def start_date_type (self):

@@ -7,6 +7,7 @@ from eats.lib.property_assertions import EntityRelationshipPropertyAssertions, E
 from eats.constants import AUTHORITY_TYPE_IRI
 from eats.decorators import add_topic_map
 from eats.forms.edit import CreateEntityForm, create_choice_list, DateForm
+from eats.models import Authority, Calendar, DatePeriod, DateType
 
 
 @add_topic_map
@@ -40,7 +41,7 @@ def entity_change (request, topic_map, entity_id):
     # QAZ: this needs to change to provide only the authorities
     # available to the user. This whole view needs to be restricted to
     # logged in users who can edit entities.
-    authorities = topic_map.get_authorities()
+    authorities = Authority.objects.all()
     authority_choices = create_choice_list(topic_map, authorities)
     data = request.POST or None
     existences = ExistencePropertyAssertions(topic_map, entity, authorities,
@@ -94,11 +95,10 @@ def date_add (request, topic_map, entity_id, assertion_id):
     assertion = entity.get_assertion(assertion_id)
     if assertion is None:
         raise Http404
-    calendar_choices = create_choice_list(topic_map, topic_map.get_calendars())
+    calendar_choices = create_choice_list(topic_map, Calendar.objects.all())
     date_period_choices = create_choice_list(topic_map,
-                                             topic_map.get_date_periods())
-    date_type_choices = create_choice_list(topic_map,
-                                           topic_map.get_date_types())
+                                             DatePeriod.objects.all())
+    date_type_choices = create_choice_list(topic_map, DateType.objects.all())
     if request.method == 'POST':
         form = DateForm(topic_map, calendar_choices, date_period_choices,
                         date_type_choices, request.POST)
@@ -126,11 +126,10 @@ def date_change (request, topic_map, entity_id, assertion_id, date_id):
     date = assertion.get_date(date_id)
     if date is None:
         raise Http404
-    calendar_choices = create_choice_list(topic_map, topic_map.get_calendars())
+    calendar_choices = create_choice_list(topic_map, Calendar.objects.all())
     date_period_choices = create_choice_list(topic_map,
-                                             topic_map.get_date_periods())
-    date_type_choices = create_choice_list(topic_map,
-                                           topic_map.get_date_types())
+                                             DatePeriod.objects.all())
+    date_type_choices = create_choice_list(topic_map, DateType.objects.all())
     if request.method == 'POST':
         form = DateForm(topic_map, calendar_choices, date_period_choices,
                         date_type_choices, request.POST, instance=date)
