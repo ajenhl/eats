@@ -378,15 +378,6 @@ class EATSTopicMap (TopicMap):
                 ENTITY_RELATIONSHIP_TYPE_TYPE_IRI))
     
     @property
-    def entity_relationship_types (self):
-        """Returns a `QuerySet` of entity relationship `Topic`s.
-
-        :rtype: `QuerySet` of `Topic`s
-
-        """
-        return self.get_topics_by_type(ENTITY_RELATIONSHIP_TYPE_TYPE_IRI)
-    
-    @property
     def entity_type (self):
         return self.create_topic_by_subject_identifier(Locator(ENTITY_TYPE_IRI))
 
@@ -443,23 +434,6 @@ class EATSTopicMap (TopicMap):
         else:
             assertion_class = None
         return assertion_class
-
-    def get_entity (self, entity_id):
-        """Returns the entity with identifier `entity_id`.
-
-        :param entity_id: the entity's identifier
-        :type entity_id: string
-        :rtype: `Entity`
-
-        """
-        topic = self.get_construct_by_id(entity_id)
-        if topic is None or not isinstance(topic, Topic):
-            entity = None
-        elif self.entity_type not in topic.get_types():
-            entity = None
-        else:
-            entity = self.convert_topic_to_entity(topic)
-        return entity
 
     def get_topic_by_id (self, topic_id, type_iri):
         """Returns the topic with `topic_id`, or None if there is no

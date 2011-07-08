@@ -1,5 +1,6 @@
 from tmapi.models import Association, Topic
 
+from base_manager import BaseManager
 from entity_relationship_property_assertion import EntityRelationshipPropertyAssertion
 from entity_type_property_assertion import EntityTypePropertyAssertion
 from existence_property_assertion import ExistencePropertyAssertion
@@ -8,8 +9,17 @@ from name_property_assertion import NamePropertyAssertion
 from note_property_assertion import NotePropertyAssertion
 
 
+class EntityManager (BaseManager):
+
+    def get_query_set (self):
+        return super(EntityManager, self).get_query_set().filter(
+            types=self.eats_topic_map.entity_type)
+
+
 class Entity (Topic):
 
+    objects = EntityManager()
+    
     class Meta:
         proxy = True
         app_label = 'eats'

@@ -7,7 +7,7 @@ from eats.lib.property_assertions import EntityRelationshipPropertyAssertions, E
 from eats.constants import AUTHORITY_TYPE_IRI
 from eats.decorators import add_topic_map
 from eats.forms.edit import CreateEntityForm, create_choice_list, DateForm
-from eats.models import Authority, Calendar, DatePeriod, DateType
+from eats.models import Authority, Calendar, DatePeriod, DateType, Entity
 
 
 @add_topic_map
@@ -34,8 +34,9 @@ def entity_add (request, topic_map):
 
 @add_topic_map
 def entity_change (request, topic_map, entity_id):
-    entity = topic_map.get_entity(entity_id)
-    if entity is None:
+    try:
+        entity = Entity.objects.get_by_identifier(entity_id)
+    except Entity.DoesNotExist:
         raise Http404
     context_data = {'entity': entity}
     # QAZ: this needs to change to provide only the authorities
@@ -89,8 +90,9 @@ def entity_change (request, topic_map, entity_id):
 
 @add_topic_map
 def date_add (request, topic_map, entity_id, assertion_id):
-    entity = topic_map.get_entity(entity_id)
-    if entity is None:
+    try:
+        entity = Entity.objects.get_by_identifier(entity_id)
+    except Entity.DoesNotExist:
         raise Http404
     assertion = entity.get_assertion(assertion_id)
     if assertion is None:
@@ -117,8 +119,9 @@ def date_add (request, topic_map, entity_id, assertion_id):
 
 @add_topic_map
 def date_change (request, topic_map, entity_id, assertion_id, date_id):
-    entity = topic_map.get_entity(entity_id)
-    if entity is None:
+    try:
+        entity = Entity.objects.get_by_identifier(entity_id)
+    except Entity.DoesNotExist:
         raise Http404
     assertion = entity.get_assertion(assertion_id)
     if assertion is None:

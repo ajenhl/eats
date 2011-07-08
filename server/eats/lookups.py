@@ -2,6 +2,7 @@ from selectable.base import LookupBase
 from selectable.registry import registry
 
 from eats.decorators import add_topic_map
+from eats.models import Entity
 
 
 class EntityLookup (LookupBase):
@@ -10,9 +11,8 @@ class EntityLookup (LookupBase):
     def get_query (self, topic_map, request, term):
         return topic_map.lookup_entities(term)
 
-    @add_topic_map
-    def get_item (self, topic_map, value):
-        return topic_map.get_entity(value)
+    def get_item (self, value):
+        return Entity.objects.get_by_identifier(value)
     
     def get_item_id (self, item):
         return item.get_id()
