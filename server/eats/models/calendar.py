@@ -1,12 +1,14 @@
 from tmapi.models import Topic
 
-from base_manager import BaseManager
+from infrastructure_manager import InfrastructureManager
 
 
-class CalendarManager (BaseManager):
+class CalendarManager (InfrastructureManager):
 
-    def get_by_identifier (self, identifier):
-        return self.get(identifier__pk=identifier)
+    def filter_by_authority (self, authority):
+        association_type = self.eats_topic_map.authority_has_calendar_association_type
+        return super(CalendarManager, self).filter_by_authority(
+            authority, association_type)
     
     def get_query_set (self):
         return super(CalendarManager, self).get_query_set().filter(

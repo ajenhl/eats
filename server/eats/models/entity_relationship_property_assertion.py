@@ -1,14 +1,12 @@
 from tmapi.models import Association
 
 from base_manager import BaseManager
+from entity_relationship_type import EntityRelationshipType
 from property_assertion import PropertyAssertion
 
 
 class EntityRelationshipPropertyAssertionManager (BaseManager):
 
-    def get_by_identifier (self, identifier):
-        return self.get(identifier__pk=identifier)
-    
     def get_query_set (self):
         assertion_type = self.eats_topic_map.entity_relationship_assertion_type
         qs = super(EntityRelationshipPropertyAssertionManager,
@@ -41,7 +39,8 @@ class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
         if not hasattr(self, '_entity_relationship_type'):
             role = self.get_roles(
                 self.eats_topic_map.entity_relationship_type_role_type)[0]
-            self._entity_relationship_type = role.get_player()
+            self._entity_relationship_type = role.get_player(
+                proxy=EntityRelationshipType)
         return self._entity_relationship_type
     
     @property
@@ -81,7 +80,7 @@ class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
         :param authority: authority making the assertion
         :type authority: `Topic`
         :param relationship_type: type of the relationship
-        :type relationship_type: `Topic`
+        :type relationship_type: `EntityRelationshipType`
         :param domain_entity: the domain entity
         :type domain_entity: `Entity`
         :param range_entity: the range entity

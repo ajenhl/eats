@@ -2,13 +2,11 @@ from tmapi.models import Topic
 
 from base_manager import BaseManager
 from date_part import DatePart
+from date_period import DatePeriod
 
 
 class DateManager (BaseManager):
 
-    def get_by_identifier (self, identifier):
-        return self.get(identifier__pk=identifier)
-    
     def get_query_set (self):
         return super(DateManager, self).get_query_set().filter(
             types=self.eats_topic_map.date_type)
@@ -156,14 +154,15 @@ class Date (Topic):
         
         """
         return self.period_association.get_roles(
-            self.eats_topic_map.date_period_role_type)[0].get_player()
+            self.eats_topic_map.date_period_role_type)[0].get_player(
+            proxy=DatePeriod)
 
     @period.setter
     def period (self, period):
         """Sets the period (span) of this date.
 
         :param period: date period
-        :type period: `Topic`
+        :type period: `DatePeriod`
 
         """
         try:

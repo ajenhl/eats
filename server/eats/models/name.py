@@ -1,6 +1,9 @@
 from tmapi.models import Topic
 
+from language import Language
 from name_index import NameIndex
+from name_type import NameType
+from script import Script
 
 
 class Name (Topic):
@@ -121,10 +124,10 @@ class Name (Topic):
     def language (self):
         """Returns the language of this name.
 
-        :rtype: `Topic`
+        :rtype: `Language`
 
         """
-        return self._language_role.get_player()
+        return self._language_role.get_player(proxy=Language)
 
     @language.setter
     def language (self, language):
@@ -134,7 +137,7 @@ class Name (Topic):
         update the name index.
 
         :param language: language of the name
-        :type language: `Topic`
+        :type language: `Language`
 
         """
         self._language_role.set_player(language)
@@ -158,17 +161,17 @@ class Name (Topic):
     def name_type (self):
         """Returns the name type of this name.
 
-        :rtype: `Topic`
+        :rtype: `NameType`
 
         """
-        return self._get_name().get_type()
+        return self._get_name().get_type(proxy=NameType)
 
     @name_type.setter
     def name_type (self, name_type):
         """Sets the name type of this name.
 
         :param name_type: type of name
-        :type name_type: `Topic`
+        :type name_type: `NameType`
 
         """
         self._get_name().set_type(name_type)
@@ -183,10 +186,10 @@ class Name (Topic):
     def script (self):
         """Returns the script of this name.
 
-        :rtype: `Topic`
+        :rtype: `Script`
 
         """
-        return self._script_role.get_player()
+        return self._script_role.get_player(proxy=Script)
 
     @script.setter
     def script (self, script):
@@ -196,7 +199,7 @@ class Name (Topic):
         the name index.
 
         :param script: script of the name
-        :type script: `Topic`
+        :type script: `Script`
 
         """
         self._script_role.set_player(script)

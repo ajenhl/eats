@@ -1,5 +1,22 @@
 EATS_BASE_IRI = 'http://eats.artefact.org.nz/psi/'
 
+AUTHORITY_HAS_CALENDAR_ASSOCIATION_TYPE_IRI = EATS_BASE_IRI + \
+    'authority_has_calendar_association/'
+AUTHORITY_HAS_DATE_PERIOD_ASSOCIATION_TYPE_IRI = EATS_BASE_IRI + \
+    'authority_has_date_period_association/'
+AUTHORITY_HAS_DATE_TYPE_ASSOCIATION_TYPE_IRI = EATS_BASE_IRI + \
+    'authority_has_date_type_association/'
+AUTHORITY_HAS_ENTITY_RELATIONSHIP_TYPE_ASSOCIATION_TYPE_IRI = EATS_BASE_IRI + \
+    'authority_has_entity_relationship_type_association/'
+AUTHORITY_HAS_ENTITY_TYPE_ASSOCIATION_TYPE_IRI = EATS_BASE_IRI + \
+    'authority_has_entity_type_association/'
+AUTHORITY_HAS_LANGUAGE_ASSOCIATION_TYPE_IRI = EATS_BASE_IRI + \
+    'authority_has_language_association/'
+AUTHORITY_HAS_NAME_TYPE_ASSOCIATION_TYPE_IRI = EATS_BASE_IRI + \
+    'authority_has_name_type_association/'
+AUTHORITY_HAS_SCRIPT_ASSOCIATION_TYPE_IRI = EATS_BASE_IRI + \
+    'authority_has_script_association/'
+AUTHORITY_ROLE_TYPE_IRI = EATS_BASE_IRI + 'authority_role/'
 AUTHORITY_TYPE_IRI = EATS_BASE_IRI + 'authority/'
 ADMIN_NAME_TYPE_IRI = EATS_BASE_IRI + 'admin_name/'
 AUTHORITY_BASE_URL_IRI = EATS_BASE_IRI + 'authority_base_url/'
@@ -17,8 +34,10 @@ DOMAIN_ENTITY_ROLE_TYPE_IRI = EATS_BASE_IRI + 'domain_entity_role'
 END_DATE_TYPE_IRI = EATS_BASE_IRI + 'end_date/'
 END_TAQ_DATE_TYPE_IRI = EATS_BASE_IRI + 'end_terminus_ante_quem_date/'
 END_TPQ_DATE_TYPE_IRI = EATS_BASE_IRI + 'end_terminus_post_quem_date/'
-ENTITY_RELATIONSHIP_ASSERTION_TYPE_IRI = EATS_BASE_IRI + 'entity_relationship_assertion/'
-ENTITY_RELATIONSHIP_TYPE_ROLE_TYPE_IRI = EATS_BASE_IRI + 'entity_relationship_role/'
+ENTITY_RELATIONSHIP_ASSERTION_TYPE_IRI = EATS_BASE_IRI + \
+    'entity_relationship_assertion/'
+ENTITY_RELATIONSHIP_TYPE_ROLE_TYPE_IRI = EATS_BASE_IRI + \
+    'entity_relationship_role/'
 ENTITY_RELATIONSHIP_TYPE_TYPE_IRI = EATS_BASE_IRI + 'entity_relationship/'
 ENTITY_ROLE_TYPE_IRI = EATS_BASE_IRI + 'entity_role/'
 ENTITY_TYPE_IRI = EATS_BASE_IRI + 'entity/'
@@ -26,6 +45,7 @@ ENTITY_TYPE_ASSERTION_TYPE_IRI = EATS_BASE_IRI + 'entity_type_assertion/'
 ENTITY_TYPE_TYPE_IRI = EATS_BASE_IRI + 'entity_type/'
 EXISTENCE_ASSERTION_TYPE_IRI = EATS_BASE_IRI + 'existence_assertion/'
 EXISTENCE_IRI = EATS_BASE_IRI + 'existence/'
+INFRASTRUCTURE_ROLE_TYPE_IRI = EATS_BASE_IRI + 'infrastructure_role/'
 IS_IN_LANGUAGE_TYPE_IRI = EATS_BASE_IRI + 'is_in_language/'
 IS_IN_SCRIPT_TYPE_IRI = EATS_BASE_IRI + 'is_in_script/'
 LANGUAGE_CODE_TYPE_IRI = EATS_BASE_IRI + 'language_code/'
@@ -42,7 +62,8 @@ POINT_TPQ_DATE_TYPE_IRI = EATS_BASE_IRI + 'point_terminus_post_quem_date/'
 PROPERTY_ROLE_TYPE_IRI = EATS_BASE_IRI + 'property_role/'
 RANGE_ENTITY_ROLE_TYPE_IRI = EATS_BASE_IRI + 'range_entity_role/'
 RELATIONSHIP_NAME_TYPE_IRI = EATS_BASE_IRI + 'relationship_name/'
-REVERSE_RELATIONSHIP_NAME_TYPE_IRI = EATS_BASE_IRI + 'reverse_relationship_name/'
+REVERSE_RELATIONSHIP_NAME_TYPE_IRI = EATS_BASE_IRI + \
+    'reverse_relationship_name/'
 SCRIPT_CODE_TYPE_IRI = EATS_BASE_IRI + 'script_code/'
 SCRIPT_ROLE_TYPE_IRI = EATS_BASE_IRI + 'script_role/'
 SCRIPT_TYPE_IRI = EATS_BASE_IRI + 'script/'

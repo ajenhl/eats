@@ -1,5 +1,8 @@
 from tmapi.models import Name
 
+from calendar import Calendar
+from date_type import DateType
+
 
 class DatePart (Name):
 
@@ -28,13 +31,14 @@ class DatePart (Name):
         """Returns the calendar for this date part, or None if no
         calendar is set.
 
-        :rtype: `Topic`
+        :rtype: `Calendar`
 
         """
         if getattr(self, '_calendar', None) is None:
             for theme in self.scoping_topics:
                 if self.eats_topic_map.calendar_type in theme.get_types():
-                    self._calendar = theme
+                    self._calendar = Calendar.objects.get_by_identifier(
+                        theme.get_id())
                     break
             else:
                 self._calendar = None
@@ -88,13 +92,14 @@ class DatePart (Name):
     def date_type (self):
         """Returns the type for this date part.
 
-        :rtype: `Topic`
+        :rtype: `DateType`
 
         """
         if getattr(self, '_date_type', None) is None:
             for theme in self.scoping_topics:
                 if self.eats_topic_map.date_type_type in theme.get_types():
-                    self._date_type = theme
+                    self._date_type = DateType.objects.get_by_identifier(
+                        theme.get_id())
                     break
             else:
                 self._date_type = None

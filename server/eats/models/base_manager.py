@@ -12,3 +12,5 @@ class BaseManager (models.Manager):
                 iri=settings.EATS_TOPIC_MAP)
         return self._eats_topic_map
 
+    def get_by_identifier (self, identifier):
+        return self.get(identifier__pk=identifier)

@@ -1,3 +1,4 @@
+from authority_tests import *
 from date_tests import *
 from entity_relationship_tests import *
 from entity_type_tests import *

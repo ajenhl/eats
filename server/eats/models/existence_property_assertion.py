@@ -6,9 +6,6 @@ from property_assertion import PropertyAssertion
 
 class ExistencePropertyAssertionManager (BaseManager):
 
-    def get_by_identifier (self, identifier):
-        return self.get(identifier__pk=identifier)
-    
     def get_query_set (self):
         assertion_type = self.eats_topic_map.existence_assertion_type
         qs = super(ExistencePropertyAssertionManager, self).get_query_set()

@@ -1,3 +1,4 @@
+from authority import Authority
 from date import Date
 
 
@@ -13,14 +14,15 @@ class PropertyAssertion (object):
         # QAZ: convert a possible IndexError into a more
         # useful/descriptive exception. Also raise an exception if
         # there is more than one theme.
-        return self.get_scope()[0]
+        topic = self.get_scope()[0]
+        return Authority.objects.get_by_identifier(topic.get_id())
 
     @authority.setter
     def authority (self, authority):
         """Sets the authority of this property assertion.
 
         :param authority: authority
-        :type authority: `Topic`
+        :type authority: `Authority`
 
         """
         for theme in self.get_scope():
