@@ -106,9 +106,13 @@ def date_add (request, topic_map, entity_id, assertion_id):
                         date_type_choices, request.POST)
         if form.is_valid():
             date_id = form.save(assertion)
-            redirect_ids = {'assertion_id': assertion_id, 'date_id': date_id,
-                            'entity_id': entity_id}
-            redirect_url = reverse('date-change', kwargs=redirect_ids)
+            if '_continue' in form.data:
+                redirect_ids = {'assertion_id': assertion_id,
+                                'date_id': date_id, 'entity_id': entity_id}
+                redirect_url = reverse('date-change', kwargs=redirect_ids)
+            else:
+                redirect_ids = {'entity_id': entity_id}
+                redirect_url = reverse('entity-change', kwargs=redirect_ids)
             return HttpResponseRedirect(redirect_url)
     else:
         form = DateForm(topic_map, calendar_choices, date_period_choices,

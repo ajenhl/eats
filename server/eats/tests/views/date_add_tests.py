@@ -38,7 +38,7 @@ class DateAddViewTestCase (BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'eats/edit/date_add.html')
         
-    def test_valid_post_request (self):
+    def test_valid_post_request_continue (self):
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         url = reverse('date-add', kwargs={'entity_id': entity.get_id(),
@@ -51,7 +51,8 @@ class DateAddViewTestCase (BaseTestCase):
                      'point_certainty': 'on',
                      'point_type': date_type.get_id(),
                      'point': '9 February 2011',
-                     'point_normalised': '2011-02-09'}
+                     'point_normalised': '2011-02-09',
+                     '_continue': 'Save and continue editing'}
         response = self.client.post(url, post_data)
         date = existence.get_dates()[0]
         self.assertEqual(date.period, date_period)
@@ -64,6 +65,26 @@ class DateAddViewTestCase (BaseTestCase):
                                kwargs={'entity_id': entity.get_id(),
                                        'assertion_id': existence.get_id(),
                                        'date_id': date.get_id()})
+        self.assertRedirects(response, redirect_url)
+
+    def test_valid_post_request_save (self):
+        entity = self.tm.create_entity(self.authority)
+        existence = entity.get_existences()[0]
+        url = reverse('date-add', kwargs={'entity_id': entity.get_id(),
+                                          'assertion_id': existence.get_id()})
+        date_period = self.create_date_period('lifespan')
+        calendar = self.create_calendar('Gregorian')
+        date_type = self.create_date_type('exact')
+        post_data = {'date_period': date_period.get_id(),
+                     'point_calendar': calendar.get_id(),
+                     'point_certainty': 'on',
+                     'point_type': date_type.get_id(),
+                     'point': '9 February 2011',
+                     'point_normalised': '2011-02-09',
+                     '_save': 'Save'}
+        response = self.client.post(url, post_data)
+        redirect_url = reverse('entity-change',
+                               kwargs={'entity_id': entity.get_id()})
         self.assertRedirects(response, redirect_url)
 
     def test_invalid_post_request (self):
