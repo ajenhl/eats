@@ -45,21 +45,21 @@ class DateTest (BaseTestCase):
              'point_type': self.date_type, 'point_normalised': '1990-01-01',
              'point_certainty': self.tm.date_full_certainty,
              'date_period': self.date_period})
-        date.start.set_value('29 November 2000')
-        self.assertEqual(date.start.get_value(), '29 November 2000')
-        date.start.set_normalised_value('2000-11-29')
-        self.assertEqual(date.start.get_normalised_value(), '2000-11-29')
+        date.point.set_value('29 November 2000')
+        self.assertEqual(date.point.get_value(), '29 November 2000')
+        date.point.set_normalised_value('2000-11-29')
+        self.assertEqual(date.point.get_normalised_value(), '2000-11-29')
         calendar2 = self.create_calendar('Julian')
-        date.start.calendar = calendar2
-        self.assertEqual(date.start.calendar, calendar2)
-        date.start.certainty = self.tm.date_no_certainty
-        self.assertEqual(date.start.certainty, self.tm.date_no_certainty)
+        date.point.calendar = calendar2
+        self.assertEqual(date.point.calendar, calendar2)
+        date.point.certainty = self.tm.date_no_certainty
+        self.assertEqual(date.point.certainty, self.tm.date_no_certainty)
         date_period2 = self.create_date_period('floruit')
         date.period = date_period2
         self.assertEqual(date.period, date_period2)
         date_type2 = self.create_date_type('circa')
-        date.start.date_type = date_type2
-        self.assertEqual(date.start.date_type, date_type2)
+        date.point.date_type = date_type2
+        self.assertEqual(date.point.date_type, date_type2)
 
     def test_assembled_form (self):
         assertion = self.entity.create_existence_property_assertion(
