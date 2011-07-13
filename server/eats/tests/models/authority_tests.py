@@ -1,7 +1,7 @@
 from eats.tests.base_test_case import BaseTestCase
 
 
-class AuthorityTest (BaseTestCase):
+class AuthorityTestCase (BaseTestCase):
 
     def test_get_calendars (self):
         self.assertEqual(0, len(self.authority.get_calendars()))
