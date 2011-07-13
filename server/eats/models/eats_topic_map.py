@@ -411,15 +411,6 @@ class EATSTopicMap (TopicMap):
         return self.create_topic_by_subject_identifier(Locator(
                 LANGUAGE_TYPE_IRI))
     
-    @property
-    def languages (self):
-        """Returns a `QuerySet` of language `Topic`s.
-
-        :rtype: `QuerySet` of `Topic`s
-
-        """
-        return Language.objects.all()
-
     def lookup_entities (self, query):
         names = query.split()
         queries = []
