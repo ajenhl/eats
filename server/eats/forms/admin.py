@@ -1,7 +1,6 @@
 from django import forms
 
-from eats.constants import CALENDAR_TYPE_IRI, DATE_PERIOD_TYPE_IRI, DATE_TYPE_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_TYPE_TYPE_IRI, SCRIPT_TYPE_IRI
-from eats.models import Authority, Calendar, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NameType, Script
+from eats.models import Calendar, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NameType, Script
 from eats.views.edit import create_choice_list
 
 
@@ -9,40 +8,45 @@ class AdminForm (forms.Form):
 
     name = forms.CharField(max_length=100)
     
-    def __init__ (self, topic_map, instance=None, **kwargs):
+    def __init__ (self, topic_map, model, data=None, instance=None, **kwargs):
         """Initialise the form.
 
         :param topic_map: the EATS Topic Map
         :type topic_map: `TopicMap`
-        :param topic_id: the `Identifier` id of the topic
-        :type topic_id: integer or None
+        :param model: the model class
+        :type model: class
 
         """
         self.topic_map = topic_map
+        self.model = model
         self.instance = instance
         if instance is None:
             object_data = {}
         else:
             object_data = self._topic_to_dict(instance)
-        super(AdminForm, self).__init__(initial=object_data, **kwargs)
+        super(AdminForm, self).__init__(initial=object_data, data=data,
+                                        **kwargs)
 
-    def _get_construct (self, name, proxy=None):
-        """Returns the construct specified by `name`.
+    def clean_name (self):
+        name = self.cleaned_data['name']
+        try:
+            existing = self.model.objects.get_by_admin_name(name)
+            if self.instance is None or self.instance != existing:
+                raise forms.ValidationError(
+                    'The name of the %s must be unique' %
+                    self.model._meta.verbose_name)
+        except self.model.DoesNotExist:
+            pass
+        return name
 
-        `name` corresponds to the name of one of the form's fields.
-
-        :param name: name of the construct to return
-        :type name: string
-        :param proxy: Django proxy model
-        :type proxy: class
-        :rtype: `Construct` or proxy object
-
-        """
-        construct_id = self.cleaned_data[name]
-        construct = None
-        if construct_id is not None:
-            construct = self.topic_map.get_construct_by_id(construct_id, proxy)
-        return construct
+    def save (self, create_method):
+        name = self.cleaned_data['name']
+        if self.instance is None:
+            model_object = create_method(name)
+        else:
+            model_object = self.instance
+            model_object.set_admin_name(name)
+        return model_object
 
     def _topic_to_dict (self, topic):
         return {'name': topic.get_admin_name()}
@@ -60,8 +64,8 @@ class AuthorityForm (AdminForm):
     name_types = forms.MultipleChoiceField(choices=[], required=False)
     scripts = forms.MultipleChoiceField(choices=[], required=False)
 
-    def __init__ (self, topic_map, data=None, instance=None, **kwargs):
-        super(AuthorityForm, self).__init__(topic_map, data=data,
+    def __init__ (self, topic_map, model, data=None, instance=None, **kwargs):
+        super(AuthorityForm, self).__init__(topic_map, model, data=data,
                                             instance=instance, **kwargs)
         self.fields['calendars'].choices = create_choice_list(
             topic_map, Calendar.objects.all())[1:]
@@ -79,17 +83,6 @@ class AuthorityForm (AdminForm):
             topic_map, NameType.objects.all())[1:]
         self.fields['scripts'].choices = create_choice_list(
             topic_map, Script.objects.all())[1:]
-
-    def clean_name (self):
-        name = self.cleaned_data['name']
-        try:
-            authority = Authority.objects.get_by_admin_name(name)
-            if self.instance is None or self.instance != authority:
-                raise forms.ValidationError(
-                    'The name of the authority must be unique')
-        except Authority.DoesNotExist:
-            pass
-        return name
 
     def _objectify_data (self, base_data):
         # It would be nice to handle this process of converting
@@ -171,66 +164,34 @@ class AuthorityForm (AdminForm):
 
 class CalendarForm (AdminForm):
 
-    def clean_name (self):
-        name = self.cleaned_data['name']
-        if self.topic_map.topic_exists(CALENDAR_TYPE_IRI, name, self.topic_id):
-            raise forms.ValidationError(
-                'The name of the calendar must be unique')
-        return name
+    def save (self):
+        super(CalendarForm, self).save(self.topic_map.create_calendar)
 
 
 class DatePeriodForm (AdminForm):
 
-    def clean_name (self):
-        name = self.cleaned_data['name']
-        if self.topic_map.topic_exists(DATE_PERIOD_TYPE_IRI, name,
-                                       self.topic_id):
-            raise forms.ValidationError(
-                'The name of the date period must be unique')
-        return name
+    def save (self):
+        super(DatePeriodForm, self).save(self.topic_map.create_date_period)
 
 
 class DateTypeForm (AdminForm):
 
-    def clean_name (self):
-        name = self.cleaned_data['name']
-        if self.topic_map.topic_exists(DATE_TYPE_TYPE_IRI, name,
-                                       self.topic_id):
-            raise forms.ValidationError(
-                'The name of the date type must be unique')
-        return name
+    def save (self):
+        super(DateTypeForm, self).save(self.topic_map.create_date_type)
 
 
 class EntityRelationshipForm (AdminForm):
 
     reverse_name = forms.CharField(max_length=100)
     
-    def clean_name (self):
-        name = self.cleaned_data['name']
-        if self.topic_map.topic_exists(ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, name,
-                                       self.topic_id):
-            raise forms.ValidationError(
-                'The name of the entity relationship type must be unique')
-        return name
-
-    def clean_reverse_name (self):
-        name = self.cleaned_data['reverse_name']
-        if self.topic_map.topic_exists(ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, name,
-                                       self.topic_id):
-            raise forms.ValidationError(
-                'The reverse name of the entity relationship type must be unique')
-        return name
+    # Need to validate that the combination of forward and reverse
+    # names is unique.
 
 
 class EntityTypeForm (AdminForm):
 
-    def clean_name (self):
-        name = self.cleaned_data['name']
-        if self.topic_map.topic_exists(ENTITY_TYPE_TYPE_IRI, name,
-                                       self.topic_id):
-            raise forms.ValidationError(
-                'The name of the entity type must be unique')
-        return name
+    def save (self):
+        super(EntityTypeForm, self).save(self.topic_map.create_entity_type)
     
 
 class LanguageForm (AdminForm):
@@ -244,23 +205,21 @@ class LanguageForm (AdminForm):
         # suitable.
         return code
 
-    def clean_name (self):
+    def save (self):
         name = self.cleaned_data['name']
-        if self.topic_map.topic_exists(LANGUAGE_TYPE_IRI, name, self.topic_id):
-            raise forms.ValidationError(
-                'The name of the language must be unique')
-        return name
+        code = self.cleaned_data['code']
+        if self.instance is None:
+            model_object = self.topic_map.create_language(name, code)
+        else:
+            model_object = self.instance
+            model_object.set_admin_name(name)
+            model_object.set_code(code)
+        return model_object
 
 
 class NameTypeForm (AdminForm):
 
-    def clean_name (self):
-        name = self.cleaned_data['name']
-        if self.topic_map.topic_exists(NAME_TYPE_TYPE_IRI, name, self.topic_id):
-            raise forms.ValidationError(
-                'The name of the name type must be unique')
-        return name
-
+    pass
     
 
 class ScriptForm (AdminForm):
@@ -273,10 +232,3 @@ class ScriptForm (AdminForm):
         # name. topic_exists checks on the admin name, and so is not
         # suitable.
         return code
-
-    def clean_name (self):
-        name = self.cleaned_data['name']
-        if self.topic_map.topic_exists(SCRIPT_TYPE_IRI, name, self.topic_id):
-            raise forms.ValidationError(
-                'The name of the script must be unique')
-        return name

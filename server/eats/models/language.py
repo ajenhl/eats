@@ -23,3 +23,11 @@ class Language (Topic, Infrastructure):
     class Meta:
         proxy = True
         app_label = 'eats'
+
+    def get_code (self):
+        name = self.get_names(self.eats_topic_map.language_code_type)[0]
+        return name.get_value()
+
+    def set_code (self, code):
+        name = self.get_names(self.eats_topic_map.language_code_type)[0]
+        name.set_value(code)

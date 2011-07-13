@@ -66,13 +66,13 @@ def topic_add (request, topic_map, model):
     form_class = get_form_class(model)
     opts = model._meta
     if request.method == 'POST':
-        form = form_class(topic_map, request.POST)
+        form = form_class(topic_map, model, request.POST)
         if form.is_valid():
             topic = form.save()
             redirect_url = get_redirect_url(form, opts, topic)
             return HttpResponseRedirect(redirect_url)
     else:
-        form = form_class(topic_map)
+        form = form_class(topic_map, model)
     context_data = {'form': form, 'opts': opts}
     return render_to_response('eats/admin/topic_add.html', context_data,
                               context_instance=RequestContext(request))
@@ -86,13 +86,13 @@ def topic_change (request, topic_map, topic_id, model):
     opts = model._meta
     form_class = get_form_class(model)
     if request.method == 'POST':
-        form = form_class(topic_map, request.POST, instance=topic)
+        form = form_class(topic_map, model, request.POST, instance=topic)
         if form.is_valid():
             form.save()
             redirect_url = get_redirect_url(form, opts, topic)
             return HttpResponseRedirect(redirect_url)
     else:
-        form = form_class(topic_map, instance=topic)
+        form = form_class(topic_map, model, instance=topic)
     context_data = {'form': form, 'opts': opts}
     return render_to_response('eats/admin/topic_change.html', context_data,
                               context_instance=RequestContext(request))

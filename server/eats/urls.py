@@ -1,7 +1,6 @@
 from django.conf.urls.defaults import patterns, url
 
-from eats.constants import AUTHORITY_TYPE_IRI, CALENDAR_TYPE_IRI, DATE_PERIOD_TYPE_IRI, DATE_TYPE_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_TYPE_TYPE_IRI, SCRIPT_TYPE_IRI
-from eats.models import Authority
+from eats.models import Authority, Calendar, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NameType, Script
 
 
 # Displaying.
@@ -22,18 +21,14 @@ urlpatterns += patterns(
     )
 
 authority_data = {'model': Authority}
-topic_data = {
-    'authority': {'type_iri': AUTHORITY_TYPE_IRI, 'name': 'authority'},
-    'calendar': {'type_iri': CALENDAR_TYPE_IRI, 'name': 'calendar'},
-    'date_period': {'type_iri': DATE_PERIOD_TYPE_IRI, 'name': 'date-period'},
-    'date_type': {'type_iri': DATE_TYPE_TYPE_IRI, 'name': 'date-type'},
-    'entity_relationship_type': {'type_iri': ENTITY_RELATIONSHIP_TYPE_TYPE_IRI,
-                                 'name': 'entity-relationship-type'},
-    'entity_type': {'type_iri': ENTITY_TYPE_TYPE_IRI, 'name': 'entity-type'},
-    'language': {'type_iri': LANGUAGE_TYPE_IRI, 'name': 'language'},
-    'name_type': {'type_iri': NAME_TYPE_TYPE_IRI, 'name': 'name-type'},
-    'script': {'type_iri': SCRIPT_TYPE_IRI, 'name': 'script'},
-    }
+calendar_data = {'model': Calendar}
+date_period_data = {'model': DatePeriod}
+date_type_data = {'model': DateType}
+entity_relationship_type_data = {'model': EntityRelationshipType}
+entity_type_data = {'model': EntityType}
+language_data = {'model': Language}
+name_type_data = {'model': NameType}
+script_data = {'model': Script}
 
 # Administration.
 urlpatterns += patterns(
@@ -47,55 +42,55 @@ urlpatterns += patterns(
         name='authority-add'),
     url(r'^administer/authority/(?P<topic_id>\d+)/$', 'topic_change',
         authority_data, name='authority-change'),
-    url(r'^administer/calendar/$', 'topic_list', topic_data['calendar'],
+    url(r'^administer/calendar/$', 'topic_list', calendar_data,
         name='calendar-list'),
-    url(r'^administer/calendar/add/$', 'topic_add', topic_data['calendar'],
+    url(r'^administer/calendar/add/$', 'topic_add', calendar_data,
         name='calendar-add'),
     url(r'^administer/calendar/(?P<topic_id>\d+)/$', 'topic_change',
-        topic_data['calendar'], name='calendar-change'),
-    url(r'^administer/date-period/$', 'topic_list', topic_data['date_period'],
+        calendar_data, name='calendar-change'),
+    url(r'^administer/date-period/$', 'topic_list', date_period_data,
         name='date-period-list'),
     url(r'^administer/date-period/add/$', 'topic_add',
-        topic_data['date_period'], name='date-period-add'),
+        date_period_data, name='date-period-add'),
     url(r'^administer/date-period/(?P<topic_id>\d+)/$', 'topic_change',
-        topic_data['date_period'], name='date-period-change'),
-    url(r'^administer/date-type/$', 'topic_list', topic_data['date_type'],
+        date_period_data, name='date-period-change'),
+    url(r'^administer/date-type/$', 'topic_list', date_type_data,
         name='date-type-list'),
-    url(r'^administer/date-type/add/$', 'topic_add', topic_data['date_type'],
+    url(r'^administer/date-type/add/$', 'topic_add', date_type_data,
         name='date-type-add'),
     url(r'^administer/date-type/(?P<topic_id>\d+)/$', 'topic_change',
-        topic_data['date_type'], name='date-type-change'),
+        date_type_data, name='date-type-change'),
     url(r'^administer/entity-relationship-type/$', 'topic_list',
-        topic_data['entity_relationship_type'],
+        entity_relationship_type_data,
         name='entity-relationship-type-list'),
     url(r'^administer/entity-relationship-type/add/$', 'topic_add',
-        topic_data['entity_relationship_type'],
+        entity_relationship_type_data,
         name='entity-relationship-type-add'),
     url(r'^administer/entity-relationship-type/(?P<topic_id>\d+)/$',
-        'topic_change', topic_data['entity_relationship_type'],
+        'topic_change', entity_relationship_type_data,
         name='entity-relationship-type-change'),
-    url(r'^administer/entity-type/$', 'topic_list', topic_data['entity_type'],
+    url(r'^administer/entity-type/$', 'topic_list', entity_type_data,
         name='entity-type-list'),
     url(r'^administer/entity-type/add/$', 'topic_add',
-        topic_data['entity_type'], name='entity-type-add'),
+        entity_type_data, name='entity-type-add'),
     url(r'^administer/entity-type/(?P<topic_id>\d+)/$', 'topic_change',
-        topic_data['entity_type'], name='entity-type-change'),
-    url(r'^administer/language/$', 'topic_list', topic_data['language'],
+        entity_type_data, name='entity-type-change'),
+    url(r'^administer/language/$', 'topic_list', language_data,
         name='language-list'),
-    url(r'^administer/language/add/$', 'topic_add', topic_data['language'],
+    url(r'^administer/language/add/$', 'topic_add', language_data,
         name='language-add'),
     url(r'^administer/language/(?P<topic_id>\d+)/$', 'topic_change',
-        topic_data['language'], name='language-change'),
-    url(r'^administer/name-type/$', 'topic_list', topic_data['name_type'],
+        language_data, name='language-change'),
+    url(r'^administer/name-type/$', 'topic_list', name_type_data,
         name='name-type-list'),
     url(r'^administer/name-type/add/$', 'topic_add',
-        topic_data['name_type'], name='name-type-add'),
+        name_type_data, name='name-type-add'),
     url(r'^administer/name-type/(?P<topic_id>\d+)/$', 'topic_change',
-        topic_data['name_type'], name='name-type-change'),
-    url(r'^administer/script/$', 'topic_list', topic_data['script'],
+        name_type_data, name='name-type-change'),
+    url(r'^administer/script/$', 'topic_list', script_data,
         name='script-list'),
-    url(r'^administer/script/add/$', 'topic_add', topic_data['script'],
+    url(r'^administer/script/add/$', 'topic_add', script_data,
         name='script-add'),
     url(r'^administer/script/(?P<topic_id>\d+)/$', 'topic_change',
-        topic_data['script'], name='script-change'),
+        script_data, name='script-change'),
     )
