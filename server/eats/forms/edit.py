@@ -280,8 +280,6 @@ class EntityTypeForm (PropertyAssertionForm):
     entity_type = forms.ChoiceField(choices=[])
 
     def __init__ (self, *args, **kwargs):
-        print args
-        print kwargs
         entity_type_choices = kwargs.pop('entity_type_choices')
         super(EntityTypeForm, self).__init__(*args, **kwargs)
         if 'initial' in kwargs:
