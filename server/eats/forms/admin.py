@@ -45,7 +45,7 @@ class AdminForm (forms.Form):
         return construct
 
     def _topic_to_dict (self, topic):
-        return {}
+        return {'name': topic.get_admin_name()}
 
 
 class AuthorityForm (AdminForm):
@@ -135,7 +135,8 @@ class AuthorityForm (AdminForm):
         if self.instance is None:
             authority = self.topic_map.create_authority(name)
         else:
-            authority = self.topic
+            authority = self.instance
+            authority.set_admin_name(name)
         authority.set_calendars(data['calendars'])
         authority.set_date_periods(data['date_periods'])
         authority.set_date_types(data['date_types'])
@@ -146,6 +147,26 @@ class AuthorityForm (AdminForm):
         authority.set_name_types(data['name_types'])
         authority.set_scripts(data['scripts'])
         return authority
+
+    def _topic_to_dict (self, topic):
+        data = super(AuthorityForm, self)._topic_to_dict(topic)
+        data['calendars'] = [calendar.get_id() for calendar in
+                             topic.get_calendars()]
+        data['date_periods'] = [date_period.get_id() for date_period in
+                                topic.get_date_periods()]
+        data['date_types'] = [date_type.get_id() for date_type in
+                                topic.get_date_types()]
+        data['entity_relationship_types'] = [
+            entity_relationship_type.get_id() for entity_relationship_type in
+            topic.get_entity_relationship_types()]
+        data['entity_types'] = [entity_type.get_id() for entity_type in
+                                topic.get_entity_types()]
+        data['languages'] = [language.get_id() for language in
+                                topic.get_languages()]
+        data['name_types'] = [name_type.get_id() for name_type in
+                                topic.get_name_types()]
+        data['scripts'] = [script.get_id() for script in topic.get_scripts()]
+        return data
 
 
 class CalendarForm (AdminForm):

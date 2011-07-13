@@ -28,4 +28,4 @@ class EntityRelationshipType (Topic, Infrastructure):
         forward = self.get_names(self.eats_topic_map.relationship_name_type)[0]
         reverse = self.get_names(
             self.eats_topic_map.reverse_relationship_name_type)[0]
-        return u'%s / %s' % (forward, reverse)
+        return u'%s / %s' % (forward.get_value(), reverse.get_value())

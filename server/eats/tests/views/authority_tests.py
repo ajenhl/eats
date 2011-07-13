@@ -96,3 +96,66 @@ class AuthorityViewsTestCase (BaseTestCase):
         url = reverse('authority-change', kwargs={'topic_id': 0})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
+
+    def test_authority_change_get (self):
+        url = reverse('authority-change', kwargs={
+                'topic_id': self.authority.get_id()})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['form'].instance, self.authority)
+
+    def test_authority_change_post (self):
+        self.assertEqual(Authority.objects.count(), 1)
+        url = reverse('authority-change', kwargs={
+                'topic_id': self.authority.get_id()})
+        self.assertEqual(self.authority.get_admin_name(), 'Test')
+        self.assertEqual(len(self.authority.get_calendars()), 0)
+        self.assertEqual(len(self.authority.get_date_periods()), 0)
+        self.assertEqual(len(self.authority.get_date_types()), 0)
+        self.assertEqual(len(self.authority.get_entity_relationship_types()), 0)
+        self.assertEqual(len(self.authority.get_entity_types()), 0)
+        self.assertEqual(len(self.authority.get_languages()), 0)
+        self.assertEqual(len(self.authority.get_name_types()), 0)
+        self.assertEqual(len(self.authority.get_scripts()), 0)
+        calendar1 = self.create_calendar('Test1')
+        calendar2 = self.create_calendar('Test2')
+        date_period = self.create_date_period('Test')
+        date_type = self.create_date_type('Test')
+        entity_relationship_type = self.create_entity_relationship_type(
+            'Test', 'Reverse')
+        entity_type = self.create_entity_type('Test')
+        language = self.create_language('English', 'en')
+        name_type = self.create_name_type('Test')
+        script = self.create_script('Latin', 'Latn')
+        post_data = {
+            'name': 'Test1',
+            'calendars': [calendar1.get_id(), calendar2.get_id()],
+            'date_periods': [date_period.get_id()],
+            'date_types': [date_type.get_id()],
+            'entity_relationship_types': [entity_relationship_type.get_id()],
+            'entity_types': [entity_type.get_id()],
+            'languages': [language.get_id()],
+            'name_types': [name_type.get_id()], 'scripts': [script.get_id()],
+            '_save': 'Save'}
+        response = self.client.post(url, post_data, follow=True)
+        self.assertRedirects(response, reverse('authority-list'))
+        self.assertEqual(Authority.objects.count(), 1)
+        self.assertEqual(self.authority.get_admin_name(), 'Test1')
+        self.assertEqual(len(self.authority.get_calendars()), 2)
+        self.assertTrue(calendar1 in self.authority.get_calendars())
+        self.assertTrue(calendar2 in self.authority.get_calendars())
+        self.assertEqual(len(self.authority.get_date_periods()), 1)
+        self.assertTrue(date_period in self.authority.get_date_periods())
+        self.assertEqual(len(self.authority.get_date_types()), 1)
+        self.assertTrue(date_type in self.authority.get_date_types())
+        self.assertEqual(len(self.authority.get_entity_relationship_types()), 1)
+        self.assertTrue(entity_relationship_type in
+                        self.authority.get_entity_relationship_types())
+        self.assertEqual(len(self.authority.get_entity_types()), 1)
+        self.assertTrue(entity_type in self.authority.get_entity_types())
+        self.assertEqual(len(self.authority.get_languages()), 1)
+        self.assertTrue(language in self.authority.get_languages())
+        self.assertEqual(len(self.authority.get_name_types()), 1)
+        self.assertTrue(name_type in self.authority.get_name_types())
+        self.assertEqual(len(self.authority.get_scripts()), 1)
+        self.assertTrue(script in self.authority.get_scripts())

@@ -8,7 +8,10 @@ class Infrastructure (object):
         return self._eats_topic_map
 
     def get_admin_name (self):
-        return self.get_names(self.eats_topic_map.admin_name_type)[0]
+        return self.get_names(self.eats_topic_map.admin_name_type)[0].get_value()
+
+    def set_admin_name (self, name):
+        self.get_names(self.eats_topic_map.admin_name_type)[0].set_value(name)
         
     def topic_exists (self):
         return False
