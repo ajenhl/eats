@@ -1,5 +1,6 @@
 from tmapi.models import Topic
 
+from infrastructure import Infrastructure
 from infrastructure_manager import InfrastructureManager
 
 
@@ -15,7 +16,7 @@ class ScriptManager (InfrastructureManager):
             types=self.eats_topic_map.script_type)
 
 
-class Script (Topic):
+class Script (Topic, Infrastructure):
 
     objects = ScriptManager()
     

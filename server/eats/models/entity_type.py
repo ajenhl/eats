@@ -1,5 +1,6 @@
 from tmapi.models import Topic
 
+from infrastructure import Infrastructure
 from infrastructure_manager import InfrastructureManager
 
 
@@ -15,7 +16,7 @@ class EntityTypeManager (InfrastructureManager):
             types=self.eats_topic_map.entity_type_type)
 
 
-class EntityType (Topic):
+class EntityType (Topic, Infrastructure):
 
     objects = EntityTypeManager()
     

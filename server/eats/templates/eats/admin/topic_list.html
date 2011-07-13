@@ -1,7 +1,7 @@
 {% extends "eats/admin/base.html" %}
 
 {% block eats_content %}
-<h1>Select {{ name }} to change</h1>
+<h1>Select {{ opts.verbose_name }} to change</h1>
 
 <form id="changelist-form" action="" method="post">
 {% csrf_token %}
@@ -16,16 +16,16 @@
 <table>
   <tr>
     <td></td>
-    <th scope="col">{{ name|title }}</th>
+    <th scope="col">{{ opts.verbose_name|title }}</th>
   </tr>
-  {% for topic, name in topics %}
+  {% for topic in topics %}
   <tr>
-    <td><input type="checkbox" class="action-select" value="{{ topic.identifier.id }}" name="_selected_action" /></td>
-    <td><a href="{{ topic.identifier.id }}/">{{ name }}</a></td>
+    <td><input type="checkbox" class="action-select" value="{{ topic.get_id }}" name="_selected_action" /></td>
+    <td><a href="{{ topic.get_id }}/">{{ topic.get_admin_name }}</a></td>
   </tr>
   {% endfor %}
 </table>
 
-<p><a href="add/">Add a new {{ name }}</a></p>
+<p><a href="add/">Add a new {{ opts.verbose_name }}</a></p>
 
 {% endblock eats_content %}

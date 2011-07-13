@@ -92,17 +92,6 @@ class EATSTopicMap (TopicMap):
         return self.create_topic_by_subject_identifier(Locator(
                 CALENDAR_TYPE_IRI))
     
-    def convert_topic_to_entity (self, topic):
-        """Returns `topic` as an instance of `Entity`.
-
-        :param topic: the `Topic` representing the entity
-        :type topic: `Topic`
-        :rtype: `Entity`
-
-        """
-        entity = Entity.objects.get(pk=topic.id)
-        return entity
-
     def create_authority (self, name):
         """Creates a new authority called `name`.
 
@@ -111,10 +100,15 @@ class EATSTopicMap (TopicMap):
         :rtype: `Authority`
 
         """
-        authority = self.create_topic(proxy=Authority)
-        authority.add_type(self.authority_type)
-        authority.create_name(name, name_type=self.admin_name_type)
-        return authority
+        try:
+            Authority.objects.get_by_admin_name(name)
+            # Raise a more specific exception with error message.
+            raise Exception
+        except Authority.DoesNotExist:
+            authority = self.create_topic(proxy=Authority)
+            authority.add_type(self.authority_type)
+            authority.create_name(name, name_type=self.admin_name_type)
+            return authority
 
     def create_calendar (self, name):
         """Creates a new calendar called `name`.
@@ -246,41 +240,6 @@ class EATSTopicMap (TopicMap):
         script.create_name(code, name_type=self.script_code_type)
         return script
     
-    def create_typed_topic (self, type_iri, data=None):
-        """Creates a topic of the specified type.
-
-        :param type_iri: IRI used as the Subject Identifier for the
-          typing topic
-        :type type_iri: string
-        :param data: optional data to be saved with the topic to be created
-        :type name: dictionary or None
-        :rtype: `Topic`
-
-        """
-        # QAZ: The data part of this method is very admin specific,
-        # and should perhaps be refactored.
-        topic = self.create_topic()
-        topic_type = self.create_topic_by_subject_identifier(
-            Locator(type_iri))
-        topic.add_type(topic_type)
-        if data is not None:
-            # Different data to save depending on the type.
-            topic.create_name(data['name'], name_type=self.admin_name_type)
-            if 'code' in data:
-                if type_iri == LANGUAGE_TYPE_IRI:
-                    occurrence_type_iri = LANGUAGE_CODE_TYPE_IRI
-                elif type_iri == SCRIPT_TYPE_IRI:
-                    occurrence_type_iri = SCRIPT_CODE_TYPE_IRI
-                occurrence_type = self.create_topic_by_subject_identifier(
-                    Locator(occurrence_type_iri))
-                topic.create_occurrence(occurrence_type, data.get('code'))
-            if 'reverse_name' in data:
-                topic.create_name(data['name'],
-                                  name_type=self.relationship_name_type)
-                topic.create_name(data['reverse_name'],
-                                  name_type=self.reverse_relationship_name_type)
-        return topic
-
     @property
     def date_certainty_type (self):
         return self.create_topic_by_subject_identifier(Locator(
@@ -401,19 +360,6 @@ class EATSTopicMap (TopicMap):
         return self.create_topic_by_subject_identifier(Locator(
                 EXISTENCE_ASSERTION_TYPE_IRI))
     
-    def get_admin_name (self, topic):
-        """Returns the administrative name of `topic`.
-
-        :param topic: the topic whose administrative name is to be returned
-        :type topic: `Topic`
-        :rtype: `Name`
-
-        """
-        # There should only be a single such name, but this is not
-        # enforced at the TMAPI level. There seems little need to raise an
-        # error here if there is more than one.
-        return topic.get_names(self.admin_name_type)[0]
-
     def get_assertion_type (self, assertion):
         """Returns the specific class of `assertion`.
 
@@ -434,64 +380,6 @@ class EATSTopicMap (TopicMap):
         else:
             assertion_class = None
         return assertion_class
-
-    def get_topic_by_id (self, topic_id, type_iri):
-        """Returns the topic with `topic_id`, or None if there is no
-        such topic that is of the type specified by `type_iri`.
-
-        :param topic_id: identifier of the topic
-        :type topic_id: integer
-        :param type_iri: IRI used as the Subject Identifier for the
-          typing topic
-        :type type_iri: string
-        :rtype: `Topic`
-
-        """
-        topic = self.get_construct_by_id(topic_id)
-        if topic is not None:
-            topic_type = self.get_topic_by_subject_identifier(
-                Locator(type_iri))
-            if not isinstance(topic, Topic) or \
-                    topic_type not in topic.types.all():
-                topic = None
-        return topic
-
-    def get_topic_data (self, topic, type_iri):
-        """Returns the data associated with topic.
-
-        :param topic: the topic whose data is to be retrieved
-        :type topic: `Topic`
-        :param type_iri: IRI used as the SubjectIdentifier for the typing topic
-        :type type_iri: string
-
-        """
-        # QAZ: This is very specific to admin functionality, and
-        # should perhaps be renamed.
-        data = {}
-        data['name'] = self.get_admin_name(topic)
-        if type_iri in (LANGUAGE_TYPE_IRI, SCRIPT_TYPE_IRI):
-            code_type_iri = self.code_type_iris[type_iri]
-            code_occurrence_type = self.get_topic_by_subject_identifier(
-                Locator(code_type_iri))
-            code_occurrence = topic.get_occurrences(code_occurrence_type)[0]
-            data['code'] = code_occurrence.get_value()
-        return data
-    
-    def get_topics_by_type (self, type_iri):
-        """Returns a `QuerySet` of `Topic`s of the the type specified
-        by `type_iri`.
-
-        :param type_iri: IRI used as the Subject Identifier for the
-          typing topic
-        :type type_iri: string
-        :rtype: `QuerySet` of `Topic`s
-
-        """
-        topic_type = self.create_topic_by_subject_identifier(
-            Locator(type_iri))
-        index = self.get_index(TypeInstanceIndex)
-        index.open()
-        return index.get_topics(topic_type)
 
     @property
     def infrastructure_role_type (self):
@@ -530,7 +418,7 @@ class EATSTopicMap (TopicMap):
         :rtype: `QuerySet` of `Topic`s
 
         """
-        return self.get_topics_by_type(LANGUAGE_TYPE_IRI)
+        return Language.objects.all()
 
     def lookup_entities (self, query):
         names = query.split()
@@ -637,52 +525,3 @@ class EATSTopicMap (TopicMap):
     def start_tpq_date_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 START_TPQ_DATE_TYPE_IRI))
-    
-    def topic_exists (self, type_iri, name, topic_id):
-        """Returns True if this topic map contains a topic with the
-        type specified by `type_iri` and whose administrative name is
-        `name`.
-
-        If `topic_id` is not None, return False if the matching topic
-        has that id, to allow for a topic to be excluded from the check.
-
-        :param type_iri: IRI used as the Subject Identifier for the
-          typing topic
-        :type type_iri: string
-        :param name: administrative name of the topic
-        :type name: string
-        :param topic_id: id of a topic to be ignored when testing
-        :type topic_id: integer
-        :rtype: Boolean
-
-        """
-        if topic_id is not None:
-            topic = self.get_topic_by_id(topic_id, type_iri)
-            if name == self.get_admin_name(topic).get_value():
-                return False
-        topics = self.get_topics_by_type(type_iri)
-        for topic in topics:
-            if name == self.get_admin_name(topic).get_value():
-                return True
-        return False
-
-    def update_topic_by_type (self, topic, type_iri, data):
-        """Updates `topic` with the information in `data`.
-
-        :param topic: the topic to be updated
-        :type topic: `Topic`
-        :param type_iri: IRI used as the SubjectIdentifier for the typing topic
-        :type type_iri: string
-
-        """
-        # QAZ: This is very specific to admin functionality, and
-        # should perhaps be renamed.
-        self.get_admin_name(topic).set_value(data.get('name'))
-        if type_iri in (LANGUAGE_TYPE_IRI, SCRIPT_TYPE_IRI):
-            code_type_iri = self.code_type_iris[type_iri]
-            code_occurrence_type = self.get_topic_by_subject_identifier(
-                Locator(code_type_iri))
-            # QAZ: assuming that there is a single such occurrence, or
-            # that the others are not useful.
-            code_occurrence = topic.get_occurrences(code_occurrence_type)[0]
-            code_occurrence.set_value(data.get('code'))

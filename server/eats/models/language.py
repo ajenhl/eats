@@ -1,5 +1,6 @@
 from tmapi.models import Topic
 
+from infrastructure import Infrastructure
 from infrastructure_manager import InfrastructureManager
 
 
@@ -15,7 +16,7 @@ class LanguageManager (InfrastructureManager):
             types=self.eats_topic_map.language_type)
 
 
-class Language (Topic):
+class Language (Topic, Infrastructure):
 
     objects = LanguageManager()
     

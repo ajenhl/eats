@@ -1,5 +1,6 @@
 from tmapi.models import Topic
 
+from infrastructure import Infrastructure
 from infrastructure_manager import InfrastructureManager
 
 
@@ -15,7 +16,7 @@ class NameTypeManager (InfrastructureManager):
             types=self.eats_topic_map.name_type_type)
 
 
-class NameType (Topic):
+class NameType (Topic, Infrastructure):
 
     objects = NameTypeManager()
     

@@ -1,5 +1,6 @@
 from tmapi.models import Topic
 
+from infrastructure import Infrastructure
 from infrastructure_manager import InfrastructureManager
 
 
@@ -15,7 +16,7 @@ class DatePeriodManager (InfrastructureManager):
             types=self.eats_topic_map.date_period_type)
 
 
-class DatePeriod (Topic):
+class DatePeriod (Topic, Infrastructure):
 
     objects = DatePeriodManager()
     

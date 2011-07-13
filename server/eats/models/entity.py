@@ -30,9 +30,9 @@ class Entity (Topic):
         asserted by `authority`.
 
         :param authority: authority asserting the property
-        :type authority: `Topic`
+        :type authority: `Authority`
         :param relationship_type: the type of relationship
-        :type relationship_type: `Topic`
+        :type relationship_type: `EntityRelationshipType`
         :param domain_entity: entity playing the domain role in the
           relationship
         :type domain_entity: `Entity`
@@ -55,9 +55,9 @@ class Entity (Topic):
         `authority`.
 
         :param authority: authority asserting the property
-        :type authority: `Topic`
+        :type authority: `Authority`
         :param entity_type: entity type
-        :type entity_type: `Topic`
+        :type entity_type: `EntityType`
         :rtype: `EntityTypePropertyAssertion`
 
         """
@@ -72,7 +72,7 @@ class Entity (Topic):
         `authority`.
 
         :param authority: authority asserting the property
-        :type authority: `Topic`
+        :type authority: `Authority`
         :rtype: `ExistencePropertyAssertion`
 
         """
@@ -87,13 +87,13 @@ class Entity (Topic):
         """Creates a name property assertion asserted by `authority`.
 
         :param authority: authority asserting the property
-        :type authority: `Topic`
+        :type authority: `Authority`
         :param name_type: name type
-        :type name_type: `Topic`
+        :type name_type: `NameType`
         :param language: language of the name
-        :type language: `Topic`
+        :type language: `Language`
         :param script" script of the name
-        :type script: `Topic`
+        :type script: `Script`
         :param display_form: display form of the name
         :type display_form: unicode string
         :rtype: `NamePropertyAssertion`
@@ -111,9 +111,9 @@ class Entity (Topic):
         """Creates a note property assertion asserted by `authority`.
 
         :param authority: authority asserting the property
-        :type authority: `Topic`
+        :type authority: `Authority`
         :param note: text of note
-        :type note: string
+        :type note: unicode string
         :rtype: `NotePropertyAssertion`
 
         """

@@ -1,38 +1,33 @@
 from tmapi.models import Topic
 
-from base_manager import BaseManager
+from infrastructure_manager import InfrastructureManager
 from calendar import Calendar
 from date_period import DatePeriod
 from date_type import DateType
 from entity_relationship_type import EntityRelationshipType
 from entity_type import EntityType
+from infrastructure import Infrastructure
 from language import Language
 from name_type import NameType
 from script import Script
 
 
-class AuthorityManager (BaseManager):
+class AuthorityManager (InfrastructureManager):
 
     def get_query_set (self):
         return super(AuthorityManager, self).get_query_set().filter(
             types=self.eats_topic_map.authority_type)
 
 
-class Authority (Topic):
+class Authority (Topic, Infrastructure):
 
     objects = AuthorityManager()
     
     class Meta:
         proxy = True
         app_label = 'eats'
+        verbose_name_plural = 'authorities'
 
-    @property
-    def eats_topic_map (self):
-        if not hasattr(self, '_eats_topic_map'):
-            from eats_topic_map import EATSTopicMap
-            self._eats_topic_map = self.get_topic_map(proxy=EATSTopicMap)
-        return self._eats_topic_map
-        
     def get_calendars (self):
         """Return the calendars available to this authority.
 

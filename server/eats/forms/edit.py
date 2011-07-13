@@ -6,7 +6,7 @@ import selectable.forms as selectable
 from eats.constants import FORWARD_RELATIONSHIP_MARKER, \
     REVERSE_RELATIONSHIP_MARKER
 from eats.lookups import EntityLookup
-from eats.models import Calendar, DatePeriod, DateType
+from eats.models import Authority, Calendar, DatePeriod, DateType, EntityType, Language, NameType, Script
 
 
 class PropertyAssertionFormSet (BaseFormSet):
@@ -216,7 +216,7 @@ class PropertyAssertionForm (forms.Form):
 class ExistenceForm (PropertyAssertionForm):
 
     def save (self):
-        authority = self._get_construct('authority')
+        authority = self._get_construct('authority', Authority)
         if self.instance is None:
             # Create a new assertion.
             self.entity.create_existence_property_assertion(authority)
@@ -251,7 +251,7 @@ class EntityRelationshipForm (PropertyAssertionForm):
         return data
         
     def save (self):
-        authority = self._get_construct('authority')
+        authority = self._get_construct('authority', Authority)
         relationship_type_id = self.cleaned_data['relationship_type']
         relationship_type = self.topic_map.get_construct_by_id(
             relationship_type_id[:-1])
@@ -280,6 +280,8 @@ class EntityTypeForm (PropertyAssertionForm):
     entity_type = forms.ChoiceField(choices=[])
 
     def __init__ (self, *args, **kwargs):
+        print args
+        print kwargs
         entity_type_choices = kwargs.pop('entity_type_choices')
         super(EntityTypeForm, self).__init__(*args, **kwargs)
         if 'initial' in kwargs:
@@ -292,8 +294,8 @@ class EntityTypeForm (PropertyAssertionForm):
         return data
         
     def save (self):
-        authority = self._get_construct('authority')
-        entity_type = self._get_construct('entity_type')
+        authority = self._get_construct('authority', Authority)
+        entity_type = self._get_construct('entity_type', EntityType)
         if self.instance is None:
             # Create a new assertion.
             self.entity.create_entity_type_property_assertion(
@@ -331,10 +333,10 @@ class NameForm (PropertyAssertionForm):
         return data
 
     def save (self):
-        authority = self._get_construct('authority')
-        name_type = self._get_construct('name_type')
-        language = self._get_construct('language')
-        script = self._get_construct('script')
+        authority = self._get_construct('authority', Authority)
+        name_type = self._get_construct('name_type', NameType)
+        language = self._get_construct('language', Language)
+        script = self._get_construct('script', Script)
         display_form = self.cleaned_data['display_form']
         if self.instance is None:
             # Create a new assertion.
@@ -356,7 +358,7 @@ class NoteForm (PropertyAssertionForm):
         return data
     
     def save (self):
-        authority = self._get_construct('authority')
+        authority = self._get_construct('authority', Authority)
         note = self.cleaned_data['note']
         if self.instance is None:
             # Create a new assertion.
@@ -553,7 +555,7 @@ def create_choice_list (topic_map, queryset, default=False):
     """
     # QAZ: need a function for getting the most appropriate name,
     # based on the user's preferences.
-    choices = [(unicode(item.get_id()), topic_map.get_admin_name(item))
+    choices = [(unicode(item.get_id()), item.get_admin_name())
                for item in queryset]
     if not (queryset.count() == 1 and default):
         choices = [('', '----------')] + choices

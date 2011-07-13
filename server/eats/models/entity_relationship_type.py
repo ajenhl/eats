@@ -1,5 +1,6 @@
 from tmapi.models import Topic
 
+from infrastructure import Infrastructure
 from infrastructure_manager import InfrastructureManager
 
 
@@ -15,10 +16,16 @@ class EntityRelationshipTypeManager (InfrastructureManager):
             types=self.eats_topic_map.entity_relationship_type_type)
 
 
-class EntityRelationshipType (Topic):
+class EntityRelationshipType (Topic, Infrastructure):
 
     objects = EntityRelationshipTypeManager()
     
     class Meta:
         proxy = True
         app_label = 'eats'
+
+    def get_admin_name (self):
+        forward = self.get_names(self.eats_topic_map.relationship_name_type)[0]
+        reverse = self.get_names(
+            self.eats_topic_map.reverse_relationship_name_type)[0]
+        return u'%s / %s' % (forward, reverse)

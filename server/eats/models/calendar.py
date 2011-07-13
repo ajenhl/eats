@@ -1,5 +1,6 @@
 from tmapi.models import Topic
 
+from infrastructure import Infrastructure
 from infrastructure_manager import InfrastructureManager
 
 
@@ -15,7 +16,7 @@ class CalendarManager (InfrastructureManager):
             types=self.eats_topic_map.calendar_type)
 
 
-class Calendar (Topic):
+class Calendar (Topic, Infrastructure):
 
     objects = CalendarManager()
     

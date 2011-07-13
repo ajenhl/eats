@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import patterns, url
 
 from eats.constants import AUTHORITY_TYPE_IRI, CALENDAR_TYPE_IRI, DATE_PERIOD_TYPE_IRI, DATE_TYPE_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_TYPE_TYPE_IRI, SCRIPT_TYPE_IRI
+from eats.models import Authority
 
 
 # Displaying.
@@ -20,6 +21,7 @@ urlpatterns += patterns(
     url(r'^edit/entity/(?P<entity_id>\d+)/(?P<assertion_id>\d+)/date/(?P<date_id>\d+)/$', 'date_change', name='date-change'),
     )
 
+authority_data = {'model': Authority}
 topic_data = {
     'authority': {'type_iri': AUTHORITY_TYPE_IRI, 'name': 'authority'},
     'calendar': {'type_iri': CALENDAR_TYPE_IRI, 'name': 'calendar'},
@@ -39,12 +41,12 @@ urlpatterns += patterns(
     url(r'^administer/$', 'administration_panel', name='administration-panel'),
     url(r'^administer/create_topic_map/$', 'create_topic_map',
         name='create-topic-map'),
-    url(r'^administer/authority/$', 'topic_list', topic_data['authority'],
+    url(r'^administer/authority/$', 'topic_list', authority_data,
         name='authority-list'),
-    url(r'^administer/authority/add/$', 'topic_add', topic_data['authority'],
+    url(r'^administer/authority/add/$', 'topic_add', authority_data,
         name='authority-add'),
     url(r'^administer/authority/(?P<topic_id>\d+)/$', 'topic_change',
-        topic_data['authority'], name='authority-change'),
+        authority_data, name='authority-change'),
     url(r'^administer/calendar/$', 'topic_list', topic_data['calendar'],
         name='calendar-list'),
     url(r'^administer/calendar/add/$', 'topic_add', topic_data['calendar'],
