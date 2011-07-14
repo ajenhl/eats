@@ -1,0 +1,31 @@
+from eats.tests.base_test_case import BaseTestCase
+
+
+class EntityRelationshipTypeTestCase (BaseTestCase):
+
+    def test_entity_relationship_type_admin_name (self):
+        er_type = self.create_entity_relationship_type('Forward', 'Reverse')
+        self.assertEqual(er_type.get_admin_name(), 'Forward / Reverse')
+        er_type.set_admin_name('Forward2', 'Reverse2')
+        self.assertEqual(er_type.get_admin_name(), 'Forward2 / Reverse2')
+        er_type.set_admin_name('Forward2', 'Reverse2')
+        self.assertEqual(er_type.get_admin_name(), 'Forward2 / Reverse2')
+    
+    def test_entity_relationship_type_forward_name (self):
+        er_type = self.create_entity_relationship_type('Forward', 'Reverse')
+        self.assertEqual(er_type.get_admin_forward_name(), 'Forward')
+        er_type.set_admin_name('Forward2', 'Reverse')
+        self.assertEqual(er_type.get_admin_forward_name(), 'Forward2')
+        er_type2 = self.create_entity_relationship_type('Test', 'Reverse')
+        self.assertRaises(Exception, er_type2.set_admin_name, 'Forward2',
+                          'Reverse')
+
+    def test_entity_relationship_type_reverse_name (self):
+        er_type = self.create_entity_relationship_type('Forward', 'Reverse')
+        self.assertEqual(er_type.get_admin_reverse_name(), 'Reverse')
+        er_type.set_admin_name('Forward', 'Reverse2')
+        self.assertEqual(er_type.get_admin_reverse_name(), 'Reverse2')
+        er_type2 = self.create_entity_relationship_type('Forward', 'Test2')
+        self.assertRaises(Exception, er_type2.set_admin_name, 'Forward',
+                          'Reverse2')
+        

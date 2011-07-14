@@ -10,6 +10,13 @@ class LanguageManager (InfrastructureManager):
         association_type = self.eats_topic_map.authority_has_language_association_type
         return super(LanguageManager, self).filter_by_authority(
             authority, association_type)
+
+    def get_by_code (self, code):
+        for language in self.all():
+            if code == language.get_code():
+                return language
+        else:
+            raise self.model.DoesNotExist
     
     def get_query_set (self):
         return super(LanguageManager, self).get_query_set().filter(
@@ -29,5 +36,13 @@ class Language (Topic, Infrastructure):
         return name.get_value()
 
     def set_code (self, code):
+        if code == self.get_code():
+            return
+        try:
+            self._default_manager.get_by_code(code)
+            # QAZ: Raise a specific exception with error message.
+            raise Exception
+        except self.DoesNotExist:
+            pass
         name = self.get_names(self.eats_topic_map.language_code_type)[0]
         name.set_value(code)

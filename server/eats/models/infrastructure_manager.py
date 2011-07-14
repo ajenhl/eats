@@ -14,12 +14,7 @@ class InfrastructureManager (BaseManager):
 
     def get_by_admin_name (self, name):
         for model_object in self.all():
-            try:
-                admin_name = model_object.get_names(
-                    self.eats_topic_map.admin_name_type)[0]
-            except IndexError:
-                continue
-            if name == admin_name.get_value():
+            if name == model_object.get_admin_name():
                 return model_object
         else:
             raise self.model.DoesNotExist
