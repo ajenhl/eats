@@ -214,12 +214,12 @@ class LanguageForm (AdminForm):
         name = self.cleaned_data['name']
         code = self.cleaned_data['code']
         if self.instance is None:
-            model_object = self.topic_map.create_language(name, code)
+            language = self.topic_map.create_language(name, code)
         else:
-            model_object = self.instance
-            model_object.set_admin_name(name)
-            model_object.set_code(code)
-        return model_object
+            language = self.instance
+            language.set_admin_name(name)
+            language.set_code(code)
+        return language
 
 
 class NameTypeForm (AdminForm):
@@ -233,7 +233,23 @@ class ScriptForm (AdminForm):
 
     def clean_code (self):
         code = self.cleaned_data['code']
-        # QAZ: Need to ensure that the code is unique, along with the
-        # name. topic_exists checks on the admin name, and so is not
-        # suitable.
+        try:
+            existing = self.model.objects.get_by_code(code)
+            if self.instance is None or self.instance != existing:
+                raise forms.ValidationError(
+                    'The code of the %s must be unique' %
+                    self.model._meta.verbose_name)
+        except self.model.DoesNotExist:
+            pass
         return code
+
+    def save (self):
+        name = self.cleaned_data['name']
+        code = self.cleaned_data['code']
+        if self.instance is None:
+            script = self.topic_map.create_script(name, code)
+        else:
+            script = self.instance
+            script.set_admin_name(name)
+            script.set_code(code)
+        return script

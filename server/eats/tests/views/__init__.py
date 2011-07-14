@@ -4,3 +4,4 @@ from date_add_tests import *
 from date_change_tests import *
 from entity_change_tests import *
 from language_tests import *
+from script_tests import *
