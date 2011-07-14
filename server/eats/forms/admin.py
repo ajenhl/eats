@@ -165,33 +165,62 @@ class AuthorityForm (AdminForm):
 class CalendarForm (AdminForm):
 
     def save (self):
-        super(CalendarForm, self).save(self.topic_map.create_calendar)
+        return super(CalendarForm, self).save(self.topic_map.create_calendar)
 
 
 class DatePeriodForm (AdminForm):
 
     def save (self):
-        super(DatePeriodForm, self).save(self.topic_map.create_date_period)
+        return super(DatePeriodForm, self).save(self.topic_map.create_date_period)
 
 
 class DateTypeForm (AdminForm):
 
     def save (self):
-        super(DateTypeForm, self).save(self.topic_map.create_date_type)
+        return super(DateTypeForm, self).save(self.topic_map.create_date_type)
 
 
 class EntityRelationshipForm (AdminForm):
 
     reverse_name = forms.CharField(max_length=100)
+
+    def clean (self):
+        # Ensure that the combination of name and reverse name is unique.
+        cleaned_data = self.cleaned_data
+        name = cleaned_data.get('name')
+        reverse_name = cleaned_data.get('reverse_name')
+        if name and reverse_name:
+            try:
+                existing = self.model.objects.get_by_admin_name(
+                    name, reverse_name)
+                if self.instance is None or self.instance != existing:
+                    raise forms.ValidationError(
+                        'The name of the %s must be unique' %
+                        self.model._meta.verbose_name)
+            except self.model.DoesNotExist:
+                pass
+        return self.cleaned_data
     
-    # Need to validate that the combination of forward and reverse
-    # names is unique.
+    def clean_name (self):
+        return self.cleaned_data['name']
+
+    def save (self):
+        name = self.cleaned_data['name']
+        reverse_name = self.cleaned_data['reverse_name']
+        if self.instance is None:
+            er_type = self.topic_map.create_entity_relationship_type(
+                name, reverse_name)
+        else:
+            er_type = self.instance
+            er_type.set_admin_name(name, reverse_name)
+        return er_type
 
 
 class EntityTypeForm (AdminForm):
 
     def save (self):
-        super(EntityTypeForm, self).save(self.topic_map.create_entity_type)
+        return super(EntityTypeForm, self).save(
+            self.topic_map.create_entity_type)
     
 
 class LanguageForm (AdminForm):
@@ -224,7 +253,8 @@ class LanguageForm (AdminForm):
 
 class NameTypeForm (AdminForm):
 
-    pass
+    def save (self):
+        return super(NameTypeForm, self).save(self.topic_map.create_name_type)
     
 
 class ScriptForm (AdminForm):
