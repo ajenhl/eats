@@ -59,7 +59,7 @@ class LanguageViewsTestCase (BaseTestCase):
         self.assertEqual(Language.objects.count(), 0)
         # Duplicate language name.
         language = self.create_language('English', 'en')
-        self.assertEqual(Language.objects.count(), 0)
+        self.assertEqual(Language.objects.count(), 1)
         post_data = {'name': 'English', 'code': 'fr', '_save': 'Save'}
         response = self.client.post(url, post_data)
         self.assertEqual(response.status_code, 200)

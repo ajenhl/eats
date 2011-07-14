@@ -200,9 +200,14 @@ class LanguageForm (AdminForm):
 
     def clean_code (self):
         code = self.cleaned_data['code']
-        # QAZ: Need to ensure that the code is unique, along with the
-        # name. topic_exists checks on the admin name, and so is not
-        # suitable.
+        try:
+            existing = self.model.objects.get_by_code(code)
+            if self.instance is None or self.instance != existing:
+                raise forms.ValidationError(
+                    'The code of the %s must be unique' %
+                    self.model._meta.verbose_name)
+        except self.model.DoesNotExist:
+            pass
         return code
 
     def save (self):
