@@ -8,3 +8,4 @@ from language_tests import *
 from name_tests import *
 from note_tests import *
 from script_tests import *
+from user_tests import *

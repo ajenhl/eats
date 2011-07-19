@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.urlresolvers import reverse
 
 from eats.tests.base_test_case import BaseTestCase
@@ -10,10 +11,46 @@ class DateChangeViewTestCase (BaseTestCase):
         self.date_period = self.create_date_period('lifespan')
         self.calendar = self.create_calendar('Gregorian')
         self.date_type = self.create_date_type('exact')
+        self.authority.set_date_periods([self.date_period])
+        self.authority.set_calendars([self.calendar])
+        self.authority.set_date_types([self.date_type])
+        user = self.create_django_user('user', 'user@example.org', 'password')
+        self.editor = self.create_user(user)
+        self.editor.editable_authorities = [self.authority]
+        self.editor.set_current_authority(self.authority)
     
+    def test_authentication (self):
+        entity = self.tm.create_entity(self.authority)
+        existence = entity.get_existences()[0]
+        date_data = {'date_period': self.date_period, 'point': '1 January 1900',
+                     'point_normalised': '1900-01-01',
+                     'point_calendar': self.calendar,
+                     'point_type': self.date_type,
+                     'point_certainty': self.tm.date_full_certainty}
+        date = existence.create_date(date_data)
+        url_args = {'entity_id': entity.get_id(), 'date_id': date.get_id(),
+                    'assertion_id': existence.get_id()}
+        url = reverse('date-change', kwargs=url_args)
+        login_url = settings.LOGIN_URL + '?next=' + url
+        response = self.client.get(url)
+        self.assertRedirects(response, login_url)
+        user = self.create_django_user('user2', 'user@example.org', 'password')
+        self.client.login(username='user2', password='password')
+        response = self.client.get(url)
+        self.assertRedirects(response, login_url)
+        eats_user = self.create_user(user)
+        response = self.client.get(url)
+        self.assertRedirects(response, login_url)        
+        authority = self.create_authority('Test2')
+        eats_user.editable_authorities = [self.authority, authority]
+        eats_user.set_current_authority(authority)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
     def test_non_matching_date_change (self):
         """Tests that the entity, assertion, and date match when
         editing a date."""
+        self.client.login(username='user', password='password')
         # Test with none of entity, assertion and date existing.
         url_args = {'entity_id': 0, 'assertion_id': 0, 'date_id': 0}
         response = self.client.get(reverse('date-change', kwargs=url_args))
@@ -50,6 +87,7 @@ class DateChangeViewTestCase (BaseTestCase):
                          'Expected a 404 HTTP response code for a date for a different assertion')
 
     def test_get_request (self):
+        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         date = existence.create_date({'date_period': self.date_period})
@@ -61,6 +99,7 @@ class DateChangeViewTestCase (BaseTestCase):
         self.assertTemplateUsed(response, 'eats/edit/date_change.html')
 
     def test_valid_post_request (self):
+        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         date_data = {'date_period': self.date_period, 'point': '1 January 1900',
@@ -74,6 +113,7 @@ class DateChangeViewTestCase (BaseTestCase):
                     'date_id': date.get_id()}
         url = reverse('date-change', kwargs=url_args)
         date_period2 = self.create_date_period('floruit')
+        self.authority.set_date_periods([self.date_period, date_period2])
         post_data = {'date_period': date_period2.get_id(),
                      'point_taq_calendar': self.calendar.get_id(),
                      'point_taq_certainty': 'on',
@@ -109,6 +149,7 @@ class DateChangeViewTestCase (BaseTestCase):
         self.assertEqual(date.point_taq.get_value(), '')
 
     def test_delete (self):
+        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         self.assertEqual(0, len(existence.get_dates()))

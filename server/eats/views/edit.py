@@ -1,27 +1,38 @@
+from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 from eats.lib.property_assertions import EntityRelationshipPropertyAssertions, EntityTypePropertyAssertions, ExistencePropertyAssertions, NamePropertyAssertions, NotePropertyAssertions
-from eats.constants import AUTHORITY_TYPE_IRI
 from eats.decorators import add_topic_map
 from eats.forms.edit import CreateEntityForm, create_choice_list, DateForm
-from eats.models import Authority, Calendar, DatePeriod, DateType, Entity
+from eats.models import Authority, Calendar, DatePeriod, DateType, EATSUser, Entity
 
 
+def user_is_editor (user):
+    if not user.is_authenticated():
+        return False
+    try:
+        eats_user = user.eats_user
+    except EATSUser.DoesNotExist:
+        return False
+    if not eats_user.is_editor():
+        return False
+    return True
+
+@user_passes_test(user_is_editor)
 @add_topic_map
 def entity_add (request, topic_map):
-    # QAZ: this needs to change to provide only the authorities
-    # available to the user. This whole view needs to be restricted to
-    # logged in users who can create new entities.
-    authorities = topic_map.get_authorities()
+    editor = request.user.eats_user
+    authorities = editor.editable_authorities.all()
     if request.method == 'POST':
         form = CreateEntityForm(topic_map, authorities, request.POST)
         if form.is_valid():
             authority_id = form.cleaned_data['authority']
-            authority = topic_map.get_topic_by_id(authority_id,
-                                                  AUTHORITY_TYPE_IRI)
+            authority = Authority.objects.get_by_identifier(authority_id)
+            if authority != editor.get_current_authority():
+                editor.set_current_authority(authority)
             entity = topic_map.create_entity(authority)
             redirect_url = reverse('entity-change',
                                    kwargs={'entity_id': entity.get_id()})
@@ -32,6 +43,7 @@ def entity_add (request, topic_map):
     return render_to_response('eats/edit/entity_add.html', context_data,
                               context_instance=RequestContext(request))
 
+@user_passes_test(user_is_editor)
 @add_topic_map
 def entity_change (request, topic_map, entity_id):
     try:
@@ -39,22 +51,15 @@ def entity_change (request, topic_map, entity_id):
     except Entity.DoesNotExist:
         raise Http404
     context_data = {'entity': entity}
-    # QAZ: this needs to change to provide only the authorities
-    # available to the user. This whole view needs to be restricted to
-    # logged in users who can edit entities.
-    authorities = Authority.objects.all()
-    authority_choices = create_choice_list(topic_map, authorities)
+    authority = request.user.eats_user.get_current_authority()
     data = request.POST or None
-    existences = ExistencePropertyAssertions(topic_map, entity, authorities,
-                                             authority_choices, data)
-    entity_types = EntityTypePropertyAssertions(topic_map, entity, authorities,
-                                                authority_choices, data)
-    names = NamePropertyAssertions(topic_map, entity, authorities,
-                                   authority_choices, data)
-    notes = NotePropertyAssertions(topic_map, entity, authorities,
-                                   authority_choices, data)
+    existences = ExistencePropertyAssertions(topic_map, entity, authority, data)
+    entity_types = EntityTypePropertyAssertions(topic_map, entity, authority,
+                                                data)
+    names = NamePropertyAssertions(topic_map, entity, authority, data)
+    notes = NotePropertyAssertions(topic_map, entity, authority, data)
     entity_relationships = EntityRelationshipPropertyAssertions(
-        topic_map, entity, authorities, authority_choices, data)
+        topic_map, entity, authority, data)
     existences_formset = existences.formset
     entity_types_formset = entity_types.formset
     names_formset = names.formset
@@ -88,6 +93,7 @@ def entity_change (request, topic_map, entity_id):
     return render_to_response('eats/edit/entity_change.html', context_data,
                               context_instance=RequestContext(request))
 
+@user_passes_test(user_is_editor)
 @add_topic_map
 def date_add (request, topic_map, entity_id, assertion_id):
     try:
@@ -97,10 +103,15 @@ def date_add (request, topic_map, entity_id, assertion_id):
     assertion = entity.get_assertion(assertion_id)
     if assertion is None:
         raise Http404
-    calendar_choices = create_choice_list(topic_map, Calendar.objects.all())
-    date_period_choices = create_choice_list(topic_map,
-                                             DatePeriod.objects.all())
-    date_type_choices = create_choice_list(topic_map, DateType.objects.all())
+    authority = assertion.authority
+    if authority != request.user.eats_user.get_current_authority():
+        raise Http404
+    calendar_choices = create_choice_list(
+        topic_map, Calendar.objects.filter_by_authority(authority))
+    date_period_choices = create_choice_list(
+        topic_map, DatePeriod.objects.filter_by_authority(authority))
+    date_type_choices = create_choice_list(
+        topic_map, DateType.objects.filter_by_authority(authority))
     if request.method == 'POST':
         form = DateForm(topic_map, calendar_choices, date_period_choices,
                         date_type_choices, request.POST)
@@ -121,6 +132,7 @@ def date_add (request, topic_map, entity_id, assertion_id):
     return render_to_response('eats/edit/date_add.html', context_data,
                               context_instance=RequestContext(request))
 
+@user_passes_test(user_is_editor)
 @add_topic_map
 def date_change (request, topic_map, entity_id, assertion_id, date_id):
     try:
@@ -133,10 +145,15 @@ def date_change (request, topic_map, entity_id, assertion_id, date_id):
     date = assertion.get_date(date_id)
     if date is None:
         raise Http404
-    calendar_choices = create_choice_list(topic_map, Calendar.objects.all())
-    date_period_choices = create_choice_list(topic_map,
-                                             DatePeriod.objects.all())
-    date_type_choices = create_choice_list(topic_map, DateType.objects.all())
+    authority = assertion.authority
+    if authority != request.user.eats_user.get_current_authority():
+        raise Http404
+    calendar_choices = create_choice_list(
+        topic_map, Calendar.objects.filter_by_authority(authority))
+    date_period_choices = create_choice_list(
+        topic_map, DatePeriod.objects.filter_by_authority(authority))
+    date_type_choices = create_choice_list(
+        topic_map, DateType.objects.filter_by_authority(authority))
     if request.method == 'POST':
         form = DateForm(topic_map, calendar_choices, date_period_choices,
                         date_type_choices, request.POST, instance=date)

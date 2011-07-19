@@ -6,12 +6,10 @@ from eats.models import EntityRelationshipType, EntityType, Language, NameType, 
 
 class PropertyAssertions (object):
 
-    def __init__ (self, topic_map, entity, authorities, authority_choices,
-                  data):
+    def __init__ (self, topic_map, entity, authority, data):
         self.topic_map = topic_map
         self.entity = entity
-        self.authorities = authorities
-        self.authority_choices = authority_choices
+        self.authority = authority
         self.data = data
         self._editable, self._non_editable = self.categorise_assertions()
 
@@ -26,11 +24,11 @@ class PropertyAssertions (object):
     def _create_formset (self, formset_class, formset_data):
         defaults = {'topic_map': self.topic_map, 'entity': self.entity,
                     'data': self.data, 'instances': self.editable,
-                    'authority_choices': self.authority_choices}
+                    'authority': self.authority}
         defaults.update(formset_data)
         return formset_class(**defaults)
     
-    def get_editable (self, scoped, authorities):
+    def get_editable (self, scoped, authority):
         """Returns `scoped` split into two lists, of editable and
         non-editable elements.
 
@@ -39,17 +37,17 @@ class PropertyAssertions (object):
 
         :param scoped: list of elements to be categorised
         :type scoped: list of `Scoped`
-        :param authorities: authorities that are editable
-        :type authorities: set of `Topic`s
+        :param authority: editable authority
+        :type authorities: `Authority`
         :rtype: two-tuple of lists
         
         """
-        authority_ids = authorities.values_list('id', flat=True)
+        authority_id = authority.get_id()
         editable = []
         non_editable = []
         for element in scoped:
-            authority_id = element.get_scope().values_list('id', flat=True)[0]
-            if authority_id not in authority_ids:
+            scope_authority_id = element.get_scope()[0].get_id()
+            if scope_authority_id != authority_id:
                 non_editable.append(element)
             else:
                 editable.append(element)
@@ -74,7 +72,7 @@ class ExistencePropertyAssertions (PropertyAssertions):
 
     def categorise_assertions (self):
         assertions = self.entity.get_existences()
-        return self.get_editable(assertions, self.authorities)
+        return self.get_editable(assertions, self.authority)
 
 
 class EntityRelationshipPropertyAssertions (PropertyAssertions):
@@ -82,7 +80,7 @@ class EntityRelationshipPropertyAssertions (PropertyAssertions):
     @property
     def formset (self):
         relationship_type_choices = []
-        for relationship_type in EntityRelationshipType.objects.all():
+        for relationship_type in EntityRelationshipType.objects.filter_by_authority(self.authority):
             id = unicode(relationship_type.get_id())
             name = relationship_type.get_names(
                 self.topic_map.relationship_name_type)[0].get_value()
@@ -100,7 +98,7 @@ class EntityRelationshipPropertyAssertions (PropertyAssertions):
 
     def categorise_assertions (self):
         assertions = self.entity.get_entity_relationships()
-        return self.get_editable(assertions, self.authorities)
+        return self.get_editable(assertions, self.authority)
 
 
 class EntityTypePropertyAssertions (PropertyAssertions):
@@ -108,26 +106,29 @@ class EntityTypePropertyAssertions (PropertyAssertions):
     @property
     def formset (self):
         entity_type_choices = create_choice_list(
-            self.topic_map, EntityType.objects.all())
+            self.topic_map, EntityType.objects.filter_by_authority(
+                self.authority))
         data = {'entity_type_choices': entity_type_choices,
                 'prefix': 'entity_types'}
         return self._create_formset(EntityTypeFormSet, data)
 
     def categorise_assertions (self):
         assertions = self.entity.get_entity_types()
-        return self.get_editable(assertions, self.authorities)
+        return self.get_editable(assertions, self.authority)
 
 
 class NamePropertyAssertions (PropertyAssertions):
 
     @property
     def formset (self):
-        name_type_choices = create_choice_list(self.topic_map,
-                                               NameType.objects.all())
-        language_choices = create_choice_list(self.topic_map,
-                                              Language.objects.all())
-        script_choices = create_choice_list(self.topic_map,
-                                            Script.objects.all())
+        name_type_choices = create_choice_list(
+            self.topic_map, NameType.objects.filter_by_authority(
+                self.authority))
+        language_choices = create_choice_list(
+            self.topic_map, Language.objects.filter_by_authority(
+                self.authority))
+        script_choices = create_choice_list(
+            self.topic_map, Script.objects.filter_by_authority(self.authority))
         data = {'prefix': 'names', 'name_type_choices': name_type_choices,
                 'language_choices': language_choices,
                 'script_choices': script_choices}
@@ -135,7 +136,7 @@ class NamePropertyAssertions (PropertyAssertions):
 
     def categorise_assertions (self):
         assertions = self.entity.get_eats_names()
-        return self.get_editable(assertions, self.authorities)
+        return self.get_editable(assertions, self.authority)
 
 
 class NotePropertyAssertions (PropertyAssertions):
@@ -147,4 +148,4 @@ class NotePropertyAssertions (PropertyAssertions):
 
     def categorise_assertions (self):
         assertions = self.entity.get_notes()
-        return self.get_editable(assertions, self.authorities)
+        return self.get_editable(assertions, self.authority)

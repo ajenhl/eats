@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.urlresolvers import reverse
 
 from eats.tests.base_test_case import BaseTestCase
@@ -5,9 +6,39 @@ from eats.tests.base_test_case import BaseTestCase
 
 class DateAddViewTestCase (BaseTestCase):
 
+    def setUp (self):
+        super(DateAddViewTestCase, self).setUp()
+        self.authority_id = self.authority.get_id()
+        user = self.create_django_user('user', 'user@example.org', 'password')
+        self.editor = self.create_user(user)
+        self.editor.editable_authorities = [self.authority]
+        self.editor.set_current_authority(self.authority)
+
+    def test_authentication (self):
+        entity = self.tm.create_entity(self.authority)
+        existence = entity.get_existences()[0]
+        url = reverse('date-add', kwargs={'entity_id': entity.get_id(),
+                                          'assertion_id': existence.get_id()})
+        login_url = settings.LOGIN_URL + '?next=' + url
+        response = self.client.get(url)
+        self.assertRedirects(response, login_url)
+        user = self.create_django_user('user2', 'user@example.org', 'password')
+        self.client.login(username='user2', password='password')
+        response = self.client.get(url)
+        self.assertRedirects(response, login_url)
+        eats_user = self.create_user(user)
+        response = self.client.get(url)
+        self.assertRedirects(response, login_url)
+        authority = self.create_authority('Test2')
+        eats_user.editable_authorities = [self.authority, authority]
+        eats_user.set_current_authority(authority)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
     def test_non_matching_date_add (self):
         """Tests that the entity and assertion match when adding a
         date."""
+        self.client.login(username='user', password='password')
         url_args = {'entity_id': 0, 'assertion_id': 0}
         # Test with non-existent entity and assertion.
         response = self.client.get(reverse('date-add', kwargs=url_args))
@@ -30,6 +61,7 @@ class DateAddViewTestCase (BaseTestCase):
                          'Expected a 404 HTTP response code for an assertion that does not belong to the entity')
 
     def test_get_request (self):
+        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         response = self.client.get(reverse(
@@ -39,6 +71,7 @@ class DateAddViewTestCase (BaseTestCase):
         self.assertTemplateUsed(response, 'eats/edit/date_add.html')
         
     def test_valid_post_request_continue (self):
+        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         url = reverse('date-add', kwargs={'entity_id': entity.get_id(),
@@ -46,6 +79,9 @@ class DateAddViewTestCase (BaseTestCase):
         date_period = self.create_date_period('lifespan')
         calendar = self.create_calendar('Gregorian')
         date_type = self.create_date_type('exact')
+        self.authority.set_date_periods([date_period])
+        self.authority.set_calendars([calendar])
+        self.authority.set_date_types([date_type])
         post_data = {'date_period': date_period.get_id(),
                      'point_calendar': calendar.get_id(),
                      'point_certainty': 'on',
@@ -68,6 +104,7 @@ class DateAddViewTestCase (BaseTestCase):
         self.assertRedirects(response, redirect_url)
 
     def test_valid_post_request_save (self):
+        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         url = reverse('date-add', kwargs={'entity_id': entity.get_id(),
@@ -75,6 +112,9 @@ class DateAddViewTestCase (BaseTestCase):
         date_period = self.create_date_period('lifespan')
         calendar = self.create_calendar('Gregorian')
         date_type = self.create_date_type('exact')
+        self.authority.set_date_periods([date_period])
+        self.authority.set_calendars([calendar])
+        self.authority.set_date_types([date_type])
         post_data = {'date_period': date_period.get_id(),
                      'point_calendar': calendar.get_id(),
                      'point_certainty': 'on',
@@ -88,12 +128,15 @@ class DateAddViewTestCase (BaseTestCase):
         self.assertRedirects(response, redirect_url)
 
     def test_invalid_post_request (self):
+        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         url = reverse('date-add', kwargs={'entity_id': entity.get_id(),
                                           'assertion_id': existence.get_id()})
         date_period = self.create_date_period('lifespan')
         calendar = self.create_calendar('Gregorian')
+        self.authority.set_date_periods([date_period])
+        self.authority.set_calendars([calendar])
         # Omitting the point date type should make the form submission
         # invalid.
         post_data = {'date_period': date_period.get_id(),

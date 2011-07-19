@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from django.conf import settings
 from django.core.urlresolvers import reverse
 
 from eats.constants import FORWARD_RELATIONSHIP_MARKER, \
@@ -12,13 +13,30 @@ class EntityChangeViewTestCase (BaseTestCase):
     def setUp (self):
         super(EntityChangeViewTestCase, self).setUp()
         self.authority_id = self.authority.get_id()
-        self.authority2 = self.create_authority('Authority2')
-        self.authority2_id = self.authority2.get_id()
-    
+        user = self.create_django_user('user', 'user@example.org', 'password')
+        self.editor = self.create_user(user)
+        self.editor.editable_authorities = [self.authority]
+        self.editor.set_current_authority(self.authority)
+
+    def test_authentication (self):
+        entity = self.tm.create_entity(self.authority)
+        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        login_url = settings.LOGIN_URL + '?next=' + url
+        response = self.client.get(url)
+        self.assertRedirects(response, login_url)
+        user = self.create_django_user('user2', 'user@example.org', 'password')
+        self.client.login(username='user2', password='password')
+        response = self.client.get(url)
+        self.assertRedirects(response, login_url)
+        self.create_user(user)
+        response = self.client.get(url)
+        self.assertRedirects(response, login_url)
+
     def test_non_existent_entity (self):
         # Use the authority topic as an example of a non-existent
         # entity. Immediately after setUp it will not be marked as an
         # entity.
+        self.client.login(username='user', password='password')
         response = self.client.get(reverse(
                 'entity-change', kwargs={'entity_id': self.authority.get_id()}))
         self.assertEqual(
@@ -26,6 +44,7 @@ class EntityChangeViewTestCase (BaseTestCase):
             'Expected a 404 HTTP response code for a non-existent entity')
     
     def test_empty_entity (self):
+        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         response = self.client.get(reverse(
@@ -48,10 +67,12 @@ class EntityChangeViewTestCase (BaseTestCase):
                              'Expected no %ss' % formset)
 
     def test_post_entity_relationships (self):
+        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
         entity2 = self.tm.create_entity(self.authority)
         rel_type = self.create_entity_relationship_type(
             'is child of', 'is parent of')
+        self.authority.set_entity_relationship_types([rel_type])
         existence = entity.get_existences()[0]
         url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
         response = self.client.post(url, {
@@ -62,7 +83,6 @@ class EntityChangeViewTestCase (BaseTestCase):
                 'names-TOTAL_FORMS': 1, 'names-INITIAL_FORMS': 0,
                 'entity_relationships-TOTAL_FORMS': 1,
                 'entity_relationships-INITIAL_FORMS': 0,
-                'entity_relationships-0-authority': self.authority_id,
                 'entity_relationships-0-relationship_type': str(rel_type.get_id()) + FORWARD_RELATIONSHIP_MARKER,
                 'entity_relationships-0-related_entity_1': entity2.get_id(),
                 'notes-TOTAL_FORMS': 1, 'notes-INITIAL_FORMS': 0,
@@ -74,8 +94,7 @@ class EntityChangeViewTestCase (BaseTestCase):
         assertion = entity.get_entity_relationships()[0]
         form_data = formset.initial_forms[0].initial
         self.assertEqual(form_data['assertion'], assertion.get_id())
-        self.assertEqual(form_data['authority'], self.authority_id)
-        self.assertEqual(form_data['authority'], assertion.authority.get_id())
+        self.assertEqual(self.authority_id, assertion.authority.get_id())
         self.assertEqual(form_data['relationship_type'],
                          str(rel_type.get_id()) + FORWARD_RELATIONSHIP_MARKER)
         self.assertEqual(form_data['relationship_type'],
@@ -88,6 +107,7 @@ class EntityChangeViewTestCase (BaseTestCase):
         # existing one.
         rel_type2 = self.create_entity_relationship_type(
             'is born in', 'is birth place of')
+        self.authority.set_entity_relationship_types([rel_type, rel_type2])
         entity3 = self.tm.create_entity(self.authority)
         response = self.client.post(url, {
                 'existences-TOTAL_FORMS': 2, 'existences-INITIAL_FORMS': 1,
@@ -99,10 +119,8 @@ class EntityChangeViewTestCase (BaseTestCase):
                 'entity_relationships-INITIAL_FORMS': 1,
                 'entity_relationships-0-DELETE': 'on',
                 'entity_relationships-0-assertion': assertion.get_id(),
-                'entity_relationships-0-authority': self.authority_id,
                 'entity_relationships-0-relationship_type': str(rel_type.get_id()) + FORWARD_RELATIONSHIP_MARKER,
                 'entity_relationships-0-related_entity_1': entity2.get_id(),
-                'entity_relationships-1-authority': self.authority2_id,
                 'entity_relationships-1-relationship_type': str(rel_type2.get_id()) + REVERSE_RELATIONSHIP_MARKER,
                 'entity_relationships-1-related_entity_1': entity3.get_id(),
                 'notes-TOTAL_FORMS': 1, 'notes-INITIAL_FORMS': 0,
@@ -114,8 +132,7 @@ class EntityChangeViewTestCase (BaseTestCase):
         assertion = entity.get_entity_relationships()[0]
         form_data = formset.initial_forms[0].initial
         self.assertEqual(form_data['assertion'], assertion.get_id())
-        self.assertEqual(form_data['authority'], self.authority2_id)
-        self.assertEqual(form_data['authority'], assertion.authority.get_id())
+        self.assertEqual(self.authority_id, assertion.authority.get_id())
         self.assertEqual(form_data['relationship_type'],
                          str(rel_type2.get_id()) + REVERSE_RELATIONSHIP_MARKER)
         self.assertEqual(form_data['relationship_type'],
@@ -134,7 +151,6 @@ class EntityChangeViewTestCase (BaseTestCase):
                 'entity_relationships-TOTAL_FORMS': 2,
                 'entity_relationships-INITIAL_FORMS': 1,
                 'entity_relationships-0-assertion': assertion.get_id(),
-                'entity_relationships-0-authority': self.authority_id,
                 'entity_relationships-0-relationship_type': str(rel_type.get_id()) + FORWARD_RELATIONSHIP_MARKER,
                 'entity_relationships-0-related_entity_1': entity2.get_id(),
                 'notes-TOTAL_FORMS': 1, 'notes-INITIAL_FORMS': 0,
@@ -146,8 +162,7 @@ class EntityChangeViewTestCase (BaseTestCase):
         assertion = entity.get_entity_relationships()[0]
         form_data = formset.initial_forms[0].initial
         self.assertEqual(form_data['assertion'], assertion.get_id())
-        self.assertEqual(form_data['authority'], self.authority_id)
-        self.assertEqual(form_data['authority'], assertion.authority.get_id())
+        self.assertEqual(self.authority_id, assertion.authority.get_id())
         self.assertEqual(form_data['relationship_type'],
                          str(rel_type.get_id()) + FORWARD_RELATIONSHIP_MARKER)
         self.assertEqual(form_data['relationship_type'],
@@ -158,16 +173,17 @@ class EntityChangeViewTestCase (BaseTestCase):
                          assertion.range_entity.get_id())
 
     def test_post_entity_types (self):
+        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         entity_type = self.create_entity_type('Person')
+        self.authority.set_entity_types([entity_type])
         url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
         response = self.client.post(url, {
                 'existences-TOTAL_FORMS': 2, 'existences-INITIAL_FORMS': 1,
                 'existences-0-assertion': existence.get_id(),
                 'existences-0-authority': self.authority_id,
                 'entity_types-TOTAL_FORMS': 1, 'entity_types-INITIAL_FORMS': 0,
-                'entity_types-0-authority': self.authority_id,
                 'entity_types-0-entity_type': entity_type.get_id(),
                 'names-TOTAL_FORMS': 1, 'names-INITIAL_FORMS': 0,
                 'entity_relationships-TOTAL_FORMS': 1,
@@ -181,13 +197,13 @@ class EntityChangeViewTestCase (BaseTestCase):
         assertion = entity.get_entity_types()[0]
         form_data = formset.initial_forms[0].initial
         self.assertEqual(form_data['assertion'], assertion.get_id())
-        self.assertEqual(form_data['authority'], self.authority_id)
-        self.assertEqual(form_data['authority'], assertion.authority.get_id())
+        self.assertEqual(self.authority_id, assertion.authority.get_id())
         self.assertEqual(form_data['entity_type'], entity_type.get_id())
         self.assertEqual(form_data['entity_type'],
                          assertion.entity_type.get_id())
         # Test adding another entity type and deleting the existing one.
         entity_type2 = self.create_entity_type('Place')
+        self.authority.set_entity_types([entity_type, entity_type2])
         response = self.client.post(url, {
                 'existences-TOTAL_FORMS': 2, 'existences-INITIAL_FORMS': 1,
                 'existences-0-assertion': existence.get_id(),
@@ -195,9 +211,7 @@ class EntityChangeViewTestCase (BaseTestCase):
                 'entity_types-TOTAL_FORMS': 2, 'entity_types-INITIAL_FORMS': 1,
                 'entity_types-0-DELETE': 'on',
                 'entity_types-0-assertion': assertion.get_id(),
-                'entity_types-0-authority': self.authority_id,
                 'entity_types-0-entity_type': entity_type.get_id(),
-                'entity_types-1-authority': self.authority2_id,
                 'entity_types-1-entity_type': entity_type2.get_id(),
                 'names-TOTAL_FORMS': 1, 'names-INITIAL_FORMS': 0,
                 'entity_relationships-TOTAL_FORMS': 1,
@@ -211,8 +225,7 @@ class EntityChangeViewTestCase (BaseTestCase):
         assertion = entity.get_entity_types()[0]
         form_data = formset.initial_forms[0].initial
         self.assertEqual(form_data['assertion'], assertion.get_id())
-        self.assertEqual(form_data['authority'], self.authority2_id)
-        self.assertEqual(form_data['authority'], assertion.authority.get_id())
+        self.assertEqual(self.authority_id, assertion.authority.get_id())
         self.assertEqual(form_data['entity_type'], entity_type2.get_id())
         self.assertEqual(form_data['entity_type'],
                          assertion.entity_type.get_id())
@@ -223,7 +236,6 @@ class EntityChangeViewTestCase (BaseTestCase):
                 'existences-0-authority': self.authority_id,
                 'entity_types-TOTAL_FORMS': 2, 'entity_types-INITIAL_FORMS': 1,
                 'entity_types-0-assertion': assertion.get_id(),
-                'entity_types-0-authority': self.authority_id,
                 'entity_types-0-entity_type': entity_type.get_id(),
                 'names-TOTAL_FORMS': 1, 'names-INITIAL_FORMS': 0,
                 'entity_relationships-TOTAL_FORMS': 1,
@@ -237,8 +249,7 @@ class EntityChangeViewTestCase (BaseTestCase):
         assertion = entity.get_entity_types()[0]
         form_data = formset.initial_forms[0].initial
         self.assertEqual(form_data['assertion'], assertion.get_id())
-        self.assertEqual(form_data['authority'], self.authority_id)
-        self.assertEqual(form_data['authority'], assertion.authority.get_id())
+        self.assertEqual(self.authority_id, assertion.authority.get_id())
         self.assertEqual(form_data['entity_type'], entity_type.get_id())
         self.assertEqual(form_data['entity_type'],
                          assertion.entity_type.get_id())
@@ -250,11 +261,15 @@ class EntityChangeViewTestCase (BaseTestCase):
         pass
             
     def test_post_names (self):
+        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         name_type = self.create_name_type('regular')
         language = self.create_language('English', 'en')
         script = self.create_script('Latin', 'Latn')
+        self.authority.set_name_types([name_type])
+        self.authority.set_languages([language])
+        self.authority.set_scripts([script])
         url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
         response = self.client.post(url, {
                 'existences-TOTAL_FORMS': 2, 'existences-INITIAL_FORMS': 1,
@@ -262,7 +277,6 @@ class EntityChangeViewTestCase (BaseTestCase):
                 'existences-0-authority': self.authority_id,
                 'entity_types-TOTAL_FORMS': 1, 'entity_types-INITIAL_FORMS': 0,
                 'names-TOTAL_FORMS': 1, 'names-INITIAL_FORMS': 0,
-                'names-0-authority': self.authority_id,
                 'names-0-name_type': name_type.get_id(),
                 'names-0-language': language.get_id(),
                 'names-0-script': script.get_id(),
@@ -279,8 +293,7 @@ class EntityChangeViewTestCase (BaseTestCase):
         name = assertion.name
         form_data = formset.initial_forms[0].initial
         self.assertEqual(form_data['assertion'], assertion.get_id())
-        self.assertEqual(form_data['authority'], assertion.authority.get_id())
-        self.assertEqual(form_data['authority'], self.authority_id)
+        self.assertEqual(self.authority_id, assertion.authority.get_id())
         self.assertEqual(form_data['name_type'], name_type.get_id())
         self.assertEqual(form_data['name_type'], name.name_type.get_id())
         self.assertEqual(form_data['language'], language.get_id())
@@ -293,6 +306,9 @@ class EntityChangeViewTestCase (BaseTestCase):
         name_type2 = self.create_name_type('irregular')
         language2 = self.create_language('Sanskrit', 'sa')
         script2 = self.create_script('Devanagari', 'Deva')
+        self.authority.set_name_types([name_type, name_type2])
+        self.authority.set_languages([language, language2])
+        self.authority.set_scripts([script, script2])
         response = self.client.post(url, {
                 'existences-TOTAL_FORMS': 2, 'existences-INITIAL_FORMS': 1,
                 'existences-0-assertion': existence.get_id(),
@@ -305,7 +321,6 @@ class EntityChangeViewTestCase (BaseTestCase):
                 'names-0-language': language.get_id(),
                 'names-0-script': script.get_id(),
                 'names-0-display_form': 'Carl Philipp Emanuel Bach',
-                'names-1-authority': self.authority2_id,
                 'names-1-name_type': name_type2.get_id(),
                 'names-1-language': language2.get_id(),
                 'names-1-script': script2.get_id(),
@@ -322,8 +337,7 @@ class EntityChangeViewTestCase (BaseTestCase):
         name = assertion.name
         form_data = formset.initial_forms[0].initial
         self.assertEqual(form_data['assertion'], assertion.get_id())
-        self.assertEqual(form_data['authority'], assertion.authority.get_id())
-        self.assertEqual(form_data['authority'], self.authority2_id)
+        self.assertEqual(self.authority_id, assertion.authority.get_id())
         self.assertEqual(form_data['name_type'], name_type2.get_id())
         self.assertEqual(form_data['name_type'], name.name_type.get_id())
         self.assertEqual(form_data['language'], language2.get_id())
@@ -340,7 +354,6 @@ class EntityChangeViewTestCase (BaseTestCase):
                 'entity_types-TOTAL_FORMS': 1, 'entity_types-INITIAL_FORMS': 0,
                 'names-TOTAL_FORMS': 2, 'names-INITIAL_FORMS': 1,
                 'names-0-assertion': assertion.get_id(),
-                'names-0-authority': self.authority_id,
                 'names-0-name_type': name_type.get_id(),
                 'names-0-language': language.get_id(),
                 'names-0-script': script.get_id(),
@@ -357,8 +370,7 @@ class EntityChangeViewTestCase (BaseTestCase):
         name = assertion.name
         form_data = formset.initial_forms[0].initial
         self.assertEqual(form_data['assertion'], assertion.get_id())
-        self.assertEqual(form_data['authority'], assertion.authority.get_id())
-        self.assertEqual(form_data['authority'], self.authority_id)
+        self.assertEqual(self.authority_id, assertion.authority.get_id())
         self.assertEqual(form_data['name_type'], name_type.get_id())
         self.assertEqual(form_data['name_type'], name.name_type.get_id())
         self.assertEqual(form_data['language'], language.get_id())
@@ -369,6 +381,7 @@ class EntityChangeViewTestCase (BaseTestCase):
         self.assertEqual(form_data['display_form'], name.display_form)
 
     def test_post_notes (self):
+        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
@@ -381,7 +394,6 @@ class EntityChangeViewTestCase (BaseTestCase):
                 'entity_relationships-TOTAL_FORMS': 1,
                 'entity_relationships-INITIAL_FORMS': 0,
                 'notes-TOTAL_FORMS': 1, 'notes-INITIAL_FORMS': 0,
-                'notes-0-authority': self.authority_id,
                 'notes-0-note': 'Test', '_save': 'Save'}, follow=True)
         self.assertRedirects(response, url)
         formset = response.context['note_formset']
@@ -391,8 +403,7 @@ class EntityChangeViewTestCase (BaseTestCase):
         assertion = entity.get_notes()[0]
         form_data = formset.initial_forms[0].initial
         self.assertEqual(form_data['assertion'], assertion.get_id())
-        self.assertEqual(form_data['authority'], assertion.authority.get_id())
-        self.assertEqual(form_data['authority'], self.authority_id)
+        self.assertEqual(assertion.authority.get_id(), self.authority_id)
         self.assertEqual(form_data['note'], assertion.note)
         self.assertEqual(form_data['note'], 'Test')
         # Test adding another note and deleting the existing one.
@@ -406,9 +417,7 @@ class EntityChangeViewTestCase (BaseTestCase):
                 'entity_relationships-INITIAL_FORMS': 0,
                 'notes-TOTAL_FORMS': 2, 'notes-INITIAL_FORMS': 1,
                 'notes-0-DELETE': 'on', 'notes-0-assertion': assertion.get_id(),
-                'notes-0-authority': self.authority_id,
                 'notes-0-note': 'Test',
-                'notes-1-authority': self.authority2_id,
                 'notes-1-note': 'Test 2', '_save': 'Save'}, follow=True)
         self.assertRedirects(response, url)
         formset = response.context['note_formset']
@@ -418,8 +427,7 @@ class EntityChangeViewTestCase (BaseTestCase):
         assertion = entity.get_notes()[0]
         form_data = formset.initial_forms[0].initial
         self.assertEqual(form_data['assertion'], assertion.get_id())
-        self.assertEqual(form_data['authority'], assertion.authority.get_id())
-        self.assertEqual(form_data['authority'], self.authority2_id)
+        self.assertEqual(self.authority_id, assertion.authority.get_id())
         self.assertEqual(form_data['note'], assertion.note)
         self.assertEqual(form_data['note'], 'Test 2')
         # Test updating an existing note.
@@ -433,7 +441,6 @@ class EntityChangeViewTestCase (BaseTestCase):
                 'entity_relationships-INITIAL_FORMS': 0,
                 'notes-TOTAL_FORMS': 2, 'notes-INITIAL_FORMS': 1,
                 'notes-0-assertion': assertion.get_id(),
-                'notes-0-authority': self.authority_id,
                 'notes-0-note': 'Test', '_save': 'Save'}, follow=True)
         self.assertRedirects(response, url)
         formset = response.context['note_formset']
@@ -443,7 +450,6 @@ class EntityChangeViewTestCase (BaseTestCase):
         assertion = entity.get_notes()[0]
         form_data = formset.initial_forms[0].initial
         self.assertEqual(form_data['assertion'], assertion.get_id())
-        self.assertEqual(form_data['authority'], assertion.authority.get_id())
-        self.assertEqual(form_data['authority'], self.authority_id)
+        self.assertEqual(self.authority_id, assertion.authority.get_id())
         self.assertEqual(form_data['note'], assertion.note)
         self.assertEqual(form_data['note'], 'Test')
