@@ -1,9 +1,10 @@
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.test import TestCase
 
 from tmapi.models import TopicMapSystemFactory
 
-from eats.models import EATSTopicMap
+from eats.models import EATSTopicMap, EATSUser
 
 
 class BaseTestCase (TestCase):
@@ -29,6 +30,9 @@ class BaseTestCase (TestCase):
     def create_date_type (self, name):
         return self.tm.create_date_type(name)
 
+    def create_django_user (self, username, email, password):
+        return User.objects.create_user(username, email, password)
+    
     def create_entity_relationship_type (self, name, reverse_name):
         return self.tm.create_entity_relationship_type(name, reverse_name)
     
@@ -43,3 +47,8 @@ class BaseTestCase (TestCase):
 
     def create_script (self, name, code):
         return self.tm.create_script(name, code)
+
+    def create_user (self, user):
+        eats_user = EATSUser(user=user)
+        eats_user.save()
+        return eats_user
