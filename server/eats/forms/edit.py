@@ -6,7 +6,7 @@ import selectable.forms as selectable
 from eats.constants import FORWARD_RELATIONSHIP_MARKER, \
     REVERSE_RELATIONSHIP_MARKER
 from eats.lookups import EntityLookup
-from eats.models import Calendar, DatePeriod, DateType, EntityType, Language, NameType, Script
+from eats.models import Calendar, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NameType, Script
 
 
 class PropertyAssertionFormSet (BaseFormSet):
@@ -181,7 +181,7 @@ class PropertyAssertionForm (forms.Form):
         """
         return {'assertion': assertion.get_id()}
         
-    def _get_construct (self, name, proxy=None):
+    def _get_construct (self, name, proxy):
         """Returns the construct specified by `name`.
 
         `name` corresponds to the name of one of the form's fields.
@@ -190,14 +190,11 @@ class PropertyAssertionForm (forms.Form):
         :type name: string
         :param proxy: Django proxy model
         :type proxy: class
-        :rtype: `Construct` or proxy object
+        :rtype: proxy object
 
         """
-        construct_id = self.cleaned_data[name]
-        construct = None
-        if construct_id is not None:
-            construct = self.topic_map.get_construct_by_id(construct_id, proxy)
-        return construct
+        identifier = self.cleaned_data[name]
+        return proxy.objects.get_by_identifier(identifier)
         
     def delete (self):
         """Deletes the assertion."""
@@ -230,8 +227,8 @@ class ExistenceForm (PropertyAssertionForm):
             # Create a new assertion.
             self.entity.create_existence_property_assertion(self.authority)
         else:
-            # Update an existing assertion.
-            self.instance.update(self.authority)
+            # Update an existing assertion - a noop.
+            pass
 
 
 class EntityRelationshipForm (PropertyAssertionForm):
@@ -261,7 +258,7 @@ class EntityRelationshipForm (PropertyAssertionForm):
         
     def save (self):
         relationship_type_id = self.cleaned_data['relationship_type']
-        relationship_type = self.topic_map.get_construct_by_id(
+        relationship_type = EntityRelationshipType.objects.get_by_identifier(
             relationship_type_id[:-1])
         # The autocomplete selection library, via lookups.py, takes
         # care of retrieving the entity from its id.
@@ -279,8 +276,7 @@ class EntityRelationshipForm (PropertyAssertionForm):
                 self.authority, relationship_type, domain_entity, range_entity)
         else:
             # Update an existing assertion.
-            self.instance.update(self.authority, relationship_type,
-                                 domain_entity, range_entity)
+            self.instance.update(relationship_type, domain_entity, range_entity)
 
 
 class EntityTypeForm (PropertyAssertionForm):
@@ -307,7 +303,7 @@ class EntityTypeForm (PropertyAssertionForm):
                 self.authority, entity_type)
         else:
             # Update an existing assertion.
-            self.instance.update(self.authority, entity_type)
+            self.instance.update(entity_type)
 
 
 class NameForm (PropertyAssertionForm):
@@ -348,8 +344,7 @@ class NameForm (PropertyAssertionForm):
                 self.authority, name_type, language, script, display_form)
         else:
             # Update an existing assertion.
-            self.instance.update(self.authority, name_type, language, script,
-                                 display_form)
+            self.instance.update(name_type, language, script, display_form)
 
 
 class NoteForm (PropertyAssertionForm):
@@ -368,7 +363,7 @@ class NoteForm (PropertyAssertionForm):
             self.entity.create_note_property_assertion(self.authority, note)
         else:
             # Update an existing assertion.
-            self.instance.update(self.authority, note)
+            self.instance.update(note)
 
 
 class DateForm (forms.Form):

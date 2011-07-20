@@ -20,7 +20,6 @@ class NotePropertyAssertion (Occurrence, PropertyAssertion):
         proxy = True
         app_label = 'eats'
 
-    @property
     def entity (self):
         """Returns the entity making this property assertion.
 
@@ -41,15 +40,12 @@ class NotePropertyAssertion (Occurrence, PropertyAssertion):
         """
         return self.get_value()
         
-    def update (self, authority, note):
+    def update (self, note):
         """Updates this property assertion.
 
-        :param authority: authority making the assertion
-        :type authority: `Topic`
         :param note: note text
         :type note: unicode string
 
         """
-        super(NotePropertyAssertion, self).update(authority)
         if self.get_value() != note:
             self.set_value(note)

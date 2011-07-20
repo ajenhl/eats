@@ -42,11 +42,9 @@ class NamePropertyAssertion (Association, PropertyAssertion):
         self._entity = entity
         name.entity = entity
         
-    def update (self, authority, name_type, language, script, display_form):
+    def update (self, name_type, language, script, display_form):
         """Updates this property assertion, and its associated name.
 
-        :param authority: authority making the assertion
-        :type authority: `Topic`
         :param name_type: type of the name
         :type name_type: `Topic`
         :param language: language of the name
@@ -57,5 +55,6 @@ class NamePropertyAssertion (Association, PropertyAssertion):
         :type display_form: unicode string
 
         """
-        super(NamePropertyAssertion, self).update(authority)
+        self.authority.validate_components(language=language, script=script,
+                                           name_type=name_type)
         self.name.update(name_type, language, script, display_form)

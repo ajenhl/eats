@@ -47,17 +47,15 @@ class EntityTypePropertyAssertion (Association, PropertyAssertion):
         self.create_role(self.eats_topic_map.entity_role_type, entity)
         self._entity = entity
 
-    def update (self, authority, entity_type):
+    def update (self, entity_type):
         """Updates this property assertion.
 
-        :param authority: authority making the assertion
-        :type authority: `Topic`
         :param entity_type: entity type
         :type entity_type: `Topic`
 
         """
-        super(EntityTypePropertyAssertion, self).update(authority)
         if entity_type != self.entity_type:
+            self.authority.validate_components(entity_type=entity_type)
             property_role = self.get_roles(
                 self.eats_topic_map.property_role_type)[0]
             property_role.set_player(entity_type)

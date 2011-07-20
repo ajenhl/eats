@@ -10,6 +10,9 @@ class LookupsTestCase (BaseTestCase):
         self.name_type = self.create_name_type('regular')
         self.language = self.create_language('English', 'en')
         self.script = self.create_script('Latin', 'Latn')
+        self.authority.set_languages([self.language])
+        self.authority.set_name_types([self.name_type])
+        self.authority.set_scripts([self.script])
     
     def test_entity_lookup_get_query (self):
         lookup = EntityLookup()

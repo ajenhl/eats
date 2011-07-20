@@ -165,6 +165,8 @@ class Date (Topic):
         :type period: `DatePeriod`
 
         """
+        self.property_assertion.authority.validate_components(
+            date_period=period)
         try:
             role = self.period_association.get_roles(
                 self.eats_topic_map.date_period_role_type)[0]

@@ -1,4 +1,8 @@
+from django.db import transaction
+
 from tmapi.models import Association
+
+from eats.exceptions import EATSValidationException
 
 from base_manager import BaseManager
 from entity_relationship_type import EntityRelationshipType
@@ -73,12 +77,11 @@ class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
         self.create_role(self.eats_topic_map.entity_relationship_type_role_type,
                          relationship_type)
 
-    def update (self, authority, relationship_type, domain_entity,
+    @transaction.commit_on_success
+    def update (self, relationship_type, domain_entity,
                 range_entity):
         """Updates this property assertion.
 
-        :param authority: authority making the assertion
-        :type authority: `Topic`
         :param relationship_type: type of the relationship
         :type relationship_type: `EntityRelationshipType`
         :param domain_entity: the domain entity
@@ -87,12 +90,13 @@ class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
         :type range_entity: `Entity`
 
         """
-        super(EntityRelationshipPropertyAssertion, self).update(authority)
         if domain_entity not in (self.domain_entity, self.range_entity) \
                 and range_entity not in (self.domain_entity, self.range_entity):
             # QAZ: use a specific exception
-            raise Exception('entity relationship update must keep at least one entity the same')
+            raise EATSValidationException('entity relationship update must keep at least one entity the same')
         if relationship_type != self.entity_relationship_type:
+            self.authority.validate_components(
+                entity_relationship_type=relationship_type)
             role = self.get_roles(
                 self.eats_topic_map.entity_relationship_type_role_type)[0]
             role.set_player(relationship_type)

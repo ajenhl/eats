@@ -1,3 +1,4 @@
+from eats.exceptions import EATSValidationException
 from eats.tests.base_test_case import BaseTestCase
 
 
@@ -8,6 +9,7 @@ class EntityTypeTest (BaseTestCase):
         self.entity = self.tm.create_entity(self.authority)
         self.entity_type = self.create_entity_type('Person')
         self.entity_type2 = self.create_entity_type('Place')
+        self.authority.set_entity_types([self.entity_type, self.entity_type2])
         
     def test_create_entity_type_property_assertion (self):
         self.assertEqual(0, len(self.entity.get_entity_types()))
@@ -18,6 +20,14 @@ class EntityTypeTest (BaseTestCase):
         self.assertEqual(self.entity_type, assertion.entity_type)
         fetched_assertion = self.entity.get_entity_types()[0]
         self.assertEqual(assertion, fetched_assertion)
+
+    def test_illegal_create_entity_type_property_assertion (self):
+        entity_type = self.create_entity_type('organisation')
+        self.assertEqual(0, len(self.entity.get_entity_types()))
+        self.assertRaises(EATSValidationException,
+                          self.entity.create_entity_type_property_assertion,
+                          self.authority, entity_type)
+        self.assertEqual(0, len(self.entity.get_entity_types()))
 
     def test_delete_entity_type_property_assertion (self):
         self.assertEqual(0, len(self.entity.get_entity_types()))
@@ -37,8 +47,14 @@ class EntityTypeTest (BaseTestCase):
             self.authority, self.entity_type)
         self.assertEqual(self.authority, assertion.authority)
         self.assertEqual(self.entity_type, assertion.entity_type)
-        authority2 = self.create_authority('Authority2')
-        assertion.update(authority2, self.entity_type2)
-        self.assertEqual(authority2, assertion.authority)
+        assertion.update(self.entity_type2)
         self.assertEqual(self.entity_type2, assertion.entity_type)
         
+    def test_illegal_update_entity_type_property_assertion (self):
+        assertion = self.entity.create_entity_type_property_assertion(
+            self.authority, self.entity_type)
+        self.assertEqual(self.authority, assertion.authority)
+        self.assertEqual(self.entity_type, assertion.entity_type)
+        entity_type2 = self.create_entity_type('organisation')
+        self.assertRaises(EATSValidationException, assertion.update,
+                          entity_type2)

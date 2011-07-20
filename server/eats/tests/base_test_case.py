@@ -1,13 +1,13 @@
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import TransactionTestCase
 
 from tmapi.models import TopicMapSystemFactory
 
 from eats.models import EATSTopicMap, EATSUser
 
 
-class BaseTestCase (TestCase):
+class BaseTestCase (TransactionTestCase):
 
     def setUp (self):
         # Create a topic map.

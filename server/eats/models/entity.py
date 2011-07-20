@@ -1,5 +1,7 @@
 from tmapi.models import Association, Topic
 
+from eats.exceptions import EATSValidationException
+
 from base_manager import BaseManager
 from entity_relationship_property_assertion import EntityRelationshipPropertyAssertion
 from entity_type_property_assertion import EntityTypePropertyAssertion
@@ -43,7 +45,9 @@ class Entity (Topic):
 
         """
         if domain_entity != self and range_entity != self:
-            raise Exception('An entity relationship property assertion created for an entity must include that entity as one of the related entities')
+            raise EATSValidationException('An entity relationship property assertion created for an entity must include that entity as one of the related entities')
+        authority.validate_components(
+            entity_relationship_type=relationship_type)
         assertion = self.eats_topic_map.create_association(
             self.eats_topic_map.entity_relationship_assertion_type,
             scope=[authority], proxy=EntityRelationshipPropertyAssertion)
@@ -61,6 +65,7 @@ class Entity (Topic):
         :rtype: `EntityTypePropertyAssertion`
 
         """
+        authority.validate_components(entity_type=entity_type)
         assertion = self.eats_topic_map.create_association(
             self.eats_topic_map.entity_type_assertion_type, scope=[authority],
             proxy=EntityTypePropertyAssertion)
@@ -99,6 +104,8 @@ class Entity (Topic):
         :rtype: `NamePropertyAssertion`
 
         """
+        authority.validate_components(name_type=name_type, language=language,
+                                      script=script)
         name = self.eats_topic_map.create_topic(proxy=Name)
         assertion = self.eats_topic_map.create_association(
             self.eats_topic_map.name_assertion_type, scope=[authority],

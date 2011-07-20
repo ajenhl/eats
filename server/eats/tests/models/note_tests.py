@@ -35,7 +35,5 @@ class NoteTest (BaseTestCase):
             self.authority, 'Test')
         self.assertEqual(self.authority, assertion.authority)
         self.assertEqual(assertion.note, 'Test')
-        authority2 = self.create_authority('Authority2')
-        assertion.update(authority2, 'Test2')
-        self.assertEqual(authority2, assertion.authority)
+        assertion.update('Test2')
         self.assertEqual(assertion.note, 'Test2')

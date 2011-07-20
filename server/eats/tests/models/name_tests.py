@@ -1,14 +1,14 @@
 from tmapi.indices.type_instance_index import TypeInstanceIndex
 
+from eats.exceptions import EATSValidationException
 from eats.models import NameIndex
-
 from eats.tests.base_test_case import BaseTestCase
 
 
-class NameTest (BaseTestCase):
+class NameTestCase (BaseTestCase):
 
     def setUp (self):
-        super(NameTest, self).setUp()
+        super(NameTestCase, self).setUp()
         self.entity = self.tm.create_entity(self.authority)
         self.name_type = self.create_name_type('regular')
         self.name_type2 = self.create_name_type('irregular')
@@ -16,8 +16,32 @@ class NameTest (BaseTestCase):
         self.language2 = self.create_language('Arabic', 'ar')
         self.script = self.create_script('Latin', 'Latn')
         self.script2 = self.create_script('Arabic', 'Arab')
+        self.authority.set_languages([self.language, self.language2])
+        self.authority.set_name_types([self.name_type, self.name_type2])
+        self.authority.set_scripts([self.script, self.script2])
         self.type_index = self.tm.get_index(TypeInstanceIndex)
         self.type_index.open()
+
+    def test_illegal_create_name_property_assertion (self):
+        self.assertEqual(0, len(self.entity.get_eats_names()))
+        language = self.create_language('French', 'fr')
+        name_type = self.create_name_type('pseudonym')
+        script = self.create_script('Gujarati', 'Gujr')
+        self.assertRaises(EATSValidationException,
+                          self.entity.create_name_property_assertion,
+                          self.authority, name_type, self.language, self.script,
+                          'Name')
+        self.assertEqual(0, len(self.entity.get_eats_names()))
+        self.assertRaises(EATSValidationException,
+                          self.entity.create_name_property_assertion,
+                          self.authority, self.name_type, language, self.script,
+                          'Name')
+        self.assertEqual(0, len(self.entity.get_eats_names()))
+        self.assertRaises(EATSValidationException,
+                          self.entity.create_name_property_assertion,
+                          self.authority, self.name_type, self.language, script,
+                          'Name')
+        self.assertEqual(0, len(self.entity.get_eats_names()))
     
     def test_create_name_property_assertion (self):
         self.assertEqual(0, len(self.entity.get_eats_names()))
@@ -68,6 +92,24 @@ class NameTest (BaseTestCase):
         self.assertEqual(0, self.type_index.get_associations(
                 self.tm.is_in_script_type).count())
 
+    def test_illegal_update_name_property_assertion (self):
+        assertion = self.entity.create_name_property_assertion(
+            self.authority, self.name_type, self.language, self.script,
+            'Name')
+        name = assertion.name
+        language = self.create_language('French', 'fr')
+        name_type = self.create_name_type('pseudonym')
+        script = self.create_script('Gujarati', 'Gujr')
+        self.assertRaises(EATSValidationException, assertion.update, name_type,
+                          self.language, self.script, 'Name')
+        self.assertEqual(name.name_type, self.name_type)
+        self.assertRaises(EATSValidationException, assertion.update,
+                          self.name_type, language, self.script, 'Name')
+        self.assertEqual(name.language, self.language)
+        self.assertRaises(EATSValidationException, assertion.update,
+                          self.name_type, self.language, script, 'Name')
+        self.assertEqual(name.script, self.script)
+
     def test_update_name_property_assertion (self):
         assertion = self.entity.create_name_property_assertion(
             self.authority, self.name_type, self.language, self.script,
@@ -78,10 +120,8 @@ class NameTest (BaseTestCase):
         self.assertEqual(name.language, self.language)
         self.assertEqual(name.script, self.script)
         self.assertEqual(name.display_form, 'Name')
-        authority2 = self.create_authority('Authority2')
-        assertion.update(authority2, self.name_type2, self.language2,
+        assertion.update(self.name_type2, self.language2,
             self.script2, 'Name2')
-        self.assertEqual(assertion.authority, authority2)
         self.assertEqual(name.name_type, self.name_type2)
         self.assertEqual(name.language, self.language2)
         self.assertEqual(name.script, self.script2)

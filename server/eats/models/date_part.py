@@ -52,6 +52,8 @@ class DatePart (Name):
         :type calendar: `Calendar`
 
         """
+        self.date.property_assertion.authority.validate_components(
+            calendar=calendar)
         if self.calendar is not None:
             self.remove_theme(self.calendar)
         self.add_theme(calendar)
@@ -89,6 +91,16 @@ class DatePart (Name):
         self._scoping_topics = None
 
     @property
+    def date (self):
+        """Returns the date of which this is a part.
+
+        :rtype: `Date`
+
+        """
+        from date import Date
+        return self.get_parent(proxy=Date)
+        
+    @property
     def date_type (self):
         """Returns the type for this date part.
 
@@ -113,6 +125,8 @@ class DatePart (Name):
         :type date_type: `DateType`
 
         """
+        self.date.property_assertion.authority.validate_components(
+            date_type=date_type)
         if self.date_type is not None:
             self.remove_theme(self.date_type)
         self.add_theme(date_type)

@@ -1,3 +1,5 @@
+from django.db import transaction
+
 from authority import Authority
 from date import Date
 
@@ -29,6 +31,7 @@ class PropertyAssertion (object):
             self.remove_theme(theme)
         self.add_theme(authority)
 
+    @transaction.commit_on_success
     def create_date (self, data):
         """Creates a new date associated with this property assertion."""
         date = self.eats_topic_map.create_topic(proxy=Date)
@@ -93,15 +96,10 @@ class PropertyAssertion (object):
     def set_players (self, entity, property):
         raise NotImplementedError
         
-    def update (self, authority, *args):
+    def update (self, *args):
         """Updates this property assertion with the new data.
 
-        This method should be overridden by subclasses, but called via
-        super.
-
-        :param authority: authority making the property assertion
-        :type authority: `Topic`
+        This method should be overridden by subclasses.
 
         """
-        if authority != self.authority:
-            self.authority = authority
+        raise NotImplementedError

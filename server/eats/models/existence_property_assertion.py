@@ -34,12 +34,3 @@ class ExistencePropertyAssertion (Association, PropertyAssertion):
                          self.eats_topic_map.existence)
         self.create_role(self.eats_topic_map.entity_role_type, entity)
         self._entity = entity
-
-    def update (self, authority):
-        """Updates this property assertion.
-
-        :param authority: authority making the assertion
-        :type authority: `Topic`
-
-        """
-        super(ExistencePropertyAssertion, self).update(authority)

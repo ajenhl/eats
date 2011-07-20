@@ -1,5 +1,7 @@
 from tmapi.models import Topic
 
+from eats.exceptions import EATSValidationException
+
 from infrastructure_manager import InfrastructureManager
 from calendar import Calendar
 from date_period import DatePeriod
@@ -168,3 +170,25 @@ class Authority (Topic, Infrastructure):
             role.remove()
         for element in elements:
             association.create_role(infrastructure_role_type, element)
+
+    def validate_components (self, calendar=None, date_period=None,
+                             date_type=None, entity_relationship_type=None,
+                             entity_type=None, language=None, name_type=None,
+                             script=None):
+        if calendar and calendar not in self.get_calendars():
+            raise EATSValidationException
+        if date_period and date_period not in self.get_date_periods():
+            raise EATSValidationException
+        if date_type and date_type not in self.get_date_types():
+            raise EATSValidationException
+        if entity_relationship_type and entity_relationship_type \
+                not in self.get_entity_relationship_types():
+            raise EATSValidationException
+        if entity_type and entity_type not in self.get_entity_types():
+            raise EATSValidationException
+        if language and language not in self.get_languages():
+            raise EATSValidationException
+        if name_type and name_type not in self.get_name_types():
+            raise EATSValidationException
+        if script and script not in self.get_scripts():
+            raise EATSValidationException
