@@ -1,6 +1,6 @@
 from django import forms
 
-from eats.models import Calendar, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NameType, Script
+from eats.models import Calendar, DatePeriod, DateType, EATSUser, EntityRelationshipType, EntityType, Language, NameType, Script
 from eats.views.edit import create_choice_list
 
 
@@ -63,6 +63,7 @@ class AuthorityForm (AdminForm):
     languages = forms.MultipleChoiceField(choices=[], required=False)
     name_types = forms.MultipleChoiceField(choices=[], required=False)
     scripts = forms.MultipleChoiceField(choices=[], required=False)
+    editors = forms.MultipleChoiceField(choices=[], required=False)
 
     def __init__ (self, topic_map, model, data=None, instance=None, **kwargs):
         super(AuthorityForm, self).__init__(topic_map, model, data=data,
@@ -83,6 +84,7 @@ class AuthorityForm (AdminForm):
             topic_map, NameType.objects.all())[1:]
         self.fields['scripts'].choices = create_choice_list(
             topic_map, Script.objects.all())[1:]
+        self.fields['editors'].choices = [(editor.user.pk, editor.user.username) for editor in EATSUser.objects.all()]
 
     def _objectify_data (self, base_data):
         # It would be nice to handle this process of converting
@@ -93,8 +95,9 @@ class AuthorityForm (AdminForm):
         # which aren't passed in to the field, this doesn't seem
         # possible, and so it is handled here.
         data = {'calendars': [], 'date_periods': [], 'date_types': [],
-                'entity_relationship_types': [], 'entity_types': [],
-                'languages': [], 'name_types': [], 'scripts': []}
+                'editors': [], 'entity_relationship_types': [],
+                'entity_types': [], 'languages': [], 'name_types': [],
+                'scripts': []}
         for calendar_id in base_data['calendars']:
             data['calendars'].append(Calendar.objects.get_by_identifier(
                     calendar_id))
@@ -120,6 +123,8 @@ class AuthorityForm (AdminForm):
         for script_id in base_data['scripts']:
             data['scripts'].append(Script.objects.get_by_identifier(
                     script_id))
+        for editor_id in base_data['editors']:
+            data['editors'].append(EATSUser.objects.get(pk=editor_id))
         return data
     
     def save (self):
@@ -139,6 +144,7 @@ class AuthorityForm (AdminForm):
         authority.set_languages(data['languages'])
         authority.set_name_types(data['name_types'])
         authority.set_scripts(data['scripts'])
+        authority.set_editors(data['editors'])
         return authority
 
     def _topic_to_dict (self, topic):
@@ -159,6 +165,7 @@ class AuthorityForm (AdminForm):
         data['name_types'] = [name_type.get_id() for name_type in
                                 topic.get_name_types()]
         data['scripts'] = [script.get_id() for script in topic.get_scripts()]
+        data['editors'] = [editor.pk for editor in topic.get_editors()]
         return data
 
 

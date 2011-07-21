@@ -44,6 +44,15 @@ class Authority (Topic, Infrastructure):
     def get_date_types (self):
         return DateType.objects.filter_by_authority(self)
 
+    def get_editors (self):
+        """Returns a `QuerySet` of `EATSUser`s who are designated
+        editors for this authority.
+
+        :rtype: `QuerySet` of `EATSUser`s
+
+        """
+        return self.editors.all()
+    
     def get_entity_types (self):
         return EntityType.objects.filter_by_authority(self)
 
@@ -90,6 +99,9 @@ class Authority (Topic, Infrastructure):
         """
         association_type = self.eats_topic_map.authority_has_date_type_association_type
         self._set_infrastructure_elements(date_types, association_type)
+
+    def set_editors (self, editors):
+        self.editors = editors
         
     def set_entity_relationship_types (self, entity_relationship_types):
         """Sets the entity relationship types available to this

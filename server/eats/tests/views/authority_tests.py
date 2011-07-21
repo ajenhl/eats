@@ -53,6 +53,8 @@ class AuthorityViewsTestCase (BaseTestCase):
         language = self.create_language('English', 'en')
         name_type = self.create_name_type('Test')
         script = self.create_script('Latin', 'Latn')
+        user = self.create_django_user('user1', 'user1@example.org', 'password')
+        editor = self.create_user(user)
         post_data = {
             'name': 'Test1',
             'calendars': [calendar1.get_id(), calendar2.get_id()],
@@ -62,7 +64,7 @@ class AuthorityViewsTestCase (BaseTestCase):
             'entity_types': [entity_type.get_id()],
             'languages': [language.get_id()],
             'name_types': [name_type.get_id()], 'scripts': [script.get_id()],
-            '_save': 'Save'}
+            'editors': [editor.pk], '_save': 'Save'}
         self.client.post(url, post_data, follow=True)
         authority = Authority.objects.get_by_admin_name('Test1')
         self.assertEqual(len(authority.get_calendars()), 2)
@@ -83,6 +85,8 @@ class AuthorityViewsTestCase (BaseTestCase):
         self.assertTrue(name_type in authority.get_name_types())
         self.assertEqual(len(authority.get_scripts()), 1)
         self.assertTrue(script in authority.get_scripts())
+        self.assertEqual(len(authority.get_editors()), 1)
+        self.assertTrue(editor in authority.get_editors())
 
     def test_authority_add_illegal_post (self):
         self.assertEqual(Authority.objects.count(), 1)
@@ -117,6 +121,7 @@ class AuthorityViewsTestCase (BaseTestCase):
         self.assertEqual(len(self.authority.get_languages()), 0)
         self.assertEqual(len(self.authority.get_name_types()), 0)
         self.assertEqual(len(self.authority.get_scripts()), 0)
+        self.assertEqual(len(self.authority.get_editors()), 0)
         calendar1 = self.create_calendar('Test1')
         calendar2 = self.create_calendar('Test2')
         date_period = self.create_date_period('Test')
@@ -127,6 +132,12 @@ class AuthorityViewsTestCase (BaseTestCase):
         language = self.create_language('English', 'en')
         name_type = self.create_name_type('Test')
         script = self.create_script('Latin', 'Latn')
+        user1 = self.create_django_user('user1', 'user1@example.org',
+                                        'password')
+        editor1 = self.create_user(user1)
+        user2 = self.create_django_user('user2', 'user2@example.org',
+                                        'password')
+        editor2 = self.create_user(user2)
         post_data = {
             'name': 'Test1',
             'calendars': [calendar1.get_id(), calendar2.get_id()],
@@ -136,7 +147,7 @@ class AuthorityViewsTestCase (BaseTestCase):
             'entity_types': [entity_type.get_id()],
             'languages': [language.get_id()],
             'name_types': [name_type.get_id()], 'scripts': [script.get_id()],
-            '_save': 'Save'}
+            'editors': [editor1.pk, editor2.pk], '_save': 'Save'}
         response = self.client.post(url, post_data, follow=True)
         self.assertRedirects(response, reverse('authority-list'))
         self.assertEqual(Authority.objects.count(), 1)
@@ -159,3 +170,8 @@ class AuthorityViewsTestCase (BaseTestCase):
         self.assertTrue(name_type in self.authority.get_name_types())
         self.assertEqual(len(self.authority.get_scripts()), 1)
         self.assertTrue(script in self.authority.get_scripts())
+        self.assertEqual(len(self.authority.get_editors()), 2)
+        self.assertTrue(editor1 in self.authority.get_editors())
+        self.assertTrue(editor2 in self.authority.get_editors())
+        self.assertTrue(self.authority in editor1.editable_authorities.all())
+        self.assertTrue(self.authority in editor2.editable_authorities.all())
