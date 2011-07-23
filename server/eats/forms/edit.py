@@ -153,6 +153,16 @@ class CreateEntityForm (forms.Form):
             topic_map, authorities, True)
 
 
+class CurrentAuthorityForm (forms.Form):
+
+    current_authority = forms.ChoiceField(choices=[])
+
+    def __init__ (self, topic_map, editable_authorities, data=None, **kwargs):
+        super(CurrentAuthorityForm, self).__init__(data, **kwargs)
+        self.fields['current_authority'].choices = create_choice_list(
+            topic_map, editable_authorities)[1:]
+
+
 class PropertyAssertionForm (forms.Form):
 
     assertion = forms.IntegerField(widget=forms.HiddenInput, required=False)

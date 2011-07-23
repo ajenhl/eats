@@ -6,7 +6,7 @@ from django.template import RequestContext
 
 from eats.lib.property_assertions import EntityRelationshipPropertyAssertions, EntityTypePropertyAssertions, ExistencePropertyAssertions, NamePropertyAssertions, NotePropertyAssertions
 from eats.decorators import add_topic_map
-from eats.forms.edit import CreateEntityForm, create_choice_list, DateForm
+from eats.forms.edit import CreateEntityForm, create_choice_list, CurrentAuthorityForm, DateForm
 from eats.models import Authority, Calendar, DatePeriod, DateType, EATSUser, Entity
 
 
@@ -50,36 +50,56 @@ def entity_change (request, topic_map, entity_id):
         entity = Entity.objects.get_by_identifier(entity_id)
     except Entity.DoesNotExist:
         raise Http404
+    editor = request.user.eats_user
     context_data = {'entity': entity}
-    authority = request.user.eats_user.get_current_authority()
-    data = request.POST or None
-    existences = ExistencePropertyAssertions(topic_map, entity, authority, data)
+    authority = editor.get_current_authority()
+    editable_authorities = editor.editable_authorities.all()
+    authority_data = None
+    entity_data = None
+    if request.method == 'POST':
+        if '_change_authority' in request.POST:
+            authority_data = request.POST
+        else:
+            entity_data = request.POST
+    current_authority_form = CurrentAuthorityForm(
+        topic_map, editable_authorities, authority_data)
+    existences = ExistencePropertyAssertions(topic_map, entity, authority,
+                                             entity_data)
     entity_types = EntityTypePropertyAssertions(topic_map, entity, authority,
-                                                data)
-    names = NamePropertyAssertions(topic_map, entity, authority, data)
-    notes = NotePropertyAssertions(topic_map, entity, authority, data)
+                                                entity_data)
+    names = NamePropertyAssertions(topic_map, entity, authority, entity_data)
+    notes = NotePropertyAssertions(topic_map, entity, authority, entity_data)
     entity_relationships = EntityRelationshipPropertyAssertions(
-        topic_map, entity, authority, data)
+        topic_map, entity, authority, entity_data)
     existences_formset = existences.formset
     entity_types_formset = entity_types.formset
     names_formset = names.formset
     notes_formset = notes.formset
     entity_relationships_formset = entity_relationships.formset
     if request.method == 'POST':
-        is_valid = False
-        for formset in (existences_formset, entity_types_formset, names_formset,
-                        notes_formset, entity_relationships_formset):
-            is_valid = formset.is_valid()
-            if not is_valid:
-                break
-        if is_valid:
+        if '_change_authority' in request.POST:
+            if current_authority_form.is_valid():
+                authority_id = current_authority_form.cleaned_data[
+                    'current_authority']
+                authority = Authority.objects.get_by_identifier(authority_id)
+                editor.set_current_authority(authority)
+        else:
+            is_valid = False
             for formset in (existences_formset, entity_types_formset,
                             names_formset, notes_formset,
                             entity_relationships_formset):
-                formset.save()
-            redirect_url = reverse('entity-change',
-                                   kwargs={'entity_id': entity_id})
-            return HttpResponseRedirect(redirect_url)
+                is_valid = formset.is_valid()
+                if not is_valid:
+                    break
+            if is_valid:
+                for formset in (existences_formset, entity_types_formset,
+                                names_formset, notes_formset,
+                                entity_relationships_formset):
+                    formset.save()
+                redirect_url = reverse('entity-change',
+                                       kwargs={'entity_id': entity_id})
+                return HttpResponseRedirect(redirect_url)
+    context_data['current_authority_form'] = current_authority_form
     context_data['existence_non_editable'] = existences.non_editable
     context_data['existence_formset'] = existences_formset
     context_data['entity_type_non_editable'] = entity_types.non_editable

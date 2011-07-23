@@ -25,6 +25,14 @@ return $( "<li></li>" )
 <form action="" method="post">
   {% csrf_token %}
 
+  {{ current_authority_form }}
+
+  <input name="_change_authority" type="submit" value="Change authority"/>
+</form>
+
+<form action="" method="post">
+  {% csrf_token %}
+
   <fieldset>
     <legend>Existences</legend>
 
@@ -44,16 +52,24 @@ return $( "<li></li>" )
         <tr>
           <td>{% if form.instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
           <td>{{ form.authority }}</td>
-          <td>{% if form.instance %}
-          {% for date in form.instance.get_dates %}
-          <a href="{{ form.assertion.value }}/date/{{ date.get_id }}/">{{ date.assembled_form }}</a>
-          {% endfor %}
+          <td>{% if form.instance %}{% with dates=form.instance.get_dates %}{% if dates %}<ul>
+          {% for date in dates %}<li><a href="{{ form.assertion.value }}/date/{{ date.get_id }}/">{{ date.assembled_form }}</a></li>{% endfor %}
+          </ul>{% endif %}{% endwith %}
           <p><a href="{{ form.assertion.value }}/date/add/">Add a date</a></p>{% endif %}</td>
           <td class="errors">{% if form.errors %}<ul>
           {% for error in form.errors.values %}
           <li>{{ error }}</li>
           {% endfor %}
           </ul>{% endif %}</td>
+        </tr>
+        {% endfor %}
+        {% for assertion in existence_non_editable %}
+        <tr>
+          <td></td>
+          <td>{{ assertion.authority }}</td>
+          <td>{% with dates=assertion.get_dates %}{% if dates %}<ul>
+          {% for date in dates %}<li>{{ date.assembled_form }}</li>{% endfor %}
+          </ul>{% endif %}{% endwith %}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -81,9 +97,6 @@ return $( "<li></li>" )
           <td>{% if form.instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
           <td>
             <div>{{ form.authority }}</div>
-            {% if form.errors.authority %}
-            <div class="errors">{{ form.errors.authority }}</div>
-            {% endif %}
           </td>
           <td>
             <div>{{ form.entity_type }}</div>
@@ -91,12 +104,22 @@ return $( "<li></li>" )
             <div class="errors">{{ form.errors.entity_type }}</div>
             {% endif %}
           </td>
-          <td>{% if form.instance %}
-          {% for date in form.instance.get_dates %}
-          <a href="{{ form.assertion.value }}/date/{{ date.get_id }}/">{{ date.assembled_form }}</a>
-          {% endfor %}
+          <td>{% if form.instance %}{% with dates=form.instance.get_dates %}{% if dates %}<ul>
+          {% for date in dates %}<li><a href="{{ form.assertion.value }}/date/{{ date.get_id }}/">{{ date.assembled_form }}</a></li>{% endfor %}
+          </ul>{% endif %}{% endwith %}
           <p><a href="{{ form.assertion.value }}/date/add/">Add a date</a></p>{% endif %}</td>
           <td class="errors"></td>
+        </tr>
+        {% endfor %}
+        {% for assertion in entity_type_non_editable %}
+        <tr>
+          <td></td>
+          <td>{{ assertion.authority }}</td>
+          <td>{{ assertion.entity_type }}</td>
+          <td>{% with dates=assertion.get_dates %}{% if dates %}<ul>
+          {% for date in dates %}<li>{{ date.assembled_form }}</li>{% endfor %}
+          </ul>{% endif %}{% endwith %}</td>
+          <td></td>
         </tr>
         {% endfor %}
       </tbody>
@@ -154,12 +177,20 @@ return $( "<li></li>" )
             <div class="errors">{{ form.errors.display_form }}</div>
             {% endif %}
           </td>
-          <td>{% if form.instance %}
-          {% for date in form.instance.get_dates %}
-          <a href="{{ form.assertion.value }}/date/{{ date.get_id }}/">{{ date.assembled_form }}</a>
-          {% endfor %}
+          <td>{% if form.instance %}{% with dates=form.instance.get_dates %}{% if dates %}<ul>
+          {% for date in dates %}<li><a href="{{ form.assertion.value }}/date/{{ date.get_id }}/">{{ date.assembled_form }}</a></li>{% endfor %}
+          </ul>{% endif %}{% endwith %}
           <p><a href="{{ form.assertion.value }}/date/add/">Add a date</a></p>{% endif %}</td>
           <td class="errors"></td>
+        </tr>
+        {% endfor %}
+        {% for assertion in name_non_editable %}
+        <tr>
+          <td>{{ assertion.display_form }}</td>
+          <td>{% with dates=assertion.get_dates %}{% if dates %}<ul>
+          {% for date in dates %}<li>{{ date.assembled_form }}</li>{% endfor %}
+          </ul>{% endif %}{% endwith %}</td>
+          <td></td>
         </tr>
         {% endfor %}
       </tbody>
@@ -203,10 +234,9 @@ return $( "<li></li>" )
             <div class="errors">{{ form.errors.related_entity }}</div>
             {% endif %}
           </td>
-          <td>{% if form.instance %}
-          {% for date in form.instance.get_dates %}
-          <a href="{{ form.assertion.value }}/date/{{ date.get_id }}/">{{ date.assembled_form }}</a>
-          {% endfor %}
+          <td>{% if form.instance %}{% with dates=form.instance.get_dates %}{% if dates %}<ul>
+          {% for date in dates %}<li><a href="{{ form.assertion.value }}/date/{{ date.get_id }}/">{{ date.assembled_form }}</a></li>{% endfor %}
+          </ul>{% endif %}{% endwith %}
           <p><a href="{{ form.assertion.value }}/date/add/">Add a date</a></p>{% endif %}</td>
         </tr>
         {% endfor %}
