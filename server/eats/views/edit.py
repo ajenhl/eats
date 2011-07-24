@@ -54,7 +54,7 @@ def entity_change (request, topic_map, entity_id):
     context_data = {'entity': entity}
     authority = editor.get_current_authority()
     editable_authorities = editor.editable_authorities.all()
-    authority_data = None
+    authority_data = {'current_authority': authority.get_id()}
     entity_data = None
     if request.method == 'POST':
         if '_change_authority' in request.POST:
@@ -77,12 +77,14 @@ def entity_change (request, topic_map, entity_id):
     notes_formset = notes.formset
     entity_relationships_formset = entity_relationships.formset
     if request.method == 'POST':
+        redirect_url = reverse('entity-change', kwargs={'entity_id': entity_id})
         if '_change_authority' in request.POST:
             if current_authority_form.is_valid():
                 authority_id = current_authority_form.cleaned_data[
                     'current_authority']
                 authority = Authority.objects.get_by_identifier(authority_id)
                 editor.set_current_authority(authority)
+                return HttpResponseRedirect(redirect_url)
         else:
             is_valid = False
             for formset in (existences_formset, entity_types_formset,
@@ -96,8 +98,6 @@ def entity_change (request, topic_map, entity_id):
                                 names_formset, notes_formset,
                                 entity_relationships_formset):
                     formset.save()
-                redirect_url = reverse('entity-change',
-                                       kwargs={'entity_id': entity_id})
                 return HttpResponseRedirect(redirect_url)
     context_data['current_authority_form'] = current_authority_form
     context_data['existence_non_editable'] = existences.non_editable
