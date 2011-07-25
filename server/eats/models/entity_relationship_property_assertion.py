@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db.models import Q
 
 from tmapi.models import Association
 
@@ -11,6 +12,13 @@ from property_assertion import PropertyAssertion
 
 class EntityRelationshipPropertyAssertionManager (BaseManager):
 
+    def filter_by_entity (self, entity):
+        domain_role_type = self.eats_topic_map.domain_entity_role_type
+        range_role_type = self.eats_topic_map.range_entity_role_type
+        return self.filter(
+            Q(roles__type=domain_role_type) | Q(roles__type=range_role_type),
+            roles__player=entity).distinct()
+    
     def get_query_set (self):
         assertion_type = self.eats_topic_map.entity_relationship_assertion_type
         qs = super(EntityRelationshipPropertyAssertionManager,

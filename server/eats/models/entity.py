@@ -176,27 +176,11 @@ class Entity (Topic):
     def get_entity_relationships (self):
         """Returns this entity's relationships to other entities.
 
-        :rtype: list of `EntityRelationshipPropertyAssertion`s
+        :rtype: `QuerySet` of `EntityRelationshipPropertyAssertion`s
 
         """
-        domain_entity_roles = self.get_roles_played(
-            self.eats_topic_map.domain_entity_role_type)
-        range_entity_roles = self.get_roles_played(
-            self.eats_topic_map.range_entity_role_type)
-        relationships = [role.get_parent(proxy=EntityRelationshipPropertyAssertion) for role in domain_entity_roles] + \
-            [role.get_parent(proxy=EntityRelationshipPropertyAssertion) for role in range_entity_roles]
-        return relationships
-
-    def get_entity_type (self, assertion):
-        """Returns the entity type asserted in `assertion`.
-
-        :param assertion: entity type property assertion
-        :type assertion: `Association`
-        :rtype: `Topic`
-
-        """
-        role = assertion.get_roles(self.eats_topic_map.property_role_type)[0]
-        return role.get_player()
+        return EntityRelationshipPropertyAssertion.objects.filter_by_entity(
+            self)
     
     def get_entity_types (self):
         """Returns this entity's entity type property assertions.
