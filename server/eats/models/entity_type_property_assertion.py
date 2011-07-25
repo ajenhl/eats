@@ -1,6 +1,7 @@
 from tmapi.models import Association
 
 from base_manager import BaseManager
+from entity_type import EntityType
 from property_assertion import PropertyAssertion
 
 
@@ -22,11 +23,15 @@ class EntityTypePropertyAssertion (Association, PropertyAssertion):
 
     @property
     def entity_type (self):
-        """Returns the entity type being asserted."""
+        """Returns the entity type being asserted.
+
+        :rtype: `EntityType`
+        
+        """
         if not hasattr(self, '_entity_type'):
             property_role = self.get_roles(
                 self.eats_topic_map.property_role_type)[0]
-            self._entity_type = property_role.get_player()
+            self._entity_type = property_role.get_player(proxy=EntityType)
         return self._entity_type
 
     def set_players (self, entity, entity_type):
