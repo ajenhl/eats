@@ -25,9 +25,11 @@ return $( "<li></li>" )
 <form action="" method="post">
   {% csrf_token %}
 
-  {{ current_authority_form }}
-
-  <input name="_change_authority" type="submit" value="Change authority"/>
+  <div>
+    {{ current_authority_form.current_authority.label_tag }}:
+    {{ current_authority_form.current_authority }}
+    <input name="_change_authority" type="submit" value="Change authority"/>
+  </div>
 </form>
 
 <form action="" method="post">
@@ -47,7 +49,7 @@ return $( "<li></li>" )
           <th></th>
         </tr>
       </thead>
-      <tbody>
+      <tbody class="eats-editable-pa">
         {% for form in existence_formset %}
         <tr>
           <td>{% if form.instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
@@ -63,6 +65,8 @@ return $( "<li></li>" )
           </ul>{% endif %}</td>
         </tr>
         {% endfor %}
+      </tbody>
+      <tbody class="eats-non-editable-pa">
         {% for assertion in existence_non_editable %}
         <tr>
           <td></td>
@@ -91,7 +95,7 @@ return $( "<li></li>" )
           <th></th>
         </tr>
       </thead>
-      <tbody>
+      <tbody class="eats-editable-pa">
         {% for form in entity_type_formset %}
         <tr>
           <td>{% if form.instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
@@ -111,6 +115,8 @@ return $( "<li></li>" )
           <td class="errors"></td>
         </tr>
         {% endfor %}
+      </tbody>
+      <tbody class="eats-non-editable-pa">
         {% for assertion in entity_type_non_editable %}
         <tr>
           <td></td>
@@ -143,7 +149,7 @@ return $( "<li></li>" )
           <th scope="col">Dates</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody class="eats-editable-pa">
         {% for form in name_formset %}
         <tr>
           <td>{{ form.DELETE }}{{ form.assertion }}</td>
@@ -179,6 +185,8 @@ return $( "<li></li>" )
           <td class="errors"></td>
         </tr>
         {% endfor %}
+      </tbody>
+      <tbody class="eats-non-editable-pa">
         {% for assertion in name_non_editable %}
         <tr>
           <td></td>
@@ -212,7 +220,7 @@ return $( "<li></li>" )
           <th scope="col">Dates</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody class="eats-editable-pa">
         {% for form in entity_relationship_formset %}
         <tr>
           <td>{{ form.DELETE }}{{ form.assertion }}</td>
@@ -235,12 +243,16 @@ return $( "<li></li>" )
           <p><a href="{{ form.assertion.value }}/date/add/">Add a date</a></p>{% endif %}</td>
         </tr>
         {% endfor %}
+      </tbody>
+      <tbody class="eats-non-editable-pa">
         {% for entity_relationship in entity_relationship_non_editable %}
         <tr>
           <td></td>
           <td>{{ entity_relationship.authority.get_admin_name }}</td>
-          <td>{{ entity_relationship.entity_relationship_type.get_admin_name }}</td>
-          <td></td>
+          {% with ert=entity_relationship.entity_relationship_type %}
+          <td>{% if entity == entity_relationship.domain_entity %}{{ ert.get_admin_forward_name }}{% if entity == entity_relationship.range_entity %} and {{ ert.get_admin_reverse_name }}{% endif %}{% else %}{{ ert.get_admin_reverse_name }}{% endif %}</td>
+          {% endwith %}
+          <td>{{ entity.get_eats_names.0.name.display_form }}</td>
           <td></td>
         </tr>
         {% endfor %}
@@ -261,7 +273,7 @@ return $( "<li></li>" )
           <th scope="col">Note</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody class="eats-editable-pa">
         {% for form in note_formset %}
         <tr>
           <td>{% if form.initial or form.is_bound %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
@@ -274,6 +286,8 @@ return $( "<li></li>" )
           </td>
         </tr>
         {% endfor %}
+      </tbody>
+      <tbody class="eats-non-editable-pa">
         {% for note in note_non_editable %}
         <tr>
           <td></td>
