@@ -163,15 +163,10 @@ class Entity (Topic):
     def get_eats_names (self):
         """Returns this entity's name property assertions.
 
-        :rtype: list of `NamePropertyAssertion`s
+        :rtype: `QuerySet` of `NamePropertyAssertion`s
 
         """
-        # QAZ: This should return a QuerySet.
-        entity_roles = self.get_roles_played(
-            self.eats_topic_map.entity_role_type,
-            self.eats_topic_map.name_assertion_type)
-        return [role.get_parent(proxy=NamePropertyAssertion) for role
-                in entity_roles]
+        return NamePropertyAssertion.objects.filter_by_entity(self)
 
     def get_entity_relationships (self):
         """Returns this entity's relationships to other entities.
@@ -185,38 +180,18 @@ class Entity (Topic):
     def get_entity_types (self):
         """Returns this entity's entity type property assertions.
 
-        :rtype: list of `EntityTypePropertyAssertion`s
+        :rtype: `QuerySet` of `EntityTypePropertyAssertion`s
 
         """
-        # QAZ: This should return a QuerySet.
-        entity_roles = self.get_roles_played(
-            self.eats_topic_map.entity_role_type,
-            self.eats_topic_map.entity_type_assertion_type)
-        entity_types = [role.get_parent(proxy=EntityTypePropertyAssertion)
-                        for role in entity_roles]
-        return entity_types
+        return EntityTypePropertyAssertion.objects.filter_by_entity(self)
     
-    def get_existences (self, authority=None):
+    def get_existences (self):
         """Returns this entity's existence property assertions.
 
-        If `authority` is not None, returns only those existences that
-        are asserted by that authority.
-
-        :param authority: the optional authority
-        :type authority: `Topic`
-        :rtype: list of `Association`s
+        :rtype: `QuerySet` of `ExistencePropertyAssertion`s
 
         """
-        # QAZ: This should return a QuerySet.
-        entity_roles = self.get_roles_played(
-            self.eats_topic_map.entity_role_type,
-            self.eats_topic_map.existence_assertion_type)
-        existences = [role.get_parent(proxy=ExistencePropertyAssertion)
-                      for role in entity_roles]
-        if authority is not None:
-            existences = [existence for existence in existences if
-                          authority in existence.get_scope()]
-        return existences
+        return ExistencePropertyAssertion.objects.filter_by_entity(self)
 
     def get_notes (self):
         """Returns this entity's note property assertions.

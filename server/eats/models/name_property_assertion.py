@@ -1,11 +1,26 @@
 from tmapi.models import Association
 
+from base_manager import BaseManager
 from name import Name
 from property_assertion import PropertyAssertion
 
 
+class NamePropertyAssertionManager (BaseManager):
+
+    def filter_by_entity (self, entity):
+        return self.filter(roles__type=self.eats_topic_map.entity_role_type,
+                           roles__player=entity)
+    
+    def get_query_set (self):
+        assertion_type = self.eats_topic_map.name_assertion_type
+        qs = super(NamePropertyAssertionManager, self).get_query_set()
+        return qs.filter(type=assertion_type)
+
+
 class NamePropertyAssertion (Association, PropertyAssertion):
 
+    objects = NamePropertyAssertionManager()
+    
     class Meta:
         proxy = True
         app_label = 'eats'

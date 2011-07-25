@@ -7,6 +7,10 @@ from property_assertion import PropertyAssertion
 
 class EntityTypePropertyAssertionManager (BaseManager):
 
+    def filter_by_entity (self, entity):
+        return self.filter(roles__type=self.eats_topic_map.entity_role_type,
+                           roles__player=entity)
+
     def get_query_set (self):
         assertion_type = self.eats_topic_map.entity_type_assertion_type
         qs = super(EntityTypePropertyAssertionManager, self).get_query_set()

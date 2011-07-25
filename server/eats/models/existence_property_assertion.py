@@ -6,6 +6,11 @@ from property_assertion import PropertyAssertion
 
 class ExistencePropertyAssertionManager (BaseManager):
 
+    def filter_by_entity (self, entity):
+        entity_role_type = self.eats_topic_map.entity_role_type
+        return self.filter(roles__type=entity_role_type,
+                           roles__player=entity)
+    
     def get_query_set (self):
         assertion_type = self.eats_topic_map.existence_assertion_type
         qs = super(ExistencePropertyAssertionManager, self).get_query_set()
