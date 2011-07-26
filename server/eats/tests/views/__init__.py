@@ -10,5 +10,6 @@ from entity_change_tests import *
 from entity_relationship_type_tests import *
 from entity_type_tests import *
 from language_tests import *
+from name_part_type_tests import *
 from name_type_tests import *
 from script_tests import *

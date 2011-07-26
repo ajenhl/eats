@@ -39,11 +39,14 @@ class BaseTestCase (TransactionTestCase):
     def create_entity_type (self, name):
         return self.tm.create_entity_type(name)
     
-    def create_name_type (self, name):
-        return self.tm.create_name_type(name)
-
     def create_language (self, name, code):
         return self.tm.create_language(name, code)
+
+    def create_name_part_type (self, name):
+        return self.tm.create_name_part_type(name)
+    
+    def create_name_type (self, name):
+        return self.tm.create_name_type(name)
 
     def create_script (self, name, code):
         return self.tm.create_script(name, code)

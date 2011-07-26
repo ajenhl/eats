@@ -107,6 +107,23 @@ class AuthorityTestCase (BaseTestCase):
         self.authority.set_languages([])
         self.assertEqual(0, len(self.authority.get_languages()))
 
+    def test_get_name_part_types (self):
+        self.assertEqual(0, len(self.authority.get_name_part_types()))
+        name_part_type1 = self.create_name_part_type('given')
+        self.authority.set_name_part_types([name_part_type1])
+        self.assertEqual(1, len(self.authority.get_name_part_types()))
+        self.assertTrue(name_part_type1 in self.authority.get_name_part_types())
+        name_part_type2 = self.create_name_part_type('family')
+        self.authority.set_name_part_types([name_part_type1, name_part_type2])
+        self.assertEqual(2, len(self.authority.get_name_part_types()))
+        self.assertTrue(name_part_type1 in self.authority.get_name_part_types())
+        self.assertTrue(name_part_type2 in self.authority.get_name_part_types())
+        self.authority.set_name_part_types([name_part_type2])
+        self.assertEqual(1, len(self.authority.get_name_part_types()))
+        self.assertTrue(name_part_type2 in self.authority.get_name_part_types())
+        self.authority.set_name_part_types([])
+        self.assertEqual(0, len(self.authority.get_name_part_types()))
+        
     def test_get_name_types (self):
         self.assertEqual(0, len(self.authority.get_name_types()))
         name_type1 = self.create_name_type('regular')

@@ -12,6 +12,8 @@ AUTHORITY_HAS_ENTITY_TYPE_ASSOCIATION_TYPE_IRI = EATS_BASE_IRI + \
     'authority_has_entity_type_association/'
 AUTHORITY_HAS_LANGUAGE_ASSOCIATION_TYPE_IRI = EATS_BASE_IRI + \
     'authority_has_language_association/'
+AUTHORITY_HAS_NAME_PART_TYPE_ASSOCIATION_TYPE_IRI = EATS_BASE_IRI + \
+    'authority_has_name_part_type_association/'
 AUTHORITY_HAS_NAME_TYPE_ASSOCIATION_TYPE_IRI = EATS_BASE_IRI + \
     'authority_has_name_type_association/'
 AUTHORITY_HAS_SCRIPT_ASSOCIATION_TYPE_IRI = EATS_BASE_IRI + \
@@ -52,6 +54,7 @@ LANGUAGE_CODE_TYPE_IRI = EATS_BASE_IRI + 'language_code/'
 LANGUAGE_ROLE_TYPE_IRI = EATS_BASE_IRI + 'language_role/'
 LANGUAGE_TYPE_IRI = EATS_BASE_IRI + 'language/'
 NAME_ASSERTION_TYPE_IRI = EATS_BASE_IRI + 'name_assertion/'
+NAME_PART_TYPE_TYPE_IRI = EATS_BASE_IRI + 'name_part_type/'
 NAME_ROLE_TYPE_IRI = EATS_BASE_IRI + 'name_role/'
 NAME_TYPE_TYPE_IRI = EATS_BASE_IRI + 'name_type/'
 NORMALISED_DATE_FORM_TYPE_IRI = EATS_BASE_IRI + 'normalised_date_form/'

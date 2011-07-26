@@ -10,6 +10,7 @@ from entity_relationship_type import EntityRelationshipType
 from entity_type import EntityType
 from infrastructure import Infrastructure
 from language import Language
+from name_part_type import NamePartType
 from name_type import NameType
 from script import Script
 
@@ -62,6 +63,9 @@ class Authority (Topic, Infrastructure):
     def get_languages (self):
         return Language.objects.filter_by_authority(self)
 
+    def get_name_part_types (self):
+        return NamePartType.objects.filter_by_authority(self)
+    
     def get_name_types (self):
         return NameType.objects.filter_by_authority(self)
 
@@ -136,6 +140,17 @@ class Authority (Topic, Infrastructure):
         """
         association_type = self.eats_topic_map.authority_has_language_association_type
         self._set_infrastructure_elements(languages, association_type)
+
+    def set_name_part_types (self, name_part_types):
+        """Sets the name part types available to this authority to
+        `name_part_types`.
+
+        :param name_part_types: name part types to make available
+        :type name_part_types: list of `NamePartType`s
+
+        """
+        association_type = self.eats_topic_map.authority_has_name_part_type_association_type
+        self._set_infrastructure_elements(name_part_types, association_type)
 
     def set_name_types (self, name_types):
         """Sets the name types available to this authority to `name_types`.

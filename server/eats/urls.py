@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import patterns, url
 
-from eats.models import Authority, Calendar, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NameType, Script
+from eats.models import Authority, Calendar, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
 
 
 # Displaying.
@@ -27,6 +27,7 @@ date_type_data = {'model': DateType}
 entity_relationship_type_data = {'model': EntityRelationshipType}
 entity_type_data = {'model': EntityType}
 language_data = {'model': Language}
+name_part_type_data = {'model': NamePartType}
 name_type_data = {'model': NameType}
 script_data = {'model': Script}
 
@@ -79,6 +80,12 @@ urlpatterns += patterns(
         name='language-add'),
     url(r'^administer/language/(?P<topic_id>\d+)/$', 'topic_change',
         language_data, name='language-change'),
+    url(r'^administer/name-part-type/$', 'topic_list', name_part_type_data,
+        name='nameparttype-list'),
+    url(r'^administer/name-part-type/add/$', 'topic_add',
+        name_part_type_data, name='nameparttype-add'),
+    url(r'^administer/name-part-type/(?P<topic_id>\d+)/$', 'topic_change',
+        name_part_type_data, name='nameparttype-change'),
     url(r'^administer/name-type/$', 'topic_list', name_type_data,
         name='nametype-list'),
     url(r'^administer/name-type/add/$', 'topic_add',

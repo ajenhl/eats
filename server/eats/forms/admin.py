@@ -258,6 +258,13 @@ class LanguageForm (AdminForm):
         return language
 
 
+class NamePartTypeForm (AdminForm):
+
+    def save (self):
+        return super(NamePartTypeForm, self).save(
+            self.topic_map.create_name_part_type)
+
+
 class NameTypeForm (AdminForm):
 
     def save (self):
