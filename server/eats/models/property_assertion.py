@@ -19,18 +19,6 @@ class PropertyAssertion (object):
         topic = self.get_scope()[0]
         return Authority.objects.get_by_identifier(topic.get_id())
 
-    @authority.setter
-    def authority (self, authority):
-        """Sets the authority of this property assertion.
-
-        :param authority: authority
-        :type authority: `Authority`
-
-        """
-        for theme in self.get_scope():
-            self.remove_theme(theme)
-        self.add_theme(authority)
-
     @transaction.commit_on_success
     def create_date (self, data):
         """Creates a new date associated with this property assertion."""
