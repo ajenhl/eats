@@ -111,7 +111,23 @@ class Entity (Topic):
             self.eats_topic_map.name_assertion_type, scope=[authority],
             proxy=NamePropertyAssertion)
         assertion.set_players(self, name)
-        name.create(name_type, language, script, display_form)
+        name.create_name(display_form, name_type)
+        # The language of the name is specified via an association
+        # with the appropriate language topic.
+        language_association = self.eats_topic_map.create_association(
+            self.eats_topic_map.is_in_language_type)
+        language_association.create_role(self.eats_topic_map.name_role_type,
+                                         name)
+        language_association.create_role(self.eats_topic_map.language_role_type,
+                                         language)
+        # The script of the name is specified via an association with
+        # the appropriate script topic.
+        script_association = self.eats_topic_map.create_association(
+            self.eats_topic_map.is_in_script_type)
+        script_association.create_role(self.eats_topic_map.name_role_type, name)
+        script_association.create_role(self.eats_topic_map.script_role_type,
+                                       script)
+        name.update_name_index()
         return assertion
 
     def create_note_property_assertion (self, authority, note):
