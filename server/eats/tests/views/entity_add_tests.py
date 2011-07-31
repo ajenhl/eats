@@ -2,10 +2,10 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 
 from eats.models import EATSUser, Entity
-from eats.tests.base_test_case import BaseTestCase
+from eats.tests.views.view_test_case import ViewTestCase
 
 
-class EntityAddViewTestCase (BaseTestCase):
+class EntityAddViewTestCase (ViewTestCase):
 
     def setUp (self):
         super(EntityAddViewTestCase, self).setUp()

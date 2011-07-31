@@ -1,10 +1,10 @@
 from django.core.urlresolvers import reverse
 
 from eats.models import Calendar
-from eats.tests.base_test_case import BaseTestCase
+from eats.tests.views.view_test_case import ViewTestCase
 
 
-class CalendarViewsTestCase (BaseTestCase):
+class CalendarViewsTestCase (ViewTestCase):
 
     def test_calendar_list (self):
         url = reverse('calendar-list')

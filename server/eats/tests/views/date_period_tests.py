@@ -1,10 +1,10 @@
 from django.core.urlresolvers import reverse
 
 from eats.models import DatePeriod
-from eats.tests.base_test_case import BaseTestCase
+from eats.tests.views.view_test_case import ViewTestCase
 
 
-class DatePeriodViewsTestCase (BaseTestCase):
+class DatePeriodViewsTestCase (ViewTestCase):
 
     def test_date_period_list (self):
         url = reverse('dateperiod-list')

@@ -5,10 +5,10 @@ from django.core.urlresolvers import reverse
 
 from eats.constants import FORWARD_RELATIONSHIP_MARKER, \
     REVERSE_RELATIONSHIP_MARKER
-from eats.tests.base_test_case import BaseTestCase
+from eats.tests.views.view_test_case import ViewTestCase
 
 
-class EntityChangeViewTestCase (BaseTestCase):
+class EntityChangeViewTestCase (ViewTestCase):
 
     def setUp (self):
         super(EntityChangeViewTestCase, self).setUp()
@@ -67,27 +67,19 @@ class EntityChangeViewTestCase (BaseTestCase):
                              'Expected no %ss' % formset)
 
     def test_post_entity_relationships (self):
-        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
         entity2 = self.tm.create_entity(self.authority)
         rel_type = self.create_entity_relationship_type(
             'is child of', 'is parent of')
         self.authority.set_entity_relationship_types([rel_type])
-        existence = entity.get_existences()[0]
         url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
-        response = self.client.post(url, {
-                'existences-TOTAL_FORMS': 2, 'existences-INITIAL_FORMS': 1,
-                'existences-0-assertion': existence.get_id(),
-                'existences-0-authority': self.authority_id,
-                'entity_types-TOTAL_FORMS': 1, 'entity_types-INITIAL_FORMS': 0,
-                'names-TOTAL_FORMS': 1, 'names-INITIAL_FORMS': 0,
-                'entity_relationships-TOTAL_FORMS': 1,
-                'entity_relationships-INITIAL_FORMS': 0,
-                'entity_relationships-0-relationship_type': str(rel_type.get_id()) + FORWARD_RELATIONSHIP_MARKER,
-                'entity_relationships-0-related_entity_1': entity2.get_id(),
-                'notes-TOTAL_FORMS': 1, 'notes-INITIAL_FORMS': 0,
-                '_save': 'Save'}, follow=True)
-        self.assertRedirects(response, url)
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['entity_relationships-0-relationship_type'] = \
+            str(rel_type.get_id()) + FORWARD_RELATIONSHIP_MARKER
+        form['entity_relationships-0-related_entity_1'] = entity2.get_id()
+        response = form.submit('_save').follow()
+        self.assertEqual(response.request.url[len(response.request.host_url):],
+                         url)
         formset = response.context['entity_relationship_formset']
         self.assertEqual(formset.initial_form_count(), 1,
                          'Expected one pre-filled entity relationship form')
@@ -109,23 +101,14 @@ class EntityChangeViewTestCase (BaseTestCase):
             'is born in', 'is birth place of')
         self.authority.set_entity_relationship_types([rel_type, rel_type2])
         entity3 = self.tm.create_entity(self.authority)
-        response = self.client.post(url, {
-                'existences-TOTAL_FORMS': 2, 'existences-INITIAL_FORMS': 1,
-                'existences-0-assertion': existence.get_id(),
-                'existences-0-authority': self.authority_id,
-                'entity_types-TOTAL_FORMS': 1, 'entity_types-INITIAL_FORMS': 0,
-                'names-TOTAL_FORMS': 1, 'names-INITIAL_FORMS': 0,
-                'entity_relationships-TOTAL_FORMS': 2,
-                'entity_relationships-INITIAL_FORMS': 1,
-                'entity_relationships-0-DELETE': 'on',
-                'entity_relationships-0-assertion': assertion.get_id(),
-                'entity_relationships-0-relationship_type': str(rel_type.get_id()) + FORWARD_RELATIONSHIP_MARKER,
-                'entity_relationships-0-related_entity_1': entity2.get_id(),
-                'entity_relationships-1-relationship_type': str(rel_type2.get_id()) + REVERSE_RELATIONSHIP_MARKER,
-                'entity_relationships-1-related_entity_1': entity3.get_id(),
-                'notes-TOTAL_FORMS': 1, 'notes-INITIAL_FORMS': 0,
-                '_save': 'Save'}, follow=True)
-        self.assertRedirects(response, url)
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['entity_relationships-0-DELETE'] = 'on'
+        form['entity_relationships-1-relationship_type'] = \
+            str(rel_type2.get_id()) + REVERSE_RELATIONSHIP_MARKER
+        form['entity_relationships-1-related_entity_1'] = entity3.get_id()
+        response = form.submit('_save').follow()
+        self.assertEqual(response.request.url[len(response.request.host_url):],
+                         url)
         formset = response.context['entity_relationship_formset']
         self.assertEqual(formset.initial_form_count(), 1,
                          'Expected one pre-filled entity relationship form')
@@ -142,20 +125,13 @@ class EntityChangeViewTestCase (BaseTestCase):
         self.assertEqual(form_data['related_entity'],
                          assertion.domain_entity.get_id())
         # Test updating an existing entity relationship.
-        response = self.client.post(url, {
-                'existences-TOTAL_FORMS': 2, 'existences-INITIAL_FORMS': 1,
-                'existences-0-assertion': existence.get_id(),
-                'existences-0-authority': self.authority_id,
-                'entity_types-TOTAL_FORMS': 1, 'entity_types-INITIAL_FORMS': 0,
-                'names-TOTAL_FORMS': 1, 'names-INITIAL_FORMS': 0,
-                'entity_relationships-TOTAL_FORMS': 2,
-                'entity_relationships-INITIAL_FORMS': 1,
-                'entity_relationships-0-assertion': assertion.get_id(),
-                'entity_relationships-0-relationship_type': str(rel_type.get_id()) + FORWARD_RELATIONSHIP_MARKER,
-                'entity_relationships-0-related_entity_1': entity2.get_id(),
-                'notes-TOTAL_FORMS': 1, 'notes-INITIAL_FORMS': 0,
-                '_save': 'Save'}, follow=True)
-        self.assertRedirects(response, url)
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['entity_relationships-0-relationship_type'] = \
+            str(rel_type.get_id()) + FORWARD_RELATIONSHIP_MARKER
+        form['entity_relationships-0-related_entity_1'] = entity2.get_id()
+        response = form.submit('_save').follow()
+        self.assertEqual(response.request.url[len(response.request.host_url):],
+                         url)
         formset = response.context['entity_relationship_formset']
         self.assertEqual(formset.initial_form_count(), 1,
                          'Expected one pre-filled entity relationship form')
@@ -173,24 +149,15 @@ class EntityChangeViewTestCase (BaseTestCase):
                          assertion.range_entity.get_id())
 
     def test_post_entity_types (self):
-        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
-        existence = entity.get_existences()[0]
         entity_type = self.create_entity_type('Person')
         self.authority.set_entity_types([entity_type])
         url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
-        response = self.client.post(url, {
-                'existences-TOTAL_FORMS': 2, 'existences-INITIAL_FORMS': 1,
-                'existences-0-assertion': existence.get_id(),
-                'existences-0-authority': self.authority_id,
-                'entity_types-TOTAL_FORMS': 1, 'entity_types-INITIAL_FORMS': 0,
-                'entity_types-0-entity_type': entity_type.get_id(),
-                'names-TOTAL_FORMS': 1, 'names-INITIAL_FORMS': 0,
-                'entity_relationships-TOTAL_FORMS': 1,
-                'entity_relationships-INITIAL_FORMS': 0,
-                'notes-TOTAL_FORMS': 1, 'notes-INITIAL_FORMS': 0,
-                '_save': 'Save'}, follow=True)
-        self.assertRedirects(response, url)
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['entity_types-0-entity_type'] = entity_type.get_id()
+        response = form.submit('_save').follow()
+        self.assertEqual(response.request.url[len(response.request.host_url):],
+                         url)
         formset = response.context['entity_type_formset']
         self.assertEqual(formset.initial_form_count(), 1,
                          'Expected one pre-filled entity type form')
@@ -204,21 +171,12 @@ class EntityChangeViewTestCase (BaseTestCase):
         # Test adding another entity type and deleting the existing one.
         entity_type2 = self.create_entity_type('Place')
         self.authority.set_entity_types([entity_type, entity_type2])
-        response = self.client.post(url, {
-                'existences-TOTAL_FORMS': 2, 'existences-INITIAL_FORMS': 1,
-                'existences-0-assertion': existence.get_id(),
-                'existences-0-authority': self.authority_id,
-                'entity_types-TOTAL_FORMS': 2, 'entity_types-INITIAL_FORMS': 1,
-                'entity_types-0-DELETE': 'on',
-                'entity_types-0-assertion': assertion.get_id(),
-                'entity_types-0-entity_type': entity_type.get_id(),
-                'entity_types-1-entity_type': entity_type2.get_id(),
-                'names-TOTAL_FORMS': 1, 'names-INITIAL_FORMS': 0,
-                'entity_relationships-TOTAL_FORMS': 1,
-                'entity_relationships-INITIAL_FORMS': 0,
-                'notes-TOTAL_FORMS': 1, 'notes-INITIAL_FORMS': 0,
-                '_save': 'Save'}, follow=True)
-        self.assertRedirects(response, url)
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['entity_types-0-DELETE'] = 'on'
+        form['entity_types-1-entity_type'] = entity_type2.get_id()
+        response = form.submit('_save').follow()
+        self.assertEqual(response.request.url[len(response.request.host_url):],
+                         url)
         formset = response.context['entity_type_formset']
         self.assertEqual(formset.initial_form_count(), 1,
                          'Expected one pre-filled entity type form')
@@ -230,19 +188,11 @@ class EntityChangeViewTestCase (BaseTestCase):
         self.assertEqual(form_data['entity_type'],
                          assertion.entity_type.get_id())
         # Test updating an existing entity type.
-        response = self.client.post(url, {
-                'existences-TOTAL_FORMS': 2, 'existences-INITIAL_FORMS': 1,
-                'existences-0-assertion': existence.get_id(),
-                'existences-0-authority': self.authority_id,
-                'entity_types-TOTAL_FORMS': 2, 'entity_types-INITIAL_FORMS': 1,
-                'entity_types-0-assertion': assertion.get_id(),
-                'entity_types-0-entity_type': entity_type.get_id(),
-                'names-TOTAL_FORMS': 1, 'names-INITIAL_FORMS': 0,
-                'entity_relationships-TOTAL_FORMS': 1,
-                'entity_relationships-INITIAL_FORMS': 0,
-                'notes-TOTAL_FORMS': 1, 'notes-INITIAL_FORMS': 0,
-                '_save': 'Save'}, follow=True)
-        self.assertRedirects(response, url)
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['entity_types-0-entity_type'] = entity_type.get_id()
+        response = form.submit('_save').follow()
+        self.assertEqual(response.request.url[len(response.request.host_url):],
+                         url)
         formset = response.context['entity_type_formset']
         self.assertEqual(formset.initial_form_count(), 1,
                          'Expected one pre-filled entity type form')
@@ -261,9 +211,7 @@ class EntityChangeViewTestCase (BaseTestCase):
         pass
             
     def test_post_names (self):
-        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
-        existence = entity.get_existences()[0]
         name_type = self.create_name_type('regular')
         language = self.create_language('English', 'en')
         script = self.create_script('Latin', 'Latn')
@@ -271,21 +219,14 @@ class EntityChangeViewTestCase (BaseTestCase):
         self.authority.set_languages([language])
         self.authority.set_scripts([script])
         url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
-        response = self.client.post(url, {
-                'existences-TOTAL_FORMS': 2, 'existences-INITIAL_FORMS': 1,
-                'existences-0-assertion': existence.get_id(),
-                'existences-0-authority': self.authority_id,
-                'entity_types-TOTAL_FORMS': 1, 'entity_types-INITIAL_FORMS': 0,
-                'names-TOTAL_FORMS': 1, 'names-INITIAL_FORMS': 0,
-                'names-0-name_type': name_type.get_id(),
-                'names-0-language': language.get_id(),
-                'names-0-script': script.get_id(),
-                'names-0-display_form': 'Carl Philipp Emanuel Bach',
-                'entity_relationships-TOTAL_FORMS': 1,
-                'entity_relationships-INITIAL_FORMS': 0,
-                'notes-TOTAL_FORMS': 1, 'notes-INITIAL_FORMS': 0,
-                '_save': 'Save'}, follow=True)
-        self.assertRedirects(response, url)
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['names-0-name_type'] = name_type.get_id()
+        form['names-0-language'] = language.get_id()
+        form['names-0-script'] = script.get_id()
+        form['names-0-display_form'] = 'Carl Philipp Emanuel Bach'
+        response = form.submit('_save').follow()
+        self.assertEqual(response.request.url[len(response.request.host_url):],
+                         url)
         formset = response.context['name_formset']
         self.assertEqual(formset.initial_form_count(), 1,
                          'Expected one pre-filled name form')
@@ -309,27 +250,15 @@ class EntityChangeViewTestCase (BaseTestCase):
         self.authority.set_name_types([name_type, name_type2])
         self.authority.set_languages([language, language2])
         self.authority.set_scripts([script, script2])
-        response = self.client.post(url, {
-                'existences-TOTAL_FORMS': 2, 'existences-INITIAL_FORMS': 1,
-                'existences-0-assertion': existence.get_id(),
-                'existences-0-authority': self.authority_id,
-                'entity_types-TOTAL_FORMS': 1, 'entity_types-INITIAL_FORMS': 0,
-                'names-TOTAL_FORMS': 2, 'names-INITIAL_FORMS': 1,
-                'names-0-DELETE': 'on', 'names-0-authority': self.authority_id,
-                'names-0-assertion': assertion.get_id(),
-                'names-0-name_type': name_type.get_id(),
-                'names-0-language': language.get_id(),
-                'names-0-script': script.get_id(),
-                'names-0-display_form': 'Carl Philipp Emanuel Bach',
-                'names-1-name_type': name_type2.get_id(),
-                'names-1-language': language2.get_id(),
-                'names-1-script': script2.get_id(),
-                'names-1-display_form': u'पद्म',
-                'entity_relationships-TOTAL_FORMS': 1,
-                'entity_relationships-INITIAL_FORMS': 0,
-                'notes-TOTAL_FORMS': 1, 'notes-INITIAL_FORMS': 0,
-                '_save': 'Save'}, follow=True)
-        self.assertRedirects(response, url)
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['names-0-DELETE'] = 'on'
+        form['names-1-name_type'] = name_type2.get_id()
+        form['names-1-language'] = language2.get_id()
+        form['names-1-script'] = script2.get_id()
+        form['names-1-display_form'] = u'पद्म'
+        response = form.submit('_save').follow()
+        self.assertEqual(response.request.url[len(response.request.host_url):],
+                         url)
         formset = response.context['name_formset']
         self.assertEqual(formset.initial_form_count(), 1,
                          'Expected one pre-filled name form')
@@ -347,22 +276,14 @@ class EntityChangeViewTestCase (BaseTestCase):
         self.assertEqual(form_data['display_form'], u'पद्म')
         self.assertEqual(form_data['display_form'], name.display_form)
         # Test updating an existing name.
-        response = self.client.post(url, {
-                'existences-TOTAL_FORMS': 2, 'existences-INITIAL_FORMS': 1,
-                'existences-0-assertion': existence.get_id(),
-                'existences-0-authority': self.authority_id,
-                'entity_types-TOTAL_FORMS': 1, 'entity_types-INITIAL_FORMS': 0,
-                'names-TOTAL_FORMS': 2, 'names-INITIAL_FORMS': 1,
-                'names-0-assertion': assertion.get_id(),
-                'names-0-name_type': name_type.get_id(),
-                'names-0-language': language.get_id(),
-                'names-0-script': script.get_id(),
-                'names-0-display_form': 'Isaac Fuller',
-                'entity_relationships-TOTAL_FORMS': 1,
-                'entity_relationships-INITIAL_FORMS': 0,
-                'notes-TOTAL_FORMS': 1, 'notes-INITIAL_FORMS': 0,
-                '_save': 'Save'}, follow=True)
-        self.assertRedirects(response, url)
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['names-0-name_type'] = name_type.get_id()
+        form['names-0-language'] = language.get_id()
+        form['names-0-script'] = script.get_id()
+        form['names-0-display_form'] = 'Isaac Fuller'
+        response = form.submit('_save').follow()
+        self.assertEqual(response.request.url[len(response.request.host_url):],
+                         url)
         formset = response.context['name_formset']
         self.assertEqual(formset.initial_form_count(), 1,
                          'Expected one pre-filled name form')
@@ -381,21 +302,13 @@ class EntityChangeViewTestCase (BaseTestCase):
         self.assertEqual(form_data['display_form'], name.display_form)
 
     def test_post_notes (self):
-        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
-        existence = entity.get_existences()[0]
         url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
-        response = self.client.post(url, {
-                'existences-TOTAL_FORMS': 2, 'existences-INITIAL_FORMS': 1,
-                'existences-0-assertion': existence.get_id(),
-                'existences-0-authority': self.authority_id,
-                'entity_types-TOTAL_FORMS': 1, 'entity_types-INITIAL_FORMS': 0,
-                'names-TOTAL_FORMS': 1, 'names-INITIAL_FORMS': 0,
-                'entity_relationships-TOTAL_FORMS': 1,
-                'entity_relationships-INITIAL_FORMS': 0,
-                'notes-TOTAL_FORMS': 1, 'notes-INITIAL_FORMS': 0,
-                'notes-0-note': 'Test', '_save': 'Save'}, follow=True)
-        self.assertRedirects(response, url)
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['notes-0-note'] = 'Test'
+        response = form.submit('_save').follow()
+        self.assertEqual(response.request.url[len(response.request.host_url):],
+                         url)
         formset = response.context['note_formset']
         self.assertEqual(formset.initial_form_count(), 1,
                          'Expected one pre-filled note form')
@@ -407,19 +320,12 @@ class EntityChangeViewTestCase (BaseTestCase):
         self.assertEqual(form_data['note'], assertion.note)
         self.assertEqual(form_data['note'], 'Test')
         # Test adding another note and deleting the existing one.
-        response = self.client.post(url, {
-                'existences-TOTAL_FORMS': 2, 'existences-INITIAL_FORMS': 1,
-                'existences-0-assertion': existence.get_id(),
-                'existences-0-authority': self.authority_id,
-                'entity_types-TOTAL_FORMS': 1, 'entity_types-INITIAL_FORMS': 0,
-                'names-TOTAL_FORMS': 1, 'names-INITIAL_FORMS': 0,
-                'entity_relationships-TOTAL_FORMS': 1,
-                'entity_relationships-INITIAL_FORMS': 0,
-                'notes-TOTAL_FORMS': 2, 'notes-INITIAL_FORMS': 1,
-                'notes-0-DELETE': 'on', 'notes-0-assertion': assertion.get_id(),
-                'notes-0-note': 'Test',
-                'notes-1-note': 'Test 2', '_save': 'Save'}, follow=True)
-        self.assertRedirects(response, url)
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['notes-0-DELETE'] = 'on'
+        form['notes-1-note'] = 'Test 2'
+        response = form.submit('_save').follow()
+        self.assertEqual(response.request.url[len(response.request.host_url):],
+                         url)
         formset = response.context['note_formset']
         self.assertEqual(formset.initial_form_count(), 1,
                          'Expected one pre-filled note form')
@@ -431,18 +337,11 @@ class EntityChangeViewTestCase (BaseTestCase):
         self.assertEqual(form_data['note'], assertion.note)
         self.assertEqual(form_data['note'], 'Test 2')
         # Test updating an existing note.
-        response = self.client.post(url, {
-                'existences-TOTAL_FORMS': 2, 'existences-INITIAL_FORMS': 1,
-                'existences-0-assertion': existence.get_id(),
-                'existences-0-authority': self.authority_id,
-                'entity_types-TOTAL_FORMS': 1, 'entity_types-INITIAL_FORMS': 0,
-                'names-TOTAL_FORMS': 1, 'names-INITIAL_FORMS': 0,
-                'entity_relationships-TOTAL_FORMS': 1,
-                'entity_relationships-INITIAL_FORMS': 0,
-                'notes-TOTAL_FORMS': 2, 'notes-INITIAL_FORMS': 1,
-                'notes-0-assertion': assertion.get_id(),
-                'notes-0-note': 'Test', '_save': 'Save'}, follow=True)
-        self.assertRedirects(response, url)
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['notes-0-note'] = 'Test'
+        response = form.submit('_save').follow()
+        self.assertEqual(response.request.url[len(response.request.host_url):],
+                         url)
         formset = response.context['note_formset']
         self.assertEqual(formset.initial_form_count(), 1,
                          'Expected one pre-filled note form')

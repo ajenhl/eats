@@ -13,3 +13,4 @@ from language_tests import *
 from name_part_type_tests import *
 from name_type_tests import *
 from script_tests import *
+from view_test_case import *

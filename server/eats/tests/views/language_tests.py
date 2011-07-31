@@ -1,10 +1,10 @@
 from django.core.urlresolvers import reverse
 
 from eats.models import Language
-from eats.tests.base_test_case import BaseTestCase
+from eats.tests.views.view_test_case import ViewTestCase
 
 
-class LanguageViewsTestCase (BaseTestCase):
+class LanguageViewsTestCase (ViewTestCase):
 
     def test_language_list (self):
         url = reverse('language-list')

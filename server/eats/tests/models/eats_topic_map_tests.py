@@ -1,8 +1,8 @@
 from eats.models import Authority, Calendar, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NameType, Script
-from eats.tests.base_test_case import BaseTestCase
+from eats.tests.models.model_test_case import ModelTestCase
 
 
-class EATSTopicMapTestCase (BaseTestCase):
+class EATSTopicMapTestCase (ModelTestCase):
 
     def test_create_authority (self):
         self.assertEqual(Authority.objects.count(), 1)

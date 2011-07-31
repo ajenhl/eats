@@ -1,7 +1,7 @@
-from eats.tests.base_test_case import BaseTestCase
+from eats.tests.models.model_test_case import ModelTestCase
 
 
-class NamePartTestCase (BaseTestCase):
+class NamePartTestCase (ModelTestCase):
 
     def setUp (self):
         super(NamePartTestCase, self).setUp()
@@ -56,7 +56,14 @@ class NamePartTestCase (BaseTestCase):
         self.assertEqual(name_part.name_part_type, self.name_part_type1)
         name_part.name_part_type = self.name_part_type2
         self.assertEqual(name_part.name_part_type, self.name_part_type2)
-        
+
+    def test_order (self):
+        name_part = self.name.create_name_part(
+            self.name_part_type1, self.language, self.script, 'Sam', 1)
+        self.assertEqual(name_part.order, 1)
+        name_part.order = 2
+        self.assertEqual(name_part.order, 2)
+
     def test_script (self):
         name_part = self.name.create_name_part(
             self.name_part_type1, self.language, self.script, 'Sam', 1)

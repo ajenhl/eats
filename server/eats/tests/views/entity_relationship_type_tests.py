@@ -1,10 +1,10 @@
 from django.core.urlresolvers import reverse
 
 from eats.models import EntityRelationshipType
-from eats.tests.base_test_case import BaseTestCase
+from eats.tests.views.view_test_case import ViewTestCase
 
 
-class EntityRelationshipTypeViewsTestCase (BaseTestCase):
+class EntityRelationshipTypeViewsTestCase (ViewTestCase):
 
     def test_entity_type_list (self):
         url = reverse('entityrelationshiptype-list')

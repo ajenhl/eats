@@ -1,22 +1,12 @@
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.test import TransactionTestCase
 
 from tmapi.models import TopicMapSystemFactory
 
 from eats.models import EATSTopicMap, EATSUser
 
 
-class BaseTestCase (TransactionTestCase):
-
-    def setUp (self):
-        # Create a topic map.
-        factory = TopicMapSystemFactory.new_instance()
-        self.tms = factory.new_topic_map_system()
-        self.tms.create_topic_map(settings.EATS_TOPIC_MAP)
-        self.tm = EATSTopicMap.objects.get(iri=settings.EATS_TOPIC_MAP)
-        # Create an authority.
-        self.authority = self.create_authority('Test')
+class BaseTestCase (object):
 
     def create_authority (self, name):
         return self.tm.create_authority(name)
@@ -50,6 +40,12 @@ class BaseTestCase (TransactionTestCase):
 
     def create_script (self, name, code):
         return self.tm.create_script(name, code)
+
+    def create_topic_map (self):
+        factory = TopicMapSystemFactory.new_instance()
+        tms = factory.new_topic_map_system()
+        tms.create_topic_map(settings.EATS_TOPIC_MAP)
+        return EATSTopicMap.objects.get(iri=settings.EATS_TOPIC_MAP)
 
     def create_user (self, user):
         eats_user = EATSUser(user=user)

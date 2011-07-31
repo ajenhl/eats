@@ -1,8 +1,8 @@
 from eats.models import EATSUser
-from eats.tests.base_test_case import BaseTestCase
+from eats.tests.models.model_test_case import ModelTestCase
 
 
-class UserTestCase (BaseTestCase):
+class UserTestCase (ModelTestCase):
 
     def setUp (self):
         super(UserTestCase, self).setUp()

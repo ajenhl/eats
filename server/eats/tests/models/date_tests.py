@@ -1,8 +1,8 @@
 from eats.exceptions import EATSValidationException
-from eats.tests.base_test_case import BaseTestCase
+from eats.tests.models.model_test_case import ModelTestCase
 
 
-class DateTest (BaseTestCase):
+class DateTest (ModelTestCase):
 
     def setUp (self):
         super(DateTest, self).setUp()

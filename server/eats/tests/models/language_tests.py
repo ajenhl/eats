@@ -1,7 +1,7 @@
-from eats.tests.base_test_case import BaseTestCase
+from eats.tests.models.model_test_case import ModelTestCase
 
 
-class LanguageTestCase (BaseTestCase):
+class LanguageTestCase (ModelTestCase):
 
     def test_language_admin_name (self):
         language = self.create_language('English', 'en')

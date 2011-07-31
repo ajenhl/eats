@@ -1,10 +1,10 @@
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
-from eats.tests.base_test_case import BaseTestCase
+from eats.tests.views.view_test_case import ViewTestCase
 
 
-class DateChangeViewTestCase (BaseTestCase):
+class DateChangeViewTestCase (ViewTestCase):
 
     def setUp (self):
         super(DateChangeViewTestCase, self).setUp()

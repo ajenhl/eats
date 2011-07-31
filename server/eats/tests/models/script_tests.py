@@ -1,7 +1,7 @@
-from eats.tests.base_test_case import BaseTestCase
+from eats.tests.models.model_test_case import ModelTestCase
 
 
-class ScriptTestCase (BaseTestCase):
+class ScriptTestCase (ModelTestCase):
 
     def test_script_admin_name (self):
         script = self.create_script('Latin', 'Latn')

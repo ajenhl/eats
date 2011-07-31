@@ -2,10 +2,10 @@ from tmapi.indices.type_instance_index import TypeInstanceIndex
 
 from eats.exceptions import EATSValidationException
 from eats.models import NameIndex
-from eats.tests.base_test_case import BaseTestCase
+from eats.tests.models.model_test_case import ModelTestCase
 
 
-class NameTestCase (BaseTestCase):
+class NameTestCase (ModelTestCase):
 
     def setUp (self):
         super(NameTestCase, self).setUp()

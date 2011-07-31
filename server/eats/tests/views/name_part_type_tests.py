@@ -1,10 +1,10 @@
 from django.core.urlresolvers import reverse
 
 from eats.models import NamePartType
-from eats.tests.base_test_case import BaseTestCase
+from eats.tests.views.view_test_case import ViewTestCase
 
 
-class NamePartTypeViewsTestCase (BaseTestCase):
+class NamePartTypeViewsTestCase (ViewTestCase):
 
     def test_name_part_type_list (self):
         url = reverse('nameparttype-list')

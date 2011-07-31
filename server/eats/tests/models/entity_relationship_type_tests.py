@@ -1,7 +1,7 @@
-from eats.tests.base_test_case import BaseTestCase
+from eats.tests.models.model_test_case import ModelTestCase
 
 
-class EntityRelationshipTypeTestCase (BaseTestCase):
+class EntityRelationshipTypeTestCase (ModelTestCase):
 
     def test_entity_relationship_type_admin_name (self):
         er_type = self.create_entity_relationship_type('Forward', 'Reverse')

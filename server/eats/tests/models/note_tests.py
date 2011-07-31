@@ -1,7 +1,7 @@
-from eats.tests.base_test_case import BaseTestCase
+from eats.tests.models.model_test_case import ModelTestCase
 
 
-class NoteTest (BaseTestCase):
+class NoteTest (ModelTestCase):
 
     def setUp (self):
         super(NoteTest, self).setUp()

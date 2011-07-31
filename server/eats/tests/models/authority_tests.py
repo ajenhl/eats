@@ -1,7 +1,7 @@
-from eats.tests.base_test_case import BaseTestCase
+from eats.tests.models.model_test_case import ModelTestCase
 
 
-class AuthorityTestCase (BaseTestCase):
+class AuthorityTestCase (ModelTestCase):
 
     def test_get_calendars (self):
         self.assertEqual(0, len(self.authority.get_calendars()))

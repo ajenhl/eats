@@ -1,10 +1,10 @@
 from django.core.urlresolvers import reverse
 
 from eats.models import Authority
-from eats.tests.base_test_case import BaseTestCase
+from eats.tests.views.view_test_case import ViewTestCase
 
 
-class AuthorityViewsTestCase (BaseTestCase):
+class AuthorityViewsTestCase (ViewTestCase):
 
     def test_authority_list (self):
         url = reverse('authority-list')

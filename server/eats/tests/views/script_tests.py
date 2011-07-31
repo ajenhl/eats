@@ -1,10 +1,10 @@
 from django.core.urlresolvers import reverse
 
 from eats.models import Script
-from eats.tests.base_test_case import BaseTestCase
+from eats.tests.views.view_test_case import ViewTestCase
 
 
-class ScriptViewsTestCase (BaseTestCase):
+class ScriptViewsTestCase (ViewTestCase):
 
     def test_script_list (self):
         url = reverse('script-list')
