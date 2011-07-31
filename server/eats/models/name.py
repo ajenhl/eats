@@ -20,7 +20,7 @@ class Name (Topic, NameElement):
             indexed_form.save()
 
     def create_name_part (self, name_part_type, language, script, display_form,
-                          order_number):
+                          order):
         """Creates a name part associated with this name.
 
         :param name_part_type: type of the name part
@@ -31,8 +31,8 @@ class Name (Topic, NameElement):
         :type script: `Script` or None
         :param display_form: form of the name part
         :type display_form: unicode string
-        :param order_number: order of name part
-        :type order_number: integer
+        :param order: order of name part
+        :type order: integer
         :rtype: `NamePart`
 
         """
@@ -51,6 +51,8 @@ class Name (Topic, NameElement):
             self.eats_topic_map.name_part_role_type, name_part)
         language_association.create_role(self.eats_topic_map.language_role_type,
                                          language)
+        name_part.create_occurrence(self.eats_topic_map.name_part_order_type,
+                                    order)
         script_association = self.eats_topic_map.create_association(
             self.eats_topic_map.is_in_script_type)
         script_association.create_role(self.eats_topic_map.name_part_role_type,

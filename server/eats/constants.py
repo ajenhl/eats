@@ -56,6 +56,8 @@ LANGUAGE_TYPE_IRI = EATS_BASE_IRI + 'language/'
 NAME_ASSERTION_TYPE_IRI = EATS_BASE_IRI + 'name_assertion/'
 NAME_HAS_NAME_PART_ASSOCIATION_TYPE_IRI = EATS_BASE_IRI + \
     'name_has_name_part_association/'
+NAME_PART_ORDER_TYPE_IRI = EATS_BASE_IRI + \
+    'name_part_order/'
 NAME_PART_ROLE_TYPE_IRI = EATS_BASE_IRI + 'name_part_role/'
 NAME_PART_TYPE_IRI = EATS_BASE_IRI + 'name_part/'
 NAME_PART_TYPE_TYPE_IRI = EATS_BASE_IRI + 'name_part_type/'

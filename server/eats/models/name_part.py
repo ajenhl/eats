@@ -71,6 +71,39 @@ class NamePart (Topic, NameElement):
         """
         self._get_name().set_type(name_part_type)
 
+    @property
+    def order (self):
+        """Returns the order of this name part.
+
+        :rtype: integer
+
+        """
+        return self._order_occurrence.get_value()
+
+    @order.setter
+    def order (self, order):
+        """Sets the order of this name part.
+
+        :param order: order
+        :type order: integer
+
+        """
+        self._order_occurrence.set_value(order)
+
+    @property
+    def _order_occurrence (self):
+        """Returns the order occurrence for this name part.
+
+        :rtype: `Occurrence`
+
+        """
+        occurrence_type = self.eats_topic_map.name_part_order_type
+        try:
+            occurrence = self.get_occurrences(occurrence_type)[0]
+        except IndexError:
+            occurrence = self.create_occurrence(occurrence_type, 1)
+        return occurrence
+
     def remove (self):
         for role in self.get_roles_played():
             association = role.get_parent()
