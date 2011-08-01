@@ -6,6 +6,7 @@ from entity_relationship_type_tests import *
 from entity_type_tests import *
 from language_tests import *
 from name_part_tests import *
+from name_part_type_tests import *
 from name_tests import *
 from note_tests import *
 from script_tests import *
