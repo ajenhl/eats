@@ -82,19 +82,6 @@ class Name (Topic, NameElement):
             self._entity = entity_role.get_player(proxy=Entity)
         return self._entity
 
-    @entity.setter
-    def entity (self, entity):
-        """Sets the entity to which this name belongs.
-
-        :param entity: the entity
-        :type entity: `Entity`
-
-        """
-        if hasattr(self, '_entity'):
-            # QAZ: raise an EATS-specific exception.
-            raise Exception('A name may not be reassigned to another, or the same, entity')
-        self._entity = entity
-
     def get_name_parts (self):
         """Returns the name parts associated with this name.
 

@@ -55,7 +55,7 @@ class NamePropertyAssertion (Association, PropertyAssertion):
         self._name = name
         self.create_role(self.eats_topic_map.entity_role_type, entity)
         self._entity = entity
-        name.entity = entity
+        name._entity = entity
         
     def update (self, name_type, language, script, display_form):
         """Updates this property assertion, and its associated name.
