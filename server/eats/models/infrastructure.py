@@ -20,3 +20,6 @@ class Infrastructure (object):
         except self.DoesNotExist:
             pass
         self.get_names(self.eats_topic_map.admin_name_type)[0].set_value(name)
+
+    def __unicode__ (self):
+        return self.get_admin_name()
