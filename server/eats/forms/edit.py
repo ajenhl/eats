@@ -517,6 +517,7 @@ class NamePartForm (forms.Form):
         self.language_choices = language_choices
         self.script_choices = script_choices
         self.instance = instance
+        self.name_part_fieldsets = []
         if instance is None:
             object_data = {}
         else:
@@ -526,22 +527,33 @@ class NamePartForm (forms.Form):
         self._create_form_fields(kwargs.get('data'), object_data)
 
     def _create_form_fields (self, post_data, object_data):
-        data = post_data or object_data
-        count = 3
-        field_name = self.add_prefix('name_part_display_form')
+        count = 2
+        data = object_data
+        field_name = 'name_part_display_form'
+        if post_data:
+            data = post_data
+            field_name = self.add_prefix(field_name)
         for name in data:
             if name.startswith(field_name) and data[name]:
                 count += 1
+        if count < 3:
+            count = 3
         for i in range(count):
             suffix = str(i)
-            self.fields['name_part_id-' + suffix] = forms.IntegerField(
+            id_name = 'name_part_id-' + suffix
+            display_form_name = 'name_part_display_form-' + suffix
+            language_name = 'name_part_language-' + suffix
+            script_name = 'name_part_script-' + suffix
+            self.fields[id_name] = forms.IntegerField(
                 widget=forms.HiddenInput, required=False)
-            self.fields['name_part_display_form-' + suffix] = forms.CharField(
-                required=False)
-            self.fields['name_part_language-' + suffix] = forms.ChoiceField(
+            self.fields[display_form_name] = forms.CharField(required=False)
+            self.fields[language_name] = forms.ChoiceField(
                 choices=self.language_choices, required=False)
-            self.fields['name_part_script-' + suffix] = forms.ChoiceField(
+            self.fields[script_name] = forms.ChoiceField(
                 choices=self.script_choices, required=False)
+            self.name_part_fieldsets.append(
+                (self[id_name], self[display_form_name], self[language_name],
+                 self[script_name]))
 
     def delete (self):
         """Deletes the name parts in this form."""
@@ -803,9 +815,9 @@ EntityRelationshipFormSet = formset_factory(
     formset=EntityRelationshipAssertionFormSet)
 EntityTypeFormSet = formset_factory(EntityTypeForm, can_delete=True, extra=2,
                                     formset=EntityTypeAssertionFormSet)
-NameFormSet = formset_factory(NameForm, can_delete=True, #extra=2,
+NameFormSet = formset_factory(NameForm, can_delete=True, extra=2,
                               formset=NameAssertionFormSet)
-NamePartFormSet = formset_factory(NamePartForm, can_delete=True, #extra=3,
+NamePartFormSet = formset_factory(NamePartForm, can_delete=True, extra=2,
                                   formset=NamePartInlineFormSet)
 NoteFormSet = formset_factory(NoteForm, can_delete=True, extra=2,
                               formset=NoteAssertionFormSet)

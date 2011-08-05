@@ -147,6 +147,7 @@ return $( "<li></li>" )
           <th scope="col">Script</th>
           <th scope="col">Display form</th>
           <th scope="col">Dates</th>
+          <th scope="col"></th>
         </tr>
       </thead>
       <tbody class="eats-editable-pa">
@@ -185,7 +186,20 @@ return $( "<li></li>" )
           <td class="errors">{{ form.non_field_errors }}{{ form.name_part_formset.management_form }}</td>
         </tr>
         {% for part_form in form.name_part_formset %}
-        {{ part_form }}
+        <tr>
+          <td></td>
+          <td colspan="7">
+            <table>
+              <tr>
+                <td>{{ part_form.DELETE }}</td>
+                <td>{{ part_form.name_part_type }}</td>
+                {% for id, display_form, language, script in part_form.name_part_fieldsets %}
+                <td>{{ id }}{{ display_form }}<br/>{{ language }}<br/>{{ script }}</td>
+                {% endfor %}
+              </tr>
+            </table>
+          </td>
+        </tr>
         {% endfor %}
         {% endfor %}
       </tbody>
