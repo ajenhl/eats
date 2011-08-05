@@ -516,6 +516,7 @@ class NamePartForm (forms.Form):
         self.authority = authority
         self.language_choices = language_choices
         self.script_choices = script_choices
+        self.instance = instance
         if instance is None:
             object_data = {}
         else:
@@ -541,7 +542,12 @@ class NamePartForm (forms.Form):
                 choices=self.language_choices, required=False)
             self.fields['name_part_script-' + suffix] = forms.ChoiceField(
                 choices=self.script_choices, required=False)
-        
+
+    def delete (self):
+        """Deletes the name parts in this form."""
+        for name_part in self.instance[1]:
+            name_part.remove()
+            
     def _name_part_to_dict (self, name_parts):
         """Returns a dictionary containing the data in `name_parts`
         suitable for passing as a Form's `initial` keyword argument.
@@ -598,8 +604,12 @@ class NamePartForm (forms.Form):
                     self._save_new(name, save_data)
             elif name_part:
                 # There is such a field, and it holds a name part.
-                save_data = self._save_data(name, data, suffix)
-                self._save_existing(name_part, save_data)
+                if data['name_part_display_form-' + suffix]:
+                    save_data = self._save_data(name, data, suffix)
+                    self._save_existing(name_part, save_data)
+                else:
+                    # Delete the name part.
+                    name_part.remove()
             else:
                 # There is no such field.
                 break
