@@ -6,7 +6,7 @@ import selectable.forms as selectable
 from eats.constants import FORWARD_RELATIONSHIP_MARKER, \
     REVERSE_RELATIONSHIP_MARKER
 from eats.lookups import EntityLookup
-from eats.models import Calendar, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NameType, Script
+from eats.models import Calendar, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NamePart, NamePartType, NameType, Script
 
 
 class PropertyAssertionFormSet (BaseFormSet):
@@ -45,7 +45,7 @@ class PropertyAssertionFormSet (BaseFormSet):
     
     def initial_form_count (self):
         """Returns the number of forms that are required in this FormSet."""
-        if not (self.data):
+        if not self.data:
             return len(self.instances)
         return super(PropertyAssertionFormSet, self).initial_form_count()
 
@@ -62,8 +62,6 @@ class PropertyAssertionFormSet (BaseFormSet):
         return form.save()
     
     def save_existing_assertions (self):
-        self.changed_objects = []
-        self.deleted_objects = []
         if not self.instances:
             return []
         saved_assertions = []
@@ -72,11 +70,9 @@ class PropertyAssertionFormSet (BaseFormSet):
             id_value = form.fields['assertion'].clean(raw_id_value)
             obj = self._existing_object(id_value)
             if self.can_delete and self._should_delete_form(form):
-                self.deleted_objects.append(obj)
-                obj.remove()
+                form.delete()
                 continue
             if form.has_changed():
-                self.changed_objects.append((obj, form.changed_data))
                 saved_assertions.append(self.save_existing(form, obj))
         return saved_assertions
 
@@ -124,6 +120,7 @@ class EntityTypeAssertionFormSet (PropertyAssertionFormSet):
 class NameAssertionFormSet (PropertyAssertionFormSet):
 
     def __init__ (self, **kwargs):
+        self.name_part_type_choices = kwargs.pop('name_part_type_choices')
         self.name_type_choices = kwargs.pop('name_type_choices')
         self.language_choices = kwargs.pop('language_choices')
         self.script_choices = kwargs.pop('script_choices')
@@ -133,14 +130,146 @@ class NameAssertionFormSet (PropertyAssertionFormSet):
         kwargs.update({'name_type_choices': self.name_type_choices,
                        'language_choices': self.language_choices,
                        'script_choices': self.script_choices})
-        return super(NameAssertionFormSet, self)._construct_form(
+        form = super(NameAssertionFormSet, self)._construct_form(
             i, **kwargs)
+        try:
+            instance = self.instances[i]
+            instances = [[name_part_type, name_parts] for name_part_type,
+                         name_parts in instance.name.get_name_parts().items()]
+        except IndexError:
+            instances = None
+        name_part_data = {
+            'topic_map': self.topic_map, 'authority': self.authority,
+            'data': self.data or None, 'instances': instances,
+            'name_prefix': self.add_prefix(i),
+            'name_part_type_choices': self.name_part_type_choices,
+            'language_choices': self.language_choices,
+            'script_choices': self.script_choices
+            }
+        form.name_part_formset = NamePartFormSet(**name_part_data)
+        return form
+
+    def is_valid (self):
+        """Returns True if form.errors is empty for every form in
+        self.forms and if each form's name part formset is valid."""
+        if not self.is_bound:
+            return False
+        forms_valid = True
+        for i in range(0, self.total_form_count()):
+            form = self.forms[i]
+            if self.can_delete:
+                if self._should_delete_form(form):
+                    # This form is going to be deleted so any of its errors
+                    # should not cause the entire formset to be invalid.
+                    continue
+            if bool(self.errors[i]):
+                forms_valid = False
+            if not form.name_part_formset.is_valid():
+                forms_valid = False
+        return forms_valid and not bool(self.non_form_errors())            
+
+    def save_existing_assertions (self):
+        if not self.instances:
+            return []
+        saved_assertions = []
+        for form in self.initial_forms:
+            raw_id_value = form._raw_value('assertion')
+            id_value = form.fields['assertion'].clean(raw_id_value)
+            obj = self._existing_object(id_value)
+            if self.can_delete and self._should_delete_form(form):
+                form.delete()
+                continue
+            if form.has_changed():
+                saved_assertions.append(self.save_existing(form, obj))
+            form.name_part_formset.save(obj)
+        return saved_assertions
+
+    def save_new_assertions (self):
+        self.new_objects = []
+        for form in self.extra_forms:
+            if not form.has_changed():
+                continue
+            if self.can_delete and self._should_delete_form(form):
+                continue
+            assertion = self.save_new(form)
+            self.new_objects.append(assertion)
+            form.name_part_formset.save(assertion)
+        return self.new_objects            
 
 
 class NoteAssertionFormSet (PropertyAssertionFormSet):
 
     pass
         
+
+class NamePartInlineFormSet (BaseFormSet):
+
+    def __init__ (self, topic_map, authority, name_prefix, instances,
+                  name_part_type_choices, language_choices, script_choices,
+                  **kwargs):
+        self.topic_map = topic_map
+        self.authority = authority
+        self.name_prefix = name_prefix
+        self.instances = instances or []
+        self.name_part_type_choices = name_part_type_choices
+        self.language_choices = language_choices
+        self.script_choices = script_choices
+        prefix = name_prefix + '-name_parts'
+        super(NamePartInlineFormSet, self).__init__(prefix=prefix, **kwargs)
+
+    def _construct_form (self, i, **kwargs):
+        kwargs.update({'topic_map': self.topic_map, 'authority': self.authority,
+                       'name_part_type_choices': self.name_part_type_choices,
+                       'language_choices': self.language_choices,
+                       'script_choices': self.script_choices})
+        if self.is_bound and i < self.initial_form_count():
+            # Get the name parts of this particular type.
+            id_key = '%s-%s' % (self.add_prefix(i), 'name_part_type')
+            kwargs['instance'] = self._existing_object(self.data[id_key])
+        if i < self.initial_form_count() and not kwargs.get('instance'):
+            kwargs['instance'] = self.instances[i]
+        return super(NamePartInlineFormSet, self)._construct_form(i, **kwargs)
+
+    def _existing_object (self, id):
+        if not hasattr(self, '_object_dict'):
+            self._object_dict = dict([(o[0].get_id(), o)
+                                      for o in self.instances])
+        return self._object_dict.get(id)
+    
+    def initial_form_count (self):
+        """Returns the number of forms that are required in this FormSet."""
+        if not self.data:
+            return len(self.instances)
+        return super(NamePartInlineFormSet, self).initial_form_count()
+
+    def save (self, name_assertion):
+        """Saves name part instances for every form, adding and
+        changing instances as necessary, and returns a list of
+        instances."""
+        return self.save_existing(name_assertion) + \
+            self.save_new(name_assertion)
+
+    def save_existing (self, name_assertion):
+        if not self.instances:
+            return []
+        saved_assertions = []
+        for form in self.initial_forms:
+            if self.can_delete and self._should_delete_form(form):
+                form.delete()
+                continue
+            if form.has_changed():
+                saved_assertions.append(form.save(name_assertion))
+        return saved_assertions
+
+    def save_new (self, name_assertion):
+        self.new_objects = []
+        for form in self.extra_forms:
+            if not form.has_changed():
+                continue
+            if self.can_delete and self._should_delete_form(form):
+                continue
+            self.new_objects.append(form.save(name_assertion))
+        return self.new_objects
 
 
 class CreateEntityForm (forms.Form):
@@ -167,8 +296,7 @@ class PropertyAssertionForm (forms.Form):
 
     assertion = forms.IntegerField(widget=forms.HiddenInput, required=False)
 
-    def __init__ (self, topic_map, entity, authority, initial=None,
-                  instance=None, **kwargs):
+    def __init__ (self, topic_map, entity, authority, instance=None, **kwargs):
         self.topic_map = topic_map
         self.entity = entity
         self.authority = authority
@@ -177,8 +305,6 @@ class PropertyAssertionForm (forms.Form):
             object_data = {}
         else:
             object_data = self._assertion_to_dict(instance)
-        if initial is not None:
-            object_data.update(initial)
         super(PropertyAssertionForm, self).__init__(initial=object_data,
                                                     **kwargs)
 
@@ -186,6 +312,8 @@ class PropertyAssertionForm (forms.Form):
         """Returns a dictionary containing the data in `assertion`
         suitable for passing as a Form's `initial` keyword argument.
 
+        :param assertion: property assertion
+        :type assertion: `PropertyAssertion`
         :rtype: dict
 
         """
@@ -218,10 +346,9 @@ class ExistenceForm (PropertyAssertionForm):
 
     authority = forms.ChoiceField(choices=[])
 
-    def __init__ (self, topic_map, entity, authority, initial=None,
-                  instance=None, **kwargs):
+    def __init__ (self, topic_map, entity, authority, instance=None, **kwargs):
         super(ExistenceForm, self).__init__(
-            topic_map, entity, authority, initial, instance, **kwargs)
+            topic_map, entity, authority, instance, **kwargs)
         authority_choices = create_choice_list(topic_map, [authority])
         if instance is not None:
             authority_choices = authority_choices[1:]
@@ -250,8 +377,6 @@ class EntityRelationshipForm (PropertyAssertionForm):
     def __init__ (self, *args, **kwargs):
         relationship_type_choices = kwargs.pop('relationship_type_choices')
         super(EntityRelationshipForm, self).__init__(*args, **kwargs)
-        if 'initial' in kwargs:
-            relationship_type_choices = relationship_type_choices[1:]
         self.fields['relationship_type'].choices = relationship_type_choices
 
     def _assertion_to_dict (self, assertion):
@@ -296,8 +421,6 @@ class EntityTypeForm (PropertyAssertionForm):
     def __init__ (self, *args, **kwargs):
         entity_type_choices = kwargs.pop('entity_type_choices')
         super(EntityTypeForm, self).__init__(*args, **kwargs)
-        if 'initial' in kwargs:
-            entity_type_choices = entity_type_choices[1:]
         self.fields['entity_type'].choices = entity_type_choices
 
     def _assertion_to_dict (self, assertion):
@@ -328,8 +451,6 @@ class NameForm (PropertyAssertionForm):
         language_choices = kwargs.pop('language_choices')
         script_choices = kwargs.pop('script_choices')
         super(NameForm, self).__init__(*args, **kwargs)
-        if 'initial' in kwargs:
-            name_type_choices = name_type_choices[1:]
         self.fields['name_type'].choices = name_type_choices
         self.fields['language'].choices = language_choices
         self.fields['script'].choices = script_choices
@@ -343,6 +464,13 @@ class NameForm (PropertyAssertionForm):
         data['script'] = name.script.get_id()
         return data
 
+    def clean (self):
+        cleaned_data = super(NameForm, self).clean()
+        # QAZ: Add check that we don't have a name part to add,
+        # without this form either representing an existing name
+        # instance or being valid to create one.
+        return cleaned_data        
+
     def save (self):
         name_type = self._get_construct('name_type', NameType)
         language = self._get_construct('language', Language)
@@ -350,11 +478,13 @@ class NameForm (PropertyAssertionForm):
         display_form = self.cleaned_data['display_form']
         if self.instance is None:
             # Create a new assertion.
-            self.entity.create_name_property_assertion(
+            assertion = self.entity.create_name_property_assertion(
                 self.authority, name_type, language, script, display_form)
         else:
             # Update an existing assertion.
             self.instance.update(name_type, language, script, display_form)
+            assertion = self.instance
+        return assertion
 
 
 class NoteForm (PropertyAssertionForm):
@@ -374,6 +504,128 @@ class NoteForm (PropertyAssertionForm):
         else:
             # Update an existing assertion.
             self.instance.update(note)
+
+
+class NamePartForm (forms.Form):
+
+    name_part_type = forms.ChoiceField(choices=[])
+
+    def __init__ (self, topic_map, authority, name_part_type_choices,
+                  language_choices, script_choices, instance=None, **kwargs):
+        self.topic_map = topic_map
+        self.authority = authority
+        self.language_choices = language_choices
+        self.script_choices = script_choices
+        if instance is None:
+            object_data = {}
+        else:
+            object_data = self._name_part_to_dict(instance)
+        super(NamePartForm, self).__init__(initial=object_data, **kwargs)
+        self.fields['name_part_type'].choices = name_part_type_choices
+        self._create_form_fields(kwargs.get('data'), object_data)
+
+    def _create_form_fields (self, post_data, object_data):
+        data = post_data or object_data
+        count = 3
+        field_name = self.add_prefix('name_part_display_form')
+        for name in data:
+            if name.startswith(field_name) and data[name]:
+                count += 1
+        for i in range(count):
+            suffix = str(i)
+            self.fields['name_part_id-' + suffix] = forms.IntegerField(
+                widget=forms.HiddenInput, required=False)
+            self.fields['name_part_display_form-' + suffix] = forms.CharField(
+                required=False)
+            self.fields['name_part_language-' + suffix] = forms.ChoiceField(
+                choices=self.language_choices, required=False)
+            self.fields['name_part_script-' + suffix] = forms.ChoiceField(
+                choices=self.script_choices, required=False)
+        
+    def _name_part_to_dict (self, name_parts):
+        """Returns a dictionary containing the data in `name_parts`
+        suitable for passing as a Form's `initial` keyword argument.
+
+        :param name_parts: list of name parts (first element is name
+          part type, second a list of name_parts)
+        :type name_parts: list
+        :rtype: dict
+
+        """
+        data = {'name_part_type': name_parts[0].get_id()}
+        name_parts = name_parts[1]
+        name_parts.sort(cmp=lambda x,y: cmp(x.order, y.order))
+        for i in range(len(name_parts)):
+            name_part = name_parts[i]
+            suffix = str(i)
+            data['name_part_id-' + suffix] = name_part.get_id()
+            data['name_part_display_form-' + suffix] = name_part.display_form
+            data['name_part_language-' + suffix] = name_part.language.get_id()
+            data['name_part_script-' + suffix] = name_part.script.get_id()
+        return data
+
+    def _objectify_data (self, base_data):
+        data = {}
+        for name, value in base_data.items():
+            if not value:
+                data[name] = value
+            elif name.startswith('name_part_display_form'):
+                data[name] = value
+            else:
+                if name.startswith('name_part_language'):
+                    model = Language
+                elif name.startswith('name_part_script'):
+                    model = Script
+                elif name.startswith('name_part_id'):
+                    model = NamePart
+                elif name.startswith('name_part_type'):
+                    model = NamePartType
+                data[name] = model.objects.get_by_identifier(value)
+        return data
+
+    def save (self, name_assertion):
+        data = self._objectify_data(self.cleaned_data)
+        name = name_assertion.name
+        i = 0
+        while True:
+            suffix = str(i)
+            name_part = data.get('name_part_id-' + suffix, False)
+            if name_part is None:
+                # There is such a field, but it does not hold a name
+                # part.
+                if data['name_part_display_form-' + suffix]:
+                    save_data = self._save_data(name, data, suffix)
+                    self._save_new(name, save_data)
+            elif name_part:
+                # There is such a field, and it holds a name part.
+                save_data = self._save_data(name, data, suffix)
+                self._save_existing(name_part, save_data)
+            else:
+                # There is no such field.
+                break
+            i += 1
+
+    def _save_data (self, name, data, suffix):
+        return {
+            'name_part_type': data['name_part_type'],
+            'language': data['name_part_language-' + suffix] or name.language,
+            'script': data['name_part_script-' + suffix] or name.script,
+            'display_form': data['name_part_display_form-' + suffix],
+            'order': int(suffix)
+            }
+
+    def _save_existing (self, name_part, data):
+        name_part.name_part_type = data['name_part_type']
+        name_part.language = data['language']
+        name_part.script = data['script']
+        name_part.display_form = data['display_form']
+        name_part.order = data['order']
+        return name_part
+
+    def _save_new (self, name, data):
+        return name.create_name_part(
+            data['name_part_type'], data['language'], data['script'],
+            data['display_form'], data['order'])
 
 
 class DateForm (forms.Form):
@@ -537,13 +789,15 @@ class DateForm (forms.Form):
 ExistenceFormSet = formset_factory(ExistenceForm, can_delete=True,
                                    formset=ExistenceAssertionFormSet)
 EntityRelationshipFormSet = formset_factory(
-    EntityRelationshipForm, can_delete=True,
+    EntityRelationshipForm, can_delete=True, extra=2,
     formset=EntityRelationshipAssertionFormSet)
-EntityTypeFormSet = formset_factory(EntityTypeForm, can_delete=True,
+EntityTypeFormSet = formset_factory(EntityTypeForm, can_delete=True, extra=2,
                                     formset=EntityTypeAssertionFormSet)
-NameFormSet = formset_factory(NameForm, can_delete=True,
+NameFormSet = formset_factory(NameForm, can_delete=True, #extra=2,
                               formset=NameAssertionFormSet)
-NoteFormSet = formset_factory(NoteForm, can_delete=True,
+NamePartFormSet = formset_factory(NamePartForm, can_delete=True, #extra=3,
+                                  formset=NamePartInlineFormSet)
+NoteFormSet = formset_factory(NoteForm, can_delete=True, extra=2,
                               formset=NoteAssertionFormSet)
 
 

@@ -1,7 +1,7 @@
 from eats.constants import FORWARD_RELATIONSHIP_MARKER, \
     REVERSE_RELATIONSHIP_MARKER
 from eats.forms.edit import EntityRelationshipFormSet, EntityTypeFormSet, ExistenceFormSet, NameFormSet, NoteFormSet, create_choice_list
-from eats.models import EntityRelationshipType, EntityType, Language, NameType, Script
+from eats.models import EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
 
 
 class PropertyAssertions (object):
@@ -129,9 +129,13 @@ class NamePropertyAssertions (PropertyAssertions):
                 self.authority))
         script_choices = create_choice_list(
             self.topic_map, Script.objects.filter_by_authority(self.authority))
+        name_part_type_choices = create_choice_list(
+            self.topic_map, NamePartType.objects.filter_by_authority(
+                self.authority))
         data = {'prefix': 'names', 'name_type_choices': name_type_choices,
                 'language_choices': language_choices,
-                'script_choices': script_choices}
+                'script_choices': script_choices,
+                'name_part_type_choices': name_part_type_choices}
         return self._create_formset(NameFormSet, data)
 
     def categorise_assertions (self):

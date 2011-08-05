@@ -22,6 +22,7 @@ from existence_property_assertion import ExistencePropertyAssertion
 from language import Language
 from name import Name
 from name_index import NameIndex
+from name_part import NamePart
 from name_part_type import NamePartType
 from name_property_assertion import NamePropertyAssertion
 from note_property_assertion import NotePropertyAssertion

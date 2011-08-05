@@ -112,7 +112,7 @@ return $( "<li></li>" )
           {% for date in dates %}<li><a href="{{ form.assertion.value }}/date/{{ date.get_id }}/">{{ date.assembled_form }}</a></li>{% endfor %}
           </ul>{% endif %}{% endwith %}
           <p><a href="{{ form.assertion.value }}/date/add/">Add a date</a></p>{% endif %}</td>
-          <td class="errors"></td>
+          <td class="errors">{{ form.non_field_errors }}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -182,8 +182,11 @@ return $( "<li></li>" )
           {% for date in dates %}<li><a href="{{ form.assertion.value }}/date/{{ date.get_id }}/">{{ date.assembled_form }}</a></li>{% endfor %}
           </ul>{% endif %}{% endwith %}
           <p><a href="{{ form.assertion.value }}/date/add/">Add a date</a></p>{% endif %}</td>
-          <td class="errors"></td>
+          <td class="errors">{{ form.non_field_errors }}{{ form.name_part_formset.management_form }}</td>
         </tr>
+        {% for part_form in form.name_part_formset %}
+        {{ part_form }}
+        {% endfor %}
         {% endfor %}
       </tbody>
       <tbody class="eats-non-editable-pa">
