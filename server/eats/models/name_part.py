@@ -30,13 +30,6 @@ class NamePart (Topic, NameElement):
         proxy = True
         app_label = 'eats'
 
-    def _get_name (self):
-        """Returns the TMAPI `Name` associated with this name
-        entity."""
-        # QAZ: convert a possible IndexError into a more
-        # useful/descriptive exception.
-        return self.get_names()[0]
-
     @property
     def _language_role (self):
         """Returns the language role for this name.
