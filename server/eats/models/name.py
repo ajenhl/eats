@@ -83,13 +83,20 @@ class Name (Topic, NameElement):
         return self._entity
 
     def get_name_parts (self):
-        """Returns the name parts associated with this name.
+        """Returns the name parts associated with this name as a
+        dictionary, keyed by name part type.
 
-        :rtype: `QuerySet` of `NamePart`s
+        :rtype: dictionary
 
         """
-        return NamePart.objects.filter_by_name(self)
-    
+        name_parts = NamePart.objects.filter_by_name(self)
+        data = {}
+        for name_part in name_parts:
+            name_part_type = name_part.name_part_type
+            type_data = data.setdefault(name_part_type, [])
+            type_data.append(name_part)
+        return data
+
     @property
     def _language_role (self):
         """Returns the language role for this name.
