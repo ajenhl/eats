@@ -444,7 +444,7 @@ class NameForm (PropertyAssertionForm):
     name_type = forms.ChoiceField(choices=[])
     language = forms.ChoiceField(choices=[])
     script = forms.ChoiceField(choices=[])
-    display_form = forms.CharField()
+    display_form = forms.CharField(required=False)
 
     def __init__ (self, *args, **kwargs):
         name_type_choices = kwargs.pop('name_type_choices')
