@@ -642,6 +642,7 @@ class NamePartForm (forms.Form):
         name_part.script = data['script']
         name_part.display_form = data['display_form']
         name_part.order = data['order']
+        name_part.update_name_index()
         return name_part
 
     def _save_new (self, name, data):
