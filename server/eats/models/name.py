@@ -16,8 +16,10 @@ class Name (Topic, NameElement):
         """Adds the forms of this name to the name index."""
         parts = self.display_form.split()
         for part in parts:
-            indexed_form = NameIndex(entity=self.entity, name=self, form=part)
-            indexed_form.save()
+            if part:
+                indexed_form = NameIndex(entity=self.entity, name=self,
+                                         form=part)
+                indexed_form.save()
 
     def create_name_part (self, name_part_type, language, script, display_form,
                           order):
@@ -132,6 +134,8 @@ class Name (Topic, NameElement):
         self._get_name().set_type(name_type)
     
     def remove (self):
+        for name_part in NamePart.objects.filter_by_name(self):
+            name_part.remove()
         for role in self.get_roles_played():
             association = role.get_parent()
             association.remove()

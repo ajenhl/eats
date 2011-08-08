@@ -1,7 +1,7 @@
 from tmapi.indices.type_instance_index import TypeInstanceIndex
 
 from eats.exceptions import EATSValidationException
-from eats.models import NameIndex
+from eats.models import NameIndex, NamePart
 from eats.tests.models.model_test_case import ModelTestCase
 
 
@@ -69,6 +69,7 @@ class NameTestCase (ModelTestCase):
             self.authority, self.name_type, self.language, self.script,
             'Name1')
         self.assertEqual(1, len(self.entity.get_eats_names()))
+        self.assertEqual(0, NamePart.objects.count())
         assertion2 = self.entity.create_name_property_assertion(
             self.authority, self.name_type, self.language, self.script,
             'Name2')
@@ -77,12 +78,17 @@ class NameTestCase (ModelTestCase):
                 self.tm.is_in_language_type).count())
         self.assertEqual(2, self.type_index.get_associations(
                 self.tm.is_in_script_type).count())
+        name_part_type = self.create_name_part_type('given')
+        assertion2.name.create_name_part(name_part_type, self.language,
+                                         self.script, 'Part', 1)
+        self.assertEqual(1, NamePart.objects.count())
         assertion2.remove()
         self.assertEqual(1, len(self.entity.get_eats_names()))
         self.assertEqual(1, self.type_index.get_associations(
                 self.tm.is_in_language_type).count())
         self.assertEqual(1, self.type_index.get_associations(
                 self.tm.is_in_script_type).count())
+        self.assertEqual(0, NamePart.objects.count())
         name1 = assertion1.name
         self.assertEqual(name1.display_form, 'Name1')
         assertion1.remove()
