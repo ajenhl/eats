@@ -61,6 +61,7 @@ class Name (Topic, NameElement):
                                        name_part)
         script_association.create_role(self.eats_topic_map.script_role_type,
                                        script)
+        name_part.update_name_index()
         return name_part
 
     def _delete_name_index_forms (self):
@@ -162,8 +163,3 @@ class Name (Topic, NameElement):
         self.script = script
         self.display_form = display_form
         self.update_name_index()
-
-    def update_name_index (self):
-        """Updates the name index forms for this name."""
-        self._delete_name_index_forms()
-        self._add_name_index()

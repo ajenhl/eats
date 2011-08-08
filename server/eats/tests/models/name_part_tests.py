@@ -1,3 +1,4 @@
+from eats.models import NameIndex
 from eats.tests.models.model_test_case import ModelTestCase
 
 
@@ -75,3 +76,31 @@ class NamePartTestCase (ModelTestCase):
         script2 = self.create_script('Arabic', 'Arab')
         name_part.script = script2
         self.assertEqual(name_part.script, script2)
+
+    def test_name_index (self):
+        index_items = NameIndex.objects.filter(entity=self.entity)
+        self.assertEqual(index_items.count(), 0)
+        name_part = self.name.create_name_part(
+            self.name_part_type1, self.language, self.script, 'Sam', 1)
+        index_items = NameIndex.objects.filter(entity=self.entity)
+        self.assertEqual(index_items.count(), 1)
+        self.assertEqual(index_items[0].form, 'Sam')
+        name_part.display_form = 'Sam Marie'
+        index_items = NameIndex.objects.filter(entity=self.entity)
+        self.assertEqual(index_items.count(), 1)
+        self.assertEqual(index_items[0].form, 'Sam')
+        name_part.update_name_index()
+        index_items = NameIndex.objects.filter(entity=self.entity)
+        self.assertEqual(index_items.count(), 2)
+        indexed_names = set([item.form for item in index_items])
+        self.assertEqual(indexed_names, set(['Sam', 'Marie']))
+        name_part2 = self.name.create_name_part(
+            self.name_part_type1, self.language, self.script, 'Isabel', 2)
+        index_items = NameIndex.objects.filter(entity=self.entity)
+        self.assertEqual(index_items.count(), 3)
+        name_part2.remove()
+        index_items = NameIndex.objects.filter(entity=self.entity)
+        self.assertEqual(index_items.count(), 2)
+        index_items = NameIndex.objects.filter(entity=self.entity)
+        indexed_names = set([item.form for item in index_items])
+        self.assertEqual(indexed_names, set(['Sam', 'Marie']))

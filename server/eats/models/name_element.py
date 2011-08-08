@@ -104,3 +104,7 @@ class NameElement (object):
         """
         raise NotImplementedError
 
+    def update_name_index (self):
+        """Updates the name index forms for this name."""
+        self._delete_name_index_forms()
+        self._add_name_index()

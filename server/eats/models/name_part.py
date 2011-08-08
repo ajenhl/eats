@@ -2,6 +2,7 @@ from tmapi.models import Topic
 
 from base_manager import BaseManager
 from name_element import NameElement
+from name_index import NameIndex
 from name_part_type import NamePartType
 
 
@@ -30,6 +31,18 @@ class NamePart (Topic, NameElement):
         proxy = True
         app_label = 'eats'
 
+    def _add_name_index (self):
+        """Adds the forms of this name to the name index."""
+        parts = self.display_form.split()
+        for part in parts:
+            indexed_form = NameIndex(entity=self.name.entity, name=self.name,
+                                     name_part=self, form=part)
+            indexed_form.save()
+
+    def _delete_name_index_forms (self):
+        """Deletes the indexed forms of this name."""
+        self.indexed_name_part_forms.all().delete()
+        
     @property
     def _language_role (self):
         """Returns the language role for this name.
@@ -44,6 +57,23 @@ class NamePart (Topic, NameElement):
         language_role = name_role.get_parent().get_roles(
             self.eats_topic_map.language_role_type)[0]
         return language_role
+
+    @property
+    def name (self):
+        """Returns the name that this is a name part of.
+
+        :rtype: `Name`
+
+        """
+        if not hasattr(self, '_name'):
+            from name import Name
+            name_part_role = self.get_roles_played(
+                self.eats_topic_map.name_part_role_type)[0]
+            association = name_part_role.get_parent()
+            name_role = association.get_roles(
+                self.eats_topic_map.name_role_type)[0]
+            self._name = name_role.get_player(proxy=Name)
+        return self._name
         
     @property
     def name_part_type (self):
