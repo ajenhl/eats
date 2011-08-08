@@ -172,11 +172,15 @@ class NameTestCase (ModelTestCase):
     def test_name_index (self):
         assertion = self.entity.create_name_property_assertion(
             self.authority, self.name_type, self.language, self.script,
-            'Name')
+            '')
+        name = assertion.name
+        index_items = NameIndex.objects.filter(entity=self.entity)
+        self.assertEqual(index_items.count(), 0)
+        name.display_form = 'Name'
+        name.update_name_index()
         index_items = NameIndex.objects.filter(entity=self.entity)
         self.assertEqual(index_items.count(), 1)
         self.assertEqual(index_items[0].form, 'Name')
-        name = assertion.name
         name.display_form = 'Carl Philipp Emanuel Bach'
         index_items = NameIndex.objects.filter(entity=self.entity)
         self.assertEqual(index_items.count(), 1)
