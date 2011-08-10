@@ -1,7 +1,9 @@
+from tmapi.indices import ScopedIndex
 from tmapi.models import Topic
 
 from infrastructure import Infrastructure
 from infrastructure_manager import InfrastructureManager
+from name_part_type import NamePartType
 
 
 class LanguageManager (InfrastructureManager):
@@ -34,6 +36,49 @@ class Language (Topic, Infrastructure):
     def get_code (self):
         name = self.get_names(self.eats_topic_map.language_code_type)[0]
         return name.get_value()
+
+    @property
+    def name_part_types (self):
+        """Returns the list of name part types that are associated
+        with this language.
+
+        :rtype: list of `NamePartType`s
+
+        """
+        index = self.eats_topic_map.get_index(ScopedIndex)
+        index.open()
+        # QAZ: This might be bleeding the underlying Django database
+        # model through too much.
+        occurrences = index.get_occurrences(self).filter(type=self.eats_topic_map.name_part_type_order_in_language_type).order_by('value')
+        return [occurrence.get_parent(proxy=NamePartType) for occurrence
+                in occurrences]
+
+    @name_part_types.setter
+    def name_part_types (self, name_part_types):
+        """Sets the name part types associated with this language.
+
+        :param name_part_types: the name part types, in display order
+        :type name_part_types: list of `NamePartType`s
+
+        """
+        index = self.eats_topic_map.get_index(ScopedIndex)
+        index.open()
+        existing = {}
+        for occurrence in index.get_occurrences(self).filter(
+            type=self.eats_topic_map.name_part_type_order_in_language_type):
+            existing[occurrence.get_parent()] = occurrence
+        i = 0
+        for name_part_type in name_part_types:
+            if name_part_type in existing:
+                existing[name_part_type].set_value(i)
+                del existing[name_part_type]
+            else:
+                name_part_type.create_occurrence(
+                    self.eats_topic_map.name_part_type_order_in_language_type,
+                    i, scope=[self])
+            i += 1
+        for occurrence in existing.values():
+            occurrence.remove()
 
     def set_code (self, code):
         if code == self.get_code():

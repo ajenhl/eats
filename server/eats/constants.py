@@ -60,6 +60,8 @@ NAME_PART_ORDER_TYPE_IRI = EATS_BASE_IRI + \
     'name_part_order/'
 NAME_PART_ROLE_TYPE_IRI = EATS_BASE_IRI + 'name_part_role/'
 NAME_PART_TYPE_IRI = EATS_BASE_IRI + 'name_part/'
+NAME_PART_TYPE_ORDER_IN_LANGUAGE_TYPE_IRI = EATS_BASE_IRI + \
+    'name_part_type_order_in_language/'
 NAME_PART_TYPE_TYPE_IRI = EATS_BASE_IRI + 'name_part_type/'
 NAME_ROLE_TYPE_IRI = EATS_BASE_IRI + 'name_role/'
 NAME_TYPE_TYPE_IRI = EATS_BASE_IRI + 'name_type/'
