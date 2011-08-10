@@ -21,6 +21,19 @@ class Name (Topic, NameElement):
                                          form=part)
                 indexed_form.save()
 
+    def _assemble_name_parts (self):
+        data = self.get_name_parts()
+        language_name_part_types = self.language.name_part_types
+        form = []
+        for name_part_type in language_name_part_types:
+            form.extend([name_part.display_form for name_part in
+                         data.get(name_part_type, [])])
+        return ' '.join(form)
+
+    @property
+    def assembled_form (self):
+        return self.display_form or self._assemble_name_parts()
+
     def create_name_part (self, name_part_type, language, script, display_form,
                           order):
         """Creates a name part associated with this name.
@@ -98,6 +111,9 @@ class Name (Topic, NameElement):
             name_part_type = name_part.name_part_type
             type_data = data.setdefault(name_part_type, [])
             type_data.append(name_part)
+        # Sort the name parts into their specified order.
+        for name_parts in data.values():
+            name_parts.sort(cmp=lambda x,y: cmp(x.order, y.order))
         return data
 
     @property

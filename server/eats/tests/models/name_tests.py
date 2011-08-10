@@ -202,3 +202,34 @@ class NameTestCase (ModelTestCase):
         indexed_names = set([item.form for item in index_items])
         self.assertEqual(indexed_names, set(['Carl', 'Philipp', 'Emanuel',
                                              'Bach']))
+
+    def test_assembled_form (self):
+        assertion = self.entity.create_name_property_assertion(
+            self.authority, self.name_type, self.language, self.script,
+            'Carl Philipp Emanuel Bach')
+        name = assertion.name
+        self.assertEqual(name.assembled_form, 'Carl Philipp Emanuel Bach')
+        name.display_form = ''
+        self.assertEqual(name.assembled_form, '')
+        name_part_type1 = self.create_name_part_type('given')
+        name_part_type2 = self.create_name_part_type('family')
+        self.language.name_part_types = [name_part_type1, name_part_type2]
+        np1 = name.create_name_part(name_part_type1, self.language, self.script,
+                                    'Carl Philipp Emanuel', 1)
+        np2 = name.create_name_part(name_part_type2, self.language, self.script,
+                                    'Bach', 1)
+        self.assertEqual(name.assembled_form, 'Carl Philipp Emanuel Bach')
+        self.language.name_part_types = [name_part_type2, name_part_type1]
+        self.assertEqual(name.assembled_form, 'Bach Carl Philipp Emanuel')
+        self.language.name_part_types = [name_part_type1, name_part_type2]
+        np1.display_form = 'Carl'
+        name.create_name_part(name_part_type1, self.language, self.script,
+                              'Emanuel', 3)
+        name.create_name_part(name_part_type1, self.language, self.script,
+                              'Philipp', 2)
+        self.assertEqual(name.assembled_form, 'Carl Philipp Emanuel Bach')
+        self.language.name_part_types = [name_part_type2]
+        self.assertEqual(name.assembled_form, 'Bach')
+        self.language.name_part_types = [name_part_type1, name_part_type2]
+        np2.remove()
+        self.assertEqual(name.assembled_form, 'Carl Philipp Emanuel')
