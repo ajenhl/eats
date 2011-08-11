@@ -93,14 +93,15 @@ class EATSTopicMapTestCase (ModelTestCase):
         
     def test_create_script (self):
         self.assertEqual(Script.objects.count(), 0)
-        script = self.tm.create_script('Latin', 'Latn')
+        script = self.tm.create_script('Latin', 'Latn', ' ')
         self.assertEqual(Script.objects.count(), 1)
         self.assertTrue(script in Script.objects.all())
-        self.assertRaises(Exception, self.tm.create_script, 'Latin', 'Arab')
+        self.assertRaises(Exception, self.tm.create_script, 'Latin', 'Arab', '')
         self.assertEqual(Script.objects.count(), 1)
         self.assertTrue(script in Script.objects.all())
         self.assertEqual(script.get_code(), 'Latn')
-        self.assertRaises(Exception, self.tm.create_script, 'Arabic', 'Latn')
+        self.assertRaises(Exception, self.tm.create_script, 'Arabic', 'Latn',
+                          ' ')
         self.assertEqual(Script.objects.count(), 1)
         self.assertTrue(script in Script.objects.all())
         self.assertEqual(script.get_admin_name(), 'Latin')

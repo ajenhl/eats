@@ -53,6 +53,6 @@ class UserTestCase (ModelTestCase):
     def test_script_preference (self):
         user = self.create_user(self.user)
         self.assertEqual(user.get_script(), None)
-        script = self.create_script('Latin', 'Latn')
+        script = self.create_script('Latin', 'Latn', ' ')
         user.set_script(script)
         self.assertEqual(user.get_script(), script)

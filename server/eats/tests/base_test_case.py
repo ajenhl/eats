@@ -38,8 +38,8 @@ class BaseTestCase (object):
     def create_name_type (self, name):
         return self.tm.create_name_type(name)
 
-    def create_script (self, name, code):
-        return self.tm.create_script(name, code)
+    def create_script (self, name, code, separator):
+        return self.tm.create_script(name, code, separator)
 
     def create_topic_map (self):
         factory = TopicMapSystemFactory.new_instance()

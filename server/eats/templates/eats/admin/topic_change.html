@@ -5,7 +5,7 @@
 {% block eats_content %}
 <h1>Change {{ name }}</h1>
 
-<form action="" method="post">
+<form action="" id="infrastructure-change-form" method="post">
   {% csrf_token %}
 
   {{ form.as_p }}

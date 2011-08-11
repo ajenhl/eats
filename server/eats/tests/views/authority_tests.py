@@ -52,7 +52,7 @@ class AuthorityViewsTestCase (ViewTestCase):
         entity_type = self.create_entity_type('Test')
         language = self.create_language('English', 'en')
         name_type = self.create_name_type('Test')
-        script = self.create_script('Latin', 'Latn')
+        script = self.create_script('Latin', 'Latn', ' ')
         user = self.create_django_user('user1', 'user1@example.org', 'password')
         editor = self.create_user(user)
         post_data = {
@@ -131,7 +131,7 @@ class AuthorityViewsTestCase (ViewTestCase):
         entity_type = self.create_entity_type('Test')
         language = self.create_language('English', 'en')
         name_type = self.create_name_type('Test')
-        script = self.create_script('Latin', 'Latn')
+        script = self.create_script('Latin', 'Latn', ' ')
         user1 = self.create_django_user('user1', 'user1@example.org',
                                         'password')
         editor1 = self.create_user(user1)

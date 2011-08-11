@@ -22,26 +22,19 @@ class EntityChangeViewTestCase (ViewTestCase):
         entity = self.tm.create_entity(self.authority)
         url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
         login_url = settings.LOGIN_URL + '?next=' + url
-        response = self.client.get(url)
+        response = self.app.get(url)
         self.assertRedirects(response, login_url)
         user = self.create_django_user('user2', 'user@example.org', 'password')
         self.client.login(username='user2', password='password')
-        response = self.client.get(url)
+        response = self.app.get(url)
         self.assertRedirects(response, login_url)
         self.create_user(user)
-        response = self.client.get(url)
+        response = self.app.get(url)
         self.assertRedirects(response, login_url)
 
     def test_non_existent_entity (self):
-        # Use the authority topic as an example of a non-existent
-        # entity. Immediately after setUp it will not be marked as an
-        # entity.
-        self.client.login(username='user', password='password')
-        response = self.client.get(reverse(
-                'entity-change', kwargs={'entity_id': self.authority.get_id()}))
-        self.assertEqual(
-            response.status_code, 404,
-            'Expected a 404 HTTP response code for a non-existent entity')
+        url = reverse('entity-change', kwargs={'entity_id': 0})
+        self.app.get(url, status=404, user='user')
     
     def test_empty_entity (self):
         self.client.login(username='user', password='password')
@@ -205,16 +198,18 @@ class EntityChangeViewTestCase (ViewTestCase):
                          assertion.entity_type.get_id())
 
     def test_post_existences (self):
-        # QAZ: Need to sort out whether existences are special in
-        # terms of being required in order to make other property
-        # assertions under an authority.
-        pass
+        entity = self.tm.create_entity(self.authority)
+        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        response = form.submit('_save').follow()
+        self.assertEqual(response.request.url[len(response.request.host_url):],
+                         url)
             
     def test_post_names (self):
         entity = self.tm.create_entity(self.authority)
         name_type = self.create_name_type('regular')
         language = self.create_language('English', 'en')
-        script = self.create_script('Latin', 'Latn')
+        script = self.create_script('Latin', 'Latn', ' ')
         self.authority.set_name_types([name_type])
         self.authority.set_languages([language])
         self.authority.set_scripts([script])
@@ -246,7 +241,7 @@ class EntityChangeViewTestCase (ViewTestCase):
         # Test adding another name and deleting the existing one.
         name_type2 = self.create_name_type('irregular')
         language2 = self.create_language('Sanskrit', 'sa')
-        script2 = self.create_script('Devanagari', 'Deva')
+        script2 = self.create_script('Devanagari', 'Deva', ' ')
         self.authority.set_name_types([name_type, name_type2])
         self.authority.set_languages([language, language2])
         self.authority.set_scripts([script, script2])

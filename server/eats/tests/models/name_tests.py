@@ -14,8 +14,8 @@ class NameTestCase (ModelTestCase):
         self.name_type2 = self.create_name_type('irregular')
         self.language = self.create_language('English', 'en')
         self.language2 = self.create_language('Arabic', 'ar')
-        self.script = self.create_script('Latin', 'Latn')
-        self.script2 = self.create_script('Arabic', 'Arab')
+        self.script = self.create_script('Latin', 'Latn', ' ')
+        self.script2 = self.create_script('Arabic', 'Arab', ' ')
         self.authority.set_languages([self.language, self.language2])
         self.authority.set_name_types([self.name_type, self.name_type2])
         self.authority.set_scripts([self.script, self.script2])
@@ -26,7 +26,7 @@ class NameTestCase (ModelTestCase):
         self.assertEqual(0, len(self.entity.get_eats_names()))
         language = self.create_language('French', 'fr')
         name_type = self.create_name_type('pseudonym')
-        script = self.create_script('Gujarati', 'Gujr')
+        script = self.create_script('Gujarati', 'Gujr', ' ')
         self.assertRaises(EATSValidationException,
                           self.entity.create_name_property_assertion,
                           self.authority, name_type, self.language, self.script,
@@ -105,7 +105,7 @@ class NameTestCase (ModelTestCase):
         name = assertion.name
         language = self.create_language('French', 'fr')
         name_type = self.create_name_type('pseudonym')
-        script = self.create_script('Gujarati', 'Gujr')
+        script = self.create_script('Gujarati', 'Gujr', ' ')
         self.assertRaises(EATSValidationException, assertion.update, name_type,
                           self.language, self.script, 'Name')
         self.assertEqual(name.name_type, self.name_type)

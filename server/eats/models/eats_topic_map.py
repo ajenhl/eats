@@ -299,13 +299,15 @@ class EATSTopicMap (TopicMap):
         name_type.create_name(name, name_type=self.admin_name_type)
         return name_type
 
-    def create_script (self, name, code):
+    def create_script (self, name, code, separator):
         """Creates a new script called `name`, with ISO code `code`.
 
         :param name: name of the new script
         :type name: unicode string
         :param code: ISO code of the new script
         :type code: string
+        :param separator: separator to be used between name parts
+        :type separator: unicode string
         :rtype: `Script`
 
         """
@@ -325,6 +327,7 @@ class EATSTopicMap (TopicMap):
         script.add_type(self.script_type)
         script.create_name(name, name_type=self.admin_name_type)
         script.create_name(code, name_type=self.script_code_type)
+        script.separator = separator
         return script
     
     @property

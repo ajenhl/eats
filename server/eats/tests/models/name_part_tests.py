@@ -10,7 +10,7 @@ class NamePartTestCase (ModelTestCase):
         self.name_part_type1 = self.create_name_part_type('given')
         self.name_part_type2 = self.create_name_part_type('family')
         self.name_type = self.create_name_type('regular')
-        self.script = self.create_script('Latin', 'Latn')
+        self.script = self.create_script('Latin', 'Latn', ' ')
         self.authority.set_languages([self.language])
         self.authority.set_name_part_types([self.name_part_type1,
                                             self.name_part_type2])
@@ -73,7 +73,7 @@ class NamePartTestCase (ModelTestCase):
         name_part = self.name.create_name_part(
             self.name_part_type1, self.language, self.script, 'Sam', 1)
         self.assertEqual(name_part.script, self.script)
-        script2 = self.create_script('Arabic', 'Arab')
+        script2 = self.create_script('Arabic', 'Arab', ' ')
         name_part.script = script2
         self.assertEqual(name_part.script, script2)
 

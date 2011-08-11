@@ -143,11 +143,11 @@ class AuthorityTestCase (ModelTestCase):
 
     def test_get_scripts (self):
         self.assertEqual(0, len(self.authority.get_scripts()))
-        script1 = self.create_script('Latin', 'Latn')
+        script1 = self.create_script('Latin', 'Latn', ' ')
         self.authority.set_scripts([script1])
         self.assertEqual(1, len(self.authority.get_scripts()))
         self.assertTrue(script1 in self.authority.get_scripts())
-        script2 = self.create_script('Arabic', 'Arab')
+        script2 = self.create_script('Arabic', 'Arab', ' ')
         self.authority.set_scripts([script1, script2])
         self.assertEqual(2, len(self.authority.get_scripts()))
         self.assertTrue(script1 in self.authority.get_scripts())

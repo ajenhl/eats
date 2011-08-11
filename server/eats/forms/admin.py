@@ -266,6 +266,11 @@ class LanguageForm (AdminForm):
             language.set_code(code)
         return language
 
+    def _topic_to_dict (self, topic):
+        data = super(LanguageForm, self)._topic_to_dict(topic)
+        data['code'] = topic.get_code()
+        return data
+
 
 class NamePartTypeForm (AdminForm):
 
@@ -283,6 +288,7 @@ class NameTypeForm (AdminForm):
 class ScriptForm (AdminForm):
 
     code = forms.CharField(max_length=4)
+    separator = forms.CharField(initial=' ', max_length=10, required=False)
 
     def clean_code (self):
         code = self.cleaned_data['code']
@@ -299,10 +305,18 @@ class ScriptForm (AdminForm):
     def save (self):
         name = self.cleaned_data['name']
         code = self.cleaned_data['code']
+        separator = self.cleaned_data['separator']
         if self.instance is None:
-            script = self.topic_map.create_script(name, code)
+            script = self.topic_map.create_script(name, code, separator)
         else:
             script = self.instance
             script.set_admin_name(name)
             script.set_code(code)
+            script.separator = separator
         return script
+
+    def _topic_to_dict (self, topic):
+        data = super(ScriptForm, self)._topic_to_dict(topic)
+        data['code'] = topic.get_code()
+        data['separator'] = topic.separator
+        return data
