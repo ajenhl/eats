@@ -77,6 +77,7 @@ REVERSE_RELATIONSHIP_NAME_TYPE_IRI = EATS_BASE_IRI + \
     'reverse_relationship_name/'
 SCRIPT_CODE_TYPE_IRI = EATS_BASE_IRI + 'script_code/'
 SCRIPT_ROLE_TYPE_IRI = EATS_BASE_IRI + 'script_role/'
+SCRIPT_SEPARATOR_TYPE_IRI = EATS_BASE_IRI + 'script_separator/'
 SCRIPT_TYPE_IRI = EATS_BASE_IRI + 'script/'
 START_DATE_TYPE_IRI = EATS_BASE_IRI + 'start_date/'
 START_TAQ_DATE_TYPE_IRI = EATS_BASE_IRI + 'start_terminus_ante_quem_date/'

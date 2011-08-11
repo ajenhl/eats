@@ -18,3 +18,9 @@ class ScriptTestCase (ModelTestCase):
         self.assertEqual(script.get_code(), 'Arab')
         script2 = self.create_script('Gujarati', 'Gujr')
         self.assertRaises(Exception, script2.set_code, 'Arab')
+
+    def test_script_separator (self):
+        script = self.create_script('Latin', 'Latn')
+        self.assertEqual(script.separator, '')
+        script.separator = ' '
+        self.assertEqual(script.separator, ' ')

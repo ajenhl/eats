@@ -28,7 +28,7 @@ class Name (Topic, NameElement):
         for name_part_type in language_name_part_types:
             form.extend([name_part.display_form for name_part in
                          data.get(name_part_type, [])])
-        return ' '.join(form)
+        return self.script.separator.join(form)
 
     @property
     def assembled_form (self):

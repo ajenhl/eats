@@ -214,6 +214,7 @@ class NameTestCase (ModelTestCase):
         name_part_type1 = self.create_name_part_type('given')
         name_part_type2 = self.create_name_part_type('family')
         self.language.name_part_types = [name_part_type1, name_part_type2]
+        self.script.separator = ' '
         np1 = name.create_name_part(name_part_type1, self.language, self.script,
                                     'Carl Philipp Emanuel', 1)
         np2 = name.create_name_part(name_part_type2, self.language, self.script,
@@ -228,6 +229,9 @@ class NameTestCase (ModelTestCase):
         name.create_name_part(name_part_type1, self.language, self.script,
                               'Philipp', 2)
         self.assertEqual(name.assembled_form, 'Carl Philipp Emanuel Bach')
+        self.script.separator = '-'
+        self.assertEqual(name.assembled_form, 'Carl-Philipp-Emanuel-Bach')
+        self.script.separator = ' '
         self.language.name_part_types = [name_part_type2]
         self.assertEqual(name.assembled_form, 'Bach')
         self.language.name_part_types = [name_part_type1, name_part_type2]
