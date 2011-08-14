@@ -217,3 +217,26 @@ class Entity (Topic):
         """
         return self.get_occurrences(self.eats_topic_map.note_assertion_type,
                                     proxy=NotePropertyAssertion)
+
+    def get_preferred_name (self, authority, language, script):
+        """Returns the name for this entity that best matches
+        `authority`, `language` and `script`.
+
+        The name that best fits first the script (completely
+        unreadable names are bad), then the authority, then the
+        language, is returned.
+        
+        :param authority: preferred authority to assert the name
+        :type authority: `Authority`
+        :param language: preferred language of the name
+        :type language: `Language`
+        :param script: preferred script of the name
+        :type script: `Script`
+        :rtype: `NamePropertyAssertion`
+        
+        """
+        try:
+            return NamePropertyAssertion.objects.get_preferred(
+                self, authority, language, script)
+        except NamePropertyAssertion.DoesNotExist:
+            return None
