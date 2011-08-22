@@ -1,10 +1,10 @@
 from eats.tests.models.model_test_case import ModelTestCase
 
 
-class EntityTest (ModelTestCase):
+class EntityTestCase (ModelTestCase):
 
     def setUp (self):
-        super(EntityTest, self).setUp()
+        super(EntityTestCase, self).setUp()
         self.authority2 = self.create_authority('Test2')
         self.name_type = self.create_name_type('regular')
         self.language1 = self.create_language('English', 'en')
@@ -50,6 +50,9 @@ class EntityTest (ModelTestCase):
         preferred_name = entity.get_preferred_name(
             self.authority, self.language2, self.script1)
         self.assertEqual(name2, preferred_name)
+        preferred_name = entity.get_preferred_name(
+            self.authority2, self.language2, self.script1)
+        self.assertEqual(name2, preferred_name)
         # Create a third name, differing from the first in authority.
         name3 = entity.create_name_property_assertion(
             self.authority2, self.name_type, self.language1, self.script1,
@@ -57,6 +60,9 @@ class EntityTest (ModelTestCase):
         preferred_name = entity.get_preferred_name(
             self.authority2, self.language1, self.script1)
         self.assertEqual(name3, preferred_name)
+        preferred_name = entity.get_preferred_name(
+            None, self.language2, self.script1)
+        self.assertEqual(name2, preferred_name)
         # Authority trumps language.
         preferred_name = entity.get_preferred_name(
             self.authority2, self.language2, self.script1)

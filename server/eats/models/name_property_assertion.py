@@ -40,24 +40,33 @@ class NamePropertyAssertionManager (BaseManager):
         entity_names = self.filter_by_entity(entity)
         if not entity_names.count():
             raise self.model.DoesNotExist
-        script_names = entity_names.filter(
-            roles__type=self.eats_topic_map.property_role_type,
-            roles__player__role_players__type=name_role_type,
-            roles__player__role_players__association__type=is_in_script_type,
-            roles__player__role_players__association__roles__type=script_type,
-            roles__player__role_players__association__roles__player=script)
-        if not script_names.count():
+        if script is not None:
+            script_names = entity_names.filter(
+                roles__type=self.eats_topic_map.property_role_type,
+                roles__player__role_players__type=name_role_type,
+                roles__player__role_players__association__type=is_in_script_type,
+                roles__player__role_players__association__roles__type=script_type,
+                roles__player__role_players__association__roles__player=script)
+            if not script_names.count():
+                script_names = entity_names
+        else:
             script_names = entity_names
-        authority_names = script_names.filter(scope=authority)
-        if not authority_names.count():
+        if authority is not None:
+            authority_names = script_names.filter(scope=authority)
+            if not authority_names.count():
+                authority_names = script_names
+        else:
             authority_names = script_names
-        language_names = authority_names.filter(
-            roles__type=self.eats_topic_map.property_role_type,
-            roles__player__role_players__type=name_role_type,
-            roles__player__role_players__association__type=is_in_language_type,
-            roles__player__role_players__association__roles__type=language_type,
+        if language is not None:
+            language_names = authority_names.filter(
+                roles__type=self.eats_topic_map.property_role_type,
+                roles__player__role_players__type=name_role_type,
+                roles__player__role_players__association__type=is_in_language_type,
+                roles__player__role_players__association__roles__type=language_type,
             roles__player__role_players__association__roles__player=language)
-        if not language_names.count():
+            if not language_names.count():
+                language_names = authority_names
+        else:
             language_names = authority_names
         names = language_names
         try:
