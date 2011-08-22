@@ -104,3 +104,9 @@ class NamePartTestCase (ModelTestCase):
         index_items = NameIndex.objects.filter(entity=self.entity)
         indexed_names = set([item.form for item in index_items])
         self.assertEqual(indexed_names, set(['Sam', 'Marie']))
+        # Updating the name's name index should have no effect on the
+        # entries relating to the name parts.
+        self.name.update_name_index()
+        index_items = NameIndex.objects.filter(entity=self.entity)
+        indexed_names = set([item.form for item in index_items])
+        self.assertEqual(indexed_names, set(['Sam', 'Marie']))

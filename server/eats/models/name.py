@@ -79,7 +79,7 @@ class Name (Topic, NameElement):
 
     def _delete_name_index_forms (self):
         """Deletes the indexed forms of this name."""
-        self.indexed_name_forms.all().delete()
+        self.indexed_name_forms.filter(name_part__isnull=True).delete()
         
     @property
     def entity (self):

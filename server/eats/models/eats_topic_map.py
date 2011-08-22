@@ -515,6 +515,7 @@ class EATSTopicMap (TopicMap):
             intersected_set = sets[0]
         for i in range(1, len(sets)):
             intersected_set = intersected_set.intersection(sets[i])
+        # QAZ: Is there any reason to return a list rather than a set?
         return list(intersected_set)
     
     @property

@@ -1,4 +1,4 @@
-from eats.models import Authority, Calendar, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NameType, Script
+from eats.models import Authority, Calendar, DatePeriod, DateType, Entity, EntityRelationshipType, EntityType, Language, NameType, Script
 from eats.tests.models.model_test_case import ModelTestCase
 
 
@@ -105,3 +105,55 @@ class EATSTopicMapTestCase (ModelTestCase):
         self.assertEqual(Script.objects.count(), 1)
         self.assertTrue(script in Script.objects.all())
         self.assertEqual(script.get_admin_name(), 'Latin')
+
+    def test_lookup_entities (self):
+        self.assertEqual(Entity.objects.count(), 0)
+        self.assertEqual(self.tm.lookup_entities('Johann'), [])
+        language = self.create_language('English', 'en')
+        name_part_type1 = self.create_name_part_type('given')
+        name_part_type2 = self.create_name_part_type('family')
+        name_type = self.create_name_type('regular')
+        script = self.create_script('Latin', 'Latn', ' ')
+        self.authority.set_languages([language])
+        self.authority.set_name_part_types([name_part_type1, name_part_type2])
+        self.authority.set_name_types([name_type])
+        self.authority.set_scripts([script])
+        entity1 = self.tm.create_entity(self.authority)
+        entity1_name1 = entity1.create_name_property_assertion(
+            self.authority, name_type, language, script,
+            'Johann Sebastian Bach')
+        self.assertEqual(self.tm.lookup_entities('Johann'), [entity1])
+        # Partial (initial) matches are allowed.
+        self.assertEqual(self.tm.lookup_entities('Seb'), [entity1])
+        # Case does not matter.
+        self.assertEqual(self.tm.lookup_entities('ba'), [entity1])
+        # Order of search terms need not match order in name.
+        self.assertEqual(self.tm.lookup_entities('B J'), [entity1])
+        # Searching over name parts should be the same as searching
+        # over a name's display form.
+        entity1_name1.name.create_name_part(name_part_type1, language, script,
+                                           'Johann', 1)
+        entity1_name1.name.create_name_part(name_part_type1, language, script,
+                                           'Sebastian', 2)
+        entity1_name1.name.create_name_part(name_part_type2, language, script,
+                                           'Bach', 1)
+        entity1_name1.name.update(name_type, language, script, '')
+        self.assertEqual(self.tm.lookup_entities('Johann'), [entity1])
+        # Partial (initial) matches are allowed.
+        self.assertEqual(self.tm.lookup_entities('Seb'), [entity1])
+        # Case does not matter.
+        self.assertEqual(self.tm.lookup_entities('ba'), [entity1])
+        # Order of search terms need not match order in name.
+        self.assertEqual(self.tm.lookup_entities('B J'), [entity1])
+        entity1_name2 = entity1.create_name_property_assertion(
+            self.authority, name_type, language, script, 'Alfred')
+        self.assertEqual(self.tm.lookup_entities('Alf'), [entity1])
+        # Individual query elements need not refer to the same name.
+        self.assertEqual(self.tm.lookup_entities('Al B'), [entity1])
+        entity2 = self.tm.create_entity(self.authority)
+        entity2_name1 = entity2.create_name_property_assertion(
+            self.authority, name_type, language, script, 'Duns Scotus')
+        self.assertEqual(set(self.tm.lookup_entities('S')),
+                         set([entity1, entity2]))
+        self.assertEqual(self.tm.lookup_entities('B s'), [entity1])
+        self.assertEqual(self.tm.lookup_entities('u'), [])
