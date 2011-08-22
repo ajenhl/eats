@@ -15,6 +15,8 @@ class EATSUser (models.Model):
 
     user = models.OneToOneField(User, primary_key=True,
                                 related_name='eats_user')
+    authority = models.ForeignKey('Authority', related_name='authority_users',
+                                  null=True)
     language = models.ForeignKey('Language', related_name='language_users',
                                  null=True)
     script = models.ForeignKey('Script', related_name='script_users', null=True)
@@ -29,6 +31,14 @@ class EATSUser (models.Model):
     class Meta:
         app_label = 'eats'
 
+    def get_authority (self):
+        """Returns the user's preferred authority.
+
+        :rtype: `Authority` or None
+
+        """
+        return self.authority
+        
     def get_current_authority (self):
         # QAZ: Direct access to self.current_authority bypasses this
         # logic, which may lead to incorrect results. Implementing the
@@ -46,11 +56,21 @@ class EATSUser (models.Model):
                 self.current_authority = None
             self.save()
         return self.current_authority
-        
+
     def get_language (self):
+        """Returns the user's preferred language.
+
+        :rtype: `Language` or None
+
+        """
         return self.language
 
     def get_script (self):
+        """Returns the user's preferred script.
+
+        :rtype: `Script` or None
+
+        """
         return self.script
 
     def is_editor (self):
@@ -58,11 +78,16 @@ class EATSUser (models.Model):
             return True
         return False
 
+    def set_authority (self, authority):
+        self.authority = authority
+        self.save()
+
     def set_current_authority (self, authority):
         if authority not in self.editable_authorities.all():
             # QAZ: Raise specific exception with error message.
             raise Exception
         self.current_authority = authority
+        self.authority = authority
         self.save()
 
     def set_language (self, language):

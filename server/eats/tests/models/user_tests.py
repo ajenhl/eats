@@ -25,9 +25,18 @@ class UserTestCase (ModelTestCase):
         user.editable_authorities.clear()
         self.assertFalse(user.is_editor())
 
+    def test_authority (self):
+        user = self.create_user(self.user)
+        self.assertEqual(user.get_authority(), None)
+        user.set_authority(self.authority)
+        self.assertEqual(user.get_authority(), self.authority)
+        authority2 = self.create_authority('Test2')
+        user.editable_authorities = [authority2]
+        user.set_current_authority(authority2)
+        self.assertEqual(user.get_authority(), authority2)
+
     def test_current_authority (self):
-        user = EATSUser(user=self.user)
-        user.save()
+        user = self.create_user(self.user)
         self.assertEqual(user.get_current_authority(), None)
         authority2 = self.create_authority('Test2')
         user.editable_authorities = [self.authority, authority2]
