@@ -3,6 +3,7 @@ from tmapi.models import Association, Topic
 from eats.exceptions import EATSValidationException
 
 from base_manager import BaseManager
+from date import Date
 from entity_relationship_property_assertion import EntityRelationshipPropertyAssertion
 from entity_type_property_assertion import EntityTypePropertyAssertion
 from existence_property_assertion import ExistencePropertyAssertion
@@ -176,13 +177,18 @@ class Entity (Topic):
                     assertion = None
         return assertion
     
-    def get_eats_names (self):
+    def get_eats_names (self, exclude=None):
         """Returns this entity's name property assertions.
 
+        :param exclude: name to exclude from the results
+        :type exclude: `NamePropertyAssertion`
         :rtype: `QuerySet` of `NamePropertyAssertion`s
 
         """
-        return NamePropertyAssertion.objects.filter_by_entity(self)
+        names = NamePropertyAssertion.objects.filter_by_entity(self)
+        if exclude:
+            names = names.exclude(id=exclude.id)
+        return names
 
     def get_entity_relationships (self):
         """Returns this entity's relationships to other entities.
@@ -200,6 +206,15 @@ class Entity (Topic):
 
         """
         return EntityTypePropertyAssertion.objects.filter_by_entity(self)
+
+    def get_existence_dates (self):
+        """Return all dates associated with this entity's existence
+        property assertions.
+
+        :rtype: `QuerySet` of `Date`s
+        
+        """
+        return Date.objects.filter_by_entity_existences(self)
     
     def get_existences (self):
         """Returns this entity's existence property assertions.

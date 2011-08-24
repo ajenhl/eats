@@ -17,6 +17,65 @@ class EntityTestCase (ModelTestCase):
         self.authority2.set_languages([self.language1, self.language2])
         self.authority2.set_name_types([self.name_type])
         self.authority2.set_scripts([self.script1, self.script2])
+
+    def test_get_eats_names (self):
+        entity = self.tm.create_entity(self.authority)
+        self.assertEqual(len(entity.get_eats_names()), 0)
+        name1 = entity.create_name_property_assertion(
+            self.authority, self.name_type, self.language1, self.script1,
+            'Name1')
+        names = entity.get_eats_names()
+        self.assertEqual(len(names), 1)
+        self.assertTrue(name1 in names)
+        name2 = entity.create_name_property_assertion(
+            self.authority, self.name_type, self.language2, self.script1,
+            'Name2')
+        names = entity.get_eats_names()
+        self.assertEqual(len(names), 2)
+        self.assertTrue(name1 in names)
+        self.assertTrue(name2 in names)
+        names = entity.get_eats_names(exclude=name1)
+        self.assertEqual(len(names), 1)
+        self.assertTrue(name2 in names)
+
+    def test_get_existence_dates (self):
+        entity = self.tm.create_entity(self.authority)
+        self.assertEqual(len(entity.get_existence_dates()), 0)
+        calendar = self.create_calendar('Gregorian')
+        date_type = self.create_date_type('exact')
+        date_period = self.create_date_period('lifespan')
+        self.authority.set_calendars([calendar])
+        self.authority.set_date_types([date_type])
+        self.authority.set_date_periods([date_period])
+        existence = entity.get_existences()[0]
+        date1 = existence.create_date(
+            {'point': '1 January 1900', 'point_calendar': calendar,
+             'point_certainty': self.tm.date_full_certainty,
+             'point_normalised': '', 'point_type': date_type,
+             'date_period': date_period})
+        dates = entity.get_existence_dates()
+        self.assertEqual(len(dates), 1)
+        self.assertTrue(date1 in dates)
+        date2 = existence.create_date(
+            {'point': '2 January 1900', 'point_calendar': calendar,
+             'point_certainty': self.tm.date_full_certainty,
+             'point_normalised': '', 'point_type': date_type,
+             'date_period': date_period})
+        dates = entity.get_existence_dates()
+        self.assertEqual(len(dates), 2)
+        self.assertTrue(date1 in dates)
+        self.assertTrue(date2 in dates)
+        entity2 = self.tm.create_entity(self.authority)
+        date3 = entity2.get_existences()[0].create_date(
+            {'point': '3 January 1900', 'point_calendar': calendar,
+             'point_certainty': self.tm.date_full_certainty,
+             'point_normalised': '', 'point_type': date_type,
+             'date_period': date_period})
+        dates = entity.get_existence_dates()
+        self.assertEqual(len(dates), 2)
+        self.assertTrue(date1 in dates)
+        self.assertTrue(date2 in dates)
+        self.assertTrue(date3 not in dates)
     
     def test_get_preferred_name (self):
         entity = self.tm.create_entity(self.authority)

@@ -7,6 +7,16 @@ from date_period import DatePeriod
 
 class DateManager (BaseManager):
 
+    def filter_by_entity_existences (self, entity):
+        date_role_type = self.eats_topic_map.date_role_type
+        entity_role_type = self.eats_topic_map.entity_role_type
+        existence_assertion_type = self.eats_topic_map.existence_assertion_type
+        return self.filter(
+            role_players__type=date_role_type,
+            role_players__association__type=existence_assertion_type,
+            role_players__association__roles__type=entity_role_type,
+            role_players__association__roles__player=entity)
+
     def get_query_set (self):
         return super(DateManager, self).get_query_set().filter(
             types=self.eats_topic_map.date_type)
