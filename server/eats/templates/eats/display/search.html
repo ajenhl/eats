@@ -1,0 +1,29 @@
+{% extends "eats/display/base.html" %}
+{% load entity_display %}
+
+{% block eats_title %}{{ block.super }} Search entities{% endblock eats_title %}
+
+{% block eats_content %}
+<h1>Search entities</h1>
+
+<form method="get" action="">
+  <div>{{ search_form.name }}
+  <input type="submit" name="search" value="Search"/>
+  </div>
+</form>
+
+{% if search_results %}
+<h2>Results</h2>
+
+<div id="search-results">
+  {% for entity in search_results %}
+  {% display_entity_search_result entity %}
+  {% endfor %}
+</div>
+
+{% else %}
+{% if search_form.is_bound %}
+<h2>No results</h2>
+{% endif %}
+{% endif %}
+{% endblock eats_content %}

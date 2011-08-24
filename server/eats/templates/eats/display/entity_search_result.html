@@ -1,0 +1,42 @@
+<div class="entity-search-result">
+  <h1>{{ preferred_name }}</h1>
+
+  <table>
+    <tbody>
+      {% if other_names %}
+      <tr>
+        <th>Other names:</th>
+        <td>
+          <ul>
+            {% for name in other_names %}
+            <li>{{ name.name.assembled_form }}</li>
+            {% endfor %}
+          </ul>
+        </td>
+      </tr>
+      {% endif %}
+      {% if dates %}
+      <tr>
+        <th>Dates:</th>
+        <td>
+          {% for date in dates %}
+          <p>{{ date.assembled_form }}</p>
+          {% endfor %}
+        </td>
+      </tr>
+      {% endif %}
+      {% if notes %}
+      <tr>
+        <th>Notes:</th>
+        <td>
+          {% for note_property in notes %}
+          <p>{{ note_property.note }}</p>
+          {% endfor %}
+        </td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+  <p><a href="{% url entity-change entity.get_id %}">Edit</a></p>
+</div>
+

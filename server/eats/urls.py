@@ -7,6 +7,7 @@ from eats.models import Authority, Calendar, DatePeriod, DateType, EntityRelatio
 urlpatterns = patterns(
     'eats.views.display',
     url(r'^entity/(?P<entity_id>\d+)/$', 'entity_view', name='entity-view'),
+    url(r'^search/$', 'search', name='search'),
     )
 
 # Editing.
