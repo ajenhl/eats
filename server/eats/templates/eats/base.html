@@ -25,6 +25,7 @@ block names, they only need to be changed in this template.
 
 {% block style %}{{ block.super }}
 {% block eats_style %}
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/eats_base.css"/>
 {% endblock eats_style %}
 {% endblock style %}
 
