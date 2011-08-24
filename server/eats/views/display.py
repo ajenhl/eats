@@ -23,7 +23,7 @@ def get_user_preferences (request):
         preferences['preferred_authority'] = eats_user.get_authority()
         preferences['preferred_language'] = eats_user.get_language()
         preferences['preferred_script'] = eats_user.get_script()
-    except EATSUser.DoesNotExist:
+    except (AttributeError, EATSUser.DoesNotExist):
         pass
     return preferences
 
