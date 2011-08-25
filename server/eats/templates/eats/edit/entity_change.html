@@ -17,6 +17,11 @@ return $( "<li></li>" )
   .appendTo( ul );
 };
 </script>
+<script type="application/javascript">
+$(document).ready(function() {
+  $('.name_part_language_script').hide();
+});
+</script>
 {% endblock eats_js %}
 
 {% block eats_content %}
@@ -194,7 +199,7 @@ return $( "<li></li>" )
                 <td>{{ part_form.DELETE }}</td>
                 <td>{{ part_form.name_part_type }}</td>
                 {% for id, display_form, language, script in part_form.name_part_fieldsets %}
-                <td>{{ id }}{{ display_form }}<br/>{{ language }}<br/>{{ script }}</td>
+                <td>{{ id }}{{ display_form }}<div class="name_part_language_script">{{ language }}<br/>{{ script }}</div></td>
                 {% endfor %}
               </tr>
             </table>
@@ -211,7 +216,7 @@ return $( "<li></li>" )
           <td>{{ assertion.name.name_type.get_admin_name }}</td>
           <td>{{ assertion.name.language.get_admin_name }}</td>
           <td>{{ assertion.name.script.get_admin_name }}</td>
-          <td>{{ assertion.name.display_form }}</td>
+          <td>{{ assertion.name.assembled_form }}</td>
           <td>{% with dates=assertion.get_dates %}{% if dates %}<ul>
           {% for date in dates %}<li>{{ date.assembled_form }}</li>{% endfor %}
           </ul>{% endif %}{% endwith %}</td>
