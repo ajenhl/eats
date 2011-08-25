@@ -1,13 +1,39 @@
+from django.http import Http404
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 from eats.decorators import add_topic_map
 from eats.forms.display import EntitySearchForm
-from eats.models import EATSUser
+from eats.models import EATSUser, Entity
 
 
-def entity_view (request):
-    pass
+def entity_view (request, entity_id):
+    try:
+        entity = Entity.objects.get_by_identifier(entity_id)
+    except Entity.DoesNotExist:
+        raise Http404
+    user_preferences = get_user_preferences(request)
+    preferred_authority = user_preferences['preferred_authority']
+    preferred_language = user_preferences['preferred_language']
+    preferred_script = user_preferences['preferred_script']
+    preferred_name = entity.get_preferred_name(
+        authority=preferred_authority, language=preferred_language,
+        script=preferred_script).name
+    existence_dates = entity.get_existence_dates()
+    entity_type_pas = entity.get_entity_types()
+    name_pas = entity.get_eats_names()
+    relationship_pas = entity.get_entity_relationships()
+    note_pas = entity.get_notes()
+    context_data = {'entity': entity,
+                    'preferred_authority': preferred_authority,
+                    'preferred_language': preferred_language,
+                    'preferred_name': preferred_name,
+                    'preferred_script': preferred_script,
+                    'existence_dates': existence_dates,
+                    'entity_type_pas': entity_type_pas, 'name_pas': name_pas,
+                    'note_pas': note_pas, 'relationship_pas': relationship_pas}
+    return render_to_response('eats/display/entity.html', context_data,
+                              context_instance=RequestContext(request))
 
 def get_user_preferences (request):
     """Returns a dictionary of user preferences derived from `request`.

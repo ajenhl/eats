@@ -1,0 +1,7 @@
+{% if dates %}
+<ul class="date-list">
+  {% for date in dates %}
+  <li>{{ date.assembled_form }}</li>
+  {% endfor %}
+</ul>
+{% endif %}

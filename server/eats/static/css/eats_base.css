@@ -1,42 +1,52 @@
-fieldset {
-           margin-bottom: 2em;
-}
+/* Global page layout */
 
-legend { 
-         font-size: larger;
-}
+body { margin: 0 2em 0 4em; }
 
-#search-results {
-                  margin: 0 8em 0 4em;
-}
+/* Forms */
+
+fieldset { margin-bottom: 2em; }
+legend { font-size: larger; }
 
 /* Tables */
 
-th, td {
-         vertical-align: top;
-}
-
+th, td { vertical-align: top; }
 td p { margin-top: 0; }
 
-.entity-search-result {
-                        margin-bottom: 2em;
-}
+/* Entity search */
 
+#search-results { margin: 0 8em 0 4em; }
+
+/* Individual entity search results */
+
+.entity-search-result { margin-bottom: 2em; }
 .entity-search-result h1 { 
-                           font-size: larger;
-                           border-bottom: thin solid black;
-                           margin-bottom: 0;
+   font-size: larger;
+   border-bottom: thin solid black;
+   margin-bottom: 0;
 }
 
-.entity-search-result table { 
-                              padding: 0;
-}
-
+.entity-search-result table { padding: 0; }
 .entity-search-result th { text-align: left; }
-
 .entity-search-result ul { margin: 0; padding: 0 }
-
 .entity-search-result li { 
-                           display: inline;
-                           padding-right: 3em;
+   display: inline;
+   padding-right: 3em;
+}
+
+/* Entity display */
+
+.entity-display ul {
+   list-style-type: none;
+   margin-left: 2em;
+   padding-left: 0;
+}
+.entity-display section > ul > li { margin-bottom: 0.5em; }
+.entity-display .name-metadata {
+   padding-left: 2em;
+   font-size: smaller;
+}
+.entity-display .note p { margin-bottom: 0; }
+.entity-display .note .note-authority {
+   margin: 0 0 1em 2em;
+   padding: 0;
 }

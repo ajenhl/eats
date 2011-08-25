@@ -1,0 +1,96 @@
+{% extends "eats/display/base.html" %}
+{% load entity_display %}
+
+{% block eats_title %}{{ block.super }} Display entity {{ preferred_name.assembled_form }}{% endblock eats_title %}
+
+{% block eats_content %}
+<article class="entity-display">
+  <h1>{{ preferred_name.assembled_form }}</h1>
+
+  {% if existence_dates %}
+  <section>
+    <h1>Dates</h1>
+    
+    <p>Dates expressing when this entity existed:</p>
+    
+    <ul>
+      {% for date in existence_dates %}
+      <li>
+        {{ date.assembled_form }}
+        {% display_property_assertion_authority date.property_assertion %}
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+  
+  {% if entity_type_pas %}
+  <section>
+    <h1>Types</h1>
+    
+    <p>This entity is classified as:</p>
+    
+    <ul>
+      {% for entity_type_pa in entity_type_pas %}
+      <li>
+        {{ entity_type_pa.entity_type.get_admin_name }}
+        {% display_property_assertion_authority entity_type_pa %}
+        {% display_property_assertion_dates entity_type_pa %}
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+  
+  {% if name_pas %}
+  <section>
+    <h1>Names</h1>
+    
+    <p>This entity is named:</p>
+    
+    <ul>
+      {% for name_pa in name_pas %}
+      <li>{{ name_pa.name.assembled_form }}
+      {% display_property_assertion_authority name_pa %}
+      {% display_name_metadata name_pa.name %}
+      {% display_property_assertion_dates name_pa %}
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+  
+  {% if relationship_pas %}
+  <section>
+    <h1>Relationships</h1>
+    
+    <p>This entity:</p>
+    
+    <ul>
+      {% for relationship_pa in relationship_pas %}
+      <li>
+        {% display_entity_relationship_property_assertion entity relationship_pa %}
+        {% display_property_assertion_authority relationship_pa %}
+        {% display_property_assertion_dates relationship_pa %}
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+  
+  {% if note_pas %}
+  <section>
+    <h1>Notes</h1>
+    
+    <ul>
+      {% for note_pa in note_pas %}
+      <li class="note">
+        <p>{{ note_pa.note }}</p>
+        <p class="note-authority">{% display_property_assertion_authority note_pa %}</p>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+</article>
+{% endblock eats_content %}
