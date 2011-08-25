@@ -572,7 +572,6 @@ class NamePartForm (forms.Form):
         """
         data = {'name_part_type': name_parts[0].get_id()}
         name_parts = name_parts[1]
-        name_parts.sort(cmp=lambda x,y: cmp(x.order, y.order))
         for i in range(len(name_parts)):
             name_part = name_parts[i]
             suffix = str(i)
@@ -703,8 +702,8 @@ class DateForm (forms.Form):
     point_tpq = forms.CharField(label='Date', required=False)
     point_tpq_calendar = forms.ChoiceField(choices=[], label='Calendar',
                                            required=False)
-    point_tpq__normalised = forms.CharField(label='Normalised value',
-                                            required=False)
+    point_tpq_normalised = forms.CharField(label='Normalised value',
+                                           required=False)
     point_tpq_type = forms.ChoiceField(choices=[], label='Type', required=False)
     point_tpq_certainty = forms.BooleanField(label='Certain', required=False)
     point_taq = forms.CharField(label='Date', required=False)
