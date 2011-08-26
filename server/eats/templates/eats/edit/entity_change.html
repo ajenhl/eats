@@ -1,4 +1,5 @@
 {% extends "eats/edit/base.html" %}
+{% load entity_edit %}
 
 {% block eats_style %}{{ block.super }}
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/themes/ui-lightness/jquery-ui.css" type="text/css" media="screen"/>
@@ -245,7 +246,7 @@ $(document).ready(function() {
       <tbody class="eats-editable-pa">
         {% for form in entity_relationship_formset %}
         <tr>
-          <td>{{ form.DELETE }}{{ form.assertion }}</td>
+          <td>{% if form.instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
           <td>{{ form.authority.get_admin_name }}</td>
           <td>
             <div>{{ form.relationship_type }}</div>
@@ -268,15 +269,7 @@ $(document).ready(function() {
       </tbody>
       <tbody class="eats-non-editable-pa">
         {% for entity_relationship in entity_relationship_non_editable %}
-        <tr>
-          <td></td>
-          <td>{{ entity_relationship.authority.get_admin_name }}</td>
-          {% with ert=entity_relationship.entity_relationship_type %}
-          <td>{% if entity == entity_relationship.domain_entity %}{{ ert.get_admin_forward_name }}{% if entity == entity_relationship.range_entity %} and {{ ert.get_admin_reverse_name }}{% endif %}{% else %}{{ ert.get_admin_reverse_name }}{% endif %}</td>
-          {% endwith %}
-          <td>{{ entity.get_eats_names.0.name.display_form }}</td>
-          <td></td>
-        </tr>
+        {% display_entity_relationship_non_editable entity entity_relationship %}
         {% endfor %}
       </tbody>
     </table>
@@ -298,7 +291,7 @@ $(document).ready(function() {
       <tbody class="eats-editable-pa">
         {% for form in note_formset %}
         <tr>
-          <td>{% if form.initial or form.is_bound %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
+          <td>{% if form.instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
           <td>{{ form.authority.get_admin_name }}</td>
           <td>
             <div>{{ form.note }}</div>
