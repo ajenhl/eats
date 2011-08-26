@@ -20,7 +20,7 @@ class EntityLookup (LookupBase):
     def get_item_label (self, item):
         try:
             name_assertion = item.get_eats_names()[0]
-            label = name_assertion.name.display_form
+            label = name_assertion.name.assembled_form
         except IndexError:
             label = '[unnamed entity]'
         return label
@@ -28,7 +28,7 @@ class EntityLookup (LookupBase):
     def get_item_value (self, item):
         try:
             name_assertion = item.get_eats_names()[0]
-            label = name_assertion.name.display_form
+            label = name_assertion.name.assembled_form
         except IndexError:
             label = '[unnamed entity]'
         return label
