@@ -48,14 +48,31 @@ def display_entity_search_result (context, entity):
     
     """
     dates = entity.get_existence_dates()
-    preferred_name = entity.get_preferred_name(context['preferred_authority'],
-                                               context['preferred_language'],
-                                               context['preferred_script'])
+    preferred_authority = context['preferred_authority']
+    preferred_language = context['preferred_language']
+    preferred_script = context['preferred_script']
+    preferred_name = entity.get_preferred_name(
+        preferred_authority, preferred_language, preferred_script)
     other_names = entity.get_eats_names(exclude=preferred_name)
+    other_name_values = set()
+    for name in other_names:
+        other_name_values.add(name.name.assembled_form)
+    other_name_values = list(other_name_values)
+    other_name_values.sort()
+    entity_relationships = entity.get_entity_relationships()
+    entity_types = entity.get_entity_types()
+    entity_type_values = set()
+    for entity_type in entity_types:
+        entity_type_values.add(entity_type.entity_type.get_admin_name())
     notes = entity.get_notes()
-    return {'dates': dates, 'entity': entity, 'notes': notes,
-            'other_names': other_names,
-            'preferred_name': preferred_name.name.assembled_form}
+    return {'dates': dates, 'entity': entity,
+            'entity_relationships': entity_relationships,
+            'entity_types': entity_type_values, 'notes': notes,
+            'other_names': other_name_values,
+            'preferred_authority': preferred_authority,
+            'preferred_language': preferred_language,
+            'preferred_name': preferred_name.name.assembled_form,
+            'preferred_script': preferred_script}
 
 @register.inclusion_tag('eats/display/name_metadata.html')
 def display_name_metadata (name):

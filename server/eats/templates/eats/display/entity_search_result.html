@@ -1,15 +1,17 @@
+{% load entity_display %}
+
 <div class="entity-search-result">
   <h1>{{ preferred_name }}</h1>
 
   <table>
     <tbody>
-      {% if other_names %}
+      {% if entity_types %}
       <tr>
-        <th>Other names:</th>
+        <th scope="row">Types:</th>
         <td>
           <ul>
-            {% for name in other_names %}
-            <li>{{ name.name.assembled_form }}</li>
+            {% for entity_type in entity_types %}
+            <li>{{ entity_type }}</li>
             {% endfor %}
           </ul>
         </td>
@@ -17,17 +19,43 @@
       {% endif %}
       {% if dates %}
       <tr>
-        <th>Dates:</th>
+        <th scope="row">Dates:</th>
         <td>
-          {% for date in dates %}
-          <p>{{ date.assembled_form }}</p>
-          {% endfor %}
+          <ul>
+            {% for date in dates %}
+            <li>{{ date.assembled_form }}</li>
+            {% endfor %}
+          </ul>
+        </td>
+      </tr>
+      {% endif %}
+      {% if other_names %}
+      <tr>
+        <th scope="row">Other names:</th>
+        <td>
+          <ul>
+            {% for name in other_names %}
+            <li>{{ name }}</li>
+            {% endfor %}
+          </ul>
+        </td>
+      </tr>
+      {% endif %}
+      {% if entity_relationships %}
+      <tr>
+        <th scope="row">Relationships:</th>
+        <td>
+          <ul>
+            {% for entity_relationship in entity_relationships %}
+            <li>{% display_entity_relationship_property_assertion entity entity_relationship %}</li>
+            {% endfor %}
+          </ul>
         </td>
       </tr>
       {% endif %}
       {% if notes %}
       <tr>
-        <th>Notes:</th>
+        <th scope="row">Notes:</th>
         <td>
           {% for note_property in notes %}
           <p>{{ note_property.note }}</p>
