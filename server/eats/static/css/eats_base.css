@@ -10,6 +10,7 @@ legend { font-size: larger; }
 /* Tables */
 
 th, td { vertical-align: top; }
+th[scope="row"] { text-align: left; }
 td p { margin-top: 0; }
 
 /* Entity search */

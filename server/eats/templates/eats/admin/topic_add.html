@@ -1,6 +1,6 @@
 {% extends "eats/admin/base.html" %}
 
-{% block eats_title %}{{ block.super }}: Add {{ name }}{% endblock eats_title %}
+{% block eats_title %}{{ block.super }}: Add {{ opts.verbose_name }}{% endblock eats_title %}
 
 {% block eats_content %}
 <h1>Add {{ opts.verbose_name }}</h1>
@@ -8,7 +8,9 @@
 <form action="" id="infrastructure-add-form" method="post">
   {% csrf_token %}
 
-  {{ form.as_p }}
+  <table>
+  {{ form.as_table }}
+  </table>
 
   <div>
     <input type="submit" value="Save" name="_save"/>
@@ -16,5 +18,7 @@
     <input type="submit" value="Save and continue editing" name="_continue"/>
   </div>
 </form>
+
+<p><a href="{% url administration-panel %}">Administration Panel</a></p>
 {% endblock eats_content %}
 

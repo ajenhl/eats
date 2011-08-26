@@ -1,0 +1,14 @@
+a:link, a:visited {
+   text-decoration: none;
+   color: #5B80B2; }
+a:hover { color: #003366; }
+
+table#admin-panel {
+   border-collapse: collapse;
+   border: 1px solid #CCCCCC;
+}
+th { text-align: right; }
+#admin-panel th, #admin-panel td {
+   border-bottom: 1px solid #EEEEEE;
+   padding: 0.5em;
+}

@@ -93,7 +93,7 @@ def topic_change (request, topic_map, topic_id, model):
             return HttpResponseRedirect(redirect_url)
     else:
         form = form_class(topic_map, model, instance=topic)
-    context_data = {'form': form, 'opts': opts}
+    context_data = {'form': form, 'opts': opts, 'name': topic.get_admin_name()}
     return render_to_response('eats/admin/topic_change.html', context_data,
                               context_instance=RequestContext(request))
 
