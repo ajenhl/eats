@@ -1,6 +1,8 @@
 {% extends "eats/base.html" %}
 
 {% block eats_title %}{{ block.super }}Edit{% endblock eats_title %}
-
+{% block eats_style %}{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/eats_edit_base.css"/>
+{% endblock %}
 
 
