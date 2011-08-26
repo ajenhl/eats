@@ -5,21 +5,11 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 from eats.lib.property_assertions import EntityRelationshipPropertyAssertions, EntityTypePropertyAssertions, ExistencePropertyAssertions, NamePropertyAssertions, NotePropertyAssertions
+from eats.lib.user import get_user_preferences, user_is_editor
 from eats.decorators import add_topic_map
 from eats.forms.edit import CreateEntityForm, create_choice_list, CurrentAuthorityForm, DateForm
-from eats.models import Authority, Calendar, DatePeriod, DateType, EATSUser, Entity
+from eats.models import Authority, Calendar, DatePeriod, DateType, Entity
 
-
-def user_is_editor (user):
-    if not user.is_authenticated():
-        return False
-    try:
-        eats_user = user.eats_user
-    except EATSUser.DoesNotExist:
-        return False
-    if not eats_user.is_editor():
-        return False
-    return True
 
 @user_passes_test(user_is_editor)
 @add_topic_map
@@ -110,6 +100,10 @@ def entity_change (request, topic_map, entity_id):
     context_data['note_non_editable'] = notes.non_editable
     context_data['entity_relationship_formset'] = entity_relationships_formset
     context_data['entity_relationship_non_editable'] = entity_relationships.non_editable
+    user_preferences = get_user_preferences(request)
+    context_data['preferred_authority'] = user_preferences['preferred_authority']
+    context_data['preferred_language'] = user_preferences['preferred_language']
+    context_data['preferred_script'] = user_preferences['preferred_script']
     return render_to_response('eats/edit/entity_change.html', context_data,
                               context_instance=RequestContext(request))
 

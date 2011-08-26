@@ -4,7 +4,8 @@ from django.template import RequestContext
 
 from eats.decorators import add_topic_map
 from eats.forms.display import EntitySearchForm
-from eats.models import EATSUser, Entity
+from eats.lib.user import get_user_preferences
+from eats.models import Entity
 
 
 def entity_view (request, entity_id):
@@ -34,24 +35,6 @@ def entity_view (request, entity_id):
                     'note_pas': note_pas, 'relationship_pas': relationship_pas}
     return render_to_response('eats/display/entity.html', context_data,
                               context_instance=RequestContext(request))
-
-def get_user_preferences (request):
-    """Returns a dictionary of user preferences derived from `request`.
-
-    :rtype: dictionary
-
-    """
-    preferences = {'preferred_authority': None,
-                   'preferred_language': None,
-                   'preferred_script': None}
-    try:
-        eats_user = request.user.eats_user
-        preferences['preferred_authority'] = eats_user.get_authority()
-        preferences['preferred_language'] = eats_user.get_language()
-        preferences['preferred_script'] = eats_user.get_script()
-    except (AttributeError, EATSUser.DoesNotExist):
-        pass
-    return preferences
 
 @add_topic_map
 def search (request, topic_map):
