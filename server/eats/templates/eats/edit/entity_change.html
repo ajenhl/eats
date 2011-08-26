@@ -158,7 +158,7 @@ $(document).ready(function() {
       <tbody class="eats-editable-pa">
         {% for form in name_formset %}
         <tr>
-          <td>{{ form.DELETE }}{{ form.assertion }}</td>
+          <td>{% if form.instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
           <td>{{ form.authority.get_admin_name }}</td>
           <td>
             <div>{{ form.name_type }}</div>
@@ -190,22 +190,22 @@ $(document).ready(function() {
           <p><a href="{{ form.assertion.value }}/date/add/">Add a date</a></p>{% endif %}</td>
           <td class="errors">{{ form.non_field_errors }}{{ form.name_part_formset.management_form }}</td>
         </tr>
-        {% for part_form in form.name_part_formset %}
         <tr>
           <td></td>
           <td colspan="7">
-            <table>
+            <table class="name-parts">
+              {% for part_form in form.name_part_formset %}
               <tr>
-                <td>{{ part_form.DELETE }}</td>
+                <td>{% if part_form.instance %}{{ part_form.DELETE }}{% endif %}</td>
                 <td>{{ part_form.name_part_type }}</td>
                 {% for id, display_form, language, script in part_form.name_part_fieldsets %}
                 <td>{{ id }}{{ display_form }}<div class="name_part_language_script">{{ language }}<br/>{{ script }}</div></td>
                 {% endfor %}
               </tr>
+              {% endfor %}
             </table>
           </td>
         </tr>
-        {% endfor %}
         {% endfor %}
       </tbody>
       <tbody class="eats-non-editable-pa">
