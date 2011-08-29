@@ -243,6 +243,24 @@ class LanguageForm (AdminForm):
 
     code = forms.CharField(max_length=3)
 
+    def __init__ (self, topic_map, model, data=None, instance=None, **kwargs):
+        super(LanguageForm, self).__init__(topic_map, model, data, instance,
+                                           **kwargs)
+        self.npt_base_name = 'name_part_type-'
+        self._create_form_fields(data, self.initial)
+
+    def clean (self):
+        # Enforce uniqueness among the values of all the name part
+        # type fields.
+        name_part_type_values = []
+        for field, value in self.cleaned_data.items():
+            if field.startswith(self.npt_base_name) and value:
+                name_part_type_values.append(value)
+        if len(name_part_type_values) != len(set(name_part_type_values)):
+            raise forms.ValidationError(
+                'Name part types may only be specified once')
+        return self.cleaned_data
+
     def clean_code (self):
         code = self.cleaned_data['code']
         try:
@@ -255,20 +273,62 @@ class LanguageForm (AdminForm):
             pass
         return code
 
+    def _create_form_fields (self, post_data, instance_data):
+        """Creates dynamic fields to accomodate the post/instance data.
+
+        :param post_data: POSTed data
+        :type post_data: dictionary
+        :param instance_data: `Language` instance data
+        :type instance_data: dictionary
+
+        """
+        name_part_type_choices = create_choice_list(
+            self.topic_map, NamePartType.objects.all())
+        data = post_data or instance_data
+        count = 2
+        for name in data:
+            if name.startswith(self.npt_base_name):
+                count += 1
+        count = max(count, 3)
+        for i in range(count):
+            self.fields[self.npt_base_name + str(i)] = forms.ChoiceField(
+                choices=name_part_type_choices, required=False,
+                label='Name part type %s' % str(i+1))
+
+    def _objectify_data (self, base_data):
+        data = {}
+        index = len(self.npt_base_name)
+        for name, value in base_data.items():
+            if name.startswith(self.npt_base_name) and value:
+                order = int(name[index:])
+                data[order] = NamePartType.objects.get_by_identifier(value)
+        keys = data.keys()
+        keys.sort()
+        name_part_types = []
+        for key in keys:
+            name_part_types.append(data[key])
+        return name_part_types
+
     def save (self):
         name = self.cleaned_data['name']
         code = self.cleaned_data['code']
+        name_part_types = self._objectify_data(self.cleaned_data)
         if self.instance is None:
             language = self.topic_map.create_language(name, code)
         else:
             language = self.instance
             language.set_admin_name(name)
             language.set_code(code)
+        language.name_part_types = name_part_types
         return language
 
     def _topic_to_dict (self, topic):
         data = super(LanguageForm, self)._topic_to_dict(topic)
         data['code'] = topic.get_code()
+        name_part_types = topic.name_part_types
+        for i in range(len(name_part_types)):
+            name_part_type = name_part_types[i]
+            data['name_part_type-' + str(i)] = name_part_type.get_id()
         return data
 
 

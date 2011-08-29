@@ -86,6 +86,17 @@ class LanguageViewsTestCase (ViewTestCase):
         self.assertEqual(Language.objects.count(), 1)
         self.assertTrue(language in Language.objects.all())
         self.assertEqual(language.get_admin_name(), 'English')
+        # Duplicate name part types.
+        name_part_type = self.create_name_part_type('given')
+        form = self.app.get(url).forms['infrastructure-add-form']
+        form['name'] = 'Hindi'
+        form['code'] = 'hi'
+        form['name_part_type-0'] = name_part_type.get_id()
+        form['name_part_type-1'] = name_part_type.get_id()
+        response = form.submit('_save')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Language.objects.count(), 1)
+        self.assertTrue(language in Language.objects.all())
         
     def test_language_change_illegal_get (self):
         url = reverse('language-change', kwargs={'topic_id': 0})
