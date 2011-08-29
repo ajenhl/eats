@@ -326,6 +326,49 @@ $(document).ready(function() {
     {% endif %}
   </fieldset>
 
+  <fieldset>
+    <legend>Subject Identifiers</legend>
+
+    {{ subject_identifier_formset.management_form }}
+
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Delete?</th>
+          <th scope="col">URL</th>
+        </tr>
+      </thead>
+      <tbody class="eats-editable-pa">
+        {% for form in subject_identifier_formset %}
+        <tr>
+          <td>{% if form.instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
+          <td>
+            <div>{{ form.subject_identifier }}</div>
+            {% if form.errors.subject_identifier %}
+            <div class="errors">{{ form.errors.subject_identifier }}</div>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% if subject_identifier_non_editable %}
+    <section>
+      <p>Other authorities specify the following URLs as representing this entity:</p>
+
+      <ul>
+        {% for assertion in subject_identifier_non_editable %}
+        <li>
+          <a href="{{ assertion.subject_identifier }}">{{ assertion.subject_identifier }}</a>
+          {% display_property_assertion_authority assertion %}
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+  </fieldset>
+
   <div>
     <input type="submit" value="Save" name="_save"/>
   </div>

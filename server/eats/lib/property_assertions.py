@@ -1,6 +1,6 @@
 from eats.constants import FORWARD_RELATIONSHIP_MARKER, \
     REVERSE_RELATIONSHIP_MARKER
-from eats.forms.edit import EntityRelationshipFormSet, EntityTypeFormSet, ExistenceFormSet, NameFormSet, NoteFormSet, create_choice_list
+from eats.forms.edit import EntityRelationshipFormSet, EntityTypeFormSet, ExistenceFormSet, NameFormSet, NoteFormSet, SubjectIdentifierFormSet, create_choice_list
 from eats.models import EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
 
 
@@ -152,4 +152,16 @@ class NotePropertyAssertions (PropertyAssertions):
 
     def categorise_assertions (self):
         assertions = self.entity.get_notes()
+        return self.get_editable(assertions, self.authority)
+
+
+class SubjectIdentifierPropertyAssertions (PropertyAssertions):
+
+    @property
+    def formset (self):
+        data = {'prefix': 'subject_identifiers'}
+        return self._create_formset(SubjectIdentifierFormSet, data)
+
+    def categorise_assertions (self):
+        assertions = self.entity.get_subject_identifiers()
         return self.get_editable(assertions, self.authority)

@@ -347,3 +347,78 @@ class EntityChangeViewTestCase (ViewTestCase):
         self.assertEqual(self.authority_id, assertion.authority.get_id())
         self.assertEqual(form_data['note'], assertion.note)
         self.assertEqual(form_data['note'], 'Test')
+
+    def test_post_subject_identifiers (self):
+        entity = self.tm.create_entity(self.authority)
+        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['subject_identifiers-1-subject_identifier'] = \
+            'http://www.example.org/test'
+        response = form.submit('_save', user='user').follow()
+        self.assertEqual(response.request.url[len(response.request.host_url):],
+                         url)
+        formset = response.context['subject_identifier_formset']
+        self.assertEqual(formset.initial_form_count(), 1,
+                         'Expected one pre-filled subject identifier form')
+        self.assertEqual(entity.get_subject_identifiers().count(), 1)
+        assertion = entity.get_subject_identifiers()[0]
+        form_data = formset.initial_forms[0].initial
+        self.assertEqual(form_data['assertion'], assertion.get_id())
+        self.assertEqual(assertion.authority.get_id(), self.authority_id)
+        self.assertEqual(form_data['subject_identifier'],
+                         assertion.subject_identifier)
+        self.assertEqual(form_data['subject_identifier'],
+                         'http://www.example.org/test')
+        # Test adding another subject_identifier and deleting the
+        # existing one.
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['subject_identifiers-0-DELETE'] = 'on'
+        form['subject_identifiers-1-subject_identifier'] = \
+            'http://www.example.org/test2'
+        response = form.submit('_save').follow()
+        self.assertEqual(response.request.url[len(response.request.host_url):],
+                         url)
+        formset = response.context['subject_identifier_formset']
+        self.assertEqual(formset.initial_form_count(), 1,
+                         'Expected one pre-filled subject_identifier form')
+        self.assertEqual(entity.get_subject_identifiers().count(), 1)
+        assertion = entity.get_subject_identifiers()[0]
+        form_data = formset.initial_forms[0].initial
+        self.assertEqual(form_data['assertion'], assertion.get_id())
+        self.assertEqual(self.authority_id, assertion.authority.get_id())
+        self.assertEqual(form_data['subject_identifier'],
+                         assertion.subject_identifier)
+        self.assertEqual(form_data['subject_identifier'],
+                         'http://www.example.org/test2')
+        # Test updating an existing subject_identifier.
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['subject_identifiers-0-subject_identifier'] = \
+            'http://www.example.org/test3'
+        response = form.submit('_save').follow()
+        self.assertEqual(response.request.url[len(response.request.host_url):],
+                         url)
+        formset = response.context['subject_identifier_formset']
+        self.assertEqual(formset.initial_form_count(), 1,
+                         'Expected one pre-filled subject_identifier form')
+        self.assertEqual(entity.get_subject_identifiers().count(), 1)
+        assertion = entity.get_subject_identifiers()[0]
+        form_data = formset.initial_forms[0].initial
+        self.assertEqual(form_data['assertion'], assertion.get_id())
+        self.assertEqual(self.authority_id, assertion.authority.get_id())
+        self.assertEqual(form_data['subject_identifier'],
+                         assertion.subject_identifier)
+        self.assertEqual(form_data['subject_identifier'],
+                         'http://www.example.org/test3')
+
+    def test_post_subject_identifiers_illegal (self):
+        entity = self.tm.create_entity(self.authority)
+        self.assertEqual(entity.get_subject_identifiers().count(), 0)
+        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['subject_identifiers-0-subject_identifier'] = \
+            'http://www.example.org/test'
+        form['subject_identifiers-1-subject_identifier'] = \
+            'http://www.example.org/test'
+        response = form.submit('_save')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(entity.get_subject_identifiers().count(), 0)

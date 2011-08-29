@@ -10,6 +10,7 @@ from existence_property_assertion import ExistencePropertyAssertion
 from name import Name
 from name_property_assertion import NamePropertyAssertion
 from note_property_assertion import NotePropertyAssertion
+from subject_identifier_property_assertion import SubjectIdentifierPropertyAssertion
 
 
 class EntityManager (BaseManager):
@@ -146,6 +147,24 @@ class Entity (Topic):
             scope=[authority], proxy=NotePropertyAssertion)
         return assertion
 
+    def create_subject_identifier_property_assertion (self, authority,
+                                                      subject_identifier):
+        """Creates and returns a new subject identifier property
+        assertion with URL `subject_identifier`, asserted by
+        `authority`.
+
+        :param authority: authority asserting the property
+        :type authority: `Authority`
+        :param subject_identifier: the subject identifier URL
+        :type subject_identifier: unicode string URL
+        :rtype: `SubjectIdentifierPropertyAssertion`
+
+        """
+        return self.create_occurrence(
+            self.eats_topic_map.subject_identifier_assertion_type,
+            subject_identifier, scope=[authority],
+            proxy=SubjectIdentifierPropertyAssertion)
+    
     @property
     def eats_topic_map (self):
         if not hasattr(self, '_eats_topic_map'):
@@ -254,3 +273,12 @@ class Entity (Topic):
                 self, authority, language, script)
         except NamePropertyAssertion.DoesNotExist:
             return None
+
+    def get_subject_identifiers (self):
+        """Returns this entity's subject identifier property assertions.
+
+        :rtype: `QuerySet` of `SubjectIdentifierPropertyAssertion`s
+
+        """
+        return SubjectIdentifierPropertyAssertion.objects.filter_by_entity(self)
+

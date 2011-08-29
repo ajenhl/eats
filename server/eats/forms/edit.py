@@ -136,6 +136,9 @@ class NameAssertionFormSet (PropertyAssertionFormSet):
             instance = self.instances[i]
             instances = [[name_part_type, name_parts] for name_part_type,
                          name_parts in instance.name.get_name_parts().items()]
+            # QAZ: It would be nice to order these instances by the
+            # name part type order associated with the language of
+            # this name.
         except IndexError:
             instances = None
         name_part_data = {
@@ -200,7 +203,25 @@ class NameAssertionFormSet (PropertyAssertionFormSet):
 class NoteAssertionFormSet (PropertyAssertionFormSet):
 
     pass
-        
+
+
+class SubjectIdentifierAssertionFormSet (PropertyAssertionFormSet):
+
+    def clean (self):
+        cleaned_data = super(SubjectIdentifierAssertionFormSet, self).clean()
+        # Ensure that the subject identifiers across all the forms in
+        # the formset are unique.
+        subject_identifier_values = []
+        for form_data in self.cleaned_data:
+            for field, value in form_data.items():
+                if field == 'subject_identifier' and value:
+                    subject_identifier_values.append(value)
+        if len(subject_identifier_values) != len(set(
+                subject_identifier_values)):
+            raise forms.ValidationError(
+                'Subject identifier URLs must be unique to an authority')
+        return cleaned_data
+
 
 class NamePartInlineFormSet (BaseFormSet):
 
@@ -504,6 +525,26 @@ class NoteForm (PropertyAssertionForm):
         else:
             # Update an existing assertion.
             self.instance.update(note)
+
+
+class SubjectIdentifierForm (PropertyAssertionForm):
+
+    subject_identifier = forms.URLField()
+
+    def _assertion_to_dict (self, assertion):
+        data = super(SubjectIdentifierForm, self)._assertion_to_dict(assertion)
+        data['subject_identifier'] = assertion.subject_identifier
+        return data
+
+    def save (self):
+        subject_identifier = self.cleaned_data['subject_identifier']
+        if self.instance is None:
+            # Create a new assertion.
+            self.entity.create_subject_identifier_property_assertion(
+                self.authority, subject_identifier)
+        else:
+            # Update an existing assertion.
+            self.instance.update(subject_identifier)
 
 
 class NamePartForm (forms.Form):
@@ -821,6 +862,9 @@ NamePartFormSet = formset_factory(NamePartForm, can_delete=True, extra=2,
                                   formset=NamePartInlineFormSet)
 NoteFormSet = formset_factory(NoteForm, can_delete=True, extra=2,
                               formset=NoteAssertionFormSet)
+SubjectIdentifierFormSet = formset_factory(
+    SubjectIdentifierForm, can_delete=True, extra=2,
+    formset=SubjectIdentifierAssertionFormSet)
 
 
 def create_choice_list (topic_map, queryset, default=False):

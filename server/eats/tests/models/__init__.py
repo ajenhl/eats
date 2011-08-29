@@ -11,4 +11,5 @@ from name_part_type_tests import *
 from name_tests import *
 from note_tests import *
 from script_tests import *
+from subject_identifier_tests import *
 from user_tests import *
