@@ -6,7 +6,7 @@
 #entity-change-form table.name-parts td {
    padding-bottom: 0;
 }
-#entity-change-form ul {
+#entity-change-form td ul {
    margin: 0;
    padding: 0;
    list-style-type: none;

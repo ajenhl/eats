@@ -489,7 +489,7 @@ class NameForm (PropertyAssertionForm):
 
 class NoteForm (PropertyAssertionForm):
 
-    note = forms.CharField(widget=forms.Textarea)
+    note = forms.CharField(widget=forms.Textarea(attrs={'rows': 5}))
 
     def _assertion_to_dict (self, assertion):
         data = super(NoteForm, self)._assertion_to_dict(assertion)

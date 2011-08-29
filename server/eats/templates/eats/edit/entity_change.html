@@ -1,5 +1,5 @@
 {% extends "eats/edit/base.html" %}
-{% load entity_edit %}
+{% load entity_display %}
 
 {% block eats_style %}{{ block.super }}
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/themes/ui-lightness/jquery-ui.css" type="text/css" media="screen"/>
@@ -26,6 +26,7 @@ $(document).ready(function() {
 {% endblock eats_js %}
 
 {% block eats_content %}
+<article class="entity-display">
 <h1>Edit entity</h1>
 
 <form action="" method="post">
@@ -95,7 +96,6 @@ $(document).ready(function() {
       <thead>
         <tr>
           <th scope="col">Delete?</th>
-          <th scope="col">Authority</th>
           <th scope="col">Entity type</th>
           <th scope="col">Dates</th>
           <th></th>
@@ -105,9 +105,6 @@ $(document).ready(function() {
         {% for form in entity_type_formset %}
         <tr>
           <td>{% if form.instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
-          <td>
-            <div>{{ form.authority.get_admin_name }}</div>
-          </td>
           <td>
             <div>{{ form.entity_type }}</div>
             {% if form.errors.entity_type %}
@@ -122,20 +119,23 @@ $(document).ready(function() {
         </tr>
         {% endfor %}
       </tbody>
-      <tbody class="eats-non-editable-pa">
-        {% for assertion in entity_type_non_editable %}
-        <tr>
-          <td></td>
-          <td>{{ assertion.authority.get_admin_name }}</td>
-          <td>{{ assertion.entity_type.get_admin_name }}</td>
-          <td>{% with dates=assertion.get_dates %}{% if dates %}<ul>
-          {% for date in dates %}<li>{{ date.assembled_form }}</li>{% endfor %}
-          </ul>{% endif %}{% endwith %}</td>
-          <td></td>
-        </tr>
-        {% endfor %}
-      </tbody>
     </table>
+
+    {% if entity_type_non_editable %}
+    <section>
+      <p>Other authorities classify this entity as:</p>
+
+      <ul>
+        {% for assertion in entity_type_non_editable %}
+        <li>
+          {{ assertion.entity_type.get_admin_name }}
+          {% display_property_assertion_authority assertion %}
+          {% display_property_assertion_dates assertion %}
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
   </fieldset>
 
   <fieldset>
@@ -147,7 +147,6 @@ $(document).ready(function() {
       <thead>
         <tr>
           <th scope="col">Delete?</th>
-          <th scope="col">Authority</th>
           <th scope="col">Name type</th>
           <th scope="col">Language</th>
           <th scope="col">Script</th>
@@ -160,7 +159,6 @@ $(document).ready(function() {
         {% for form in name_formset %}
         <tr>
           <td>{% if form.instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
-          <td>{{ form.authority.get_admin_name }}</td>
           <td>
             <div>{{ form.name_type }}</div>
             {% if form.errors.name_type %}
@@ -209,23 +207,24 @@ $(document).ready(function() {
         </tr>
         {% endfor %}
       </tbody>
-      <tbody class="eats-non-editable-pa">
-        {% for assertion in name_non_editable %}
-        <tr>
-          <td></td>
-          <td>{{ assertion.authority.get_admin_name }}</td>
-          <td>{{ assertion.name.name_type.get_admin_name }}</td>
-          <td>{{ assertion.name.language.get_admin_name }}</td>
-          <td>{{ assertion.name.script.get_admin_name }}</td>
-          <td>{{ assertion.name.assembled_form }}</td>
-          <td>{% with dates=assertion.get_dates %}{% if dates %}<ul>
-          {% for date in dates %}<li>{{ date.assembled_form }}</li>{% endfor %}
-          </ul>{% endif %}{% endwith %}</td>
-          <td></td>
-        </tr>
-        {% endfor %}
-      </tbody>
     </table>
+
+    {% if name_non_editable %}
+    <section>
+      <p>Other authorities name this entity:</p>
+
+      <ul>
+        {% for assertion in name_non_editable %}
+        <li>
+          {{ assertion.name.assembled_form }}
+          {% display_property_assertion_authority assertion %}
+          {% display_name_metadata assertion.name %}
+          {% display_property_assertion_dates assertion %}
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
   </fieldset>
 
   <fieldset>
@@ -237,7 +236,6 @@ $(document).ready(function() {
       <thead>
         <tr>
           <th scope="col">Delete?</th>
-          <th scope="col">Authority</th>
           <th scope="col">Relationship</th>
           <th scope="col">Related entity</th>
           <th scope="col">Dates</th>
@@ -247,7 +245,6 @@ $(document).ready(function() {
         {% for form in entity_relationship_formset %}
         <tr>
           <td>{% if form.instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
-          <td>{{ form.authority.get_admin_name }}</td>
           <td>
             <div>{{ form.relationship_type }}</div>
             {% if form.errors.relationship_type %}
@@ -267,12 +264,23 @@ $(document).ready(function() {
         </tr>
         {% endfor %}
       </tbody>
-      <tbody class="eats-non-editable-pa">
-        {% for entity_relationship in entity_relationship_non_editable %}
-        {% display_entity_relationship_non_editable entity entity_relationship %}
-        {% endfor %}
-      </tbody>
     </table>
+
+    {% if entity_relationship_non_editable %}
+    <section>
+      <p>Other authorities state that this entity:</p>
+
+      <ul>
+        {% for assertion in entity_relationship_non_editable %}
+        <li>
+          {% display_entity_relationship_property_assertion entity assertion %}
+          {% display_property_assertion_authority assertion %}
+          {% display_property_assertion_dates assertion %}
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
   </fieldset>
 
   <fieldset>
@@ -284,7 +292,6 @@ $(document).ready(function() {
       <thead>
         <tr>
           <th scope="col">Delete?</th>
-          <th scope="col">Authority</th>
           <th scope="col">Note</th>
         </tr>
       </thead>
@@ -292,7 +299,6 @@ $(document).ready(function() {
         {% for form in note_formset %}
         <tr>
           <td>{% if form.instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
-          <td>{{ form.authority.get_admin_name }}</td>
           <td>
             <div>{{ form.note }}</div>
             {% if form.errors.note %}
@@ -302,16 +308,22 @@ $(document).ready(function() {
         </tr>
         {% endfor %}
       </tbody>
-      <tbody class="eats-non-editable-pa">
-        {% for note in note_non_editable %}
-        <tr>
-          <td></td>
-          <td>{{ note.authority.get_admin_name }}</td>
-          <td>{{ note.note }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
     </table>
+
+    {% if note_non_editable %}
+    <section>
+      <p>Other authorities say about this entity:</p>
+
+      <ul>
+        {% for assertion in note_non_editable %}
+        <li class="note">
+          <p>{{ assertion.note }}</p>
+          <p class="note-authority">{% display_property_assertion_authority assertion %}</p>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
   </fieldset>
 
   <div>
@@ -319,6 +331,7 @@ $(document).ready(function() {
   </div>
 </form>
 
+</article>
 {% endblock eats_content %}
 
 
