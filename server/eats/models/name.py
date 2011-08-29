@@ -1,3 +1,5 @@
+from operator import attrgetter
+
 from tmapi.models import Topic
 
 from name_element import NameElement
@@ -113,7 +115,7 @@ class Name (Topic, NameElement):
             type_data.append(name_part)
         # Sort the name parts into their specified order.
         for name_parts in data.values():
-            name_parts.sort(cmp=lambda x,y: cmp(x.order, y.order))
+            name_parts.sort(key=attrgetter('order'))
         return data
 
     @property
