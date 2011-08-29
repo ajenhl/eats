@@ -6,6 +6,9 @@ from property_assertion import PropertyAssertion
 
 class NotePropertyAssertionManager (BaseManager):
 
+    def filter_by_entity (self, entity):
+        return self.filter(topic=entity)
+    
     def get_query_set (self):
         assertion_type = self.eats_topic_map.note_assertion_type
         qs = super(NotePropertyAssertionManager, self).get_query_set()

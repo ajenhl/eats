@@ -227,11 +227,10 @@ class Entity (Topic):
     def get_notes (self):
         """Returns this entity's note property assertions.
 
-        :rtype: `QuerySet` of `Occurrence`s
+        :rtype: `QuerySet` of `NotePropertyAssertion`s
 
         """
-        return self.get_occurrences(self.eats_topic_map.note_assertion_type,
-                                    proxy=NotePropertyAssertion)
+        return NotePropertyAssertion.objects.filter_by_entity(self)
 
     def get_preferred_name (self, authority, language, script):
         """Returns the name for this entity that best matches
