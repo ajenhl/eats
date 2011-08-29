@@ -1,10 +1,10 @@
 from eats.tests.models.model_test_case import ModelTestCase
 
 
-class NoteTest (ModelTestCase):
+class NoteTestCase (ModelTestCase):
 
     def setUp (self):
-        super(NoteTest, self).setUp()
+        super(NoteTestCase, self).setUp()
         self.entity = self.tm.create_entity(self.authority)
 
     def test_create_note_property_assertion (self):
