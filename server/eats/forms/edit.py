@@ -208,19 +208,18 @@ class NoteAssertionFormSet (PropertyAssertionFormSet):
 class SubjectIdentifierAssertionFormSet (PropertyAssertionFormSet):
 
     def clean (self):
-        cleaned_data = super(SubjectIdentifierAssertionFormSet, self).clean()
-        # Ensure that the subject identifiers across all the forms in
-        # the formset are unique.
-        subject_identifier_values = []
-        for form_data in self.cleaned_data:
-            for field, value in form_data.items():
-                if field == 'subject_identifier' and value:
-                    subject_identifier_values.append(value)
-        if len(subject_identifier_values) != len(set(
-                subject_identifier_values)):
-            raise forms.ValidationError(
-                'Subject identifier URLs must be unique to an authority')
-        return cleaned_data
+        if self.is_valid():
+            # Ensure that the subject identifiers across all the forms in
+            # the formset are unique.
+            subject_identifier_values = []
+            for form_data in self.cleaned_data:
+                for field, value in form_data.items():
+                    if field == 'subject_identifier' and value:
+                        subject_identifier_values.append(value)
+            if len(subject_identifier_values) != len(set(
+                    subject_identifier_values)):
+                raise forms.ValidationError(
+                    'Subject identifier URLs must be unique to an authority')
 
 
 class NamePartInlineFormSet (BaseFormSet):
@@ -536,6 +535,23 @@ class SubjectIdentifierForm (PropertyAssertionForm):
         data['subject_identifier'] = assertion.subject_identifier
         return data
 
+    def clean_subject_identifier (self):
+        subject_identifier = self.cleaned_data['subject_identifier']
+        duplicate_entities = self.entity.get_duplicate_subject_identifiers(
+            subject_identifier, self.authority)
+        if duplicate_entities:
+            names = []
+            for duplicate_entity in duplicate_entities:
+                name = duplicate_entity.get_preferred_name(None, None, None)
+                try:
+                    name_form = name.name.assembled_form
+                except AttributeError:
+                    name_form = '[unnamed entity]'
+                names.append(name_form)
+            raise forms.ValidationError(
+                'This URL is also used by this authority to identify %s; either the URL is incorrect or these entities should be merged.' % (', '.join(names)))
+        return subject_identifier
+    
     def save (self):
         subject_identifier = self.cleaned_data['subject_identifier']
         if self.instance is None:

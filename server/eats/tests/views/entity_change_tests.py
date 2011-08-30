@@ -411,9 +411,9 @@ class EntityChangeViewTestCase (ViewTestCase):
                          'http://www.example.org/test3')
 
     def test_post_subject_identifiers_illegal (self):
-        entity = self.tm.create_entity(self.authority)
-        self.assertEqual(entity.get_subject_identifiers().count(), 0)
-        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        entity1 = self.tm.create_entity(self.authority)
+        self.assertEqual(entity1.get_subject_identifiers().count(), 0)
+        url = reverse('entity-change', kwargs={'entity_id': entity1.get_id()})
         form = self.app.get(url, user='user').forms['entity-change-form']
         form['subject_identifiers-0-subject_identifier'] = \
             'http://www.example.org/test'
@@ -421,4 +421,13 @@ class EntityChangeViewTestCase (ViewTestCase):
             'http://www.example.org/test'
         response = form.submit('_save')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(entity.get_subject_identifiers().count(), 0)
+        self.assertEqual(entity1.get_subject_identifiers().count(), 0)
+        entity2 = self.tm.create_entity(self.authority)
+        entity2.create_subject_identifier_property_assertion(
+            self.authority, 'http://www.example.org/test')
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['subject_identifiers-0-subject_identifier'] = \
+            'http://www.example.org/test'
+        response = form.submit('_save')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(entity1.get_subject_identifiers().count(), 0)

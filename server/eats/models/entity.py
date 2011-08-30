@@ -15,6 +15,33 @@ from subject_identifier_property_assertion import SubjectIdentifierPropertyAsser
 
 class EntityManager (BaseManager):
 
+    def filter_by_duplicate_subject_identifiers (self, entity,
+                                                 subject_indicator, authority):
+        """Returns entities, excluding `entity`, that have a subject
+        identifier property assertion matching `subject_identifier`.
+
+        If `authority` is not None, only those entities that have
+        `subject_identifier` asserted by `authority` are returned.
+
+        :param entity: entity to exclude from the results
+        :type entity: `Entity`
+        :param subject_identifier: the subject identifier to find
+        :type subject_identifier: unicode string URL
+        :param authority: authority to restrict search
+        :type authority: `Authority` or None
+        :rtype: `QuerySet` of `Entity`s
+
+        """
+        occurrence_type = self.eats_topic_map.subject_identifier_assertion_type
+        if authority is None:
+            entities = self.filter(occurrences__type=occurrence_type,
+                                   occurrences__value=subject_indicator)
+        else:
+            entities = self.filter(occurrences__type=occurrence_type,
+                                   occurrences__value=subject_indicator,
+                                   occurrences__scope=authority)
+        return entities.exclude(id=entity.id)
+
     def get_query_set (self):
         return super(EntityManager, self).get_query_set().filter(
             types=self.eats_topic_map.entity_type)
@@ -195,6 +222,24 @@ class Entity (Topic):
                 if assertion.entity != self:
                     assertion = None
         return assertion
+
+    def get_duplicate_subject_identifiers (self, subject_identifier,
+                                           authority=None):
+        """Returns other entities that have a subject identifier
+        property assertion matching `subject_identifier`.
+
+        If `authority` is not None, only those entities that have
+        `subject_identifier` asserted by `authority` are returned.
+
+        :param subject_identifier: the subject identifier to find
+        :type subject_identifier: unicode string URL
+        :param authority: optional authority to restrict search
+        :type authority: `Authority`
+        :rtype: `QuerySet` of `Entity`s
+
+        """
+        return Entity.objects.filter_by_duplicate_subject_identifiers(
+            self, subject_identifier, authority)
     
     def get_eats_names (self, exclude=None):
         """Returns this entity's name property assertions.

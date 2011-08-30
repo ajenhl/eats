@@ -329,6 +329,14 @@ $(document).ready(function() {
   <fieldset>
     <legend>Subject Identifiers</legend>
 
+    <p>Subject identifiers are URLs of resources that are specifically
+    about this entity. For example, the URL
+    http://en.wikipedia.org/wiki/Johann_Sebastian_Bach is an
+    appropriate subject identifier for Johann Sebastian Bach.</p>
+
+    <p>If two entities have a subject identifier in common, that
+    indicates that they are the same entity.</p>
+
     {{ subject_identifier_formset.management_form }}
 
     <table>
@@ -336,6 +344,7 @@ $(document).ready(function() {
         <tr>
           <th scope="col">Delete?</th>
           <th scope="col">URL</th>
+          <th scope="col">Possible duplicate entities</th>
         </tr>
       </thead>
       <tbody class="eats-editable-pa">
@@ -347,6 +356,9 @@ $(document).ready(function() {
             {% if form.errors.subject_identifier %}
             <div class="errors">{{ form.errors.subject_identifier }}</div>
             {% endif %}
+          </td>
+          <td>
+            {% display_duplicate_subject_identifiers entity form.subject_identifier.value %}
           </td>
         </tr>
         {% endfor %}
@@ -360,8 +372,11 @@ $(document).ready(function() {
       <ul>
         {% for assertion in subject_identifier_non_editable %}
         <li>
-          <a href="{{ assertion.subject_identifier }}">{{ assertion.subject_identifier }}</a>
+          {% with assertion.subject_identifier as subject_identifier %}
+          <a href="{{ subject_identifier }}">{{ subject_identifier }}</a>
           {% display_property_assertion_authority assertion %}
+          {% display_duplicate_subject_identifiers entity subject_identifier %}
+          {% endwith %}
         </li>
         {% endfor %}
       </ul>

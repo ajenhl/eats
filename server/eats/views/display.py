@@ -25,6 +25,7 @@ def entity_view (request, entity_id):
     name_pas = entity.get_eats_names()
     relationship_pas = entity.get_entity_relationships()
     note_pas = entity.get_notes()
+    subject_identifier_pas = entity.get_subject_identifiers()
     context_data = {'entity': entity,
                     'preferred_authority': preferred_authority,
                     'preferred_language': preferred_language,
@@ -32,7 +33,8 @@ def entity_view (request, entity_id):
                     'preferred_script': preferred_script,
                     'existence_dates': existence_dates,
                     'entity_type_pas': entity_type_pas, 'name_pas': name_pas,
-                    'note_pas': note_pas, 'relationship_pas': relationship_pas}
+                    'note_pas': note_pas, 'relationship_pas': relationship_pas,
+                    'subject_identifier_pas': subject_identifier_pas}
     return render_to_response('eats/display/entity.html', context_data,
                               context_instance=RequestContext(request))
 

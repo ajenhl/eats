@@ -40,3 +40,28 @@ class SubjectIdentifierTestCase (ModelTestCase):
         assertion.update('http://www.example.org/test2')
         self.assertEqual(assertion.subject_identifier,
                          'http://www.example.org/test2')
+
+    def test_get_duplicate_subject_identifiers (self):
+        subject_identifier = 'http://www.example.org/test'
+        duplicates = self.entity.get_duplicate_subject_identifiers(
+            subject_identifier)
+        self.assertEqual(duplicates.count(), 0)
+        self.entity.create_subject_identifier_property_assertion(
+            self.authority, subject_identifier)
+        self.assertEqual(duplicates.count(), 0)
+        entity2 = self.tm.create_entity(self.authority)
+        entity3 = self.tm.create_entity(self.authority)
+        authority2 = self.create_authority('Test 2')
+        entity2.create_subject_identifier_property_assertion(
+            self.authority, subject_identifier)
+        entity3.create_subject_identifier_property_assertion(
+            authority2, subject_identifier)
+        duplicates = self.entity.get_duplicate_subject_identifiers(
+            subject_identifier)
+        self.assertEqual(duplicates.count(), 2)
+        self.assertTrue(entity2 in duplicates)
+        self.assertTrue(entity3 in duplicates)
+        duplicates = self.entity.get_duplicate_subject_identifiers(
+            subject_identifier, self.authority)
+        self.assertEqual(duplicates.count(), 1)
+        self.assertTrue(entity2 in duplicates)

@@ -6,6 +6,26 @@ from django import template
 
 register = template.Library()
 
+
+@register.inclusion_tag('eats/display/duplicate_subject_identifiers.html', takes_context=True)
+def display_duplicate_subject_identifiers (context, entity, subject_identifier,
+                                           authority=None):
+    duplicate_entities = entity.get_duplicate_subject_identifiers(
+        subject_identifier, authority)
+    duplicate_entity_data = {}
+    preferred_authority = context['preferred_authority']
+    preferred_language = context['preferred_language']
+    preferred_script = context['preferred_script']
+    for duplicate_entity in duplicate_entities:
+        preferred_name = duplicate_entity.get_preferred_name(
+            preferred_authority, preferred_language, preferred_script)
+        try:
+            preferred_name_form = preferred_name.name.assembled_form
+        except AttributeError:
+            preferred_name_form = '[unnamed entity]'
+        duplicate_entity_data[duplicate_entity.get_id()] = preferred_name_form
+    return {'duplicate_entity_data': duplicate_entity_data}
+
 @register.inclusion_tag('eats/display/entity_relationship_property_assertion.html', takes_context=True)
 def display_entity_relationship_property_assertion (context, entity,
                                                     entity_relationship):

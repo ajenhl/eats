@@ -92,5 +92,26 @@
     </ul>
   </section>
   {% endif %}
+
+  {% if subject_identifier_pas %}
+  <section>
+    <h1>Subject identifiers</h1>
+
+    <p>The following resources identify/are specifically about this entity:</p>
+
+    <ul>
+      {% for subject_identifier_pa in subject_identifier_pas %}
+      {% with subject_identifier_pa.subject_identifier as subject_identifier %}
+      <li>
+        <a href="{{ subject_identifier }}">{{ subject_identifier }}</a>
+        {% display_property_assertion_authority subject_identifier_pa %}
+        {% display_duplicate_subject_identifiers entity subject_identifier %}
+      </li>
+      {% endwith %}
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+        
 </article>
 {% endblock eats_content %}
