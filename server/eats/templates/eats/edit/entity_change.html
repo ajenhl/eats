@@ -1,6 +1,7 @@
 {% extends "eats/edit/base.html" %}
 {% load entity_display %}
 
+{% block eats_title %}{{ block.super }} entity {{ preferred_name }}{% endblock %}
 {% block eats_style %}{{ block.super }}
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/themes/ui-lightness/jquery-ui.css" type="text/css" media="screen"/>
 {{ entity_relationship_formset.media.css }}
@@ -27,7 +28,7 @@ $(document).ready(function() {
 
 {% block eats_content %}
 <article class="entity-display">
-<h1>Edit entity</h1>
+<h1>Edit entity {{ preferred_name }}</h1>
 
 <form action="" method="post">
   {% csrf_token %}

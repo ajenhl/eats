@@ -106,9 +106,15 @@ def entity_change (request, topic_map, entity_id):
     context_data['subject_identifier_formset'] = subject_identifiers_formset
     context_data['subject_identifier_non_editable'] = subject_identifiers.non_editable
     user_preferences = get_user_preferences(request)
-    context_data['preferred_authority'] = user_preferences['preferred_authority']
-    context_data['preferred_language'] = user_preferences['preferred_language']
-    context_data['preferred_script'] = user_preferences['preferred_script']
+    context_data.update(user_preferences)
+    preferred_name_assertion = entity.get_preferred_name(
+        user_preferences['preferred_authority'],
+        user_preferences['preferred_language'],
+        user_preferences['preferred_script'])
+    if preferred_name_assertion:
+        context_data['preferred_name'] = preferred_name_assertion.name.assembled_form
+    else:
+        context_data['preferred_name'] = '[unnamed entity]'
     return render_to_response('eats/edit/entity_change.html', context_data,
                               context_instance=RequestContext(request))
 
