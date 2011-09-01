@@ -871,13 +871,13 @@ ExistenceFormSet = formset_factory(ExistenceForm, can_delete=True,
 EntityRelationshipFormSet = formset_factory(
     EntityRelationshipForm, can_delete=True, extra=2,
     formset=EntityRelationshipAssertionFormSet)
-EntityTypeFormSet = formset_factory(EntityTypeForm, can_delete=True, extra=2,
+EntityTypeFormSet = formset_factory(EntityTypeForm, can_delete=True, extra=1,
                                     formset=EntityTypeAssertionFormSet)
 NameFormSet = formset_factory(NameForm, can_delete=True, extra=2,
                               formset=NameAssertionFormSet)
 NamePartFormSet = formset_factory(NamePartForm, can_delete=True, extra=2,
                                   formset=NamePartInlineFormSet)
-NoteFormSet = formset_factory(NoteForm, can_delete=True, extra=2,
+NoteFormSet = formset_factory(NoteForm, can_delete=True, extra=1,
                               formset=NoteAssertionFormSet)
 SubjectIdentifierFormSet = formset_factory(
     SubjectIdentifierForm, can_delete=True, extra=2,
