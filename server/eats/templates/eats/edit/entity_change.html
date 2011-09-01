@@ -32,6 +32,19 @@ $(document).ready(function() {
   });
 });
 </script>
+<script type="application/javascript">
+  $(document).ready(function() {
+    $('.name-part-section').hide();
+    $('.name-part-section-toggle').click(function() {
+      if ($(this).text() == '+') {
+        $(this).text('−');
+      } else {
+        $(this).text('+');
+      }
+      $(this).closest('tr').next('.name-part-section').toggle();
+    });
+  });
+</script>
 {% endblock eats_js %}
 
 {% block eats_content %}
@@ -156,6 +169,7 @@ $(document).ready(function() {
       <thead>
         <tr>
           <th scope="col">Delete?</th>
+          <th scope="col"></th>
           <th scope="col">Name type</th>
           <th scope="col">Language</th>
           <th scope="col">Script</th>
@@ -166,8 +180,15 @@ $(document).ready(function() {
       </thead>
       <tbody class="eats-editable-pa">
         {% for form in name_formset %}
+        {% if form.instance %}
+        <tr>
+          <td></td>
+          <td colspan="7">{{ form.instance.name.assembled_form }}</td>
+        </tr>
+        {% endif %}
         <tr>
           <td>{% if form.instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
+          <td><span class="name-part-section-toggle">+</span></td>
           <td>
             <div>{{ form.name_type }}</div>
             {% if form.errors.name_type %}
@@ -198,9 +219,9 @@ $(document).ready(function() {
           <p><a href="{{ form.assertion.value }}/date/add/">Add a date</a></p>{% endif %}</td>
           <td class="errors">{{ form.non_field_errors }}{{ form.name_part_formset.management_form }}</td>
         </tr>
-        <tr>
+        <tr class="name-part-section">
           <td></td>
-          <td colspan="6">
+          <td colspan="7">
             <table class="name-parts">
               {% for part_form in form.name_part_formset %}
               <tr>
