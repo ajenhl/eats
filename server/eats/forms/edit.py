@@ -603,7 +603,8 @@ class NamePartForm (forms.Form):
             script_name = 'name_part_script-' + suffix
             self.fields[id_name] = forms.IntegerField(
                 widget=forms.HiddenInput, required=False)
-            self.fields[display_form_name] = forms.CharField(required=False)
+            self.fields[display_form_name] = forms.CharField(
+                required=False, widget=forms.TextInput(attrs={'size': 12}))
             self.fields[language_name] = forms.ChoiceField(
                 choices=self.language_choices, required=False)
             self.fields[script_name] = forms.ChoiceField(

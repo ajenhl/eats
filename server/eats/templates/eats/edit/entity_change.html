@@ -21,7 +21,15 @@ return $( "<li></li>" )
 </script>
 <script type="application/javascript">
 $(document).ready(function() {
-  $('.name_part_language_script').hide();
+  $('.npls-toggled').hide();
+  $('.npls-toggle').click(function() {
+    if ($(this).text() == '+') {
+      $(this).text('−');
+    } else {
+      $(this).text('+');
+    }
+    $(this).next('.npls-toggled').toggle();
+  });
 });
 </script>
 {% endblock eats_js %}
@@ -192,14 +200,14 @@ $(document).ready(function() {
         </tr>
         <tr>
           <td></td>
-          <td colspan="7">
+          <td colspan="6">
             <table class="name-parts">
               {% for part_form in form.name_part_formset %}
               <tr>
                 <td>{% if part_form.instance %}{{ part_form.DELETE }}{% endif %}</td>
                 <td>{{ part_form.name_part_type }}</td>
                 {% for id, display_form, language, script in part_form.name_part_fieldsets %}
-                <td>{{ id }}{{ display_form }}<div class="name_part_language_script">{{ language }}<br/>{{ script }}</div></td>
+                <td>{{ id }}{{ display_form }}<span class="npls-toggle">+</span><div class="npls-toggled">Language: {{ language }}<br/>Script: {{ script }}</div></td>
                 {% endfor %}
               </tr>
               {% endfor %}

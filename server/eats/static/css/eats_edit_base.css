@@ -15,3 +15,8 @@
    text-decoration: none;
    color: #5B80B2; }
 #entity-change-form a:hover { color: #003366; }
+.errors { color: red; }
+.npls-toggle {
+    color: #5B80B2;
+    cursor: pointer;
+}
