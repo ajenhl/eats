@@ -1,15 +1,19 @@
+from django.test import TestCase
+
 from eats.lookups import EntityLookup
 from eats.models import Entity
 from eats.tests.base_test_case import BaseTestCase
 
 
-class LookupsTestCase (BaseTestCase):
+class LookupsTestCase (TestCase, BaseTestCase):
 
     def setUp (self):
         super(LookupsTestCase, self).setUp()
+        self.tm = self.create_topic_map()
+        self.authority = self.create_authority('Test')
         self.name_type = self.create_name_type('regular')
         self.language = self.create_language('English', 'en')
-        self.script = self.create_script('Latin', 'Latn')
+        self.script = self.create_script('Latin', 'Latn', ' ')
         self.authority.set_languages([self.language])
         self.authority.set_name_types([self.name_type])
         self.authority.set_scripts([self.script])
