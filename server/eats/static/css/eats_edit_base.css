@@ -1,3 +1,7 @@
+#entity-change-form table {
+   border-collapse: collapse;
+}
+
 #entity-change-form th, #entity-change-form td {
    text-align: left;
    padding: 0 2em 0.5em 0;
@@ -17,6 +21,9 @@
 #entity-change-form a:hover { color: #003366; }
 .errors { color: red; }
 .npls-toggle, .name-part-section-toggle {
-    color: #5B80B2;
-    cursor: pointer;
+   color: #5B80B2;
+   cursor: pointer;
+}
+#entity-change-form .assertion-row1 {
+   background-color: #EDF3FE;
 }

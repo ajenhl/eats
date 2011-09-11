@@ -180,13 +180,14 @@ $(document).ready(function() {
       </thead>
       <tbody class="eats-editable-pa">
         {% for form in name_formset %}
+        {% cycle 'assertion-row1' 'assertion-row2' as assertion_row silent %}
         {% if form.instance %}
-        <tr>
+        <tr class="{{ assertion_row }}">
           <td></td>
           <td colspan="7">{{ form.instance.name.assembled_form }}</td>
         </tr>
         {% endif %}
-        <tr>
+        <tr class="{{ assertion_row }}">
           <td>{% if form.instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
           <td><span class="name-part-section-toggle">+</span></td>
           <td>
@@ -282,7 +283,7 @@ $(document).ready(function() {
             {% endif %}
           </td>
           <td>
-            <div>{{ form.related_entity }}</div>
+            <div>{{ form.related_entity }} {% if form.instance %}[<a href="{% url entity-view form.related_entity.value %}">view record</a>]{% endif %}</div>
             {% if form.errors.related_entity %}
             <div class="errors">{{ form.errors.related_entity }}</div>
             {% endif %}
