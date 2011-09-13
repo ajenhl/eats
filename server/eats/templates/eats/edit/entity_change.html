@@ -220,7 +220,7 @@ $(document).ready(function() {
           <p><a href="{{ form.assertion.value }}/date/add/">Add a date</a></p>{% endif %}</td>
           <td class="errors">{{ form.non_field_errors }}{{ form.name_part_formset.management_form }}</td>
         </tr>
-        <tr class="name-part-section">
+        <tr class="{{ assertion_row }} name-part-section">
           <td></td>
           <td colspan="7">
             <table class="name-parts">
@@ -422,5 +422,3 @@ $(document).ready(function() {
 
 </article>
 {% endblock eats_content %}
-
-
