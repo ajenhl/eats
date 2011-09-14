@@ -112,6 +112,22 @@
     </ul>
   </section>
   {% endif %}
+
+  <section id="eats-psi-footer">
+    <!-- PSI Requirement 1 (PSID is a URI), Requirement 3 (state unique
+         PSID URI), Recommendations 4 (Statement of Purpose) and 5
+         (Publisher Identification) -->
+
+    <p>This resource is intended to be used as a <a href="http://www.oasis-open.org/committees/download.php/1217/wd-pubsubj-introduction-01.htm#s.2.4">Published Subject Indicator</a>. The canonical <abbr title="Published Subject Identifier">PSID</abbr> for this <abbr title="Published Subject Indicator">PSI</abbr> is <a href="http://{{ site.domain }}{{ entity.get_absolute_url }}">http://{{ site.domain }}{{ entity.get_absolute_url }}</a>. This <abbr title="Published Subject Indicator">PSI</abbr> is published by <a href="http://{{ site.domain }}">{{ site.name }}</a>, although the entity metadata may be drawn from other sources, as identified.</p>
+
+    <!-- PSI Recommendation 2 (machine-processable metadata) -->
+    <p>This record's data is also available in the following
+    machine-processable forms:</p>
+
+    <ul>
+      <li><a href="eatsml/"><abbr title="Entity Authority Tool Set">EATS</abbr> XML</a></li>
+    </ul>
+  </section>
         
 </article>
 {% endblock eats_content %}

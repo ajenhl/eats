@@ -1,9 +1,13 @@
-from django.http import Http404
+from django.contrib.sites.models import Site
+from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
+from lxml import etree
+
 from eats.decorators import add_topic_map
 from eats.forms.display import EntitySearchForm
+from eats.lib.eatsml_exporter import EATSMLExporter
 from eats.lib.user import get_user_preferences
 from eats.models import Entity
 
@@ -34,9 +38,19 @@ def entity_view (request, entity_id):
                     'existence_dates': existence_dates,
                     'entity_type_pas': entity_type_pas, 'name_pas': name_pas,
                     'note_pas': note_pas, 'relationship_pas': relationship_pas,
-                    'subject_identifier_pas': subject_identifier_pas}
+                    'subject_identifier_pas': subject_identifier_pas,
+                    'site': Site.objects.get_current()}
     return render_to_response('eats/display/entity.html', context_data,
                               context_instance=RequestContext(request))
+
+def entity_eatsml_view (request, entity_id):
+    try:
+        entity = Entity.objects.get_by_identifier(entity_id)
+    except Entity.DoesNotExist:
+        raise Http404
+    tree = EATSMLExporter().export_entities([entity])
+    xml = etree.tostring(tree, encoding='utf-8', pretty_print=True)
+    return HttpResponse(xml, mimetype='text/xml')
 
 @add_topic_map
 def search (request, topic_map):

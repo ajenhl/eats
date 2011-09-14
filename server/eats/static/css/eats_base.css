@@ -51,3 +51,20 @@ td p { margin-top: 0; }
    margin: 0 0 1em 2em;
    padding: 0;
 }
+
+#eats-psi-footer {
+   margin: 3em 1em 1em 2em;
+   padding: 1em 2em;
+   border: thin dotted;
+   color: black;
+   background: #E2FDF8;
+}
+
+#eats-psi-footer ul {
+   list-style-type: square;
+}
+
+#eats-psi-footer li {
+   margin: 0 0 0 1em;
+   padding: 0;
+}
