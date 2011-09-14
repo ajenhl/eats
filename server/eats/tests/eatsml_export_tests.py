@@ -268,5 +268,134 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
 ''' % {'authority': authority.get_id(), 'entity': entity.get_id()}
         self._compare_XML(export, expected_xml)
 
-    def test_export_infrastructure (self):
-        pass
+    def test_export_infrastructure_full (self):
+        authority1 = self.create_authority('Test1')
+        authority2 = self.create_authority('Test2')
+        person = self.create_entity_type('person')
+        place = self.create_entity_type('place')
+        authority1.set_entity_types([person, place])
+        authority2.set_entity_types([place])
+        regular = self.create_name_type('regular')
+        authority1.set_name_types([regular])
+        title = self.create_name_part_type('title')
+        given = self.create_name_part_type('given')
+        family = self.create_name_part_type('family')
+        authority1.set_name_part_types([given, family])
+        authority2.set_name_part_types([family])
+        english = self.create_language('English', 'en')
+        english.name_part_types = [title, given, family]
+        french = self.create_language('French', 'fr')
+        authority1.set_languages([english])
+        authority2.set_languages([french])
+        child = self.create_entity_relationship_type(
+            'is child of', 'is parent of')
+        latin = self.create_script('Latin', 'Latn', ' ')
+        arabic = self.create_script('Arabic', 'Arab', '')
+        authority1.set_scripts([latin])
+        authority2.set_scripts([arabic])
+        export = self.exporter.export_infrastructure()
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-%(authority1)d">
+      <name>Test1</name>
+      <entity_types>
+        <entity_type ref="entity_type-%(person)d"/>
+        <entity_type ref="entity_type-%(place)d"/>
+      </entity_types>
+      <languages>
+        <language ref="language-%(english)d"/>
+      </languages>
+      <name_types>
+        <name_type ref="name_type-%(regular)d"/>
+      </name_types>
+      <name_part_types>
+        <name_part_type ref="name_part_type-%(given)d"/>
+        <name_part_type ref="name_part_type-%(family)d"/>
+      </name_part_types>
+      <scripts>
+        <script ref="script-%(latin)d"/>
+      </scripts>
+    </authority>
+    <authority xml:id="authority-%(authority2)d">
+      <name>Test2</name>
+      <entity_types>
+        <entity_type ref="entity_type-%(place)d"/>
+      </entity_types>
+      <languages>
+        <language ref="language-%(french)d"/>
+      </languages>
+      <name_part_types>
+        <name_part_type ref="name_part_type-%(family)d"/>
+      </name_part_types>
+      <scripts>
+        <script ref="script-%(arabic)d"/>
+      </scripts>
+    </authority>
+  </authorities>
+  <entity_types>
+    <entity_type xml:id="entity_type-%(person)d">
+      <name>person</name>
+    </entity_type>
+    <entity_type xml:id="entity_type-%(place)d">
+      <name>place</name>
+    </entity_type>
+  </entity_types>
+  <languages>
+    <language xml:id="language-%(english)d">
+      <name>English</name>
+      <code>en</code>
+      <name_part_types>
+        <name_part_type ref="name_part_type-%(title)d"/>
+        <name_part_type ref="name_part_type-%(given)d"/>
+        <name_part_type ref="name_part_type-%(family)d"/>
+      </name_part_types>
+    </language>
+    <language xml:id="language-%(french)d">
+      <name>French</name>
+      <code>fr</code>
+    </language>
+  </languages>
+  <scripts>
+    <script xml:id="script-%(arabic)d">
+      <name>Arabic</name>
+      <code>Arab</code>
+      <separator></separator>
+    </script>
+    <script xml:id="script-%(latin)d">
+      <name>Latin</name>
+      <code>Latn</code>
+      <separator> </separator>
+    </script>
+  </scripts>
+  <name_types>
+    <name_type xml:id="name_type-%(regular)d">
+      <name>regular</name>
+    </name_type>
+  </name_types>
+  <name_part_types>
+    <name_part_type xml:id="name_part_type-%(given)d">
+      <name>given</name>
+    </name_part_type>
+    <name_part_type xml:id="name_part_type-%(family)d">
+      <name>family</name>
+    </name_part_type>
+    <name_part_type xml:id="name_part_type-%(title)d">
+      <name>title</name>
+    </name_part_type>
+  </name_part_types>
+  <entity_relationship_types>
+    <entity_relationship_type xml:id="entity_relationship_type-%(child)d">
+      <name>is child of</name>
+      <reverse_name>is parent of</reverse_name>
+    </entity_relationship_type>
+  </entity_relationship_types>
+</collection>
+''' % {'authority1': authority1.get_id(), 'authority2': authority2.get_id(),
+       'english': english.get_id(), 'french': french.get_id(),
+       'latin': latin.get_id(), 'arabic': arabic.get_id(),
+       'given': given.get_id(), 'family': family.get_id(),
+       'person': person.get_id(), 'place': place.get_id(),
+       'regular': regular.get_id(), 'title': title.get_id(),
+       'child': child.get_id()}
+        self._compare_XML(export, expected_xml)

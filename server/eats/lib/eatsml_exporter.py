@@ -1,5 +1,7 @@
 from lxml import etree
 
+from eats.models import Authority, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
+
 
 # Namespace constants.
 XML_NAMESPACE = 'http://www.w3.org/XML/1998/namespace'
@@ -334,6 +336,18 @@ class EATSMLExporter (object):
         subject_identifier_element.text = assertion.subject_identifier
         self._infrastructure_required['authority'].add(authority)
 
+    def export_infrastructure (self, limited=False):
+        root = etree.Element(EATS + 'collection', nsmap=NSMAP)
+        self._infrastructure_required['authority'] = set(Authority.objects.all())
+        self._infrastructure_required['entity_type'] = set(EntityType.objects.all())
+        self._infrastructure_required['language'] = set(Language.objects.all())
+        self._infrastructure_required['script'] = set(Script.objects.all())
+        self._infrastructure_required['name_type'] = set(NameType.objects.all())
+        self._infrastructure_required['name_part_type'] = set(NamePartType.objects.all())
+        self._infrastructure_required['entity_relationship_type'] = set(EntityRelationshipType.objects.all())
+        self._export_infrastructure(root)
+        return root.getroottree()
+        
     def _export_infrastructure (self, parent):
         """Exports required infrastructure elements, appending them to
         `parent`.
@@ -389,25 +403,33 @@ class EATSMLExporter (object):
         authority_element.set(XML + 'id', 'authority-%d' % authority.get_id())
         name_element = etree.SubElement(authority_element, EATS + 'name')
         name_element.text = authority.get_admin_name()
-        self._export_authority_infrastructure('entity_type', 'entity_types',
-                                              'entity_type', authority_element)
-        self._export_authority_infrastructure('language', 'languages',
-                                              'language', authority_element)
-        self._export_authority_infrastructure('name_type', 'name_types',
-                                              'name_type', authority_element)
+        entity_types = authority.get_entity_types()
+        self._export_authority_infrastructure(
+            'entity_type', 'entity_types', 'entity_type', entity_types,
+            authority_element)
+        languages = authority.get_languages()
+        self._export_authority_infrastructure(
+            'language', 'languages', 'language', languages, authority_element)
+        name_types = authority.get_name_types()
+        self._export_authority_infrastructure(
+            'name_type', 'name_types', 'name_type', name_types,
+            authority_element)
+        name_part_types = authority.get_name_part_types()
         self._export_authority_infrastructure(
             'name_part_type', 'name_part_types', 'name_part_type',
-            authority_element)
+            name_part_types, authority_element)
+        scripts = authority.get_scripts()
         self._export_authority_infrastructure('script', 'scripts', 'script',
-                                              authority_element)
+                                              scripts, authority_element)
+        relationship_types = authority.get_entity_relationship_types()
         self._export_authority_infrastructure(
             'entity_relationship_type', 'entity_relationship_types',
-            'entity_relationship_type', authority_element)
+            'entity_relationship_type', relationship_types, authority_element)
 
     def _export_authority_infrastructure (self, infrastructure_element_name,
                                           container_element_name, element_name,
-                                          parent):
-        """Exports ...
+                                          authority_items, parent):
+        """Exports a type of infrastructure as it related to an authority.
 
         :param infrastructure_element_name: name of the infrastructure
           element to export
@@ -417,11 +439,17 @@ class EATSMLExporter (object):
         :type container_element_name: `str`
         :param element_name: name of the element for each infrastructure element
         :type element_name: `str`
+        :param authority_items: infrastructure items associated with
+          the authority
+        :type authority_items: `list` of infrastructure items
         :param parent: XML element that will contain the exported elements
         :type parent: `Element`
 
         """
-        items = self._infrastructure_required[infrastructure_element_name]
+        # Only export those items that are required, and only those
+        # that are associated with the current authority.
+        all_items = self._infrastructure_required[infrastructure_element_name]
+        items = all_items & set(authority_items)
         if items:
             container_element = etree.SubElement(parent, EATS +
                                                  container_element_name)
