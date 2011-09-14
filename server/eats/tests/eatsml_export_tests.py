@@ -179,7 +179,94 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         self._compare_XML(export, expected_xml)
         
     def test_export_entity_entity_relationship (self):
-        pass
+        authority = self.create_authority('Test')
+        entity = self.tm.create_entity(authority)
+        entity.get_existences()[0].remove()
+        relationship_type = self.create_entity_relationship_type(
+            'is child of', 'is parent of')
+        authority.set_entity_relationship_types([relationship_type])
+        other = self.tm.create_entity(authority)
+        other.get_existences()[0].remove()
+        relationship = entity.create_entity_relationship_property_assertion(
+            authority, relationship_type, entity, other)
+        export = self.exporter.export_entities([entity])
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-%(authority)d">
+      <name>Test</name>
+      <entity_relationship_types>
+        <entity_relationship_type ref="entity_relationship_type-%(relationship_type)d"/>
+      </entity_relationship_types>
+    </authority>
+  </authorities>
+  <entity_relationship_types>
+    <entity_relationship_type xml:id="entity_relationship_type-%(relationship_type)d">
+      <name>is child of</name>
+      <reverse_name>is parent of</reverse_name>
+    </entity_relationship_type>
+  </entity_relationship_types>
+  <entities>
+    <entity xml:id="entity-%(entity)d">
+      <entity_relationships>
+        <entity_relationship authority="authority-%(authority)d" entity_relationship_type="entity_relationship_type-%(relationship_type)d" domain_entity="entity-%(entity)d" range_entity="entity-%(other)d"/>
+      </entity_relationships>
+    </entity>
+    <entity xml:id="entity-%(other)d" related_entity="true"></entity>
+  </entities>
+</collection>
+''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
+       'other': other.get_id(), 'relationship_type': relationship_type.get_id()}
+        self._compare_XML(export, expected_xml)
+
+    def test_export_entity_note (self):
+        authority = self.create_authority('Test')
+        entity = self.tm.create_entity(authority)
+        entity.get_existences()[0].remove()
+        entity.create_note_property_assertion(authority, 'A note.')
+        export = self.exporter.export_entities([entity])
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-%(authority)d">
+      <name>Test</name>
+    </authority>
+  </authorities>
+  <entities>
+    <entity xml:id="entity-%(entity)d">
+      <notes>
+        <note authority="authority-%(authority)d">A note.</note>
+      </notes>
+    </entity>
+  </entities>
+</collection>
+''' % {'authority': authority.get_id(), 'entity': entity.get_id()}
+        self._compare_XML(export, expected_xml)
+
+    def test_export_entity_subject_identifier (self):
+        authority = self.create_authority('Test')
+        entity = self.tm.create_entity(authority)
+        entity.get_existences()[0].remove()
+        entity.create_subject_identifier_property_assertion(
+            authority, 'http://www.example.org/test/')
+        export = self.exporter.export_entities([entity])
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-%(authority)d">
+      <name>Test</name>
+    </authority>
+  </authorities>
+  <entities>
+    <entity xml:id="entity-%(entity)d">
+      <subject_identifiers>
+        <subject_identifier authority="authority-%(authority)d">http://www.example.org/test/</subject_identifier>
+      </subject_identifiers>
+    </entity>
+  </entities>
+</collection>
+''' % {'authority': authority.get_id(), 'entity': entity.get_id()}
+        self._compare_XML(export, expected_xml)
 
     def test_export_infrastructure (self):
         pass

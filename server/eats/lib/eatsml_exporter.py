@@ -14,12 +14,14 @@ class EATSMLExporter (object):
     def __init__ (self):
         self._infrastructure_required = {
             'authority': set(),
+            'entity_relationship_type': set(),
             'entity_type': set(),
             'language': set(),
             'name_part_type': set(),
             'name_type': set(),
             'script': set(),
             }
+        self._entities_required = set()
 
     def export_entities (self, entities):
         """Returns an XML tree of `entities` exported into EATSML.
@@ -33,17 +35,24 @@ class EATSMLExporter (object):
         entities_element = etree.SubElement(root, EATS + 'entities')
         for entity in entities:
             self._export_entity(entity, entities_element)
+        # Export any additional entities that might need to be
+        # exported (due to being referenced from another entity).
+        for entity in self._entities_required:
+            if entity not in entities:
+                self._export_entity(entity, entities_element, True)
         # Export any required infrastructure elements.
         self._export_infrastructure(root)
         return root.getroottree()
 
-    def _export_entity (self, entity, parent):
+    def _export_entity (self, entity, parent, extra=False):
         """Exports `entity`.
 
         :param entity: entity to export
         :type entity: `Entity`
         :param parent: XML element that will contain the exported entity
         :type parent: `Element`
+        :param extra: if True, `entity` is only referenced by another entity
+        :type extra: `bool`
 
         """
         entity_element = etree.SubElement(parent, EATS + 'entity')
@@ -51,7 +60,71 @@ class EATSMLExporter (object):
         self._export_existence_property_assertions(entity, entity_element)
         self._export_entity_type_property_assertions(entity, entity_element)
         self._export_name_property_assertions(entity, entity_element)
+        if extra:
+            entity_element.set('related_entity', 'true')
+        else:
+            # Only export relationships for primary entities (those
+            # specifically requested to be exported); otherwise there
+            # is the possibility of recursion.
+            self._export_entity_relationship_property_assertions(
+                entity, entity_element)
+        self._export_note_property_assertions(entity, entity_element)
+        self._export_subject_identifier_property_assertions(
+            entity, entity_element)
 
+    def _export_entity_relationship_property_assertions (self, entity, parent):
+        """Exports the entity relationships of `entity`.
+
+        :param entity: entity whose entity relationships will be exported
+        :type entity: `Entity`
+        :param parent: XML element that will contain the exported entity types
+        :type parent: `Element`
+
+        """
+        entity_relationships = entity.get_entity_relationships()
+        if entity_relationships:
+            entity_relationships_element = etree.SubElement(
+                parent, EATS + 'entity_relationships')
+        for entity_relationship in entity_relationships:
+            self._export_entity_relationship_property_assertion(
+                entity_relationship, entity, entity_relationships_element)
+
+    def _export_entity_relationship_property_assertion (self, assertion,
+                                                        entity, parent):
+        """Exports the entity relationship `assertion`.
+
+        :param assertion: entity relationship to export
+        :type assertion: `EntityRelationshipPropertyAssertion`
+        :param entity: entity whose assertion this is
+        :type entity: `Entity`
+        :param parent: XML element that will contain the exported
+          entity relationships
+        :type parent: `Element`
+
+        """        
+        entity_relationship_element = etree.SubElement(
+            parent, EATS + 'entity_relationship')
+        authority = assertion.authority
+        entity_relationship_element.set('authority', 'authority-%d' %
+                                        authority.get_id())
+        relationship_type = assertion.entity_relationship_type
+        entity_relationship_element.set('entity_relationship_type',
+                                        'entity_relationship_type-%d' %
+                                        relationship_type.get_id())
+        domain_entity = assertion.domain_entity
+        range_entity = assertion.range_entity
+        entity_relationship_element.set('domain_entity', 'entity-%d' %
+                                        domain_entity.get_id())
+        entity_relationship_element.set('range_entity', 'entity-%d' %
+                                        range_entity.get_id())
+        self._infrastructure_required['authority'].add(authority)
+        self._infrastructure_required['entity_relationship_type'].add(
+            relationship_type)
+        if domain_entity == entity:
+            self._entities_required.add(range_entity)
+        else:
+            self._entities_required.add(domain_entity)
+        
     def _export_entity_type_property_assertions (self, entity, parent):
         """Exports the entity types of `entity`.
 
@@ -70,7 +143,7 @@ class EATSMLExporter (object):
                                                         entity_types_element)
 
     def _export_entity_type_property_assertion (self, assertion, parent):
-        """Exports `entity_type`.
+        """Exports the entity type `assertion`.
 
         :param assertopm: entity type property assertion to export
         :type assertion: `EntityTypePropertyAssertion`
@@ -134,7 +207,7 @@ class EATSMLExporter (object):
             self._export_name_property_assertion(name, names_element)
 
     def _export_name_property_assertion (self, assertion, parent):
-        """Exports `name`.
+        """Exports the name in `assertion`.
 
         :param assertion: name to export
         :type assertion: `NamePropertyAssertion`
@@ -195,6 +268,72 @@ class EATSMLExporter (object):
         name_part_element.set('script', 'script-%d' % script.get_id())
         name_part_element.text = name_part.display_form
 
+    def _export_note_property_assertions (self, entity, parent):
+        """Exports the notes of `entity`.
+
+        :param entity: entity whose notes will be exported
+        :type entity: `Entity`
+        :param parent: XML element that will contain the exported notes
+        :type parent: `Element`
+
+        """
+        notes = entity.get_notes()
+        if notes:
+            notes_element = etree.SubElement(parent, EATS + 'notes')
+        for note in notes:
+            self._export_note_property_assertion(note, notes_element)
+
+    def _export_note_property_assertion (self, assertion, parent):
+        """Exports the note `assertion`.
+
+        :param assertion: note to export
+        :type assertion: `NotePropertyAssertion`
+        :param parent: XML element that will contain the exported note
+        :type parent: `Element`
+
+        """
+        authority = assertion.authority
+        note_element = etree.SubElement(parent, EATS + 'note')
+        note_element.set('authority', 'authority-%d' % authority.get_id())
+        note_element.text = assertion.note
+        self._infrastructure_required['authority'].add(authority)
+
+    def _export_subject_identifier_property_assertions (self, entity, parent):
+        """Exports the subject identifiers of `entity`.
+
+        :param entity: entity whose subject identifiers will be exported
+        :type entity: `Entity`
+        :param parent: XML element that will contain the exported
+          subject identifiers
+        :type parent: `Element`
+
+        """
+        subject_identifiers = entity.get_subject_identifiers()
+        if subject_identifiers:
+            subject_identifiers_element = etree.SubElement(
+                parent, EATS + 'subject_identifiers')
+        for subject_identifier in subject_identifiers:
+            self._export_subject_identifier_property_assertion(
+                subject_identifier, subject_identifiers_element)
+
+    def _export_subject_identifier_property_assertion (self, assertion, parent):
+        """Exports the subject identifier `assertion`.
+
+        :param assertion: subject identifier to export
+        :type assertion: `SubjectIdentifierPropertyAssertion`
+        :param parent: XML element that will contain the exported
+          subject identifier
+        :type parent: `Element`
+
+        """
+        subject_identifier_element = etree.SubElement(
+            parent, EATS + 'subject_identifier')
+        authority = assertion.authority
+        subject_identifier_element.set('authority', 'authority-%d' %
+                                       authority.get_id())
+        subject_identifier_element.text = assertion.subject_identifier
+        self._infrastructure_required['authority'].add(authority)
+
     def _export_infrastructure (self, parent):
         """Exports required infrastructure elements, appending them to
         `parent`.
@@ -215,6 +354,9 @@ class EATSMLExporter (object):
         self._export_name_types(name_types, parent)
         name_part_types = self._infrastructure_required['name_part_type']
         self._export_name_part_types(name_part_types, parent)
+        entity_relationship_types = self._infrastructure_required['entity_relationship_type']
+        self._export_entity_relationship_types(entity_relationship_types,
+                                               parent)
         # If there is an entities element that has already been
         # created, move it to after the infrastructure elements.
         if parent[0].tag == EATS + 'entities':
@@ -258,6 +400,9 @@ class EATSMLExporter (object):
             authority_element)
         self._export_authority_infrastructure('script', 'scripts', 'script',
                                               authority_element)
+        self._export_authority_infrastructure(
+            'entity_relationship_type', 'entity_relationship_types',
+            'entity_relationship_type', authority_element)
 
     def _export_authority_infrastructure (self, infrastructure_element_name,
                                           container_element_name, element_name,
@@ -286,6 +431,44 @@ class EATSMLExporter (object):
             element.set('ref', '%s-%d' % (infrastructure_element_name,
                                           item.get_id()))
 
+    def _export_entity_relationship_types (self, relationship_types, parent):
+        """Exports `relationship_types`, appending them to `parent`.
+
+        :param relationship_types: entity relationship types to export
+        :type relationshp_types: `set` of `EntityRelationshipType`s
+        :param parent: XML element that will contain the exported
+          entity relationship types
+        :type parent: `Element`
+
+        """
+        if relationship_types:
+            relationship_types_element = etree.SubElement(
+                parent, EATS + 'entity_relationship_types')
+        for relationship_type in relationship_types:
+            self._export_entity_relationship_type(relationship_type,
+                                                  relationship_types_element)
+
+    def _export_entity_relationship_type (self, relationship_type, parent):
+        """Exports `relationship_type`, appending it to `parent`.
+
+        :param relationship_type: entity relationship type to export
+        :type relationship_type: `EntityRelationshipType`
+        :param parent: XML elementa that will contain the exported
+          entity relationship type
+        :type parent: `Element`
+
+        """
+        relationship_type_element = etree.SubElement(
+            parent, EATS + 'entity_relationship_type')
+        relationship_type_element.set(XML + 'id', 'entity_relationship_type-%d'
+                                      % relationship_type.get_id())
+        name_element = etree.SubElement(relationship_type_element,
+                                        EATS + 'name')
+        name_element.text = relationship_type.get_admin_forward_name()
+        reverse_name_element = etree.SubElement(relationship_type_element,
+                                                EATS + 'reverse_name')
+        reverse_name_element.text = relationship_type.get_admin_reverse_name()
+            
     def _export_entity_types (self, entity_types, parent):
         """Exports `entity_types`, appending them to `parent`.
 
