@@ -1,5 +1,6 @@
 from lxml import etree
 
+from eats.exceptions import EATSExportException
 from eats.models import Authority, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
 
 
@@ -336,15 +337,56 @@ class EATSMLExporter (object):
         subject_identifier_element.text = assertion.subject_identifier
         self._infrastructure_required['authority'].add(authority)
 
-    def export_infrastructure (self, limited=False):
+    def export_infrastructure (self, limited=False, user=None):
+        """Returns an XML tree of infrastructural elements, exported
+        into EATSML.
+
+        If `limited` is True, `user` must be specified, and the export
+        is limited to those authorities and their associated elements
+        that are editable by the user.
+
+        :param limited: whether to limit the export to user editable
+          authorities
+        :type limited: `bool`
+        :param user: optional user
+        :type user: `EATSUser`
+        :rtype: `ElementTree`
+
+        """
         root = etree.Element(EATS + 'collection', nsmap=NSMAP)
-        self._infrastructure_required['authority'] = set(Authority.objects.all())
-        self._infrastructure_required['entity_type'] = set(EntityType.objects.all())
-        self._infrastructure_required['language'] = set(Language.objects.all())
-        self._infrastructure_required['script'] = set(Script.objects.all())
-        self._infrastructure_required['name_type'] = set(NameType.objects.all())
-        self._infrastructure_required['name_part_type'] = set(NamePartType.objects.all())
-        self._infrastructure_required['entity_relationship_type'] = set(EntityRelationshipType.objects.all())
+        if limited and user is None:
+            raise EATSExportException('A user must be specified if the export is to be limited to user editable authorities')
+        if limited:
+            authorities = user.editable_authorities.all()
+            entity_types = []
+            languages = []
+            scripts = []
+            name_types = []
+            name_part_types = []
+            entity_relationship_types = []
+            for authority in authorities:
+                entity_types.extend(authority.get_entity_types())
+                languages.extend(authority.get_languages())
+                scripts.extend(authority.get_scripts())
+                name_types.extend(authority.get_name_types())
+                name_part_types.extend(authority.get_name_part_types())
+                entity_relationship_types.extend(authority.get_entity_relationship_types())
+        else:
+            authorities = Authority.objects.all()
+            entity_types = EntityType.objects.all()
+            languages = Language.objects.all()
+            scripts = Script.objects.all()
+            name_types = NameType.objects.all()
+            name_part_types = NamePartType.objects.all()
+            entity_relationship_types = EntityRelationshipType.objects.all()
+        self._infrastructure_required['authority'] = set(authorities)
+        self._infrastructure_required['entity_type'] = set(entity_types)
+        self._infrastructure_required['language'] = set(languages)
+        self._infrastructure_required['script'] = set(scripts)
+        self._infrastructure_required['name_type'] = set(name_types)
+        self._infrastructure_required['name_part_type'] = set(name_part_types)
+        self._infrastructure_required['entity_relationship_type'] = \
+            set(entity_relationship_types)
         self._export_infrastructure(root)
         return root.getroottree()
         
@@ -568,14 +610,15 @@ class EATSMLExporter (object):
 
         """
         name_part_types = language.name_part_types
-        if name_part_types:
-            name_part_types_element = etree.SubElement(parent, EATS +
-                                                       'name_part_types')
+        name_part_types_element = etree.Element(EATS + 'name_part_types')
         for name_part_type in name_part_types:
-            name_part_type_element = etree.SubElement(name_part_types_element,
-                                                      EATS + 'name_part_type')
-            name_part_type_element.set('ref', 'name_part_type-%d' %
-                                       name_part_type.get_id())
+            if name_part_type in self._infrastructure_required['name_part_type']:
+                name_part_type_element = etree.SubElement(
+                    name_part_types_element, EATS + 'name_part_type')
+                name_part_type_element.set('ref', 'name_part_type-%d' %
+                                           name_part_type.get_id())
+        if len(name_part_types_element):
+            parent.append(name_part_types_element)
 
     def _export_name_types (self, name_types, parent):
         """Exports `name_types`, appending them to `parent`.

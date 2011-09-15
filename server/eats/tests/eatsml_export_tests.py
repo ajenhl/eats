@@ -187,7 +187,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         authority.set_entity_relationship_types([relationship_type])
         other = self.tm.create_entity(authority)
         other.get_existences()[0].remove()
-        relationship = entity.create_entity_relationship_property_assertion(
+        entity.create_entity_relationship_property_assertion(
             authority, relationship_type, entity, other)
         export = self.exporter.export_entities([entity])
         expected_xml = '''
@@ -398,4 +398,85 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
        'person': person.get_id(), 'place': place.get_id(),
        'regular': regular.get_id(), 'title': title.get_id(),
        'child': child.get_id()}
+        self._compare_XML(export, expected_xml)
+
+    def test_export_infrastructure_limited (self):
+        authority1 = self.create_authority('Test1')
+        authority2 = self.create_authority('Test2')
+        person = self.create_entity_type('person')
+        place = self.create_entity_type('place')
+        authority1.set_entity_types([person, place])
+        authority2.set_entity_types([place])
+        regular = self.create_name_type('regular')
+        authority1.set_name_types([regular])
+        title = self.create_name_part_type('title')
+        given = self.create_name_part_type('given')
+        family = self.create_name_part_type('family')
+        authority1.set_name_part_types([given, family])
+        authority2.set_name_part_types([family])
+        english = self.create_language('English', 'en')
+        french = self.create_language('French', 'fr')
+        french.name_part_types = [title, given, family]
+        authority1.set_languages([english])
+        authority2.set_languages([french])
+        child = self.create_entity_relationship_type(
+            'is child of', 'is parent of')
+        latin = self.create_script('Latin', 'Latn', ' ')
+        arabic = self.create_script('Arabic', 'Arab', '')
+        authority1.set_scripts([latin])
+        authority2.set_scripts([arabic])
+        django_user = self.create_django_user('test', 'test@example.org',
+                                              'password')
+        user = self.create_user(django_user)
+        user.editable_authorities.add(authority2)
+        export = self.exporter.export_infrastructure(True, user)
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-%(authority2)d">
+      <name>Test2</name>
+      <entity_types>
+        <entity_type ref="entity_type-%(place)d"/>
+      </entity_types>
+      <languages>
+        <language ref="language-%(french)d"/>
+      </languages>
+      <name_part_types>
+        <name_part_type ref="name_part_type-%(family)d"/>
+      </name_part_types>
+      <scripts>
+        <script ref="script-%(arabic)d"/>
+      </scripts>
+    </authority>
+  </authorities>
+  <entity_types>
+    <entity_type xml:id="entity_type-%(place)d">
+      <name>place</name>
+    </entity_type>
+  </entity_types>
+  <languages>
+    <language xml:id="language-%(french)d">
+      <name>French</name>
+      <code>fr</code>
+      <name_part_types>
+        <name_part_type ref="name_part_type-%(family)d"/>
+      </name_part_types>
+    </language>
+  </languages>
+  <scripts>
+    <script xml:id="script-%(arabic)d">
+      <name>Arabic</name>
+      <code>Arab</code>
+      <separator></separator>
+    </script>
+  </scripts>
+  <name_part_types>
+    <name_part_type xml:id="name_part_type-%(family)d">
+      <name>family</name>
+    </name_part_type>
+  </name_part_types>
+</collection>
+''' % {'authority2': authority2.get_id(), 'place': place.get_id(),
+       'french': french.get_id(), 'family': family.get_id(),
+       'arabic': arabic.get_id()}
         self._compare_XML(export, expected_xml)
