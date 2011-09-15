@@ -1,0 +1,16 @@
+{% extends "eats/admin/base.html" %}
+
+{% block eats_content %}
+<h1>Select user to change</h1>
+
+<ul>
+  {% for eats_user in eats_users %}
+  <li><a href="{{ eats_user.pk }}/">{{ eats_user.user }}</a></li>
+  {% endfor %}
+</ul>
+
+
+
+<p><a href="{% url administration-panel %}">Administration Panel</a></p>
+
+{% endblock %}

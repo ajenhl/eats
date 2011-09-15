@@ -101,4 +101,7 @@ urlpatterns += patterns(
         name='script-add'),
     url(r'^administer/script/(?P<topic_id>\d+)/$', 'topic_change',
         script_data, name='script-change'),
+    url(r'^administer/user/$', 'user_list', name='user-list'),
+    url(r'^administer/user/(?P<eats_user_id>\d+)/$', 'user_change',
+        name='user-change'),
     )

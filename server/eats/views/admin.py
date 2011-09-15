@@ -1,6 +1,7 @@
 from urlparse import urljoin
 
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import redirect, render_to_response
@@ -10,7 +11,7 @@ from tmapi.exceptions import TopicMapExistsException
 from tmapi.models import TopicMap, TopicMapSystemFactory
 
 from eats.decorators import add_topic_map
-from eats.models import Authority, Calendar, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
+from eats.models import Authority, Calendar, DatePeriod, DateType, EATSUser, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
 from eats.forms.admin import AuthorityForm, CalendarForm, DatePeriodForm, DateTypeForm, EntityRelationshipForm, EntityTypeForm, LanguageForm, NamePartTypeForm, NameTypeForm, ScriptForm
 
 
@@ -129,10 +130,44 @@ def get_form_class (model):
 
 def get_redirect_url (form, opts, topic):
     object_type = opts.module_name
-    redirect_url = reverse(object_type + '-list')
     if '_addanother' in form.data:
         redirect_url = reverse(object_type + '-add')
     elif '_continue' in form.data:
         redirect_url = reverse(object_type + '-change',
                                kwargs={'topic_id': topic.get_id()})
+    else:
+        redirect_url = reverse(object_type + '-list')
     return redirect_url
+
+def user_list (request):
+    eats_users = EATSUser.objects.all()
+    django_users = User.objects.all()
+    context_data = {'eats_users': eats_users, 'django_users': django_users}
+    return render_to_response('eats/admin/user_list.html', context_data,
+                              context_instance=RequestContext(request))
+
+def user_change (request, eats_user_id):
+    # This is a ridiculous workaround Django failing the
+    # create_topic_map test if, in the course of reversing the
+    # appropriate URL, it comes across a model form containing fields
+    # that reference a topic. Bravo!
+    from eats.forms.admin_model import EATSUserForm
+    try:
+        eats_user = EATSUser.objects.get(pk=eats_user_id)
+    except EATSUser.DoesNotExist:
+        raise Http404
+    if request.method == 'POST':
+        form = EATSUserForm(request.POST, instance=eats_user)
+        if form.is_valid():
+            form.save()
+            if '_continue' in form.data:
+                redirect_url = reverse('user-change', kwargs={
+                        'eats_user_id': eats_user.pk})
+            else:
+                redirect_url = reverse('user-list')
+            return HttpResponseRedirect(redirect_url)
+    else:
+        form = EATSUserForm(instance=eats_user)
+    context_data = {'form': form, 'user': eats_user.user}
+    return render_to_response('eats/admin/user_change.html', context_data,
+                              context_instance=RequestContext(request))
