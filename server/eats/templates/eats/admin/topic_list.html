@@ -3,9 +3,6 @@
 {% block eats_content %}
 <h1>Select {{ opts.verbose_name }} to change</h1>
 
-<form id="changelist-form" action="" method="post">
-{% csrf_token %}
-
 <ul>
 {% for topic in topics %}
 <li><a href="{{ topic.get_id }}/">{{ topic.get_admin_name }}</a></li>
