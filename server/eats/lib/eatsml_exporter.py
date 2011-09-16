@@ -1,7 +1,7 @@
 from lxml import etree
 
 from eats.exceptions import EATSExportException
-from eats.models import Authority, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
+from eats.models import Authority, Calendar, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
 
 
 # Namespace constants.
@@ -14,9 +14,13 @@ NSMAP = {None: EATS_NAMESPACE}
 
 class EATSMLExporter (object):
 
-    def __init__ (self):
+    def __init__ (self, topic_map):
+        self._topic_map = topic_map
         self._infrastructure_required = {
             'authority': set(),
+            'calendar': set(),
+            'date_period': set(),
+            'date_type': set(),
             'entity_relationship_type': set(),
             'entity_type': set(),
             'language': set(),
@@ -105,21 +109,20 @@ class EATSMLExporter (object):
         :type parent: `Element`
 
         """        
-        entity_relationship_element = etree.SubElement(
-            parent, EATS + 'entity_relationship')
+        assertion_element = etree.SubElement(parent, EATS +
+                                             'entity_relationship')
         authority = assertion.authority
-        entity_relationship_element.set('authority', 'authority-%d' %
-                                        authority.get_id())
+        assertion_element.set('authority', 'authority-%d' % authority.get_id())
         relationship_type = assertion.entity_relationship_type
-        entity_relationship_element.set('entity_relationship_type',
-                                        'entity_relationship_type-%d' %
-                                        relationship_type.get_id())
+        assertion_element.set(
+            'entity_relationship_type', 'entity_relationship_type-%d' %
+            relationship_type.get_id())
         domain_entity = assertion.domain_entity
         range_entity = assertion.range_entity
-        entity_relationship_element.set('domain_entity', 'entity-%d' %
-                                        domain_entity.get_id())
-        entity_relationship_element.set('range_entity', 'entity-%d' %
-                                        range_entity.get_id())
+        assertion_element.set('domain_entity', 'entity-%d' %
+                              domain_entity.get_id())
+        assertion_element.set('range_entity', 'entity-%d' %
+                              range_entity.get_id())
         self._infrastructure_required['authority'].add(authority)
         self._infrastructure_required['entity_relationship_type'].add(
             relationship_type)
@@ -127,6 +130,7 @@ class EATSMLExporter (object):
             self._entities_required.add(range_entity)
         else:
             self._entities_required.add(domain_entity)
+        self._export_dates(assertion, assertion_element)
         
     def _export_entity_type_property_assertions (self, entity, parent):
         """Exports the entity types of `entity`.
@@ -154,15 +158,15 @@ class EATSMLExporter (object):
         :type parent: `Element`
 
         """
-        entity_type_element = etree.SubElement(parent, EATS + 'entity_type')
+        assertion_element = etree.SubElement(parent, EATS + 'entity_type')
         authority = assertion.authority
         entity_type = assertion.entity_type
-        entity_type_element.set('authority', 'authority-%d' %
-                                authority.get_id())
-        entity_type_element.set('entity_type', 'entity_type-%d' %
-                                entity_type.get_id())
+        assertion_element.set('authority', 'authority-%d' % authority.get_id())
+        assertion_element.set('entity_type', 'entity_type-%d' %
+                              entity_type.get_id())
         self._infrastructure_required['authority'].add(authority)
         self._infrastructure_required['entity_type'].add(entity_type)
+        self._export_dates(assertion, assertion_element)
 
     def _export_existence_property_assertions (self, entity, parent):
         """Exports the existences of `entity`.
@@ -189,10 +193,11 @@ class EATSMLExporter (object):
         :type parent: `Element`
 
         """
-        existence_element = etree.SubElement(parent, EATS + 'existence')
+        assertion_element = etree.SubElement(parent, EATS + 'existence')
         authority = existence.authority
-        existence_element.set('authority', 'authority-%d' % authority.get_id())
+        assertion_element.set('authority', 'authority-%d' % authority.get_id())
         self._infrastructure_required['authority'].add(authority)
+        self._export_dates(existence, assertion_element)
 
     def _export_name_property_assertions (self, entity, parent):
         """Exports the names of `entity`.
@@ -248,6 +253,7 @@ class EATSMLExporter (object):
         assembled_form_element = etree.SubElement(name_element,
                                                   EATS + 'assembled_form')
         assembled_form_element.text = name.assembled_form
+        self._export_dates(assertion, name_element)
 
     def _export_name_part (self, name_part_type_id, name_part, parent):
         """Exports `name_part`.
@@ -337,6 +343,78 @@ class EATSMLExporter (object):
         subject_identifier_element.text = assertion.subject_identifier
         self._infrastructure_required['authority'].add(authority)
 
+    def _export_dates (self, assertion, parent):
+        """Exports the dates associated with `assertion`.
+
+        :param assertion: property assertion whose dates will be exported
+        :type assertion: `PropertyAssertion`
+        :param parent: XML element that will contain the exported dates
+        :type parent; `Element`
+
+        """
+        dates = assertion.get_dates()
+        if dates:
+            dates_element = etree.SubElement(parent, EATS + 'dates')
+        for date in dates:
+            self._export_date(date, dates_element)
+
+    def _export_date (self, date, parent):
+        """Exports `date`, appending it to `parent`.
+
+        :param date: date to export
+        :type date: `Date`
+        :param parent: XML element that will contain the exported date
+        :type parent: `Element`
+
+        """
+        date_element = etree.SubElement(parent, EATS + 'date')
+        date_period = date.period
+        date_element.set('date_period', 'date_period-%d' % date_period.get_id())
+        self._infrastructure_required['date_period'].add(date_period)
+        assembled_form_element = etree.SubElement(date_element, EATS +
+                                                  'assembled_form')
+        assembled_form_element.text = date.assembled_form
+        date_parts_element = etree.SubElement(date_element, EATS + 'date_parts')
+        for date_part_name in date.date_part_names:
+            date_part = getattr(date, date_part_name)
+            self._export_date_part(date_part, date_part_name,
+                                   date_parts_element)
+
+    def _export_date_part (self, date_part, date_part_name, parent):
+        """Exports `date_part` (if it has content), appending it to
+        `parent`.
+
+        :param date_part: date part to export
+        :type date_part: `DatePart`
+        :param date_part_name: name of date part
+        :type date_part_name: `str`
+        :param parent: XML element that will contain the exported date part
+        :type parent: `Element`
+
+        """
+        assembled_form = date_part.assembled_form
+        if assembled_form:
+            date_part_element = etree.SubElement(parent, EATS + 'date_part')
+            date_part_element.set('type', date_part_name)
+            calendar = date_part.calendar
+            date_part_element.set('calendar', 'calendar-%d' % calendar.get_id())
+            self._infrastructure_required['calendar'].add(calendar)
+            date_type = date_part.date_type
+            date_part_element.set('date_type', 'date_type-%d' %
+                                  date_type.get_id())
+            self._infrastructure_required['date_type'].add(date_type)
+            certainty = date_part.certainty
+            if certainty == self._topic_map.date_full_certainty:
+                certainty_value = 'full'
+            else:
+                certainty_value = 'none'
+            date_part_element.set('certainty', certainty_value)
+            raw_element = etree.SubElement(date_part_element, EATS + 'raw')
+            raw_element.text = date_part.get_value()
+            normalised_element = etree.SubElement(date_part_element, EATS +
+                                                  'normalised')
+            normalised_element.text = date_part.get_normalised_value()
+
     def export_infrastructure (self, limited=False, user=None):
         """Returns an XML tree of infrastructural elements, exported
         into EATSML.
@@ -364,6 +442,9 @@ class EATSMLExporter (object):
             name_types = []
             name_part_types = []
             entity_relationship_types = []
+            date_periods = []
+            date_types = []
+            calendars = []
             for authority in authorities:
                 entity_types.extend(authority.get_entity_types())
                 languages.extend(authority.get_languages())
@@ -371,6 +452,9 @@ class EATSMLExporter (object):
                 name_types.extend(authority.get_name_types())
                 name_part_types.extend(authority.get_name_part_types())
                 entity_relationship_types.extend(authority.get_entity_relationship_types())
+                date_periods.extend(authority.get_date_periods())
+                date_types.extend(authority.get_date_types())
+                calendars.extend(authority.get_calendars())
         else:
             authorities = Authority.objects.all()
             entity_types = EntityType.objects.all()
@@ -379,6 +463,9 @@ class EATSMLExporter (object):
             name_types = NameType.objects.all()
             name_part_types = NamePartType.objects.all()
             entity_relationship_types = EntityRelationshipType.objects.all()
+            date_periods = DatePeriod.objects.all()
+            date_types = DateType.objects.all()
+            calendars = Calendar.objects.all()
         self._infrastructure_required['authority'] = set(authorities)
         self._infrastructure_required['entity_type'] = set(entity_types)
         self._infrastructure_required['language'] = set(languages)
@@ -387,6 +474,9 @@ class EATSMLExporter (object):
         self._infrastructure_required['name_part_type'] = set(name_part_types)
         self._infrastructure_required['entity_relationship_type'] = \
             set(entity_relationship_types)
+        self._infrastructure_required['date_period'] = set(date_periods)
+        self._infrastructure_required['date_type'] = set(date_types)
+        self._infrastructure_required['calendar'] = set(calendars)
         self._export_infrastructure(root)
         return root.getroottree()
         
@@ -413,6 +503,12 @@ class EATSMLExporter (object):
         entity_relationship_types = self._infrastructure_required['entity_relationship_type']
         self._export_entity_relationship_types(entity_relationship_types,
                                                parent)
+        date_periods = self._infrastructure_required['date_period']
+        self._export_date_periods(date_periods, parent)
+        date_types = self._infrastructure_required['date_type']
+        self._export_date_types(date_types, parent)
+        calendars = self._infrastructure_required['calendar']
+        self._export_calendars(calendars, parent)
         # If there is an entities element that has already been
         # created, move it to after the infrastructure elements.
         if parent[0].tag == EATS + 'entities':
@@ -467,6 +563,17 @@ class EATSMLExporter (object):
         self._export_authority_infrastructure(
             'entity_relationship_type', 'entity_relationship_types',
             'entity_relationship_type', relationship_types, authority_element)
+        date_periods = authority.get_date_periods()
+        self._export_authority_infrastructure(
+            'date_period', 'date_periods', 'date_period', date_periods,
+            authority_element)
+        date_types = authority.get_date_types()
+        self._export_authority_infrastructure(
+            'date_type', 'date_types', 'date_type', date_types,
+            authority_element)
+        calendars = authority.get_calendars()
+        self._export_authority_infrastructure(
+            'calendar', 'calendars', 'calendar', calendars, authority_element)
 
     def _export_authority_infrastructure (self, infrastructure_element_name,
                                           container_element_name, element_name,
@@ -500,6 +607,96 @@ class EATSMLExporter (object):
                                        element_name)
             element.set('ref', '%s-%d' % (infrastructure_element_name,
                                           item.get_id()))
+
+    def _export_calendars (self, calendars, parent):
+        """Exports `calendars`, appending them to `parent`.
+
+        :param calendars: date periods to export
+        :type calendars: `set` of `Calendar`s
+        :param parent: XML element that will contain the exported date periods
+        :type parent: `Element`
+
+        """
+        if calendars:
+            calendars_element = etree.SubElement(parent, EATS +
+                                                    'calendars')
+        for calendar in calendars:
+            self._export_calendar(calendar, calendars_element)
+
+    def _export_calendar (self, calendar, parent):
+        """Exports `calendar`, appending it to `parent`.
+
+        :param calendar: calendar to export
+        :type calendar: `Calendar`
+        :param parent: XML element that will contain the exported calendar
+        :type parent: `Element`
+
+        """
+        calendar_element = etree.SubElement(parent, EATS + 'calendar')
+        calendar_element.set(XML + 'id', 'calendar-%d' %
+                                calendar.get_id())
+        name_element = etree.SubElement(calendar_element, EATS + 'name')
+        name_element.text = calendar.get_admin_name()
+
+    def _export_date_periods (self, date_periods, parent):
+        """Exports `date_periods`, appending them to `parent`.
+
+        :param date_periods: date periods to export
+        :type date_periods: `set` of `DatePeriod`s
+        :param parent: XML element that will contain the exported date periods
+        :type parent: `Element`
+
+        """
+        if date_periods:
+            date_periods_element = etree.SubElement(parent, EATS +
+                                                    'date_periods')
+        for date_period in date_periods:
+            self._export_date_period(date_period, date_periods_element)
+
+    def _export_date_period (self, date_period, parent):
+        """Exports `date_period`, appending it to `parent`.
+
+        :param date_period: date period to export
+        :type date_period: `DatePeriod`
+        :param parent: XML element that will contain the exported date period
+        :type parent: `Element`
+
+        """
+        date_period_element = etree.SubElement(parent, EATS + 'date_period')
+        date_period_element.set(XML + 'id', 'date_period-%d' %
+                                date_period.get_id())
+        name_element = etree.SubElement(date_period_element, EATS + 'name')
+        name_element.text = date_period.get_admin_name()
+
+    def _export_date_types (self, date_types, parent):
+        """Exports `date_types`, appending them to `parent`.
+
+        :param date_types: date types to export
+        :type date_types: `set` of `DateType`s
+        :param parent: XML element that will contain the exported date types
+        :type parent: `Element`
+
+        """
+        if date_types:
+            date_types_element = etree.SubElement(parent, EATS +
+                                                  'date_types')
+        for date_type in date_types:
+            self._export_date_type(date_type, date_types_element)
+
+    def _export_date_type (self, date_type, parent):
+        """Exports `date_type`, appending it to `parent`.
+
+        :param date_type: date type to export
+        :type date_type: `DateType`
+        :param parent: XML element that will contain the exported date type
+        :type parent: `Element`
+
+        """
+        date_type_element = etree.SubElement(parent, EATS + 'date_type')
+        date_type_element.set(XML + 'id', 'date_type-%d' %
+                              date_type.get_id())
+        name_element = etree.SubElement(date_type_element, EATS + 'name')
+        name_element.text = date_type.get_admin_name()
 
     def _export_entity_relationship_types (self, relationship_types, parent):
         """Exports `relationship_types`, appending them to `parent`.

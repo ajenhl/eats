@@ -13,7 +13,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     def setUp (self):
         super(EATSMLExportTestCase, self).setUp()
         self.tm = self.create_topic_map()
-        self.exporter = EATSMLExporter()
+        self.exporter = EATSMLExporter(self.tm)
 
     def _compare_XML (self, export, expected_xml):
         parser = etree.XMLParser(remove_blank_text=True)
@@ -268,6 +268,81 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
 ''' % {'authority': authority.get_id(), 'entity': entity.get_id()}
         self._compare_XML(export, expected_xml)
 
+    def test_export_entity_date (self):
+        authority = self.create_authority('Test')
+        calendar = self.create_calendar('Julian')
+        authority.set_calendars([calendar])
+        date_type = self.create_date_type('exact')
+        authority.set_date_types([date_type])
+        date_period = self.create_date_period('lifespan')
+        authority.set_date_periods([date_period])
+        entity = self.tm.create_entity(authority)
+        existence = entity.get_existences()[0]
+        certainty = self.tm.date_full_certainty
+        certainty_value = 'full'
+        date = existence.create_date({
+                'date_period': date_period, 'start': '1 January 2001',
+                'start_calendar': calendar, 'start_certainty': certainty,
+                'start_normalised': '2001-01-01', 'start_type': date_type,
+                })
+        export = self.exporter.export_entities([entity])
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-%(authority)d">
+      <name>Test</name>
+      <date_periods>
+        <date_period ref="date_period-%(date_period)d"/>
+      </date_periods>
+      <date_types>
+        <date_type ref="date_type-%(date_type)d"/>
+      </date_types>
+      <calendars>
+        <calendar ref="calendar-%(calendar)d"/>
+      </calendars>
+    </authority>
+  </authorities>
+  <date_periods>
+    <date_period xml:id="date_period-%(date_period)d">
+      <name>lifespan</name>
+    </date_period>
+  </date_periods>
+  <date_types>
+    <date_type xml:id="date_type-%(date_type)d">
+      <name>exact</name>
+    </date_type>
+  </date_types>
+  <calendars>
+    <calendar xml:id="calendar-%(calendar)d">
+      <name>Julian</name>
+    </calendar>
+  </calendars>
+  <entities>
+    <entity xml:id="entity-%(entity)d">
+      <existences>
+        <existence authority="authority-%(authority)d">
+          <dates>
+            <date date_period="date_period-%(date_period)d">
+              <assembled_form>%(date_assembled)s</assembled_form>
+              <date_parts>
+                <date_part type="start" calendar="calendar-%(calendar)d" date_type="date_type-%(date_type)d" certainty="%(certainty)s">
+                  <raw>1 January 2001</raw>
+                  <normalised>2001-01-01</normalised>
+                </date_part>
+              </date_parts>
+            </date>
+          </dates>
+        </existence>
+      </existences>
+    </entity>
+  </entities>
+</collection>
+''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
+       'date_assembled': date.assembled_form, 'calendar': calendar.get_id(),
+       'date_type': date_type.get_id(), 'date_period': date_period.get_id(),
+       'certainty': certainty_value}
+        self._compare_XML(export, expected_xml)
+
     def test_export_infrastructure_full (self):
         authority1 = self.create_authority('Test1')
         authority2 = self.create_authority('Test2')
@@ -293,6 +368,12 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         arabic = self.create_script('Arabic', 'Arab', '')
         authority1.set_scripts([latin])
         authority2.set_scripts([arabic])
+        calendar = self.create_calendar('Julian')
+        authority2.set_calendars([calendar])
+        date_type = self.create_date_type('exact')
+        authority2.set_date_types([date_type])
+        date_period = self.create_date_period('lifespan')
+        authority2.set_date_periods([date_period])
         export = self.exporter.export_infrastructure()
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
@@ -331,6 +412,15 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
       <scripts>
         <script ref="script-%(arabic)d"/>
       </scripts>
+      <date_periods>
+        <date_period ref="date_period-%(date_period)d"/>
+      </date_periods>
+      <date_types>
+        <date_type ref="date_type-%(date_type)d"/>
+      </date_types>
+      <calendars>
+        <calendar ref="calendar-%(calendar)d"/>
+      </calendars>
     </authority>
   </authorities>
   <entity_types>
@@ -390,6 +480,21 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
       <reverse_name>is parent of</reverse_name>
     </entity_relationship_type>
   </entity_relationship_types>
+  <date_periods>
+    <date_period xml:id="date_period-%(date_period)d">
+      <name>lifespan</name>
+    </date_period>
+  </date_periods>
+  <date_types>
+    <date_type xml:id="date_type-%(date_type)d">
+      <name>exact</name>
+    </date_type>
+  </date_types>
+  <calendars>
+    <calendar xml:id="calendar-%(calendar)d">
+      <name>Julian</name>
+    </calendar>
+  </calendars>
 </collection>
 ''' % {'authority1': authority1.get_id(), 'authority2': authority2.get_id(),
        'english': english.get_id(), 'french': french.get_id(),
@@ -397,7 +502,8 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
        'given': given.get_id(), 'family': family.get_id(),
        'person': person.get_id(), 'place': place.get_id(),
        'regular': regular.get_id(), 'title': title.get_id(),
-       'child': child.get_id()}
+       'child': child.get_id(), 'calendar': calendar.get_id(),
+       'date_period': date_period.get_id(), 'date_type': date_type.get_id()}
         self._compare_XML(export, expected_xml)
 
     def test_export_infrastructure_limited (self):
@@ -425,6 +531,12 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         arabic = self.create_script('Arabic', 'Arab', '')
         authority1.set_scripts([latin])
         authority2.set_scripts([arabic])
+        calendar = self.create_calendar('Julian')
+        authority2.set_calendars([calendar])
+        date_type = self.create_date_type('exact')
+        authority2.set_date_types([date_type])
+        date_period = self.create_date_period('lifespan')
+        authority2.set_date_periods([date_period])
         django_user = self.create_django_user('test', 'test@example.org',
                                               'password')
         user = self.create_user(django_user)
@@ -447,6 +559,15 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
       <scripts>
         <script ref="script-%(arabic)d"/>
       </scripts>
+      <date_periods>
+        <date_period ref="date_period-%(date_period)d"/>
+      </date_periods>
+      <date_types>
+        <date_type ref="date_type-%(date_type)d"/>
+      </date_types>
+      <calendars>
+        <calendar ref="calendar-%(calendar)d"/>
+      </calendars>
     </authority>
   </authorities>
   <entity_types>
@@ -475,8 +596,24 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
       <name>family</name>
     </name_part_type>
   </name_part_types>
+  <date_periods>
+    <date_period xml:id="date_period-%(date_period)d">
+      <name>lifespan</name>
+    </date_period>
+  </date_periods>
+  <date_types>
+    <date_type xml:id="date_type-%(date_type)d">
+      <name>exact</name>
+    </date_type>
+  </date_types>
+  <calendars>
+    <calendar xml:id="calendar-%(calendar)d">
+      <name>Julian</name>
+    </calendar>
+  </calendars>
 </collection>
 ''' % {'authority2': authority2.get_id(), 'place': place.get_id(),
        'french': french.get_id(), 'family': family.get_id(),
-       'arabic': arabic.get_id()}
+       'arabic': arabic.get_id(), 'calendar': calendar.get_id(),
+       'date_period': date_period.get_id(), 'date_type': date_type.get_id()}
         self._compare_XML(export, expected_xml)

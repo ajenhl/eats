@@ -43,12 +43,13 @@ def entity_view (request, entity_id):
     return render_to_response('eats/display/entity.html', context_data,
                               context_instance=RequestContext(request))
 
-def entity_eatsml_view (request, entity_id):
+@add_topic_map
+def entity_eatsml_view (request, topic_map, entity_id):
     try:
         entity = Entity.objects.get_by_identifier(entity_id)
     except Entity.DoesNotExist:
         raise Http404
-    tree = EATSMLExporter().export_entities([entity])
+    tree = EATSMLExporter(topic_map).export_entities([entity])
     xml = etree.tostring(tree, encoding='utf-8', pretty_print=True)
     return HttpResponse(xml, mimetype='text/xml')
 
