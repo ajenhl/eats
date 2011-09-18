@@ -67,16 +67,14 @@ class Language (Topic, Infrastructure):
         for occurrence in index.get_occurrences(self).filter(
             type=self.eats_topic_map.name_part_type_order_in_language_type):
             existing[occurrence.get_parent()] = occurrence
-        i = 0
-        for name_part_type in name_part_types:
+        for index, name_part_type in enumerate(name_part_types):
             if name_part_type in existing:
-                existing[name_part_type].set_value(i)
+                existing[name_part_type].set_value(index)
                 del existing[name_part_type]
             else:
                 name_part_type.create_occurrence(
                     self.eats_topic_map.name_part_type_order_in_language_type,
-                    i, scope=[self])
-            i += 1
+                    index, scope=[self])
         for occurrence in existing.values():
             occurrence.remove()
 
