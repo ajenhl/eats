@@ -4,8 +4,9 @@ from lxml import etree
 
 from django.test import TestCase
 
+from eats.exceptions import EATSMLException
 from eats.lib.eatsml_importer import EATSMLImporter
-from eats.models import Authority, DatePeriod, DateType, Language, NameType, Script
+from eats.models import Authority, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
 from eats.tests.base_test_case import BaseTestCase
 
 
@@ -151,6 +152,108 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 ''' % {'authority': authority.get_id(), 'date_type': date_type.get_id()}
         self._compare_XML(annotated_import, expected_xml)
 
+    def test_import_entity_relationship_type (self):
+        authority = self.create_authority('Test')
+        self.assertEqual(len(Authority.objects.all()), 1)
+        self.assertEqual(len(EntityRelationshipType.objects.all()), 0)
+        self.assertEqual(len(authority.get_entity_relationship_types()), 0)
+        import_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-1" eats_id="%(authority)d">
+      <name>Test</name>
+      <entity_relationship_types>
+        <entity_relationship_type ref="entity_relationship_type-1"/>
+      </entity_relationship_types>
+    </authority>
+  </authorities>
+  <entity_relationship_types>
+    <entity_relationship_type xml:id="entity_relationship_type-1">
+      <name>is child of</name>
+      <reverse_name>is parent of</reverse_name>
+    </entity_relationship_type>
+  </entity_relationship_types>
+</collection>
+''' % {'authority': authority.get_id()}
+        annotated_import = self.importer.import_xml(import_xml, self.admin)
+        self.assertEqual(len(Authority.objects.all()), 1)
+        self.assertEqual(len(EntityRelationshipType.objects.all()), 1)
+        self.assertEqual(len(authority.get_entity_relationship_types()), 1)
+        entity_relationship_type = EntityRelationshipType.objects.all()[0]
+        self.assertTrue(entity_relationship_type in
+                        authority.get_entity_relationship_types())
+        self.assertEqual(entity_relationship_type.get_admin_forward_name(),
+                         'is child of')
+        self.assertEqual(entity_relationship_type.get_admin_reverse_name(),
+                         'is parent of')
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-1" eats_id="%(authority)d">
+      <name>Test</name>
+      <entity_relationship_types>
+        <entity_relationship_type ref="entity_relationship_type-1"/>
+      </entity_relationship_types>
+    </authority>
+  </authorities>
+  <entity_relationship_types>
+    <entity_relationship_type xml:id="entity_relationship_type-1" eats_id="%(entity_relationship_type)d">
+      <name>is child of</name>
+      <reverse_name>is parent of</reverse_name>
+    </entity_relationship_type>
+  </entity_relationship_types>
+</collection>
+''' % {'authority': authority.get_id(), 'entity_relationship_type': entity_relationship_type.get_id()}
+        self._compare_XML(annotated_import, expected_xml)
+
+    def test_import_entity_type (self):
+        authority = self.create_authority('Test')
+        self.assertEqual(len(Authority.objects.all()), 1)
+        self.assertEqual(len(EntityType.objects.all()), 0)
+        self.assertEqual(len(authority.get_entity_types()), 0)
+        import_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-1" eats_id="%(authority)d">
+      <name>Test</name>
+      <entity_types>
+        <entity_type ref="entity_type-1"/>
+      </entity_types>
+    </authority>
+  </authorities>
+  <entity_types>
+    <entity_type xml:id="entity_type-1">
+      <name>exact</name>
+    </entity_type>
+  </entity_types>
+</collection>
+''' % {'authority': authority.get_id()}
+        annotated_import = self.importer.import_xml(import_xml, self.admin)
+        self.assertEqual(len(Authority.objects.all()), 1)
+        self.assertEqual(len(EntityType.objects.all()), 1)
+        self.assertEqual(len(authority.get_entity_types()), 1)
+        entity_type = EntityType.objects.all()[0]
+        self.assertTrue(entity_type in authority.get_entity_types())
+        self.assertEqual(entity_type.get_admin_name(), 'exact')
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-1" eats_id="%(authority)d">
+      <name>Test</name>
+      <entity_types>
+        <entity_type ref="entity_type-1"/>
+      </entity_types>
+    </authority>
+  </authorities>
+  <entity_types>
+    <entity_type xml:id="entity_type-1" eats_id="%(entity_type)d">
+      <name>exact</name>
+    </entity_type>
+  </entity_types>
+</collection>
+''' % {'authority': authority.get_id(), 'entity_type': entity_type.get_id()}
+        self._compare_XML(annotated_import, expected_xml)
+
     def test_import_language (self):
         authority = self.create_authority('Test')
         self.assertEqual(len(Authority.objects.all()), 1)
@@ -202,6 +305,78 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 ''' % {'authority': authority.get_id(), 'language': language.get_id()}
         self._compare_XML(annotated_import, expected_xml)
 
+    def test_import_name_part_type (self):
+        authority = self.create_authority('Test')
+        language = self.create_language('English', 'en')
+        self.assertEqual(len(Authority.objects.all()), 1)
+        self.assertEqual(len(Language.objects.all()), 1)
+        self.assertEqual(len(NamePartType.objects.all()), 0)
+        self.assertEqual(len(authority.get_name_part_types()), 0)
+        self.assertEqual(len(language.name_part_types), 0)
+        import_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-1" eats_id="%(authority)d">
+      <name>Test</name>
+      <name_part_types>
+        <name_part_type ref="name_part_type-1"/>
+      </name_part_types>
+    </authority>
+  </authorities>
+  <languages>
+    <language xml:id="language-1" eats_id="%(language)d">
+      <name>English</name>
+      <code>en</code>
+      <name_part_types>
+        <name_part_type ref="name_part_type-1"/>
+      </name_part_types>
+    </language>
+  </languages>
+  <name_part_types>
+    <name_part_type xml:id="name_part_type-1">
+      <name>given</name>
+    </name_part_type>
+  </name_part_types>
+</collection>
+''' % {'authority': authority.get_id(), 'language': language.get_id()}
+        annotated_import = self.importer.import_xml(import_xml, self.admin)
+        self.assertEqual(len(Authority.objects.all()), 1)
+        self.assertEqual(len(Language.objects.all()), 1)
+        self.assertEqual(len(NamePartType.objects.all()), 1)
+        self.assertEqual(len(authority.get_name_part_types()), 1)
+        name_part_type = NamePartType.objects.all()[0]
+        self.assertEqual(language.name_part_types, [name_part_type])
+        self.assertTrue(name_part_type in authority.get_name_part_types())
+        self.assertEqual(name_part_type.get_admin_name(), 'given')
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-1" eats_id="%(authority)d">
+      <name>Test</name>
+      <name_part_types>
+        <name_part_type ref="name_part_type-1"/>
+      </name_part_types>
+    </authority>
+  </authorities>
+  <languages>
+    <language xml:id="language-1" eats_id="%(language)d">
+      <name>English</name>
+      <code>en</code>
+      <name_part_types>
+        <name_part_type ref="name_part_type-1"/>
+      </name_part_types>
+    </language>
+  </languages>
+  <name_part_types>
+    <name_part_type xml:id="name_part_type-1" eats_id="%(name_part_type)d">
+      <name>given</name>
+    </name_part_type>
+  </name_part_types>
+</collection>
+''' % {'authority': authority.get_id(), 'language': language.get_id(),
+       'name_part_type': name_part_type.get_id()}
+        self._compare_XML(annotated_import, expected_xml)
+        
     def test_import_name_type (self):
         authority = self.create_authority('Test')
         self.assertEqual(len(Authority.objects.all()), 1)
@@ -219,7 +394,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   </authorities>
   <name_types>
     <name_type xml:id="name_type-1">
-      <name>lifespan</name>
+      <name>regular</name>
     </name_type>
   </name_types>
 </collection>
@@ -230,7 +405,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
         self.assertEqual(len(authority.get_name_types()), 1)
         name_type = NameType.objects.all()[0]
         self.assertTrue(name_type in authority.get_name_types())
-        self.assertEqual(name_type.get_admin_name(), 'lifespan')
+        self.assertEqual(name_type.get_admin_name(), 'regular')
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
@@ -243,7 +418,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   </authorities>
   <name_types>
     <name_type xml:id="name_type-1" eats_id="%(name_type)d">
-      <name>lifespan</name>
+      <name>regular</name>
     </name_type>
   </name_types>
 </collection>
@@ -302,7 +477,32 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   </scripts>
 </collection>
 ''' % {'authority': authority.get_id(), 'script': script.get_id()}
-        self._compare_XML(annotated_import, expected_xml)        
+        self._compare_XML(annotated_import, expected_xml)
+
+    def test_import_illformed_xml (self):
+        import_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority>
+      <name>Test</name>
+    </authority>
+  </authorities>
+<!-- Missing closing tag. -->'''
+        self.assertRaises(EATSMLException, self.importer.import_xml, import_xml,
+                          self.admin)
+
+    def test_import_invalid_xml (self):
+        import_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <!-- Missing @xml:id -->
+    <authority>
+      <name>Test</name>
+    </authority>
+  </authorities>
+</collection>'''
+        self.assertRaises(EATSMLException, self.importer.import_xml, import_xml,
+                          self.admin)
         
     def test_import_entity (self):
         pass

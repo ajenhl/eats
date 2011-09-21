@@ -3,8 +3,9 @@ import copy
 from lxml import etree
 
 from eats.constants import EATS_NAMESPACE, XML
+from eats.exceptions import EATSMLException
 from eats.lib.eatsml_handler import EATSMLHandler
-from eats.models import Authority
+from eats.models import Authority, Language
 
 
 NSMAP = {'e': EATS_NAMESPACE}
@@ -43,7 +44,10 @@ class EATSMLImporter (EATSMLHandler):
             'authority': {},
             'date_period': {},
             'date_type': {},
+            'entity_relationship_type': {},
+            'entity_type': {},
             'language': {},
+            'name_part_type': {},
             'name_type': {},
             'script': {},
             }
@@ -66,7 +70,11 @@ class EATSMLImporter (EATSMLHandler):
         # isn't a subset of the latter. Except in the case of an
         # administrator.
         parser = etree.XMLParser(remove_blank_text=True)
-        import_tree = etree.XML(eatsml, parser).getroottree()
+        try:
+            import_tree = etree.XML(eatsml, parser).getroottree()
+        except etree.XMLSyntaxError, e:
+            message = 'EATSML is not well-formed: %s' % str(e)
+            raise EATSMLException(message)
         self._validate(import_tree)
         annotated_tree = copy.deepcopy(import_tree)
         self._import_infrastructure(annotated_tree)
@@ -81,6 +89,11 @@ class EATSMLImporter (EATSMLHandler):
         """
         self._import_date_periods(tree)
         self._import_date_types(tree)
+        self._import_entity_relationship_types(tree)
+        self._import_entity_types(tree)
+        # Name part types may be referenced by languages, so import
+        # before them.
+        self._import_name_part_types(tree)
         self._import_languages(tree)
         self._import_name_types(tree)
         self._import_scripts(tree)
@@ -116,10 +129,25 @@ class EATSMLImporter (EATSMLHandler):
                 'e:date_types/e:date_type', namespaces=NSMAP)
             self._import_authority_infrastructure(
                 authority.set_date_types, 'date_type', date_type_elements)
+            entity_relationship_type_elements = authority_element.xpath(
+                'e:entity_relationship_types/e:entity_relationship_type',
+                namespaces=NSMAP)
+            self._import_authority_infrastructure(
+                authority.set_entity_relationship_types,
+                'entity_relationship_type', entity_relationship_type_elements)
+            entity_type_elements = authority_element.xpath(
+                'e:entity_types/e:entity_type', namespaces=NSMAP)
+            self._import_authority_infrastructure(
+                authority.set_entity_types, 'entity_type', entity_type_elements)
             language_elements = authority_element.xpath(
                 'e:languages/e:language', namespaces=NSMAP)
             self._import_authority_infrastructure(
                 authority.set_languages, 'language', language_elements)
+            name_part_type_elements = authority_element.xpath(
+                'e:name_part_types/e:name_part_type', namespaces=NSMAP)
+            self._import_authority_infrastructure(
+                authority.set_name_part_types, 'name_part_type',
+                name_part_type_elements)
             name_type_elements = authority_element.xpath(
                 'e:name_types/e:name_type', namespaces=NSMAP)
             self._import_authority_infrastructure(
@@ -192,6 +220,46 @@ class EATSMLImporter (EATSMLHandler):
                 date_type_element.set('eats_id', str(eats_id))
             self._add_mapping('date_type', xml_id, date_type)
 
+    def _import_entity_relationship_types (self, tree):
+        """Imports date types from XML `tree`.
+
+        :param tree: XML tree of EATSML to import
+        :type tree: `ElementTree`
+
+        """
+        elements = tree.xpath(
+            '/e:collection/e:entity_relationship_types/e:entity_relationship_type', namespaces=NSMAP)
+        for element in elements:
+            xml_id = element.get(XML + 'id')
+            eats_id = self._get_element_eats_id(element)
+            if eats_id is None:
+                name = element[0].text
+                reverse_name = element[1].text
+                entity_relationship_type = self._topic_map.create_entity_relationship_type(name, reverse_name)
+                eats_id = entity_relationship_type.get_id()
+                element.set('eats_id', str(eats_id))
+            self._add_mapping('entity_relationship_type', xml_id,
+                              entity_relationship_type)
+
+    def _import_entity_types (self, tree):
+        """Imports entity types from XML `tree`.
+
+        :param tree: XML tree of EATSML to import
+        :type tree: `ElementTree`
+
+        """
+        entity_type_elements = tree.xpath(
+            '/e:collection/e:entity_types/e:entity_type', namespaces=NSMAP)
+        for entity_type_element in entity_type_elements:
+            xml_id = entity_type_element.get(XML + 'id')
+            eats_id = self._get_element_eats_id(entity_type_element)
+            if eats_id is None:
+                name = entity_type_element[0].text
+                entity_type = self._topic_map.create_entity_type(name)
+                eats_id = entity_type.get_id()
+                entity_type_element.set('eats_id', str(eats_id))
+            self._add_mapping('entity_type', xml_id, entity_type)
+
     def _import_languages (self, tree):
         """Imports languages from XML `tree`.
 
@@ -210,7 +278,37 @@ class EATSMLImporter (EATSMLHandler):
                 language = self._topic_map.create_language(name, code)
                 eats_id = language.get_id()
                 language_element.set('eats_id', str(eats_id))
+            else:
+                language = Language.objects.get_by_identifier(eats_id)
             self._add_mapping('language', xml_id, language)
+            name_part_types = []
+            for name_part_type_element in language_element.xpath(
+                'e:name_part_types/e:name_part_type', namespaces=NSMAP):
+                xml_id = name_part_type_element.get('ref')
+                name_part_type = self._xml_object_map['name_part_type'][xml_id]
+                name_part_types.append(name_part_type)
+            if name_part_types:
+                language.name_part_types = name_part_types
+
+    def _import_name_part_types (self, tree):
+        """Imports name part types from XML `tree`.
+
+        :param tree: XML tree of EATSML to import
+        :type tree: `ElementTree`
+
+        """
+        name_part_type_elements = tree.xpath(
+            '/e:collection/e:name_part_types/e:name_part_type',
+            namespaces=NSMAP)
+        for name_part_type_element in name_part_type_elements:
+            xml_id = name_part_type_element.get(XML + 'id')
+            eats_id = self._get_element_eats_id(name_part_type_element)
+            if eats_id is None:
+                name = name_part_type_element[0].text
+                name_type = self._topic_map.create_name_part_type(name)
+                eats_id = name_type.get_id()
+                name_part_type_element.set('eats_id', str(eats_id))
+            self._add_mapping('name_part_type', xml_id, name_type)
 
     def _import_name_types (self, tree):
         """Imports name types from XML `tree`.
