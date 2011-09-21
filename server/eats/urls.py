@@ -15,12 +15,12 @@ urlpatterns = patterns(
 # Editing.
 urlpatterns += patterns(
     'eats.views.edit',
-    url(r'^edit/entity/add/$', 'entity_add', name='entity-add'),
-    url(r'^edit/entity/(?P<entity_id>\d+)/$', 'entity_change',
+    url(r'^entity/add/$', 'entity_add', name='entity-add'),
+    url(r'^entity/(?P<entity_id>\d+)/edit/$', 'entity_change',
         name='entity-change'),
-    url(r'^edit/entity/(?P<entity_id>\d+)/(?P<assertion_id>\d+)/date/add/$',
+    url(r'^entity/(?P<entity_id>\d+)/edit/(?P<assertion_id>\d+)/date/add/$',
         'date_add', name='date-add'),
-    url(r'^edit/entity/(?P<entity_id>\d+)/(?P<assertion_id>\d+)/date/(?P<date_id>\d+)/$', 'date_change', name='date-change'),
+    url(r'^entity/(?P<entity_id>\d+)/edit/(?P<assertion_id>\d+)/date/(?P<date_id>\d+)/$', 'date_change', name='date-change'),
     )
 
 authority_data = {'model': Authority}
