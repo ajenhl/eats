@@ -1,20 +1,15 @@
 from lxml import etree
 
+from eats.constants import EATS, NSMAP, XML
 from eats.exceptions import EATSExportException
+from eats.lib.eatsml_handler import EATSMLHandler
 from eats.models import Authority, Calendar, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
 
 
-# Namespace constants.
-XML_NAMESPACE = 'http://www.w3.org/XML/1998/namespace'
-XML = '{%s}' % (XML_NAMESPACE)
-EATS_NAMESPACE = 'http://eats.artefact.org.nz/ns/eatsml/'
-EATS = '{%s}' % (EATS_NAMESPACE)
-NSMAP = {None: EATS_NAMESPACE}
-
-
-class EATSMLExporter (object):
+class EATSMLExporter (EATSMLHandler):
 
     def __init__ (self, topic_map):
+        super(EATSMLExporter, self).__init__(topic_map)
         self._topic_map = topic_map
         self._infrastructure_required = {
             'authority': set(),
@@ -49,7 +44,9 @@ class EATSMLExporter (object):
                 self._export_entity(entity, entities_element, True)
         # Export any required infrastructure elements.
         self._export_infrastructure(root)
-        return root.getroottree()
+        tree = root.getroottree()
+        self._validate(tree)
+        return tree
 
     def _export_entity (self, entity, parent, extra=False):
         """Exports `entity`.
@@ -436,49 +433,51 @@ class EATSMLExporter (object):
             raise EATSExportException('A user must be specified if the export is to be limited to user editable authorities')
         if limited:
             authorities = user.editable_authorities.all()
-            entity_types = []
-            languages = []
-            scripts = []
-            name_types = []
-            name_part_types = []
-            entity_relationship_types = []
+            calendars = []
             date_periods = []
             date_types = []
-            calendars = []
+            entity_relationship_types = []
+            entity_types = []
+            languages = []
+            name_part_types = []
+            name_types = []
+            scripts = []
             for authority in authorities:
-                entity_types.extend(authority.get_entity_types())
-                languages.extend(authority.get_languages())
-                scripts.extend(authority.get_scripts())
-                name_types.extend(authority.get_name_types())
-                name_part_types.extend(authority.get_name_part_types())
-                entity_relationship_types.extend(authority.get_entity_relationship_types())
+                calendars.extend(authority.get_calendars())
                 date_periods.extend(authority.get_date_periods())
                 date_types.extend(authority.get_date_types())
-                calendars.extend(authority.get_calendars())
+                entity_relationship_types.extend(authority.get_entity_relationship_types())
+                entity_types.extend(authority.get_entity_types())
+                languages.extend(authority.get_languages())
+                name_part_types.extend(authority.get_name_part_types())
+                name_types.extend(authority.get_name_types())
+                scripts.extend(authority.get_scripts())
         else:
             authorities = Authority.objects.all()
-            entity_types = EntityType.objects.all()
-            languages = Language.objects.all()
-            scripts = Script.objects.all()
-            name_types = NameType.objects.all()
-            name_part_types = NamePartType.objects.all()
-            entity_relationship_types = EntityRelationshipType.objects.all()
+            calendars = Calendar.objects.all()
             date_periods = DatePeriod.objects.all()
             date_types = DateType.objects.all()
-            calendars = Calendar.objects.all()
+            entity_relationship_types = EntityRelationshipType.objects.all()
+            entity_types = EntityType.objects.all()
+            languages = Language.objects.all()
+            name_part_types = NamePartType.objects.all()
+            name_types = NameType.objects.all()
+            scripts = Script.objects.all()
         self._infrastructure_required['authority'] = set(authorities)
-        self._infrastructure_required['entity_type'] = set(entity_types)
-        self._infrastructure_required['language'] = set(languages)
-        self._infrastructure_required['script'] = set(scripts)
-        self._infrastructure_required['name_type'] = set(name_types)
-        self._infrastructure_required['name_part_type'] = set(name_part_types)
-        self._infrastructure_required['entity_relationship_type'] = \
-            set(entity_relationship_types)
+        self._infrastructure_required['calendar'] = set(calendars)
         self._infrastructure_required['date_period'] = set(date_periods)
         self._infrastructure_required['date_type'] = set(date_types)
-        self._infrastructure_required['calendar'] = set(calendars)
+        self._infrastructure_required['entity_relationship_type'] = \
+            set(entity_relationship_types)
+        self._infrastructure_required['entity_type'] = set(entity_types)
+        self._infrastructure_required['language'] = set(languages)
+        self._infrastructure_required['name_part_type'] = set(name_part_types)
+        self._infrastructure_required['name_type'] = set(name_types)
+        self._infrastructure_required['script'] = set(scripts)
         self._export_infrastructure(root)
-        return root.getroottree()
+        tree = root.getroottree()
+        self._validate(tree)
+        return tree
         
     def _export_infrastructure (self, parent):
         """Exports required infrastructure elements, appending them to
@@ -490,25 +489,25 @@ class EATSMLExporter (object):
         """
         authorities = self._infrastructure_required['authority']
         self._export_authorities(authorities, parent)
-        entity_types = self._infrastructure_required['entity_type']
-        self._export_entity_types(entity_types, parent)
-        languages = self._infrastructure_required['language']
-        self._export_languages(languages, parent)
-        scripts = self._infrastructure_required['script']
-        self._export_scripts(scripts, parent)
-        name_types = self._infrastructure_required['name_type']
-        self._export_name_types(name_types, parent)
-        name_part_types = self._infrastructure_required['name_part_type']
-        self._export_name_part_types(name_part_types, parent)
-        entity_relationship_types = self._infrastructure_required['entity_relationship_type']
-        self._export_entity_relationship_types(entity_relationship_types,
-                                               parent)
+        calendars = self._infrastructure_required['calendar']
+        self._export_calendars(calendars, parent)
         date_periods = self._infrastructure_required['date_period']
         self._export_date_periods(date_periods, parent)
         date_types = self._infrastructure_required['date_type']
         self._export_date_types(date_types, parent)
-        calendars = self._infrastructure_required['calendar']
-        self._export_calendars(calendars, parent)
+        entity_relationship_types = self._infrastructure_required['entity_relationship_type']
+        self._export_entity_relationship_types(entity_relationship_types,
+                                               parent)
+        entity_types = self._infrastructure_required['entity_type']
+        self._export_entity_types(entity_types, parent)
+        languages = self._infrastructure_required['language']
+        self._export_languages(languages, parent)
+        name_part_types = self._infrastructure_required['name_part_type']
+        self._export_name_part_types(name_part_types, parent)
+        name_types = self._infrastructure_required['name_type']
+        self._export_name_types(name_types, parent)
+        scripts = self._infrastructure_required['script']
+        self._export_scripts(scripts, parent)
         # If there is an entities element that has already been
         # created, move it to after the infrastructure elements.
         if parent[0].tag == EATS + 'entities':
@@ -541,28 +540,9 @@ class EATSMLExporter (object):
         authority_element.set(XML + 'id', 'authority-%d' % authority.get_id())
         name_element = etree.SubElement(authority_element, EATS + 'name')
         name_element.text = authority.get_admin_name()
-        entity_types = authority.get_entity_types()
+        calendars = authority.get_calendars()
         self._export_authority_infrastructure(
-            'entity_type', 'entity_types', 'entity_type', entity_types,
-            authority_element)
-        languages = authority.get_languages()
-        self._export_authority_infrastructure(
-            'language', 'languages', 'language', languages, authority_element)
-        name_types = authority.get_name_types()
-        self._export_authority_infrastructure(
-            'name_type', 'name_types', 'name_type', name_types,
-            authority_element)
-        name_part_types = authority.get_name_part_types()
-        self._export_authority_infrastructure(
-            'name_part_type', 'name_part_types', 'name_part_type',
-            name_part_types, authority_element)
-        scripts = authority.get_scripts()
-        self._export_authority_infrastructure('script', 'scripts', 'script',
-                                              scripts, authority_element)
-        relationship_types = authority.get_entity_relationship_types()
-        self._export_authority_infrastructure(
-            'entity_relationship_type', 'entity_relationship_types',
-            'entity_relationship_type', relationship_types, authority_element)
+            'calendar', 'calendars', 'calendar', calendars, authority_element)
         date_periods = authority.get_date_periods()
         self._export_authority_infrastructure(
             'date_period', 'date_periods', 'date_period', date_periods,
@@ -571,9 +551,28 @@ class EATSMLExporter (object):
         self._export_authority_infrastructure(
             'date_type', 'date_types', 'date_type', date_types,
             authority_element)
-        calendars = authority.get_calendars()
+        relationship_types = authority.get_entity_relationship_types()
         self._export_authority_infrastructure(
-            'calendar', 'calendars', 'calendar', calendars, authority_element)
+            'entity_relationship_type', 'entity_relationship_types',
+            'entity_relationship_type', relationship_types, authority_element)
+        entity_types = authority.get_entity_types()
+        self._export_authority_infrastructure(
+            'entity_type', 'entity_types', 'entity_type', entity_types,
+            authority_element)
+        languages = authority.get_languages()
+        self._export_authority_infrastructure(
+            'language', 'languages', 'language', languages, authority_element)
+        name_part_types = authority.get_name_part_types()
+        self._export_authority_infrastructure(
+            'name_part_type', 'name_part_types', 'name_part_type',
+            name_part_types, authority_element)
+        name_types = authority.get_name_types()
+        self._export_authority_infrastructure(
+            'name_type', 'name_types', 'name_type', name_types,
+            authority_element)
+        scripts = authority.get_scripts()
+        self._export_authority_infrastructure('script', 'scripts', 'script',
+                                              scripts, authority_element)
 
     def _export_authority_infrastructure (self, infrastructure_element_name,
                                           container_element_name, element_name,

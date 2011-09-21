@@ -113,13 +113,13 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
       <languages>
         <language ref="language-%(language)d"/>
       </languages>
-      <name_types>
-        <name_type ref="name_type-%(name_type)d"/>
-      </name_types>
       <name_part_types>
         <name_part_type ref="name_part_type-%(family_name_part_type)d"/>
         <name_part_type ref="name_part_type-%(given_name_part_type)d"/>
       </name_part_types>
+      <name_types>
+        <name_type ref="name_type-%(name_type)d"/>
+      </name_types>
       <scripts>
         <script ref="script-%(script)d"/>
       </scripts>
@@ -135,18 +135,6 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
       </name_part_types>
     </language>
   </languages>
-  <scripts>
-    <script xml:id="script-%(script)d">
-      <name>Latin</name>
-      <code>Latn</code>
-      <separator> </separator>
-    </script>
-  </scripts>
-  <name_types>
-    <name_type xml:id="name_type-%(name_type)d">
-      <name>regular</name>
-    </name_type>
-  </name_types>
   <name_part_types>
     <name_part_type xml:id="name_part_type-%(family_name_part_type)d">
       <name>family</name>
@@ -155,6 +143,18 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
       <name>given</name>
     </name_part_type>
   </name_part_types>
+  <name_types>
+    <name_type xml:id="name_type-%(name_type)d">
+      <name>regular</name>
+    </name_type>
+  </name_types>
+  <scripts>
+    <script xml:id="script-%(script)d">
+      <name>Latin</name>
+      <code>Latn</code>
+      <separator> </separator>
+    </script>
+  </scripts>
   <entities>
     <entity xml:id="entity-%(entity)d">
       <names>
@@ -291,17 +291,22 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
   <authorities>
     <authority xml:id="authority-%(authority)d">
       <name>Test</name>
+      <calendars>
+        <calendar ref="calendar-%(calendar)d"/>
+      </calendars>
       <date_periods>
         <date_period ref="date_period-%(date_period)d"/>
       </date_periods>
       <date_types>
         <date_type ref="date_type-%(date_type)d"/>
       </date_types>
-      <calendars>
-        <calendar ref="calendar-%(calendar)d"/>
-      </calendars>
     </authority>
   </authorities>
+  <calendars>
+    <calendar xml:id="calendar-%(calendar)d">
+      <name>Julian</name>
+    </calendar>
+  </calendars>
   <date_periods>
     <date_period xml:id="date_period-%(date_period)d">
       <name>lifespan</name>
@@ -312,11 +317,6 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
       <name>exact</name>
     </date_type>
   </date_types>
-  <calendars>
-    <calendar xml:id="calendar-%(calendar)d">
-      <name>Julian</name>
-    </calendar>
-  </calendars>
   <entities>
     <entity xml:id="entity-%(entity)d">
       <existences>
@@ -387,19 +387,28 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
       <languages>
         <language ref="language-%(english)d"/>
       </languages>
-      <name_types>
-        <name_type ref="name_type-%(regular)d"/>
-      </name_types>
       <name_part_types>
         <name_part_type ref="name_part_type-%(given)d"/>
         <name_part_type ref="name_part_type-%(family)d"/>
       </name_part_types>
+      <name_types>
+        <name_type ref="name_type-%(regular)d"/>
+      </name_types>
       <scripts>
         <script ref="script-%(latin)d"/>
       </scripts>
     </authority>
     <authority xml:id="authority-%(authority2)d">
       <name>Test2</name>
+      <calendars>
+        <calendar ref="calendar-%(calendar)d"/>
+      </calendars>
+      <date_periods>
+        <date_period ref="date_period-%(date_period)d"/>
+      </date_periods>
+      <date_types>
+        <date_type ref="date_type-%(date_type)d"/>
+      </date_types>
       <entity_types>
         <entity_type ref="entity_type-%(place)d"/>
       </entity_types>
@@ -412,17 +421,29 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
       <scripts>
         <script ref="script-%(arabic)d"/>
       </scripts>
-      <date_periods>
-        <date_period ref="date_period-%(date_period)d"/>
-      </date_periods>
-      <date_types>
-        <date_type ref="date_type-%(date_type)d"/>
-      </date_types>
-      <calendars>
-        <calendar ref="calendar-%(calendar)d"/>
-      </calendars>
     </authority>
   </authorities>
+  <calendars>
+    <calendar xml:id="calendar-%(calendar)d">
+      <name>Julian</name>
+    </calendar>
+  </calendars>
+  <date_periods>
+    <date_period xml:id="date_period-%(date_period)d">
+      <name>lifespan</name>
+    </date_period>
+  </date_periods>
+  <date_types>
+    <date_type xml:id="date_type-%(date_type)d">
+      <name>exact</name>
+    </date_type>
+  </date_types>
+  <entity_relationship_types>
+    <entity_relationship_type xml:id="entity_relationship_type-%(child)d">
+      <name>is child of</name>
+      <reverse_name>is parent of</reverse_name>
+    </entity_relationship_type>
+  </entity_relationship_types>
   <entity_types>
     <entity_type xml:id="entity_type-%(person)d">
       <name>person</name>
@@ -446,6 +467,22 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
       <code>fr</code>
     </language>
   </languages>
+  <name_part_types>
+    <name_part_type xml:id="name_part_type-%(given)d">
+      <name>given</name>
+    </name_part_type>
+    <name_part_type xml:id="name_part_type-%(family)d">
+      <name>family</name>
+    </name_part_type>
+    <name_part_type xml:id="name_part_type-%(title)d">
+      <name>title</name>
+    </name_part_type>
+  </name_part_types>
+  <name_types>
+    <name_type xml:id="name_type-%(regular)d">
+      <name>regular</name>
+    </name_type>
+  </name_types>
   <scripts>
     <script xml:id="script-%(arabic)d">
       <name>Arabic</name>
@@ -458,43 +495,6 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
       <separator> </separator>
     </script>
   </scripts>
-  <name_types>
-    <name_type xml:id="name_type-%(regular)d">
-      <name>regular</name>
-    </name_type>
-  </name_types>
-  <name_part_types>
-    <name_part_type xml:id="name_part_type-%(given)d">
-      <name>given</name>
-    </name_part_type>
-    <name_part_type xml:id="name_part_type-%(family)d">
-      <name>family</name>
-    </name_part_type>
-    <name_part_type xml:id="name_part_type-%(title)d">
-      <name>title</name>
-    </name_part_type>
-  </name_part_types>
-  <entity_relationship_types>
-    <entity_relationship_type xml:id="entity_relationship_type-%(child)d">
-      <name>is child of</name>
-      <reverse_name>is parent of</reverse_name>
-    </entity_relationship_type>
-  </entity_relationship_types>
-  <date_periods>
-    <date_period xml:id="date_period-%(date_period)d">
-      <name>lifespan</name>
-    </date_period>
-  </date_periods>
-  <date_types>
-    <date_type xml:id="date_type-%(date_type)d">
-      <name>exact</name>
-    </date_type>
-  </date_types>
-  <calendars>
-    <calendar xml:id="calendar-%(calendar)d">
-      <name>Julian</name>
-    </calendar>
-  </calendars>
 </collection>
 ''' % {'authority1': authority1.get_id(), 'authority2': authority2.get_id(),
        'english': english.get_id(), 'french': french.get_id(),
@@ -547,6 +547,15 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
   <authorities>
     <authority xml:id="authority-%(authority2)d">
       <name>Test2</name>
+      <calendars>
+        <calendar ref="calendar-%(calendar)d"/>
+      </calendars>
+      <date_periods>
+        <date_period ref="date_period-%(date_period)d"/>
+      </date_periods>
+      <date_types>
+        <date_type ref="date_type-%(date_type)d"/>
+      </date_types>
       <entity_types>
         <entity_type ref="entity_type-%(place)d"/>
       </entity_types>
@@ -559,17 +568,23 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
       <scripts>
         <script ref="script-%(arabic)d"/>
       </scripts>
-      <date_periods>
-        <date_period ref="date_period-%(date_period)d"/>
-      </date_periods>
-      <date_types>
-        <date_type ref="date_type-%(date_type)d"/>
-      </date_types>
-      <calendars>
-        <calendar ref="calendar-%(calendar)d"/>
-      </calendars>
     </authority>
   </authorities>
+  <calendars>
+    <calendar xml:id="calendar-%(calendar)d">
+      <name>Julian</name>
+    </calendar>
+  </calendars>
+  <date_periods>
+    <date_period xml:id="date_period-%(date_period)d">
+      <name>lifespan</name>
+    </date_period>
+  </date_periods>
+  <date_types>
+    <date_type xml:id="date_type-%(date_type)d">
+      <name>exact</name>
+    </date_type>
+  </date_types>
   <entity_types>
     <entity_type xml:id="entity_type-%(place)d">
       <name>place</name>
@@ -584,6 +599,11 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
       </name_part_types>
     </language>
   </languages>
+  <name_part_types>
+    <name_part_type xml:id="name_part_type-%(family)d">
+      <name>family</name>
+    </name_part_type>
+  </name_part_types>
   <scripts>
     <script xml:id="script-%(arabic)d">
       <name>Arabic</name>
@@ -591,26 +611,6 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
       <separator></separator>
     </script>
   </scripts>
-  <name_part_types>
-    <name_part_type xml:id="name_part_type-%(family)d">
-      <name>family</name>
-    </name_part_type>
-  </name_part_types>
-  <date_periods>
-    <date_period xml:id="date_period-%(date_period)d">
-      <name>lifespan</name>
-    </date_period>
-  </date_periods>
-  <date_types>
-    <date_type xml:id="date_type-%(date_type)d">
-      <name>exact</name>
-    </date_type>
-  </date_types>
-  <calendars>
-    <calendar xml:id="calendar-%(calendar)d">
-      <name>Julian</name>
-    </calendar>
-  </calendars>
 </collection>
 ''' % {'authority2': authority2.get_id(), 'place': place.get_id(),
        'french': french.get_id(), 'family': family.get_id(),

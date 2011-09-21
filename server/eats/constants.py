@@ -86,3 +86,10 @@ SUBJECT_IDENTIFIER_ASSERTION_TYPE_IRI = EATS_BASE_IRI + 'subject_identifier/'
 
 FORWARD_RELATIONSHIP_MARKER = 'f'
 REVERSE_RELATIONSHIP_MARKER = 'r'
+
+# Namespace constants.
+XML_NAMESPACE = 'http://www.w3.org/XML/1998/namespace'
+XML = '{%s}' % (XML_NAMESPACE)
+EATS_NAMESPACE = 'http://eats.artefact.org.nz/ns/eatsml/'
+EATS = '{%s}' % (EATS_NAMESPACE)
+NSMAP = {None: EATS_NAMESPACE}

@@ -12,6 +12,21 @@ class EATSExportException (EATSException):
     pass
 
 
+class EATSImportException (EATSException):
+
+    """Exception raised when there is a problem with an import."""
+
+    pass
+
+
+class EATSMLException (EATSException):
+
+    """Exception raised when there is a problem with an EATSML
+    document."""
+    
+    pass
+
+
 class EATSValidationException (EATSException):
 
     """Exception raised when invalid data is supplied to an EATS
