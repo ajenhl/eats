@@ -1,9 +1,12 @@
 from lxml import etree
 
-from eats.constants import EATS, NSMAP, XML
+from eats.constants import EATS, EATS_NAMESPACE, XML
 from eats.exceptions import EATSExportException
 from eats.lib.eatsml_handler import EATSMLHandler
 from eats.models import Authority, Calendar, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
+
+
+NSMAP = {None: EATS_NAMESPACE}
 
 
 class EATSMLExporter (EATSMLHandler):
