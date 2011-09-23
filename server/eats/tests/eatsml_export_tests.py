@@ -48,8 +48,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         authority = self.create_authority('Test')
         entity_type = self.create_entity_type('person')
         authority.set_entity_types([entity_type])
-        entity = self.tm.create_entity(authority)
-        entity.get_existences()[0].remove()
+        entity = self.tm.create_entity()
         entity.create_entity_type_property_assertion(authority, entity_type)
         export = self.exporter.export_entities([entity])
         expected_xml = '''
@@ -93,8 +92,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         authority.set_scripts([script])
         authority.set_name_part_types([given_name_part_type,
                                        family_name_part_type])
-        entity = self.tm.create_entity(authority)
-        entity.get_existences()[0].remove()
+        entity = self.tm.create_entity()
         assertion = entity.create_name_property_assertion(
             authority, name_type, language, script, '')
         name = assertion.name
@@ -180,13 +178,11 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         
     def test_export_entity_entity_relationship (self):
         authority = self.create_authority('Test')
-        entity = self.tm.create_entity(authority)
-        entity.get_existences()[0].remove()
+        entity = self.tm.create_entity()
         relationship_type = self.create_entity_relationship_type(
             'is child of', 'is parent of')
         authority.set_entity_relationship_types([relationship_type])
-        other = self.tm.create_entity(authority)
-        other.get_existences()[0].remove()
+        other = self.tm.create_entity()
         entity.create_entity_relationship_property_assertion(
             authority, relationship_type, entity, other)
         export = self.exporter.export_entities([entity])
@@ -221,8 +217,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
 
     def test_export_entity_note (self):
         authority = self.create_authority('Test')
-        entity = self.tm.create_entity(authority)
-        entity.get_existences()[0].remove()
+        entity = self.tm.create_entity()
         entity.create_note_property_assertion(authority, 'A note.')
         export = self.exporter.export_entities([entity])
         expected_xml = '''
@@ -245,8 +240,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
 
     def test_export_entity_subject_identifier (self):
         authority = self.create_authority('Test')
-        entity = self.tm.create_entity(authority)
-        entity.get_existences()[0].remove()
+        entity = self.tm.create_entity()
         entity.create_subject_identifier_property_assertion(
             authority, 'http://www.example.org/test/')
         export = self.exporter.export_entities([entity])

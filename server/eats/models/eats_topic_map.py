@@ -172,9 +172,11 @@ class EATSTopicMap (TopicMap):
         date_type.create_name(name, name_type=self.admin_name_type)
         return date_type
 
-    def create_entity (self, authority):
-        """Creates a new entity, using `authority` to create an
-        accompanying existence property assertion.
+    def create_entity (self, authority=None):
+        """Creates a new entity.
+
+        If `authority` is specified, create an accompanying existence
+        property assertion.
 
         :param authority: authority used in the existence property assertion
         :type authority: `Topic`
@@ -186,7 +188,8 @@ class EATSTopicMap (TopicMap):
         url = 'http://%s/%s' % (Site.objects.get_current().domain, view_url)
         entity.add_subject_identifier(Locator(url))
         entity.add_type(self.entity_type)
-        entity.create_existence_property_assertion(authority)
+        if authority is not None:
+            entity.create_existence_property_assertion(authority)
         return entity
 
     def create_entity_relationship_type (self, name, reverse_name):
