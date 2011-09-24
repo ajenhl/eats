@@ -5,7 +5,7 @@ from lxml import etree
 from eats.constants import EATS_NAMESPACE, XML
 from eats.exceptions import EATSMLException
 from eats.lib.eatsml_handler import EATSMLHandler
-from eats.models import Authority, Language
+from eats.models import Authority, EntityType, Language, NamePartType, NameType, Script
 
 
 NSMAP = {'e': EATS_NAMESPACE}
@@ -26,6 +26,12 @@ class EATSMLImporter (EATSMLHandler):
        * property assertions (for both new and existing entities)
        * dates (for new property assertions only)
 
+    Entity relationship property assertions, because they are
+    bi-directional, are handled specially. A new assertion will be
+    created only when the domain_entity attribute references the
+    entity ancestor's XML ID, preventing the same relationship being
+    created twice.
+       
     Since an import may create database objects before encountering a
     fatal error (for example, an attempt to create an infrastructure
     object with the same name as an existing object), an import must
@@ -42,8 +48,10 @@ class EATSMLImporter (EATSMLHandler):
         # element and not an entity_type element.
         self._xml_object_map = {
             'authority': {},
+            'calendar': {},
             'date_period': {},
             'date_type': {},
+            'entity': {},
             'entity_relationship_type': {},
             'entity_type': {},
             'language': {},
@@ -78,6 +86,7 @@ class EATSMLImporter (EATSMLHandler):
         self._validate(import_tree)
         annotated_tree = copy.deepcopy(import_tree)
         self._import_infrastructure(annotated_tree)
+        self._import_entities(annotated_tree)
         return annotated_tree
 
     def _import_infrastructure (self, tree):
@@ -87,6 +96,7 @@ class EATSMLImporter (EATSMLHandler):
         :type tree: `ElementTree`
 
         """
+        self._import_calendars(tree)
         self._import_date_periods(tree)
         self._import_date_types(tree)
         self._import_entity_relationship_types(tree)
@@ -121,6 +131,10 @@ class EATSMLImporter (EATSMLHandler):
             else:
                 authority = Authority.objects.get_by_identifier(eats_id)
             self._add_mapping('authority', xml_id, authority)
+            calendar_elements = authority_element.xpath(
+                'e:calendars/e:calendar', namespaces=NSMAP)
+            self._import_authority_infrastructure(
+                authority.set_calendars, 'calendar', calendar_elements)
             date_period_elements = authority_element.xpath(
                 'e:date_periods/e:date_period', namespaces=NSMAP)
             self._import_authority_infrastructure(
@@ -182,6 +196,25 @@ class EATSMLImporter (EATSMLHandler):
         if objects:
             setter(objects)
 
+    def _import_calendars (self, tree):
+        """Imports calendars from XML `tree`.
+
+        :param tree: XML tree of EATSML to import
+        :type tree: `ElementTree`
+
+        """
+        calendar_elements = tree.xpath(
+            '/e:collection/e:calendars/e:calendar', namespaces=NSMAP)
+        for calendar_element in calendar_elements:
+            xml_id = calendar_element.get(XML + 'id')
+            eats_id = self._get_element_eats_id(calendar_element)
+            if eats_id is None:
+                name = calendar_element[0].text
+                calendar = self._topic_map.create_calendar(name)
+                eats_id = calendar.get_id()
+                calendar_element.set('eats_id', str(eats_id))
+            self._add_mapping('calendar', xml_id, calendar)
+            
     def _import_date_periods (self, tree):
         """Imports date periods from XML `tree`.
 
@@ -258,6 +291,8 @@ class EATSMLImporter (EATSMLHandler):
                 entity_type = self._topic_map.create_entity_type(name)
                 eats_id = entity_type.get_id()
                 entity_type_element.set('eats_id', str(eats_id))
+            else:
+                entity_type = EntityType.objects.get_by_identifier(eats_id)
             self._add_mapping('entity_type', xml_id, entity_type)
 
     def _import_languages (self, tree):
@@ -305,10 +340,12 @@ class EATSMLImporter (EATSMLHandler):
             eats_id = self._get_element_eats_id(name_part_type_element)
             if eats_id is None:
                 name = name_part_type_element[0].text
-                name_type = self._topic_map.create_name_part_type(name)
-                eats_id = name_type.get_id()
+                name_part_type = self._topic_map.create_name_part_type(name)
+                eats_id = name_part_type.get_id()
                 name_part_type_element.set('eats_id', str(eats_id))
-            self._add_mapping('name_part_type', xml_id, name_type)
+            else:
+                name_part_type = NamePartType.objects.get_by_identifier(eats_id)
+            self._add_mapping('name_part_type', xml_id, name_part_type)
 
     def _import_name_types (self, tree):
         """Imports name types from XML `tree`.
@@ -327,6 +364,8 @@ class EATSMLImporter (EATSMLHandler):
                 name_type = self._topic_map.create_name_type(name)
                 eats_id = name_type.get_id()
                 name_type_element.set('eats_id', str(eats_id))
+            else:
+                name_type = NameType.objects.get_by_identifier(eats_id)
             self._add_mapping('name_type', xml_id, name_type)
 
     def _import_scripts (self, tree):
@@ -348,7 +387,205 @@ class EATSMLImporter (EATSMLHandler):
                 script = self._topic_map.create_script(name, code, separator)
                 eats_id = script.get_id()
                 script_element.set('eats_id', str(eats_id))
+            else:
+                script = Script.objects.get_by_identifier(eats_id)
             self._add_mapping('script', xml_id, script)
+
+    def _import_entities (self, tree):
+        """Imports entities from XML `tree`.
+
+        :param tree: XML tree of EATSML to import
+        :type tree: `ElementTree`
+
+        """
+        entity_elements = tree.xpath('/e:collection/e:entities/e:entity',
+                                     namespaces=NSMAP)
+        for entity_element in entity_elements:
+            xml_id = entity_element.get(XML + 'id')
+            eats_id = self._get_element_eats_id(entity_element)
+            if eats_id is None:
+                entity = self._topic_map.create_entity()
+                entity_element.set('eats_id', str(entity.get_id()))
+            self._add_mapping('entity', xml_id, entity)
+            #self._import_entity_relationship_assertions(entity, entity_element)
+            self._import_entity_type_assertions(entity, entity_element)
+            self._import_existence_assertions(entity, entity_element)
+            self._import_name_assertions(entity, entity_element)
+            self._import_note_assertions(entity, entity_element)
+            self._import_subject_identifier_assertions(entity, entity_element)
+
+    def _import_entity_type_assertions (self, entity, entity_element):
+        """Imports entity type assertions from `entity_element` into
+        `entity`.
+
+        :param entity: entity to import into
+        :type entity: `Entity`
+        :param entity_element: XML element representing `entity`
+        :type entity_element: `Element`
+
+        """
+        elements = entity_element.xpath('e:entity_types/e:entity_type',
+                                        namespaces=NSMAP)
+        for element in elements:
+            eats_id = self._get_element_eats_id(element)
+            if eats_id is None:
+                authority = self._get_mapped_object(element, 'authority',
+                                                    'authority')
+                entity_type = self._get_mapped_object(element, 'entity_type',
+                                                      'entity_type')
+                assertion = entity.create_entity_type_property_assertion(
+                    authority, entity_type)
+                element.set('eats_id', str(assertion.get_id()))
+            
+    def _import_existence_assertions (self, entity, entity_element):
+        """Imports existence assertions from `entity_element` into
+        `entity`.
+
+        :param entity: entity to import into
+        :type entity: `Entity`
+        :param entity_element: XML element representing `entity`
+        :type entity_element: `Element`
+
+        """
+        elements = entity_element.xpath('e:existences/e:existence',
+                                        namespaces=NSMAP)
+        for element in elements:
+            eats_id = self._get_element_eats_id(element)
+            if eats_id is None:
+                authority = self._get_mapped_object(element, 'authority',
+                                                    'authority')
+                assertion = entity.create_existence_property_assertion(
+                    authority)
+                element.set('eats_id', str(assertion.get_id()))
+
+    def _import_name_assertions (self, entity, entity_element):
+        """Imports name assertions from `entity_element` into
+        `entity`.
+
+        :param entity: entity to import into
+        :type entity: `Entity`
+        :param entity_element: XML element representing `entity`
+        :type entity_element: `Element`
+
+        """
+        elements = entity_element.xpath('e:names/e:name', namespaces=NSMAP)
+        for element in elements:
+            eats_id = self._get_element_eats_id(element)
+            if eats_id is None:
+                authority = self._get_mapped_object(element, 'authority',
+                                                    'authority')
+                name_type = self._get_mapped_object(element, 'name_type',
+                                                    'name_type')
+                language = self._get_mapped_object(element, 'language',
+                                                   'language')
+                script = self._get_mapped_object(element, 'script', 'script')
+                display_form = self._get_text(element, 'e:display_form')
+                assertion = entity.create_name_property_assertion(
+                    authority, name_type, language, script, display_form)
+                element.set('eats_id', str(assertion.get_id()))
+                self._import_name_parts(assertion.name, element)
+
+    def _import_name_parts (self, name, name_element):
+        """Imports name parts from `name_element` into `name`.
+
+        :param name: name to import into
+        :type name: `Name`
+        :param name_element: XML element representing `name`
+        :type name_element: `Element`
+
+        """
+        pass
+
+    def _import_note_assertions (self, entity, entity_element):
+        """Imports note assertions from `entity_element` into
+        `entity`.
+
+        :param entity: entity to import into
+        :type entity: `Entity`
+        :param entity_element: XML element representing `entity`
+        :type entity_element: `Element`
+
+        """
+        elements = entity_element.xpath('e:notes/e:note', namespaces=NSMAP)
+        for element in elements:
+            eats_id = self._get_element_eats_id(element)
+            if eats_id is None:
+                authority = self._get_mapped_object(element, 'authority',
+                                                    'authority')
+                note = self._get_text(element, '.')
+                assertion = entity.create_note_property_assertion(
+                    authority, note)
+                element.set('eats_id', str(assertion.get_id()))
+
+    def _import_subject_identifier_assertions (self, entity, entity_element):
+        """Imports subject identifier assertions from `entity_element`
+        into `entity`.
+
+        :param entity: entity to import into
+        :type entity: `Entity`
+        :param entity_element: XML element representing `entity`
+        :type entity_element: `Element`
+
+        """
+        elements = entity_element.xpath(
+            'e:subject_identifiers/e:subject_identifier', namespaces=NSMAP)
+        for element in elements:
+            eats_id = self._get_element_eats_id(element)
+            if eats_id is None:
+                authority = self._get_mapped_object(element, 'authority',
+                                                    'authority')
+                subject_identifier = self._get_text(element, '.')
+                assertion = entity.create_subject_identifier_property_assertion(
+                    authority, subject_identifier)
+                element.set('eats_id', str(assertion.get_id()))
+
+    def _import_entity_relationship_assertions (self, entity, entity_element):
+        """Imports entity relationship assertions from `entity_element`
+        into `entity`.
+
+        :param entity: entity to import into
+        :type entity: `Entity`
+        :param entity_element: XML element representing `entity`
+        :type entity_element: `Element`
+
+        """
+        elements = entity_element.xpath(
+            'e:entity_relationships/e:entity_relationship', namespaces=NSMAP)
+        for element in elements:
+            eats_id = self._get_element_eats_id(element)
+            if eats_id is None:
+                self._import_entity_relationship_assertion(entity, element)
+
+    def _import_entity_relationship_assertion (self, entity, element):
+        """Imports entity relationship assertion from `element` into
+        `entity`.
+
+        :param entity: entity to import into
+        :type entity: `Entity`
+        :param element: XML element representing entity relationship assertion
+        :type element: `Element`
+
+        """
+        try:
+            domain_entity = self._get_mapped_object(
+                element, 'domain_entity', 'entity')
+        except KeyError:
+            # The domain entity may not have been imported yet.
+            domain_entity = None
+        # Only import an entity relationship if the domain
+        # entity is the current entity. This prevents the same
+        # relationship between imported twice.
+        if domain_entity == entity:
+            authority = self._get_mapped_object(element, 'authority',
+                                                'authority')
+            entity_relationship_type = self._get_mapped_object(
+                element, 'entity_relationship_type', 'entity_relationship_type')
+            range_entity = self._get_mapped_object(element, 'range_entity',
+                                                   'entity')
+            relationship = entity.create_entity_relationship_property_assertion(
+                authority, entity_relationship_type, domain_entity,
+                range_entity)
+            element.set('eats_id', relationship.get_id())
 
     def _add_mapping (self, object_type, xml_id, obj):
         """Adds a mapping between `xml_id` and `obj` within the
@@ -364,6 +601,22 @@ class EATSMLImporter (EATSMLHandler):
 
         """
         self._xml_object_map[object_type][xml_id] = obj
+
+    def _get_mapped_object (self, element, attribute_name, object_type):
+        """Returns the object mapped to `object_type` with the ID
+        taken from `attribute_name` on `element`.
+
+        :param element: XML element holding the attribute
+        :type element: `Element`
+        :param attribute_name: name of the attribute holding the ID
+        :type attribute_name: `str`
+        :param object_type: name of the type of object to look up
+        :type object_type: `str`
+        :rtype: `Construct`
+
+        """
+        xml_id = element.get(attribute_name)
+        return self._xml_object_map[object_type][xml_id]
 
     @staticmethod
     def _get_element_id (element):
