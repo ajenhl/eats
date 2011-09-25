@@ -26,22 +26,26 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     
     def test_export_entity_existence (self):
         authority = self.create_authority('Test')
-        entity = self.tm.create_entity(authority)
+        entity = self.tm.create_entity()
+        existence = entity.create_existence_property_assertion(authority)
         export = self.exporter.export_entities([entity])
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
-    <authority xml:id="authority-%(authority)d"><name>Test</name></authority>
+    <authority xml:id="authority-%(authority)d" eats_id="%(authority)d">
+      <name>Test</name>
+    </authority>
   </authorities>
   <entities>
-    <entity xml:id="entity-%(entity)d">
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d">
       <existences>
-        <existence authority="authority-%(authority)d"/>
+        <existence authority="authority-%(authority)d" eats_id="%(existence)d"/>
       </existences>
     </entity>
   </entities>
 </collection>
-''' % {'authority': authority.get_id(), 'entity': entity.get_id()}
+''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
+       'existence': existence.get_id()}
         self._compare_XML(export, expected_xml)
 
     def test_export_entity_entity_type (self):
@@ -49,12 +53,13 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         entity_type = self.create_entity_type('person')
         authority.set_entity_types([entity_type])
         entity = self.tm.create_entity()
-        entity.create_entity_type_property_assertion(authority, entity_type)
+        assertion = entity.create_entity_type_property_assertion(
+            authority, entity_type)
         export = self.exporter.export_entities([entity])
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
-    <authority xml:id="authority-%(authority)d">
+    <authority xml:id="authority-%(authority)d" eats_id="%(authority)d">
       <name>Test</name>
       <entity_types>
         <entity_type ref="entity_type-%(entity_type)d"/>
@@ -62,20 +67,20 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     </authority>
   </authorities>
   <entity_types>
-    <entity_type xml:id="entity_type-%(entity_type)d">
+    <entity_type xml:id="entity_type-%(entity_type)d" eats_id="%(entity_type)d">
       <name>person</name>
     </entity_type>
   </entity_types>
   <entities>
-    <entity xml:id="entity-%(entity)d">
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d">
       <entity_types>
-        <entity_type authority="authority-%(authority)d" entity_type="entity_type-%(entity_type)d"/>
+        <entity_type authority="authority-%(authority)d" eats_id="%(assertion)d" entity_type="entity_type-%(entity_type)d"/>
       </entity_types>
     </entity>
   </entities>
 </collection>
 ''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
-       'entity_type': entity_type.get_id()}
+       'entity_type': entity_type.get_id(), 'assertion': assertion.get_id()}
         self._compare_XML(export, expected_xml)
 
     def test_export_entity_name (self):
@@ -106,7 +111,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
-    <authority xml:id="authority-%(authority)d">
+    <authority xml:id="authority-%(authority)d" eats_id="%(authority)d">
       <name>Test</name>
       <languages>
         <language ref="language-%(language)d"/>
@@ -124,7 +129,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     </authority>
   </authorities>
   <languages>
-    <language xml:id="language-%(language)d">
+    <language xml:id="language-%(language)d" eats_id="%(language)d">
       <name>English</name>
       <code>en</code>
       <name_part_types>
@@ -134,29 +139,29 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     </language>
   </languages>
   <name_part_types>
-    <name_part_type xml:id="name_part_type-%(family_name_part_type)d">
+    <name_part_type xml:id="name_part_type-%(family_name_part_type)d" eats_id="%(family_name_part_type)d">
       <name>family</name>
     </name_part_type>
-    <name_part_type xml:id="name_part_type-%(given_name_part_type)d">
+    <name_part_type xml:id="name_part_type-%(given_name_part_type)d" eats_id="%(given_name_part_type)d">
       <name>given</name>
     </name_part_type>
   </name_part_types>
   <name_types>
-    <name_type xml:id="name_type-%(name_type)d">
+    <name_type xml:id="name_type-%(name_type)d" eats_id="%(name_type)d">
       <name>regular</name>
     </name_type>
   </name_types>
   <scripts>
-    <script xml:id="script-%(script)d">
+    <script xml:id="script-%(script)d" eats_id="%(script)d">
       <name>Latin</name>
       <code>Latn</code>
       <separator> </separator>
     </script>
   </scripts>
   <entities>
-    <entity xml:id="entity-%(entity)d">
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d">
       <names>
-        <name authority="authority-%(authority)d" language="language-%(language)d" name_type="name_type-%(name_type)d" script="script-%(script)d">
+        <name authority="authority-%(authority)d" eats_id="%(name)d" language="language-%(language)d" name_type="name_type-%(name_type)d" script="script-%(script)d">
           <display_form></display_form>
           <name_parts>
             <name_part name_part_type="name_part_type-%(family_name_part_type)d" language="language-%(language)d" script="script-%(script)d">Frost</name_part>
@@ -173,7 +178,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
        'language': language.get_id(), 'script': script.get_id(),
        'given_name_part_type': given_name_part_type.get_id(),
        'family_name_part_type': family_name_part_type.get_id(),
-       'name_type': name_type.get_id()}
+       'name_type': name_type.get_id(), 'name': assertion.get_id()}
         self._compare_XML(export, expected_xml)
         
     def test_export_entity_entity_relationship (self):
@@ -183,13 +188,13 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
             'is child of', 'is parent of')
         authority.set_entity_relationship_types([relationship_type])
         other = self.tm.create_entity()
-        entity.create_entity_relationship_property_assertion(
+        assertion = entity.create_entity_relationship_property_assertion(
             authority, relationship_type, entity, other)
         export = self.exporter.export_entities([entity])
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
-    <authority xml:id="authority-%(authority)d">
+    <authority xml:id="authority-%(authority)d" eats_id="%(authority)d">
       <name>Test</name>
       <entity_relationship_types>
         <entity_relationship_type ref="entity_relationship_type-%(relationship_type)d"/>
@@ -197,69 +202,72 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     </authority>
   </authorities>
   <entity_relationship_types>
-    <entity_relationship_type xml:id="entity_relationship_type-%(relationship_type)d">
+    <entity_relationship_type xml:id="entity_relationship_type-%(relationship_type)d" eats_id="%(relationship_type)d">
       <name>is child of</name>
       <reverse_name>is parent of</reverse_name>
     </entity_relationship_type>
   </entity_relationship_types>
   <entities>
-    <entity xml:id="entity-%(entity)d">
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d">
       <entity_relationships>
-        <entity_relationship authority="authority-%(authority)d" entity_relationship_type="entity_relationship_type-%(relationship_type)d" domain_entity="entity-%(entity)d" range_entity="entity-%(other)d"/>
+        <entity_relationship authority="authority-%(authority)d" eats_id="%(assertion)d" entity_relationship_type="entity_relationship_type-%(relationship_type)d" domain_entity="entity-%(entity)d" range_entity="entity-%(other)d"/>
       </entity_relationships>
     </entity>
-    <entity xml:id="entity-%(other)d" related_entity="true"></entity>
+    <entity xml:id="entity-%(other)d" eats_id="%(other)d" related_entity="true"></entity>
   </entities>
 </collection>
 ''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
-       'other': other.get_id(), 'relationship_type': relationship_type.get_id()}
+       'other': other.get_id(), 'relationship_type': relationship_type.get_id(),
+       'assertion': assertion.get_id()}
         self._compare_XML(export, expected_xml)
 
     def test_export_entity_note (self):
         authority = self.create_authority('Test')
         entity = self.tm.create_entity()
-        entity.create_note_property_assertion(authority, 'A note.')
+        note = entity.create_note_property_assertion(authority, 'A note.')
         export = self.exporter.export_entities([entity])
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
-    <authority xml:id="authority-%(authority)d">
+    <authority xml:id="authority-%(authority)d" eats_id="%(authority)d">
       <name>Test</name>
     </authority>
   </authorities>
   <entities>
-    <entity xml:id="entity-%(entity)d">
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d">
       <notes>
-        <note authority="authority-%(authority)d">A note.</note>
+        <note authority="authority-%(authority)d" eats_id="%(note)d">A note.</note>
       </notes>
     </entity>
   </entities>
 </collection>
-''' % {'authority': authority.get_id(), 'entity': entity.get_id()}
+''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
+       'note': note.get_id()}
         self._compare_XML(export, expected_xml)
 
     def test_export_entity_subject_identifier (self):
         authority = self.create_authority('Test')
         entity = self.tm.create_entity()
-        entity.create_subject_identifier_property_assertion(
+        assertion = entity.create_subject_identifier_property_assertion(
             authority, 'http://www.example.org/test/')
         export = self.exporter.export_entities([entity])
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
-    <authority xml:id="authority-%(authority)d">
+    <authority xml:id="authority-%(authority)d" eats_id="%(authority)d">
       <name>Test</name>
     </authority>
   </authorities>
   <entities>
-    <entity xml:id="entity-%(entity)d">
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d">
       <subject_identifiers>
-        <subject_identifier authority="authority-%(authority)d">http://www.example.org/test/</subject_identifier>
+        <subject_identifier authority="authority-%(authority)d" eats_id="%(assertion)d">http://www.example.org/test/</subject_identifier>
       </subject_identifiers>
     </entity>
   </entities>
 </collection>
-''' % {'authority': authority.get_id(), 'entity': entity.get_id()}
+''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
+       'assertion': assertion.get_id()}
         self._compare_XML(export, expected_xml)
 
     def test_export_entity_date (self):
@@ -283,7 +291,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
-    <authority xml:id="authority-%(authority)d">
+    <authority xml:id="authority-%(authority)d" eats_id="%(authority)d">
       <name>Test</name>
       <calendars>
         <calendar ref="calendar-%(calendar)d"/>
@@ -297,24 +305,24 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     </authority>
   </authorities>
   <calendars>
-    <calendar xml:id="calendar-%(calendar)d">
+    <calendar xml:id="calendar-%(calendar)d" eats_id="%(calendar)d">
       <name>Julian</name>
     </calendar>
   </calendars>
   <date_periods>
-    <date_period xml:id="date_period-%(date_period)d">
+    <date_period xml:id="date_period-%(date_period)d" eats_id="%(date_period)d">
       <name>lifespan</name>
     </date_period>
   </date_periods>
   <date_types>
-    <date_type xml:id="date_type-%(date_type)d">
+    <date_type xml:id="date_type-%(date_type)d" eats_id="%(date_type)d">
       <name>exact</name>
     </date_type>
   </date_types>
   <entities>
-    <entity xml:id="entity-%(entity)d">
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d">
       <existences>
-        <existence authority="authority-%(authority)d">
+        <existence authority="authority-%(authority)d" eats_id="%(existence)d">
           <dates>
             <date date_period="date_period-%(date_period)d">
               <assembled_form>%(date_assembled)s</assembled_form>
@@ -334,7 +342,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
 ''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
        'date_assembled': date.assembled_form, 'calendar': calendar.get_id(),
        'date_type': date_type.get_id(), 'date_period': date_period.get_id(),
-       'certainty': certainty_value}
+       'certainty': certainty_value, 'existence': existence.get_id()}
         self._compare_XML(export, expected_xml)
 
     def test_export_infrastructure_full (self):
@@ -372,7 +380,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
-    <authority xml:id="authority-%(authority1)d">
+    <authority xml:id="authority-%(authority1)d" eats_id="%(authority1)d">
       <name>Test1</name>
       <entity_types>
         <entity_type ref="entity_type-%(person)d"/>
@@ -392,7 +400,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         <script ref="script-%(latin)d"/>
       </scripts>
     </authority>
-    <authority xml:id="authority-%(authority2)d">
+    <authority xml:id="authority-%(authority2)d" eats_id="%(authority2)d">
       <name>Test2</name>
       <calendars>
         <calendar ref="calendar-%(calendar)d"/>
@@ -418,36 +426,36 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     </authority>
   </authorities>
   <calendars>
-    <calendar xml:id="calendar-%(calendar)d">
+    <calendar xml:id="calendar-%(calendar)d" eats_id="%(calendar)d">
       <name>Julian</name>
     </calendar>
   </calendars>
   <date_periods>
-    <date_period xml:id="date_period-%(date_period)d">
+    <date_period xml:id="date_period-%(date_period)d" eats_id="%(date_period)d">
       <name>lifespan</name>
     </date_period>
   </date_periods>
   <date_types>
-    <date_type xml:id="date_type-%(date_type)d">
+    <date_type xml:id="date_type-%(date_type)d" eats_id="%(date_type)d">
       <name>exact</name>
     </date_type>
   </date_types>
   <entity_relationship_types>
-    <entity_relationship_type xml:id="entity_relationship_type-%(child)d">
+    <entity_relationship_type xml:id="entity_relationship_type-%(child)d" eats_id="%(child)d">
       <name>is child of</name>
       <reverse_name>is parent of</reverse_name>
     </entity_relationship_type>
   </entity_relationship_types>
   <entity_types>
-    <entity_type xml:id="entity_type-%(person)d">
+    <entity_type xml:id="entity_type-%(person)d" eats_id="%(person)d">
       <name>person</name>
     </entity_type>
-    <entity_type xml:id="entity_type-%(place)d">
+    <entity_type xml:id="entity_type-%(place)d" eats_id="%(place)d">
       <name>place</name>
     </entity_type>
   </entity_types>
   <languages>
-    <language xml:id="language-%(english)d">
+    <language xml:id="language-%(english)d" eats_id="%(english)d">
       <name>English</name>
       <code>en</code>
       <name_part_types>
@@ -456,34 +464,34 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         <name_part_type ref="name_part_type-%(family)d"/>
       </name_part_types>
     </language>
-    <language xml:id="language-%(french)d">
+    <language xml:id="language-%(french)d" eats_id="%(french)d">
       <name>French</name>
       <code>fr</code>
     </language>
   </languages>
   <name_part_types>
-    <name_part_type xml:id="name_part_type-%(given)d">
+    <name_part_type xml:id="name_part_type-%(given)d" eats_id="%(given)d">
       <name>given</name>
     </name_part_type>
-    <name_part_type xml:id="name_part_type-%(family)d">
+    <name_part_type xml:id="name_part_type-%(family)d" eats_id="%(family)d">
       <name>family</name>
     </name_part_type>
-    <name_part_type xml:id="name_part_type-%(title)d">
+    <name_part_type xml:id="name_part_type-%(title)d" eats_id="%(title)d">
       <name>title</name>
     </name_part_type>
   </name_part_types>
   <name_types>
-    <name_type xml:id="name_type-%(regular)d">
+    <name_type xml:id="name_type-%(regular)d" eats_id="%(regular)d">
       <name>regular</name>
     </name_type>
   </name_types>
   <scripts>
-    <script xml:id="script-%(arabic)d">
+    <script xml:id="script-%(arabic)d" eats_id="%(arabic)d">
       <name>Arabic</name>
       <code>Arab</code>
       <separator></separator>
     </script>
-    <script xml:id="script-%(latin)d">
+    <script xml:id="script-%(latin)d" eats_id="%(latin)d">
       <name>Latin</name>
       <code>Latn</code>
       <separator> </separator>
@@ -539,7 +547,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
-    <authority xml:id="authority-%(authority2)d">
+    <authority xml:id="authority-%(authority2)d" eats_id="%(authority2)d">
       <name>Test2</name>
       <calendars>
         <calendar ref="calendar-%(calendar)d"/>
@@ -565,27 +573,27 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     </authority>
   </authorities>
   <calendars>
-    <calendar xml:id="calendar-%(calendar)d">
+    <calendar xml:id="calendar-%(calendar)d" eats_id="%(calendar)d">
       <name>Julian</name>
     </calendar>
   </calendars>
   <date_periods>
-    <date_period xml:id="date_period-%(date_period)d">
+    <date_period xml:id="date_period-%(date_period)d" eats_id="%(date_period)d">
       <name>lifespan</name>
     </date_period>
   </date_periods>
   <date_types>
-    <date_type xml:id="date_type-%(date_type)d">
+    <date_type xml:id="date_type-%(date_type)d" eats_id="%(date_type)d">
       <name>exact</name>
     </date_type>
   </date_types>
   <entity_types>
-    <entity_type xml:id="entity_type-%(place)d">
+    <entity_type xml:id="entity_type-%(place)d" eats_id="%(place)d">
       <name>place</name>
     </entity_type>
   </entity_types>
   <languages>
-    <language xml:id="language-%(french)d">
+    <language xml:id="language-%(french)d" eats_id="%(french)d">
       <name>French</name>
       <code>fr</code>
       <name_part_types>
@@ -594,12 +602,12 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     </language>
   </languages>
   <name_part_types>
-    <name_part_type xml:id="name_part_type-%(family)d">
+    <name_part_type xml:id="name_part_type-%(family)d" eats_id="%(family)d">
       <name>family</name>
     </name_part_type>
   </name_part_types>
   <scripts>
-    <script xml:id="script-%(arabic)d">
+    <script xml:id="script-%(arabic)d" eats_id="%(arabic)d">
       <name>Arabic</name>
       <code>Arab</code>
       <separator></separator>

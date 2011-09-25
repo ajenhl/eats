@@ -63,7 +63,9 @@ class EATSMLExporter (EATSMLHandler):
 
         """
         entity_element = etree.SubElement(parent, EATS + 'entity')
-        entity_element.set(XML + 'id', 'entity-%d' % entity.get_id())
+        entity_id = str(entity.get_id())
+        entity_element.set(XML + 'id', 'entity-%s' % entity_id)
+        entity_element.set('eats_id', entity_id)
         self._export_existence_property_assertions(entity, entity_element)
         self._export_entity_type_property_assertions(entity, entity_element)
         self._export_name_property_assertions(entity, entity_element)
@@ -113,6 +115,7 @@ class EATSMLExporter (EATSMLHandler):
                                              'entity_relationship')
         authority = assertion.authority
         assertion_element.set('authority', 'authority-%d' % authority.get_id())
+        assertion_element.set('eats_id', str(assertion.get_id()))
         relationship_type = assertion.entity_relationship_type
         assertion_element.set(
             'entity_relationship_type', 'entity_relationship_type-%d' %
@@ -162,6 +165,7 @@ class EATSMLExporter (EATSMLHandler):
         authority = assertion.authority
         entity_type = assertion.entity_type
         assertion_element.set('authority', 'authority-%d' % authority.get_id())
+        assertion_element.set('eats_id', str(assertion.get_id()))
         assertion_element.set('entity_type', 'entity_type-%d' %
                               entity_type.get_id())
         self._infrastructure_required['authority'].add(authority)
@@ -196,6 +200,7 @@ class EATSMLExporter (EATSMLHandler):
         assertion_element = etree.SubElement(parent, EATS + 'existence')
         authority = existence.authority
         assertion_element.set('authority', 'authority-%d' % authority.get_id())
+        assertion_element.set('eats_id', str(existence.get_id()))
         self._infrastructure_required['authority'].add(authority)
         self._export_dates(existence, assertion_element)
 
@@ -230,6 +235,7 @@ class EATSMLExporter (EATSMLHandler):
         language = name.language
         script = name.script
         name_element.set('authority', 'authority-%d' % authority.get_id())
+        name_element.set('eats_id', str(assertion.get_id()))
         name_element.set('language', 'language-%d' % language.get_id())
         name_element.set('name_type', 'name_type-%d' % name_type.get_id())
         name_element.set('script', 'script-%d' % script.get_id())
@@ -304,6 +310,7 @@ class EATSMLExporter (EATSMLHandler):
         authority = assertion.authority
         note_element = etree.SubElement(parent, EATS + 'note')
         note_element.set('authority', 'authority-%d' % authority.get_id())
+        note_element.set('eats_id', str(assertion.get_id()))
         note_element.text = assertion.note
         self._infrastructure_required['authority'].add(authority)
 
@@ -340,6 +347,7 @@ class EATSMLExporter (EATSMLHandler):
         authority = assertion.authority
         subject_identifier_element.set('authority', 'authority-%d' %
                                        authority.get_id())
+        subject_identifier_element.set('eats_id', str(assertion.get_id()))
         subject_identifier_element.text = assertion.subject_identifier
         self._infrastructure_required['authority'].add(authority)
 
@@ -540,7 +548,9 @@ class EATSMLExporter (EATSMLHandler):
 
         """
         authority_element = etree.SubElement(parent, EATS + 'authority')
-        authority_element.set(XML + 'id', 'authority-%d' % authority.get_id())
+        authority_id = str(authority.get_id())
+        authority_element.set(XML + 'id', 'authority-%s' % authority_id)
+        authority_element.set('eats_id', authority_id)
         name_element = etree.SubElement(authority_element, EATS + 'name')
         name_element.text = authority.get_admin_name()
         calendars = authority.get_calendars()
@@ -635,8 +645,9 @@ class EATSMLExporter (EATSMLHandler):
 
         """
         calendar_element = etree.SubElement(parent, EATS + 'calendar')
-        calendar_element.set(XML + 'id', 'calendar-%d' %
-                                calendar.get_id())
+        calendar_id = str(calendar.get_id())
+        calendar_element.set(XML + 'id', 'calendar-%s' % calendar_id)
+        calendar_element.set('eats_id', calendar_id)
         name_element = etree.SubElement(calendar_element, EATS + 'name')
         name_element.text = calendar.get_admin_name()
 
@@ -665,8 +676,9 @@ class EATSMLExporter (EATSMLHandler):
 
         """
         date_period_element = etree.SubElement(parent, EATS + 'date_period')
-        date_period_element.set(XML + 'id', 'date_period-%d' %
-                                date_period.get_id())
+        date_period_id = str(date_period.get_id())
+        date_period_element.set(XML + 'id', 'date_period-%s' % date_period_id)
+        date_period_element.set('eats_id', date_period_id)
         name_element = etree.SubElement(date_period_element, EATS + 'name')
         name_element.text = date_period.get_admin_name()
 
@@ -695,8 +707,9 @@ class EATSMLExporter (EATSMLHandler):
 
         """
         date_type_element = etree.SubElement(parent, EATS + 'date_type')
-        date_type_element.set(XML + 'id', 'date_type-%d' %
-                              date_type.get_id())
+        date_type_id = str(date_type.get_id())
+        date_type_element.set(XML + 'id', 'date_type-%s' % date_type_id)
+        date_type_element.set('eats_id', date_type_id)
         name_element = etree.SubElement(date_type_element, EATS + 'name')
         name_element.text = date_type.get_admin_name()
 
@@ -729,8 +742,10 @@ class EATSMLExporter (EATSMLHandler):
         """
         relationship_type_element = etree.SubElement(
             parent, EATS + 'entity_relationship_type')
-        relationship_type_element.set(XML + 'id', 'entity_relationship_type-%d'
-                                      % relationship_type.get_id())
+        relationship_type_id = str(relationship_type.get_id())
+        relationship_type_element.set(XML + 'id', 'entity_relationship_type-%s'
+                                      % relationship_type_id)
+        relationship_type_element.set('eats_id', relationship_type_id)
         name_element = etree.SubElement(relationship_type_element,
                                         EATS + 'name')
         name_element.text = relationship_type.get_admin_forward_name()
@@ -763,8 +778,9 @@ class EATSMLExporter (EATSMLHandler):
 
         """
         entity_type_element = etree.SubElement(parent, EATS + 'entity_type')
-        entity_type_element.set(XML + 'id', 'entity_type-%d' %
-                                entity_type.get_id())
+        entity_type_id = str(entity_type.get_id())
+        entity_type_element.set(XML + 'id', 'entity_type-%s' % entity_type_id)
+        entity_type_element.set('eats_id', entity_type_id)
         name_element = etree.SubElement(entity_type_element, EATS + 'name')
         name_element.text = entity_type.get_admin_name()
 
@@ -792,7 +808,9 @@ class EATSMLExporter (EATSMLHandler):
 
         """
         language_element = etree.SubElement(parent, EATS + 'language')
-        language_element.set(XML + 'id', 'language-%d' % language.get_id())
+        language_id = str(language.get_id())
+        language_element.set(XML + 'id', 'language-%s' % language_id)
+        language_element.set('eats_id', language_id)
         name_element = etree.SubElement(language_element, EATS + 'name')
         name_element.text = language.get_admin_name()
         code_element = etree.SubElement(language_element, EATS + 'code')
@@ -843,7 +861,9 @@ class EATSMLExporter (EATSMLHandler):
 
         """
         name_type_element = etree.SubElement(parent, EATS + 'name_type')
-        name_type_element.set(XML + 'id', 'name_type-%d' % name_type.get_id())
+        name_type_id = str(name_type.get_id())
+        name_type_element.set(XML + 'id', 'name_type-%s' % name_type_id)
+        name_type_element.set('eats_id', name_type_id)
         name_element = etree.SubElement(name_type_element, EATS + 'name')
         name_element.text = name_type.get_admin_name()
 
@@ -874,8 +894,10 @@ class EATSMLExporter (EATSMLHandler):
         """
         name_part_type_element = etree.SubElement(parent, EATS +
                                                   'name_part_type')
-        name_part_type_element.set(XML + 'id', 'name_part_type-%d' %
-                                   name_part_type.get_id())
+        name_part_type_id = str(name_part_type.get_id())
+        name_part_type_element.set(XML + 'id', 'name_part_type-%s' %
+                                   name_part_type_id)
+        name_part_type_element.set('eats_id', name_part_type_id)
         name_element = etree.SubElement(name_part_type_element, EATS + 'name')
         name_element.text = name_part_type.get_admin_name()
 
@@ -903,7 +925,9 @@ class EATSMLExporter (EATSMLHandler):
 
         """
         script_element = etree.SubElement(parent, EATS + 'script')
-        script_element.set(XML + 'id', 'script-%d' % script.get_id())
+        script_id = str(script.get_id())
+        script_element.set(XML + 'id', 'script-%s' % script_id)
+        script_element.set('eats_id', script_id)
         name_element = etree.SubElement(script_element, EATS + 'name')
         name_element.text = script.get_admin_name()
         code_element = etree.SubElement(script_element, EATS + 'code')

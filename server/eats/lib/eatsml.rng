@@ -321,6 +321,9 @@
         <oneOrMore>
           <element name="existence">
             <ref name="authority_attribute"/>
+            <optional>
+              <ref name="eats_id_attribute"/>
+            </optional>
             <ref name="dates"/>
           </element>
         </oneOrMore>
@@ -334,6 +337,9 @@
         <oneOrMore>
           <element name="entity_type">
             <ref name="authority_attribute"/>
+            <optional>
+              <ref name="eats_id_attribute"/>
+            </optional>
             <attribute name="entity_type">
               <data type="IDREF"/>
             </attribute>
@@ -350,6 +356,9 @@
         <oneOrMore>
           <element name="name">
             <ref name="authority_attribute"/>
+            <optional>
+              <ref name="eats_id_attribute"/>
+            </optional>
             <ref name="language_attribute"/>
             <ref name="script_attribute"/>
             <attribute name="name_type">
@@ -391,6 +400,9 @@
             <attribute name="domain_entity">
               <data type="IDREF"/>
             </attribute>
+            <optional>
+              <ref name="eats_id_attribute"/>
+            </optional>
             <attribute name="entity_relationship_type">
               <data type="IDREF"/>
             </attribute>
@@ -410,6 +422,9 @@
         <oneOrMore>
           <element name="subject_identifier">
             <ref name="authority_attribute"/>
+            <optional>
+              <ref name="eats_id_attribute"/>
+            </optional>
             <text/>
           </element>
         </oneOrMore>
@@ -423,6 +438,9 @@
         <oneOrMore>
           <element name="note">
             <ref name="authority_attribute"/>
+            <optional>
+              <ref name="eats_id_attribute"/>
+            </optional>
             <text/>
           </element>
         </oneOrMore>
