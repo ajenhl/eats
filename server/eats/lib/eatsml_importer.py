@@ -5,7 +5,7 @@ from lxml import etree
 from eats.constants import EATS_NAMESPACE, XML
 from eats.exceptions import EATSMLException
 from eats.lib.eatsml_handler import EATSMLHandler
-from eats.models import Authority, EntityType, Language, NamePartType, NameType, Script
+from eats.models import Authority, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
 
 
 NSMAP = {'e': EATS_NAMESPACE}
@@ -271,6 +271,8 @@ class EATSMLImporter (EATSMLHandler):
                 entity_relationship_type = self._topic_map.create_entity_relationship_type(name, reverse_name)
                 eats_id = entity_relationship_type.get_id()
                 element.set('eats_id', str(eats_id))
+            else:
+                entity_relationship_type = EntityRelationshipType.objects.get_by_identifier(eats_id)
             self._add_mapping('entity_relationship_type', xml_id,
                               entity_relationship_type)
 
@@ -407,12 +409,12 @@ class EATSMLImporter (EATSMLHandler):
                 entity = self._topic_map.create_entity()
                 entity_element.set('eats_id', str(entity.get_id()))
             self._add_mapping('entity', xml_id, entity)
-            #self._import_entity_relationship_assertions(entity, entity_element)
             self._import_entity_type_assertions(entity, entity_element)
             self._import_existence_assertions(entity, entity_element)
             self._import_name_assertions(entity, entity_element)
             self._import_note_assertions(entity, entity_element)
             self._import_subject_identifier_assertions(entity, entity_element)
+        self._import_entity_relationship_assertions(tree)
 
     def _import_entity_type_assertions (self, entity, entity_element):
         """Imports entity type assertions from `entity_element` into
@@ -494,7 +496,16 @@ class EATSMLImporter (EATSMLHandler):
         :type name_element: `Element`
 
         """
-        pass
+        for element in name_element.xpath('e:name_parts/e:name_part',
+                                          namespaces=NSMAP):
+            name_part_type = self._get_mapped_object(element, 'name_part_type',
+                                                     'name_part_type')
+            language = self._get_mapped_object(element, 'language', 'language')
+            script = self._get_mapped_object(element, 'script', 'script')
+            display_form = self._get_text(element, '.')
+            order = element.xpath('count(preceding-sibling::e:name_part[@name_part_type="%s"])+1' % name_part_type, namespaces=NSMAP)
+            name.create_name_part(name_part_type, language, script,
+                                  display_form, order)
 
     def _import_note_assertions (self, entity, entity_element):
         """Imports note assertions from `entity_element` into
@@ -539,39 +550,32 @@ class EATSMLImporter (EATSMLHandler):
                     authority, subject_identifier)
                 element.set('eats_id', str(assertion.get_id()))
 
-    def _import_entity_relationship_assertions (self, entity, entity_element):
-        """Imports entity relationship assertions from `entity_element`
-        into `entity`.
+    def _import_entity_relationship_assertions (self, tree):
+        """Imports entity relationship assertions.
 
-        :param entity: entity to import into
-        :type entity: `Entity`
-        :param entity_element: XML element representing `entity`
-        :type entity_element: `Element`
+        :param tree: XML tree of EATSML to import
+        :type tree: `ElementTree`
 
         """
-        elements = entity_element.xpath(
-            'e:entity_relationships/e:entity_relationship', namespaces=NSMAP)
+        elements = tree.xpath(
+            '/e:collection/e:entities/e:entity/e:entity_relationships/e:entity_relationship', namespaces=NSMAP)
         for element in elements:
             eats_id = self._get_element_eats_id(element)
             if eats_id is None:
-                self._import_entity_relationship_assertion(entity, element)
+                self._import_entity_relationship_assertion(element)
 
-    def _import_entity_relationship_assertion (self, entity, element):
-        """Imports entity relationship assertion from `element` into
-        `entity`.
+    def _import_entity_relationship_assertion (self, element):
+        """Imports entity relationship assertion from `element`.
 
-        :param entity: entity to import into
-        :type entity: `Entity`
         :param element: XML element representing entity relationship assertion
         :type element: `Element`
 
         """
-        try:
-            domain_entity = self._get_mapped_object(
-                element, 'domain_entity', 'entity')
-        except KeyError:
-            # The domain entity may not have been imported yet.
-            domain_entity = None
+        entity_element = element.xpath('ancestor::e:entity',
+                                       namespaces=NSMAP)[0]
+        entity = self._get_mapped_object(entity_element, XML + 'id', 'entity')
+        domain_entity = self._get_mapped_object(element, 'domain_entity',
+                                                'entity')
         # Only import an entity relationship if the domain
         # entity is the current entity. This prevents the same
         # relationship between imported twice.
@@ -585,7 +589,7 @@ class EATSMLImporter (EATSMLHandler):
             relationship = entity.create_entity_relationship_property_assertion(
                 authority, entity_relationship_type, domain_entity,
                 range_entity)
-            element.set('eats_id', relationship.get_id())
+            element.set('eats_id', str(relationship.get_id()))
 
     def _add_mapping (self, object_type, xml_id, obj):
         """Adds a mapping between `xml_id` and `obj` within the

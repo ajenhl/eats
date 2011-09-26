@@ -552,6 +552,84 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
         self.assertRaises(EATSMLException, self.importer.import_xml, import_xml,
                           self.admin)
 
+    def test_import_new_entity_entity_relationship (self):
+        authority = self.create_authority('Test')
+        entity_relationship_type = self.create_entity_relationship_type(
+            'is child of', 'is parent of')
+        authority.set_entity_relationship_types([entity_relationship_type])
+        import_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-1" eats_id="%(authority)d">
+      <name>Test</name>
+      <entity_relationship_types>
+        <entity_relationship_type ref="entity_relationship_type-1"/>
+      </entity_relationship_types>
+    </authority>
+  </authorities>
+  <entity_relationship_types>
+    <entity_relationship_type xml:id="entity_relationship_type-1" eats_id="%(entity_relationship_type)d">
+      <name>is child of</name>
+      <reverse_name>is parent of</reverse_name>
+    </entity_relationship_type>
+  </entity_relationship_types>
+  <entities>
+    <entity xml:id="entity-1">
+      <entity_relationships>
+        <entity_relationship authority="authority-1" domain_entity="entity-1" entity_relationship_type="entity_relationship_type-1" range_entity="entity-2"/>
+      </entity_relationships>
+    </entity>
+    <entity xml:id="entity-2">
+      <entity_relationships>
+        <entity_relationship authority="authority-1" domain_entity="entity-1" entity_relationship_type="entity_relationship_type-1" range_entity="entity-2"/>
+      </entity_relationships>
+    </entity>
+  </entities>
+</collection>''' % {'authority': authority.get_id(),
+                    'entity_relationship_type': entity_relationship_type.get_id()}
+        annotated_import = self.importer.import_xml(import_xml, self.admin)
+        entity1 = Entity.objects.all()[0]
+        entity2 = Entity.objects.all()[1]
+        assertion = entity1.get_entity_relationships()[0]
+        self.assertEqual(assertion.authority, authority)
+        self.assertEqual(assertion.entity_relationship_type,
+                         entity_relationship_type)
+        self.assertEqual(assertion.domain_entity, entity1)
+        self.assertEqual(assertion.range_entity, entity2)
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-1" eats_id="%(authority)d">
+      <name>Test</name>
+      <entity_relationship_types>
+        <entity_relationship_type ref="entity_relationship_type-1"/>
+      </entity_relationship_types>
+    </authority>
+  </authorities>
+  <entity_relationship_types>
+    <entity_relationship_type xml:id="entity_relationship_type-1" eats_id="%(entity_relationship_type)d">
+      <name>is child of</name>
+      <reverse_name>is parent of</reverse_name>
+    </entity_relationship_type>
+  </entity_relationship_types>
+  <entities>
+    <entity xml:id="entity-1" eats_id="%(entity1)d">
+      <entity_relationships>
+        <entity_relationship authority="authority-1" domain_entity="entity-1" eats_id="%(assertion)d" entity_relationship_type="entity_relationship_type-1" range_entity="entity-2"/>
+      </entity_relationships>
+    </entity>
+    <entity xml:id="entity-2" eats_id="%(entity2)d">
+      <entity_relationships>
+        <entity_relationship authority="authority-1" domain_entity="entity-1" entity_relationship_type="entity_relationship_type-1" range_entity="entity-2"/>
+      </entity_relationships>
+    </entity>
+  </entities>
+</collection>''' % {'authority': authority.get_id(),
+                    'entity_relationship_type': entity_relationship_type.get_id(),
+                    'entity1': entity1.get_id(), 'entity2': entity2.get_id(),
+                    'assertion': assertion.get_id()}
+        self._compare_XML(annotated_import, expected_xml)
+
     def test_import_new_entity_entity_type (self):
         authority = self.create_authority('Test')
         entity_type = self.create_entity_type('person')
