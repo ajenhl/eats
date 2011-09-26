@@ -1,0 +1,77 @@
+"""Module containing constants for the Banquet application."""
+
+BANQUET_CONFIG_FILEPATH = '~/.banquetrc'
+
+EATS_SERVER_CONNECTED = 'connected'
+EATS_SERVER_CONNECTED_MESSAGE = 'Connected to the EATS server'
+EATS_SERVER_DISCONNECTED = 'disconnected'
+EATS_SERVER_DISCONNECTED_MESSAGE = 'Not connected to the EATS server'
+EATS_SEARCH_RESULTS = 'search_results'
+
+MARKUP_NOTEBOOK_NAME_PAGE = 0
+MARKUP_NOTEBOOK_FILE_PAGE = 1
+MARKUP_NOTEBOOK_KEY_PAGE = 2
+MARKUP_NOTEBOOK_SELECTION_PAGE = 3
+
+FILE_LOAD_INACTIVE = 0
+FILE_LOAD_COMPLETE = 1
+FILE_LOAD_INTERRUPTED = 2
+FILE_TOTAL_TYPE = 'file_total'
+FILE_INCREMENTED_TYPE = 'file_increment'
+NAME_TOTAL_TYPE = 'name_total'
+NAME_INCREMENTED_TYPE = 'name_increment'
+
+TEI_NAMESPACE = 'http://www.tei-c.org/ns/1.0'
+TEI_NSMAP = {'tei': TEI_NAMESPACE}
+
+# Columns in the filelist ListStore.
+FILE_OBJECT_COLUMN = 0
+
+# Columns in the name markup TreeStore.
+IS_SELECTED_COLUMN = 0
+NAME_OBJECT_COLUMN = 1
+IS_KEYED_COLUMN = 2
+
+# Columns in the resultlist TreeStore.
+ENTITY_OBJECT_COLUMN = 0
+ENTITY_TYPE_COLUMN = 1
+GIVEN_NAME_COLUMN = 2
+FAMILY_NAME_COLUMN = 3
+
+# Columns in the authority ListStore.
+AUTHORITY_OBJECT_COLUMN = 0
+AUTHORITY_NAME_COLUMN = 1
+
+# Columns in the entity type ListStore.
+ENTITY_TYPE_OBJECT_COLUMN = 0
+ENTITY_TYPE_NAME_COLUMN = 1
+ENTITY_TYPE_AUTHORITY_OBJECT_COLUMN = 2
+
+# Columns in the language ListStore.
+LANGUAGE_OBJECT_COLUMN = 0
+LANGUAGE_NAME_COLUMN = 1
+
+# Columns in the script ListStore.
+SCRIPT_OBJECT_COLUMN = 0
+SCRIPT_NAME_COLUMN = 1
+
+# Columns in the name type ListStore.
+NAME_TYPE_OBJECT_COLUMN = 0
+NAME_TYPE_NAME_COLUMN = 1
+NAME_TYPE_AUTHORITY_OBJECT_COLUMN = 2
+
+EATS_SERVER_CONFIG_SECTION = 'EATS Server'
+EATS_SERVER_URL_CONFIG_OPTION = 'url'
+EATS_SERVER_USERNAME_CONFIG_OPTION = 'username'
+EATS_SERVER_PASSWORD_CONFIG_OPTION = 'password'
+EATS_SERVER_HTTP_USERNAME_CONFIG_OPTION = 'http_username'
+EATS_SERVER_HTTP_PASSWORD_CONFIG_OPTION = 'http_password'
+TOOLS_CONFIG_SECTION = 'Tools'
+CONTEXT_TOOL_URL_CONFIG_OPTION = 'context_url'
+CONTEXT_LENGTH_CONFIG_OPTION = 'context_length'
+AUTO_EDIT_CONFIG_OPTION = 'auto_edit_new'
+AUTO_DESELECT_CONFIG_OPTION = 'auto_deselect_on_cancel'
+TEI_USES_SPECIFIC_NAME_ELEMENTS = 'tei_uses_specific_name_elements'
+
+# NameInstance context.
+NAME_INSTANCE_CONTEXT_CHARS = 60

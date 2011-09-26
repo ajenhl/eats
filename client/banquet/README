@@ -1,0 +1,73 @@
+Banquet is an EATS client designed to ease the keying of entities in
+one or more TEI XML files. It operates only on existing name markup,
+but allows multiple name elements to be handled with a single
+lookup. It is, to that extent, a batch process.
+
+Banquet is a graphical application.
+
+
+        Application layout
+
+The Banquet GUI consists primarily of two windows: the main
+application window that lists the open files and the name markup
+within them, and the name lookup form.
+
+
+    Main window
+
+The list of name markup in the open documents can be viewed from
+several perspectives, each corresponding to a tab in the
+display. These perspectives are each an ordering and/or filtering of
+the underlying data only.
+
+The names displayed can be filtered by entering text into the text box
+above the tabbed display. This will reduce the set of names displayed
+to only those containing the text entered.
+
+The four perspectives on the list of names are:
+
+Names
+
+  This perspective lists the names, and within each name lists the
+  file(s) in which they occur. Each name is broken down into keyed and
+  unkeyed instances.
+
+Files
+
+  This perspective lists the open file(s), and within each file the
+  names found within that file. Each name is broken down into keyed
+  and unkeyed instances.
+
+Keys
+
+  This perpsective lists the keys used in the open file(s), and within
+  each key lists the file(s) in which it occurs. Within each file are
+  listed the name instances that use that key.
+
+Selections
+
+  This perspective lists the name instances that are currently
+  selected by the user.
+
+
+    Lookup window
+
+[Repeat information from Java lookup client documentation. The two
+interfaces are not quite the same; Banquet's GUI should be brought
+into line with the other.]
+
+
+        Application functionality
+
+Names to be keyed are marked using the checkboxes. Marking an item
+which has children will automatically select the descendants, except
+for those names that are already keyed. When at least one name has
+been marked, and a marked item is selected (highlighted), pressing
+Control-L will open the lookup window. When an entity is selected from
+the lookup, or a new entity created, all of the marked names will be
+keyed with the key for that entity.
+
+Instead of keying a name, the name markup may be removed from the XML
+file (in the case of the markup being incorrect). After marking the
+offending names, pressing Control-D will remove the markup.
+
