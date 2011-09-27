@@ -543,11 +543,14 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
                                               'password')
         user = self.create_user(django_user)
         user.editable_authorities.add(authority2)
-        export = self.exporter.export_infrastructure(True, user)
+        user.set_current_authority(authority2)
+        user.set_language(french)
+        user.set_script(latin)
+        export = self.exporter.export_infrastructure(user=user)
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
-    <authority xml:id="authority-%(authority2)d" eats_id="%(authority2)d">
+    <authority xml:id="authority-%(authority2)d" eats_id="%(authority2)d" user_default="true">
       <name>Test2</name>
       <calendars>
         <calendar ref="calendar-%(calendar)d"/>
@@ -593,7 +596,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     </entity_type>
   </entity_types>
   <languages>
-    <language xml:id="language-%(french)d" eats_id="%(french)d">
+    <language xml:id="language-%(french)d" eats_id="%(french)d" user_default="true">
       <name>French</name>
       <code>fr</code>
       <name_part_types>

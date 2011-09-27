@@ -27,6 +27,9 @@ class EATSMLExporter (EATSMLHandler):
             'script': set(),
             }
         self._entities_required = set()
+        self._user_authority = None
+        self._user_language = None
+        self._user_script = None
 
     def export_entities (self, entities):
         """Returns an XML tree of `entities` exported into EATSML.
@@ -423,26 +426,24 @@ class EATSMLExporter (EATSMLHandler):
                                                   'normalised')
             normalised_element.text = date_part.get_normalised_value()
 
-    def export_infrastructure (self, limited=False, user=None):
+    def export_infrastructure (self, user=None):
         """Returns an XML tree of infrastructural elements, exported
         into EATSML.
 
-        If `limited` is True, `user` must be specified, and the export
-        is limited to those authorities and their associated elements
-        that are editable by the user.
+        If `user` is specified, the export is limited to those
+        authorities and their associated elements that are editable by
+        the user.
 
-        :param limited: whether to limit the export to user editable
-          authorities
-        :type limited: `bool`
         :param user: optional user
         :type user: `EATSUser`
         :rtype: `ElementTree`
 
         """
         root = etree.Element(EATS + 'collection', nsmap=NSMAP)
-        if limited and user is None:
-            raise EATSExportException('A user must be specified if the export is to be limited to user editable authorities')
-        if limited:
+        if user is not None:
+            self._user_authority = user.get_current_authority()
+            self._user_language = user.get_language()
+            self._user_script = user.get_script()
             authorities = user.editable_authorities.all()
             calendars = []
             date_periods = []
@@ -551,6 +552,8 @@ class EATSMLExporter (EATSMLHandler):
         authority_id = str(authority.get_id())
         authority_element.set(XML + 'id', 'authority-%s' % authority_id)
         authority_element.set('eats_id', authority_id)
+        if authority == self._user_authority:
+            authority_element.set('user_default', 'true')
         name_element = etree.SubElement(authority_element, EATS + 'name')
         name_element.text = authority.get_admin_name()
         calendars = authority.get_calendars()
@@ -811,6 +814,8 @@ class EATSMLExporter (EATSMLHandler):
         language_id = str(language.get_id())
         language_element.set(XML + 'id', 'language-%s' % language_id)
         language_element.set('eats_id', language_id)
+        if language == self._user_language:
+            language_element.set('user_default', 'true')
         name_element = etree.SubElement(language_element, EATS + 'name')
         name_element.text = language.get_admin_name()
         code_element = etree.SubElement(language_element, EATS + 'code')
@@ -928,6 +933,8 @@ class EATSMLExporter (EATSMLHandler):
         script_id = str(script.get_id())
         script_element.set(XML + 'id', 'script-%s' % script_id)
         script_element.set('eats_id', script_id)
+        if script == self._user_script:
+            script_element.set('user_default', 'true')
         name_element = etree.SubElement(script_element, EATS + 'name')
         name_element.text = script.get_admin_name()
         code_element = etree.SubElement(script_element, EATS + 'code')

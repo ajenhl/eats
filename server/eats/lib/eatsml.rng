@@ -28,6 +28,9 @@
             <optional>
               <ref name="eats_id_attribute"/>
             </optional>
+            <optional>
+              <ref name="user_default_attribute"/>
+            </optional>
 	    <ref name="name"/>
             <optional>
               <element name="calendars">
@@ -208,6 +211,9 @@
             <optional>
               <ref name="eats_id_attribute"/>
             </optional>
+            <optional>
+              <ref name="user_default_attribute"/>
+            </optional>
             <ref name="name"/>
             <ref name="code"/>
             <optional>
@@ -265,6 +271,9 @@
             <ref name="id_attribute"/>
             <optional>
               <ref name="eats_id_attribute"/>
+            </optional>
+            <optional>
+              <ref name="user_default_attribute"/>
             </optional>
             <ref name="name"/>
             <ref name="code"/>
@@ -521,6 +530,12 @@
   <define name="script_attribute">
     <attribute name="script">
       <data type="IDREF"/>
+    </attribute>
+  </define>
+
+  <define name="user_default_attribute">
+    <attribute name="user_default">
+      <data type="boolean"/>
     </attribute>
   </define>
 
