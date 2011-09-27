@@ -1,9 +1,12 @@
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
+from lxml import etree
+
+from eats.lib.eatsml_exporter import EATSMLExporter
 from eats.lib.property_assertions import EntityRelationshipPropertyAssertions, EntityTypePropertyAssertions, ExistencePropertyAssertions, NamePropertyAssertions, NotePropertyAssertions, SubjectIdentifierPropertyAssertions
 from eats.lib.user import get_user_preferences, user_is_editor
 from eats.decorators import add_topic_map
@@ -200,3 +203,12 @@ def date_change (request, topic_map, entity_id, assertion_id, date_id):
     context_data = {'form': form}
     return render_to_response('eats/edit/date_change.html', context_data,
                               context_instance=RequestContext(request))
+
+@user_passes_test(user_is_editor)
+@add_topic_map
+def export_eatsml_base (request, topic_map):
+    tree = EATSMLExporter(topic_map).export_infrastructure(
+        user=request.user.eats_user)
+    xml = etree.tostring(tree, encoding='utf-8', pretty_print=True)
+    return HttpResponse(xml, mimetype='text/xml')
+    

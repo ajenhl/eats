@@ -21,6 +21,8 @@ urlpatterns += patterns(
     url(r'^entity/(?P<entity_id>\d+)/edit/(?P<assertion_id>\d+)/date/add/$',
         'date_add', name='date-add'),
     url(r'^entity/(?P<entity_id>\d+)/edit/(?P<assertion_id>\d+)/date/(?P<date_id>\d+)/$', 'date_change', name='date-change'),
+    url(r'^export/eatsml/base/', 'export_eatsml_base',
+        name='export-eatsml-base'),
     )
 
 authority_data = {'model': Authority}
