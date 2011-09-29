@@ -10,6 +10,7 @@ urlpatterns = patterns(
     url(r'^entity/(?P<entity_id>\d+)/eatsml/', 'entity_eatsml_view',
         name='entity-eatsml-view'),
     url(r'^search/$', 'search', name='search'),
+    url(r'^search/eatsml/$', 'search_eatsml', name='search-eatsml'),
     )
 
 # Editing.

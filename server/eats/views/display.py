@@ -67,3 +67,12 @@ def search (request, topic_map):
     context_data.update(user_preferences)
     return render_to_response('eats/display/search.html', context_data,
                               context_instance=RequestContext(request))
+
+@add_topic_map
+def search_eatsml (request, topic_map):
+    name = request.GET.get('name', '')
+    entities = topic_map.lookup_entities(name)
+    tree = EATSMLExporter(topic_map).export_entities(entities)
+    xml = etree.tostring(tree, encoding='utf-8', pretty_print=True)
+    return HttpResponse(xml, mimetype='text/xml')
+    
