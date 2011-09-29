@@ -550,7 +550,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
-    <authority xml:id="authority-%(authority2)d" eats_id="%(authority2)d" user_default="true">
+    <authority xml:id="authority-%(authority2)d" eats_id="%(authority2)d" user_preferred="true">
       <name>Test2</name>
       <calendars>
         <calendar ref="calendar-%(calendar)d"/>
@@ -596,7 +596,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     </entity_type>
   </entity_types>
   <languages>
-    <language xml:id="language-%(french)d" eats_id="%(french)d" user_default="true">
+    <language xml:id="language-%(french)d" eats_id="%(french)d" user_preferred="true">
       <name>French</name>
       <code>fr</code>
       <name_part_types>

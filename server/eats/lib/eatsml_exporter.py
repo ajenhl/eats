@@ -1,7 +1,6 @@
 from lxml import etree
 
 from eats.constants import EATS, EATS_NAMESPACE, XML
-from eats.exceptions import EATSExportException
 from eats.lib.eatsml_handler import EATSMLHandler
 from eats.models import Authority, Calendar, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
 
@@ -69,9 +68,6 @@ class EATSMLExporter (EATSMLHandler):
         entity_id = str(entity.get_id())
         entity_element.set(XML + 'id', 'entity-%s' % entity_id)
         entity_element.set('eats_id', entity_id)
-        self._export_existence_property_assertions(entity, entity_element)
-        self._export_entity_type_property_assertions(entity, entity_element)
-        self._export_name_property_assertions(entity, entity_element)
         if extra:
             entity_element.set('related_entity', 'true')
         else:
@@ -80,6 +76,9 @@ class EATSMLExporter (EATSMLHandler):
             # is the possibility of recursion.
             self._export_entity_relationship_property_assertions(
                 entity, entity_element)
+        self._export_entity_type_property_assertions(entity, entity_element)
+        self._export_existence_property_assertions(entity, entity_element)
+        self._export_name_property_assertions(entity, entity_element)
         self._export_note_property_assertions(entity, entity_element)
         self._export_subject_identifier_property_assertions(
             entity, entity_element)
@@ -553,7 +552,7 @@ class EATSMLExporter (EATSMLHandler):
         authority_element.set(XML + 'id', 'authority-%s' % authority_id)
         authority_element.set('eats_id', authority_id)
         if authority == self._user_authority:
-            authority_element.set('user_default', 'true')
+            authority_element.set('user_preferred', 'true')
         name_element = etree.SubElement(authority_element, EATS + 'name')
         name_element.text = authority.get_admin_name()
         calendars = authority.get_calendars()
@@ -815,7 +814,7 @@ class EATSMLExporter (EATSMLHandler):
         language_element.set(XML + 'id', 'language-%s' % language_id)
         language_element.set('eats_id', language_id)
         if language == self._user_language:
-            language_element.set('user_default', 'true')
+            language_element.set('user_preferred', 'true')
         name_element = etree.SubElement(language_element, EATS + 'name')
         name_element.text = language.get_admin_name()
         code_element = etree.SubElement(language_element, EATS + 'code')
@@ -934,7 +933,7 @@ class EATSMLExporter (EATSMLHandler):
         script_element.set(XML + 'id', 'script-%s' % script_id)
         script_element.set('eats_id', script_id)
         if script == self._user_script:
-            script_element.set('user_default', 'true')
+            script_element.set('user_preferred', 'true')
         name_element = etree.SubElement(script_element, EATS + 'name')
         name_element.text = script.get_admin_name()
         code_element = etree.SubElement(script_element, EATS + 'code')

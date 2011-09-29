@@ -29,7 +29,7 @@
               <ref name="eats_id_attribute"/>
             </optional>
             <optional>
-              <ref name="user_default_attribute"/>
+              <ref name="user_preferred_attribute"/>
             </optional>
 	    <ref name="name"/>
             <optional>
@@ -212,7 +212,7 @@
               <ref name="eats_id_attribute"/>
             </optional>
             <optional>
-              <ref name="user_default_attribute"/>
+              <ref name="user_preferred_attribute"/>
             </optional>
             <ref name="name"/>
             <ref name="code"/>
@@ -273,7 +273,7 @@
               <ref name="eats_id_attribute"/>
             </optional>
             <optional>
-              <ref name="user_default_attribute"/>
+              <ref name="user_preferred_attribute"/>
             </optional>
             <ref name="name"/>
             <ref name="code"/>
@@ -533,8 +533,8 @@
     </attribute>
   </define>
 
-  <define name="user_default_attribute">
-    <attribute name="user_default">
+  <define name="user_preferred_attribute">
+    <attribute name="user_preferred">
       <data type="boolean"/>
     </attribute>
   </define>
