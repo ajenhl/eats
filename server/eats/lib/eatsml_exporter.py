@@ -39,19 +39,31 @@ class EATSMLExporter (EATSMLHandler):
 
         """
         root = etree.Element(EATS + 'collection', nsmap=NSMAP)
-        entities_element = etree.SubElement(root, EATS + 'entities')
+        if entities:
+            self._export_entities(entities, root)
+        # Export any required infrastructure elements.
+        self._export_infrastructure(root)
+        tree = root.getroottree()
+        self._validate(tree)
+        return tree
+
+    def _export_entities (self, entities, parent):
+        """Exports `entities`.
+
+        :param entities: entities to export
+        :type entities: `list` or `QuerySet` of `Entity`s
+        :param parent: XML element that will contain the exported entities
+        :type parent: `Element`
+
+        """
+        entities_element = etree.SubElement(parent, EATS + 'entities')
         for entity in entities:
             self._export_entity(entity, entities_element)
         # Export any additional entities that might need to be
         # exported (due to being referenced from another entity).
         for entity in self._entities_required:
             if entity not in entities:
-                self._export_entity(entity, entities_element, True)
-        # Export any required infrastructure elements.
-        self._export_infrastructure(root)
-        tree = root.getroottree()
-        self._validate(tree)
-        return tree
+                self._export_entity(entity, entities_element, True)        
 
     def _export_entity (self, entity, parent, extra=False):
         """Exports `entity`.
@@ -521,7 +533,7 @@ class EATSMLExporter (EATSMLHandler):
         self._export_scripts(scripts, parent)
         # If there is an entities element that has already been
         # created, move it to after the infrastructure elements.
-        if parent[0].tag == EATS + 'entities':
+        if len(parent) and parent[0].tag == EATS + 'entities':
             parent.append(parent[0])
 
     def _export_authorities (self, authorities, parent):

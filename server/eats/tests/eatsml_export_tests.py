@@ -23,6 +23,11 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         root = etree.XML(expected_xml, parser)
         root.getroottree().write_c14n(expected)
         self.assertEqual(actual.getvalue(), expected.getvalue())
+
+    def test_export_no_entities (self):
+        export = self.exporter.export_entities([])
+        expected_xml = '<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/"/>'
+        self._compare_XML(export, expected_xml)
     
     def test_export_entity_existence (self):
         authority = self.create_authority('Test')
