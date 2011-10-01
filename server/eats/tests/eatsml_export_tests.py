@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from StringIO import StringIO
 
 from lxml import etree
@@ -167,13 +169,13 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     <entity xml:id="entity-%(entity)d" eats_id="%(entity)d">
       <names>
         <name authority="authority-%(authority)d" eats_id="%(name)d" language="language-%(language)d" name_type="name_type-%(name_type)d" script="script-%(script)d">
+          <assembled_form>Miriam Clare Frost</assembled_form>
           <display_form></display_form>
           <name_parts>
             <name_part name_part_type="name_part_type-%(family_name_part_type)d" language="language-%(language)d" script="script-%(script)d">Frost</name_part>
             <name_part name_part_type="name_part_type-%(given_name_part_type)d" language="language-%(language)d" script="script-%(script)d">Miriam</name_part>
             <name_part name_part_type="name_part_type-%(given_name_part_type)d" language="language-%(language)d" script="script-%(script)d">Clare</name_part>
           </name_parts>
-          <assembled_form>Miriam Clare Frost</assembled_form>
         </name>
       </names>
     </entity>
@@ -184,6 +186,96 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
        'given_name_part_type': given_name_part_type.get_id(),
        'family_name_part_type': family_name_part_type.get_id(),
        'name_type': name_type.get_id(), 'name': assertion.get_id()}
+        self._compare_XML(export, expected_xml)
+
+    def test_export_entity_name_with_user (self):
+        authority = self.create_authority('Test')
+        english = self.create_language('English', 'en')
+        french = self.create_language('French', 'fr')
+        name_type = self.create_name_type('regular')
+        latin = self.create_script('Latin', 'Latn', ' ')
+        arabic = self.create_script('Arabic', 'Arab', ' ')
+        authority.set_name_types([name_type])
+        authority.set_languages([english, french])
+        authority.set_scripts([arabic, latin])
+        entity = self.tm.create_entity()
+        name1 = entity.create_name_property_assertion(authority, name_type,
+                                                      english, latin, 'Gerald')
+        name2 = entity.create_name_property_assertion(
+            authority, name_type, french, arabic, u'عبّاس')
+        django_user = self.create_django_user('test', 'test@example.org',
+                                              'password')
+        user = self.create_user(django_user)
+        user.editable_authorities.add(authority)
+        user.set_current_authority(authority)
+        user.set_language(french)
+        user.set_script(latin)
+        export = self.exporter.export_entities([entity], user=user)
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-%(authority)d" eats_id="%(authority)d" user_preferred="true">
+      <name>Test</name>
+      <languages>
+        <language ref="language-%(english)d"/>
+        <language ref="language-%(french)d"/>
+      </languages>
+      <name_types>
+        <name_type ref="name_type-%(name_type)d"/>
+      </name_types>
+      <scripts>
+        <script ref="script-%(latin)d"/>
+        <script ref="script-%(arabic)d"/>
+      </scripts>
+    </authority>
+  </authorities>
+  <languages>
+    <language xml:id="language-%(english)d" eats_id="%(english)d">
+      <name>English</name>
+      <code>en</code>
+    </language>
+    <language xml:id="language-%(french)d" eats_id="%(french)d" user_preferred="true">
+      <name>French</name>
+      <code>fr</code>
+    </language>
+  </languages>
+  <name_types>
+    <name_type xml:id="name_type-%(name_type)d" eats_id="%(name_type)d">
+      <name>regular</name>
+    </name_type>
+  </name_types>
+  <scripts>
+    <script xml:id="script-%(latin)d" eats_id="%(latin)d" user_preferred="true">
+      <name>Latin</name>
+      <code>Latn</code>
+      <separator> </separator>
+    </script>
+    <script xml:id="script-%(arabic)d" eats_id="%(arabic)d">
+      <name>Arabic</name>
+      <code>Arab</code>
+      <separator> </separator>
+    </script>
+  </scripts>
+  <entities>
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d">
+      <names>
+        <name authority="authority-%(authority)d" eats_id="%(name1)d" language="language-%(english)d" name_type="name_type-%(name_type)d" script="script-%(latin)d" user_preferred="true">
+          <assembled_form>Gerald</assembled_form>
+          <display_form>Gerald</display_form>
+        </name>
+        <name authority="authority-%(authority)d" eats_id="%(name2)d" language="language-%(french)d" name_type="name_type-%(name_type)d" script="script-%(arabic)d">
+          <assembled_form>عبّاس</assembled_form>
+          <display_form>عبّاس</display_form>
+        </name>
+      </names>
+    </entity>
+  </entities>
+</collection>
+''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
+       'english': english.get_id(), 'french': french.get_id(),
+       'arabic': arabic.get_id(), 'latin': latin.get_id(),
+       'name_type': name_type.get_id(), 'name1': name1.get_id(),
+       'name2': name2.get_id()}
         self._compare_XML(export, expected_xml)
         
     def test_export_entity_entity_relationship (self):

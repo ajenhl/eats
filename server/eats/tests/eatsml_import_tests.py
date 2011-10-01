@@ -796,13 +796,13 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
     <entity xml:id="entity-1">
       <names>
         <name authority="authority-1" language="language-1" name_type="name_type-1" script="script-1">
+          <assembled_form></assembled_form>
           <display_form>Miri Frost</display_form>
           <name_parts>
             <name_part name_part_type="name_part_type-2" language="language-1" script="script-1">Frost</name_part>
             <name_part name_part_type="name_part_type-1" language="language-1" script="script-1">Miriam</name_part>
             <name_part name_part_type="name_part_type-1" language="language-1" script="script-1">Clare</name_part>
           </name_parts>
-          <assembled_form></assembled_form>
         </name>
       </names>
     </entity>
@@ -884,13 +884,13 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
     <entity xml:id="entity-1" eats_id="%(entity)d">
       <names>
         <name authority="authority-1" eats_id="%(assertion)d" language="language-1" name_type="name_type-1" script="script-1">
+          <assembled_form></assembled_form>
           <display_form>Miri Frost</display_form>
           <name_parts>
             <name_part name_part_type="name_part_type-2" language="language-1" script="script-1">Frost</name_part>
             <name_part name_part_type="name_part_type-1" language="language-1" script="script-1">Miriam</name_part>
             <name_part name_part_type="name_part_type-1" language="language-1" script="script-1">Clare</name_part>
           </name_parts>
-          <assembled_form></assembled_form>
         </name>
       </names>
     </entity>

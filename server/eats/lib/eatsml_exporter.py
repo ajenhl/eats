@@ -30,15 +30,24 @@ class EATSMLExporter (EATSMLHandler):
         self._user_language = None
         self._user_script = None
 
-    def export_entities (self, entities):
+    def export_entities (self, entities, user=None):
         """Returns an XML tree of `entities` exported into EATSML.
 
+        If `user` is specified, the preferred name of each entity is
+        annotated.
+        
         :param entities: entities to export
         :type entities: `list` or `QuerySet` of `Entity`s
+        :param user: optional user
+        :type user: `EATSUser`
         :rtype: `ElementTree`
 
         """
         root = etree.Element(EATS + 'collection', nsmap=NSMAP)
+        if user is not None:
+            self._user_authority = user.get_current_authority()
+            self._user_language = user.get_language()
+            self._user_script = user.get_script()
         if entities:
             self._export_entities(entities, root)
         # Export any required infrastructure elements.
@@ -230,16 +239,28 @@ class EATSMLExporter (EATSMLHandler):
         names = entity.get_eats_names()
         if names:
             names_element = etree.SubElement(parent, EATS + 'names')
+            preferred_name = None
+            if self._user_authority or self._user_language or self._user_script:
+                preferred_name = entity.get_preferred_name(
+                    self._user_authority, self._user_language,
+                    self._user_script)
         for name in names:
-            self._export_name_property_assertion(name, names_element)
+            is_preferred = False
+            if name == preferred_name:
+                is_preferred = True
+            self._export_name_property_assertion(name, names_element,
+                                                 is_preferred)
 
-    def _export_name_property_assertion (self, assertion, parent):
+    def _export_name_property_assertion (self, assertion, parent, is_preferred):
         """Exports the name in `assertion`.
 
         :param assertion: name to export
         :type assertion: `NamePropertyAssertion`
         :param parent: XML element that will contain the exported name
         :type parent: `Element`
+        :param is_preferred: indicates if this `assertion` is
+          preferred by the exporter
+        :type is_preferred: `bool`
 
         """
         name_element = etree.SubElement(parent, EATS + 'name')
@@ -253,10 +274,15 @@ class EATSMLExporter (EATSMLHandler):
         name_element.set('language', 'language-%d' % language.get_id())
         name_element.set('name_type', 'name_type-%d' % name_type.get_id())
         name_element.set('script', 'script-%d' % script.get_id())
+        if is_preferred:
+            name_element.set('user_preferred', 'true')
         self._infrastructure_required['authority'].add(authority)
         self._infrastructure_required['language'].add(language)
         self._infrastructure_required['script'].add(script)
         self._infrastructure_required['name_type'].add(name_type)
+        assembled_form_element = etree.SubElement(name_element,
+                                                  EATS + 'assembled_form')
+        assembled_form_element.text = name.assembled_form
         display_form_element = etree.SubElement(name_element,
                                                 EATS + 'display_form')
         display_form_element.text = name.display_form
@@ -270,9 +296,6 @@ class EATSMLExporter (EATSMLHandler):
             for name_part in name_parts:
                 self._export_name_part(name_part_type_id, name_part,
                                        name_parts_element)
-        assembled_form_element = etree.SubElement(name_element,
-                                                  EATS + 'assembled_form')
-        assembled_form_element.text = name.assembled_form
         self._export_dates(assertion, name_element)
 
     def _export_name_part (self, name_part_type_id, name_part, parent):

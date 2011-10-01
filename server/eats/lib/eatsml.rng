@@ -369,10 +369,16 @@
               <ref name="eats_id_attribute"/>
             </optional>
             <ref name="language_attribute"/>
-            <ref name="script_attribute"/>
             <attribute name="name_type">
               <data type="IDREF"/>
             </attribute>
+            <ref name="script_attribute"/>
+            <optional>
+              <ref name="user_preferred_attribute"/>
+            </optional>
+            <element name="assembled_form">
+              <text/>
+            </element>
             <element name="display_form">
               <text/>
             </element>
@@ -390,9 +396,6 @@
                 </oneOrMore>
               </element>
             </optional>
-            <element name="assembled_form">
-              <text/>
-            </element>
             <ref name="dates"/>
           </element>
         </oneOrMore>
