@@ -19,8 +19,6 @@ class NamePropertyAssertionManager (BaseManager):
         unreadable names are bad), then the authority, then the
         language, is returned.
 
-        If `entity` has no names, None is returned.
-
         :param entity: the entity that bears the name
         :type entity: `Entity`
         :param authority: preferred authority to assert the name
