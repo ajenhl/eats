@@ -254,6 +254,22 @@ class Entity (Topic):
             names = names.exclude(id=exclude.id)
         return names
 
+    def get_eats_subject_identifier (self):
+        """Returns this entity's EATS subject identifier.
+
+        This is not a subject identifier property assertion, but
+        rather the EATS system's own SID for this entity.
+
+        :rtype: `SubjectIdentifier`
+
+        """
+        # QAZ: Raise an exception if there is not a single SID.
+        #
+        # QAZ: Due to overridden get_subject_identifiers() method,
+        # access the subject identifiers directly - not nice to expose
+        # the DB layer in this way.
+        return self.subject_identifiers.all()[0]
+
     def get_entity_relationships (self):
         """Returns this entity's relationships to other entities.
 

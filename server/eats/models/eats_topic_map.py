@@ -185,7 +185,7 @@ class EATSTopicMap (TopicMap):
         """
         entity = self.create_topic(proxy=Entity)
         view_url = reverse('entity-view', kwargs={'entity_id': entity.id})
-        url = 'http://%s/%s' % (Site.objects.get_current().domain, view_url)
+        url = 'http://%s%s' % (Site.objects.get_current().domain, view_url)
         entity.add_subject_identifier(Locator(url))
         entity.add_type(self.entity_type)
         if authority is not None:

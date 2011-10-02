@@ -1,3 +1,6 @@
+from django.contrib.sites.models import Site
+from django.core.urlresolvers import reverse
+
 from eats.tests.models.model_test_case import ModelTestCase
 
 
@@ -17,6 +20,14 @@ class EntityTestCase (ModelTestCase):
         self.authority2.set_languages([self.language1, self.language2])
         self.authority2.set_name_types([self.name_type])
         self.authority2.set_scripts([self.script1, self.script2])
+
+    def test_get_eats_subject_identifier (self):
+        entity = self.tm.create_entity()
+        self.assertEqual(len(entity.subject_identifiers.all()), 1)
+        view_url = reverse('entity-view', kwargs={'entity_id': entity.id})
+        url = 'http://%s%s' % (Site.objects.get_current().domain, view_url)
+        subject_identifier = entity.get_eats_subject_identifier()
+        self.assertEqual(subject_identifier.address, url)
 
     def test_get_eats_names (self):
         entity = self.tm.create_entity(self.authority)
