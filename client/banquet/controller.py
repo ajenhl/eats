@@ -278,14 +278,12 @@ class MainController (Controller):
     def __render_result_object (self, column, cell, model, iter):
         """Function for rendering a lookup result."""
         entity = model.get_value(iter, ENTITY_OBJECT_COLUMN)
-        default_name = entity.get_default_name()
-        text = '<b>%s</b>' % gobject.markup_escape_text(default_name.get_display_name())
-        keys = [record.system_id for record in
-                entity.get_default_authority_records()]
-        key_text = ', '.join(keys)
-        if key_text:
-            text = '%s\n    <i>%s</i>' % (text,
-                                          gobject.markup_escape_text(key_text))
+        preferred_name = entity.get_preferred_name()
+        text = '<b>%s</b>' % gobject.markup_escape_text(
+            preferred_name.assembled_form)
+        entity_url = ''
+        text = '%s\n    <i>%s</i>' % (text,
+                                      gobject.markup_escape_text(entity_url))
         dates = [date.assembled_form for date in entity.get_existence_dates()]
         date_text = '\n    '.join(dates)
         if date_text:
@@ -1120,8 +1118,6 @@ class MainController (Controller):
         self.name_type_filter.refilter()
         self.entity_type_filter.refilter()
         # Set the defaults for the other comboboxes.
-        default_name_type_iter = self.name_type_filter.convert_child_iter_to_iter(self.model.default_name_type_iter)
-        self.view['name_type_combobox'].set_active_iter(default_name_type_iter)
         self.view['language_combobox'].set_active_iter(
             self.model.default_language_iter)
         self.view['script_combobox'].set_active_iter(
@@ -1240,9 +1236,9 @@ class MainController (Controller):
         name_text = ''
         names = entity.get_names()
         if len(names) > 1:
-            default_name = entity.get_default_name()
-            name_text = '\n    '.join([name.get_display_name() for name
-                                       in names if name != default_name])
+            preferred_name = entity.get_preferred_name()
+            name_text = '\n    '.join([name.assembled_form for name
+                                       in names if name != preferred_name])
         return name_text
 
     def __get_entity_note_text (self, entity):
@@ -1258,7 +1254,7 @@ class MainController (Controller):
         if notes:
             wrapper = TextWrapper(initial_indent='    ',
                                   subsequent_indent='    ', width=50)
-            note_texts = [wrapper.fill(note.note) for note in notes]
+            note_texts = [wrapper.fill(note.text) for note in notes]
             note_text = '\n\n'.join(note_texts)
         return note_text            
 
@@ -1272,18 +1268,10 @@ class MainController (Controller):
         """
         relationship_text = ''
         relationships = entity.get_relationships()
-        relationship_texts = [relationship.get_assembled_form(entity=True)
+        relationship_texts = [relationship.get_assembled_form()
                               for relationship in relationships]
         if relationship_texts:
             relationship_text = '\n    '.join(relationship_texts)
-        reverse_relationships = entity.get_reverse_relationships()
-        reverse_relationship_texts = [relationship.get_assembled_form(
-                related_entity=True) for relationship in reverse_relationships]
-        if reverse_relationship_texts:
-            if relationship_text:
-                relationship_text = relationship_text + '\n    '
-            relationship_text = relationship_text + '\n    '.join(
-                reverse_relationship_texts)
         return relationship_text
 
     def __create_new_entity (self):

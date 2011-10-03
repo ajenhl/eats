@@ -100,11 +100,15 @@ class MainModel (Model):
         # ListStore for languages:
         #   Language object
         #   Language name
-        self.language_list = gtk.ListStore(gobject.TYPE_PYOBJECT, str)
+        #   Authority object
+        self.language_list = gtk.ListStore(gobject.TYPE_PYOBJECT, str,
+                                           gobject.TYPE_PYOBJECT)
         # ListStore for scripts:
         #   Script object
         #   Script name
-        self.script_list = gtk.ListStore(gobject.TYPE_PYOBJECT, str)
+        #   Authority object
+        self.script_list = gtk.ListStore(gobject.TYPE_PYOBJECT, str,
+                                         gobject.TYPE_PYOBJECT)
         # ListStore for lookup results:
         #   Entity result object
         #   Entity type
@@ -219,34 +223,33 @@ class MainModel (Model):
         self.language_list.clear()
         self.script_list.clear()
         for authority in eatsml.get_authorities():
-            row_iter = self.authority_list.append([authority,
-                                                   authority.short_name])
-            if authority.is_user_default:
+            row_iter = self.authority_list.append([authority, authority.name])
+            if authority.user_preferred:
                 self.default_authority_iter = row_iter
                 self.__default_authority = authority
-        for entity_type in eatsml.get_entity_types():
-            self.entity_type_list.append([entity_type, entity_type.text,
-                                          entity_type.authority])
-        for name_type in eatsml.get_name_types():
-            row_iter = self.name_type_list.append([name_type, name_type.text,
-                                                   name_type.authority])
-            if name_type.is_user_default:
-                self.default_name_type_iter = row_iter
-        for language in eatsml.get_languages():
-            row_iter = self.language_list.append([language, language.name])
-            if language.is_user_default:
-                self.default_language_iter = row_iter
-        for script in eatsml.get_scripts():
-            row_iter = self.script_list.append([script, script.name])
-            if script.is_user_default:
-                self.default_script_iter = row_iter
+            for entity_type in authority.get_entity_types():
+                self.entity_type_list.append([entity_type, entity_type.name,
+                                              authority])
+            for name_type in authority.get_name_types():
+                row_iter = self.name_type_list.append(
+                    [name_type, name_type.name, authority])
+            for language in authority.get_languages():
+                row_iter = self.language_list.append([language, language.name,
+                                                      authority])
+                if language.user_preferred:
+                    self.default_language_iter = row_iter
+            for script in authority.get_scripts():
+                row_iter = self.script_list.append([script, script.name,
+                                                    authority])
+                if script.user_preferred:
+                    self.default_script_iter = row_iter
         self.__name_part_types = {}
         self.__name_part_types['terms_of_address'] = eatsml.get_name_part_type(
-            self.__default_authority, 'terms of address')
+            'terms of address')
         self.__name_part_types['given_name'] = eatsml.get_name_part_type(
-            self.__default_authority, 'given')
+            'given')
         self.__name_part_types['family_name'] = eatsml.get_name_part_type(
-            self.__default_authority, 'family')
+            'family')
         return True
         
     def add_files (self, filenames):
@@ -908,22 +911,18 @@ class MainModel (Model):
         if not entities:
             return
         for entity in entities:
-            entity_types = entity.get_default_entity_types()
+            entity_types = []
             if len(entity_types):
                 entity_type = unicode(entity_types[0])
             else:
                 entity_type = ''
-            name = entity.get_default_name()
+            name = entity.get_preferred_name()
             given_name = family_name = ''
             if name is not None:
-                given_name_element = name.get_name_part(
+                given_name = name.get_name_part(
                     self.__name_part_types['given_name'])
-                if given_name_element is not None:
-                    given_name = given_name_element.text
-                family_name_element = name.get_name_part(
+                family_name = name.get_name_part(
                     self.__name_part_types['family_name'])
-                if family_name_element is not None:
-                    family_name = family_name_element.text
             self.resultlist.append([entity, entity_type,
                                     given_name, family_name])
 
@@ -979,7 +978,7 @@ class MainModel (Model):
         - `entity_type`: entity type element
 
         """
-        entity_type_value = unicode(entity_type)
+        entity_type_value = entity_type.name
         # Iterate over a copy of the selected NameInstance objects,
         # since that list is being modified within the loop.
         for name_instance in self.__get_selected_name_instances():
@@ -998,44 +997,13 @@ class MainModel (Model):
         - `data`: dictionary of user-provided lookup data
 
         """
-        keys = [record.system_id for record in
-                entity.get_default_authority_records()]
-        if len(keys) > 1:
-            # There are multiple default authority records for this
-            # entity, so user intervention is required in order to
-            # know what to do.
-            #
-            # QAZ: Throw an error, rather than offering the choice to
-            # the user.
-            self.exception = {
-                'text': 'This entity has multiple default authority records',
-                'secondary_text': 'Currently this program is too simple to offer you the choice between the records'}
-            return None, None
-        if len(keys) == 0:
-            # An existence and entity type need to be created for the
-            # entity associated with the default authority. This
-            # requires that an authority and an entity are selected.
-            secondary_text = ''
-            if data['authority'] is None and data['entity_type'] is None:
-                secondary_text = 'Please select an authority and entity type.'
-            elif data['authority'] is None:
-                secondary_text = 'Please select an authority.'
-            elif data['entity_type'] is None:
-                secondary_text = 'Please select an entity type.'
-            if secondary_text:
-                self.exception = {
-                    'text': 'This entity does not have the required data.',
-                    'secondary_text': secondary_text}
-                return None, None
-            key = self.__add_existence(entity, data)
-            entity_type = data['entity_type']
+        key = entity.url
+        entity_types = entity.get_preferred_entity_types(data['authority'])
+        if entity_types:
+            print entity_types
+            entity_type = entity_types[0]
         else:
-            key = keys[0]
-            entity_types = entity.get_default_entity_types()
-            if entity_types:
-                entity_type = entity_types[0]
-            else:
-                entity_type = data['entity_type']
+            entity_type = data['entity_type']
         return key, entity_type
 
     def __add_existence (self, entity, data):
@@ -1050,18 +1018,12 @@ class MainModel (Model):
 
         """
         doc = self.__dispatcher.get_base_document_copy()
-        authority_record = doc.create_authority_record(
-            id='new_authority_record', authority=data['authority'])
-        authority_record.set_auto_create_data()
         new_entity = doc.create_entity(id=entity.id, eats_id=entity.eats_id)
-        new_entity.create_existence(
-            id='new_existence_assertion', authority_record=authority_record,
-            is_preferred=True)
-        new_entity.create_entity_type(
-            id='new_entity_type_assertion', authority_record=authority_record,
-            entity_type=data['entity_type'], is_preferred=True)
+        new_entity.create_existence(id='new_existence_assertion')
+        new_entity.create_entity_type(id='new_entity_type_assertion',
+                                      entity_type=data['entity_type'])
         message = 'Added %s existence and entity type to entity %s.' % \
-            (data['authority'].short_name, entity.eats_id)
+            (data['authority'].name, entity.eats_id)
         try:
             url = self.__dispatcher.import_document(doc, message)
         except Exception, err:
@@ -1152,18 +1114,15 @@ class MainModel (Model):
 
         """
         doc = self.__dispatcher.get_base_document_copy()
-        authority_record = doc.create_authority_record(
-            id='new_authority_record', authority=data['authority'])
-        authority_record.set_auto_create_data()
-        entity = doc.create_entity(id='new_entity')
-        entity.create_existence(
-            id='new_existence_assertion', authority_record=authority_record,
-            is_preferred=True)
+        authority = data['authority']
+        entity = doc.create_entity(xml_id='new_entity')
+        entity.create_existence(xml_id='new_existence_assertion',
+                                authority=authority)
         entity.create_entity_type(
-            id='new_entity_type_assertion', authority_record=authority_record,
-            entity_type=data['entity_type'], is_preferred=True)
+            xml_id='new_entity_type_assertion', authority=authority,
+            entity_type=data['entity_type'])
         name = entity.create_name(
-            'new_name_assertion', authority_record=authority_record,
+            xml_id='new_name_assertion', authority=authority,
             name_type=data['name_type'], is_preferred=True)
         name.language = data['language']
         name.script = data['script']

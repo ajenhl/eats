@@ -2,8 +2,6 @@
 
 __docformat__ = 'restructuredtext'
 
-import sys
-
 try:
     import psyco
     psyco.full()

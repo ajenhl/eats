@@ -37,10 +37,10 @@ if sys.version_info[:2] == (2, 6) and sys.version_info[2] >= 6:
 class Dispatcher (object):
 
     __urls = {
-        'base_document': 'edit/export/eatsml/base/',
-        'edit_entity': 'edit/entity/%s/',
+        'base_document': 'export/eatsml/base/',
+        'edit_entity': 'entity/%s/edit/',
         'import': 'edit/import/',
-        'lookup_name': 'lookup/?%s'}
+        'lookup_name': 'search/eatsml/?%s'}
     
     def __init__ (self, base_url, username, password, http_username=None,
                   http_password=None):
