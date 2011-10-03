@@ -72,7 +72,11 @@ def search (request, topic_map):
 def search_eatsml (request, topic_map):
     name = request.GET.get('name', '')
     entities = topic_map.lookup_entities(name)
-    tree = EATSMLExporter(topic_map).export_entities(entities)
+    try:
+        user = request.user.eats_user
+    except AttributeError:
+        user = None
+    tree = EATSMLExporter(topic_map).export_entities(entities, user=user)
     xml = etree.tostring(tree, encoding='utf-8', pretty_print=True)
     return HttpResponse(xml, mimetype='text/xml')
     
