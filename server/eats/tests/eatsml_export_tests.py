@@ -44,7 +44,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     </authority>
   </authorities>
   <entities>
-    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d">
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d" url="%(url)s">
       <existences>
         <existence authority="authority-%(authority)d" eats_id="%(existence)d"/>
       </existences>
@@ -52,7 +52,8 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
   </entities>
 </collection>
 ''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
-       'existence': existence.get_id()}
+       'existence': existence.get_id(),
+       'url': entity.get_eats_subject_identifier()}
         self._compare_XML(export, expected_xml)
 
     def test_export_entity_entity_type (self):
@@ -79,7 +80,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     </entity_type>
   </entity_types>
   <entities>
-    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d">
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d" url="%(url)s">
       <entity_types>
         <entity_type authority="authority-%(authority)d" eats_id="%(assertion)d" entity_type="entity_type-%(entity_type)d"/>
       </entity_types>
@@ -87,7 +88,8 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
   </entities>
 </collection>
 ''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
-       'entity_type': entity_type.get_id(), 'assertion': assertion.get_id()}
+       'entity_type': entity_type.get_id(), 'assertion': assertion.get_id(),
+       'url': entity.get_eats_subject_identifier()}
         self._compare_XML(export, expected_xml)
 
     def test_export_entity_name (self):
@@ -166,7 +168,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     </script>
   </scripts>
   <entities>
-    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d">
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d" url="%(url)s">
       <names>
         <name authority="authority-%(authority)d" eats_id="%(name)d" language="language-%(language)d" name_type="name_type-%(name_type)d" script="script-%(script)d">
           <assembled_form>Miriam Clare Frost</assembled_form>
@@ -185,7 +187,8 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
        'language': language.get_id(), 'script': script.get_id(),
        'given_name_part_type': given_name_part_type.get_id(),
        'family_name_part_type': family_name_part_type.get_id(),
-       'name_type': name_type.get_id(), 'name': assertion.get_id()}
+       'name_type': name_type.get_id(), 'name': assertion.get_id(),
+       'url': entity.get_eats_subject_identifier()}
         self._compare_XML(export, expected_xml)
 
     def test_export_entity_name_with_user (self):
@@ -257,7 +260,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     </script>
   </scripts>
   <entities>
-    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d">
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d" url="%(url)s">
       <names>
         <name authority="authority-%(authority)d" eats_id="%(name1)d" language="language-%(english)d" name_type="name_type-%(name_type)d" script="script-%(latin)d" user_preferred="true">
           <assembled_form>Gerald</assembled_form>
@@ -275,7 +278,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
        'english': english.get_id(), 'french': french.get_id(),
        'arabic': arabic.get_id(), 'latin': latin.get_id(),
        'name_type': name_type.get_id(), 'name1': name1.get_id(),
-       'name2': name2.get_id()}
+       'name2': name2.get_id(), 'url': entity.get_eats_subject_identifier()}
         self._compare_XML(export, expected_xml)
         
     def test_export_entity_entity_relationship (self):
@@ -305,17 +308,19 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     </entity_relationship_type>
   </entity_relationship_types>
   <entities>
-    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d">
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d" url="%(entity_url)s">
       <entity_relationships>
         <entity_relationship authority="authority-%(authority)d" eats_id="%(assertion)d" entity_relationship_type="entity_relationship_type-%(relationship_type)d" domain_entity="entity-%(entity)d" range_entity="entity-%(other)d"/>
       </entity_relationships>
     </entity>
-    <entity xml:id="entity-%(other)d" eats_id="%(other)d" related_entity="true"></entity>
+    <entity xml:id="entity-%(other)d" eats_id="%(other)d" related_entity="true" url="%(other_url)s"></entity>
   </entities>
 </collection>
 ''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
        'other': other.get_id(), 'relationship_type': relationship_type.get_id(),
-       'assertion': assertion.get_id()}
+       'assertion': assertion.get_id(),
+       'entity_url': entity.get_eats_subject_identifier(),
+       'other_url': other.get_eats_subject_identifier()}
         self._compare_XML(export, expected_xml)
 
     def test_export_entity_note (self):
@@ -331,7 +336,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     </authority>
   </authorities>
   <entities>
-    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d">
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d" url="%(url)s">
       <notes>
         <note authority="authority-%(authority)d" eats_id="%(note)d">A note.</note>
       </notes>
@@ -339,7 +344,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
   </entities>
 </collection>
 ''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
-       'note': note.get_id()}
+       'note': note.get_id(), 'url': entity.get_eats_subject_identifier()}
         self._compare_XML(export, expected_xml)
 
     def test_export_entity_subject_identifier (self):
@@ -356,7 +361,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     </authority>
   </authorities>
   <entities>
-    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d">
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d" url="%(url)s">
       <subject_identifiers>
         <subject_identifier authority="authority-%(authority)d" eats_id="%(assertion)d">http://www.example.org/test/</subject_identifier>
       </subject_identifiers>
@@ -364,7 +369,8 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
   </entities>
 </collection>
 ''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
-       'assertion': assertion.get_id()}
+       'assertion': assertion.get_id(),
+       'url': entity.get_eats_subject_identifier()}
         self._compare_XML(export, expected_xml)
 
     def test_export_entity_date (self):
@@ -417,7 +423,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     </date_type>
   </date_types>
   <entities>
-    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d">
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d" url="%(url)s">
       <existences>
         <existence authority="authority-%(authority)d" eats_id="%(existence)d">
           <dates>
@@ -439,7 +445,8 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
 ''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
        'date_assembled': date.assembled_form, 'calendar': calendar.get_id(),
        'date_type': date_type.get_id(), 'date_period': date_period.get_id(),
-       'certainty': certainty_value, 'existence': existence.get_id()}
+       'certainty': certainty_value, 'existence': existence.get_id(),
+       'url': entity.get_eats_subject_identifier()}
         self._compare_XML(export, expected_xml)
 
     def test_export_infrastructure_full (self):

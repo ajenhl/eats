@@ -312,6 +312,9 @@
                 <data type="boolean"/>
               </attribute>
             </optional>
+            <optional>
+              <attribute name="url"/>
+            </optional>
             <ref name="entity_relationship_assertions"/>
             <ref name="entity_type_assertions"/>
             <ref name="existence_assertions"/>
