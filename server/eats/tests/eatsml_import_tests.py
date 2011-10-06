@@ -613,12 +613,12 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
     </entity_relationship_type>
   </entity_relationship_types>
   <entities>
-    <entity xml:id="entity-1" eats_id="%(entity1)d">
+    <entity xml:id="entity-1" eats_id="%(entity1)d" url="%(entity1_url)s">
       <entity_relationships>
         <entity_relationship authority="authority-1" domain_entity="entity-1" eats_id="%(assertion)d" entity_relationship_type="entity_relationship_type-1" range_entity="entity-2"/>
       </entity_relationships>
     </entity>
-    <entity xml:id="entity-2" eats_id="%(entity2)d">
+    <entity xml:id="entity-2" eats_id="%(entity2)d" url="%(entity2_url)s">
       <entity_relationships>
         <entity_relationship authority="authority-1" domain_entity="entity-1" entity_relationship_type="entity_relationship_type-1" range_entity="entity-2"/>
       </entity_relationships>
@@ -627,7 +627,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 </collection>''' % {'authority': authority.get_id(),
                     'entity_relationship_type': entity_relationship_type.get_id(),
                     'entity1': entity1.get_id(), 'entity2': entity2.get_id(),
-                    'assertion': assertion.get_id()}
+                    'assertion': assertion.get_id(),
+                    'entity1_url': entity1.get_eats_subject_identifier(),
+                    'entity2_url': entity2.get_eats_subject_identifier()}
         self._compare_XML(annotated_import, expected_xml)
 
     def test_import_new_entity_entity_type (self):
@@ -679,7 +681,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
     </entity_type>
   </entity_types>
   <entities>
-    <entity xml:id="entity-1" eats_id="%(entity)d">
+    <entity xml:id="entity-1" eats_id="%(entity)d" url="%(entity_url)s">
       <entity_types>
         <entity_type authority="authority-1" eats_id="%(entity_type_assertion)d" entity_type="entity_type-1"/>
       </entity_types>
@@ -687,7 +689,8 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   </entities>
 </collection>''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
                     'entity_type': entity_type.get_id(),
-                    'entity_type_assertion': entity_type_assertion.get_id()}
+                    'entity_type_assertion': entity_type_assertion.get_id(),
+                    'entity_url': entity.get_eats_subject_identifier()}
         self._compare_XML(annotated_import, expected_xml)
         
     def test_import_new_entity_existence (self):
@@ -719,14 +722,15 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
     </authority>
   </authorities>
   <entities>
-    <entity xml:id="entity-1" eats_id="%(entity)d">
+    <entity xml:id="entity-1" eats_id="%(entity)d" url="%(entity_url)s">
       <existences>
         <existence authority="authority-1" eats_id="%(existence)d"/>
       </existences>
     </entity>
   </entities>
 </collection>''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
-                    'existence': existence.get_id()}
+                    'existence': existence.get_id(),
+                    'entity_url': entity.get_eats_subject_identifier()}
         self._compare_XML(annotated_import, expected_xml)
 
     def test_import_new_entity_name (self):
@@ -880,7 +884,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
     </script>
   </scripts>
   <entities>
-    <entity xml:id="entity-1" eats_id="%(entity)d">
+    <entity xml:id="entity-1" eats_id="%(entity)d" url="%(entity_url)s">
       <names>
         <name authority="authority-1" eats_id="%(assertion)d" language="language-1" name_type="name_type-1" script="script-1">
           <display_form>Miri Frost</display_form>
@@ -898,7 +902,8 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
                     'language': language.get_id(), 'script': script.get_id(),
                     'name_type': name_type.get_id(),
                     'given_name_part_type': given_name_part_type.get_id(),
-                    'family_name_part_type': family_name_part_type.get_id(),}
+                    'family_name_part_type': family_name_part_type.get_id(),
+                    'entity_url': entity.get_eats_subject_identifier()}
         self._compare_XML(annotated_import, expected_xml)
 
     def test_import_new_entity_note (self):
@@ -931,14 +936,15 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
     </authority>
   </authorities>
   <entities>
-    <entity xml:id="entity-1" eats_id="%(entity)d">
+    <entity xml:id="entity-1" eats_id="%(entity)d" url="%(entity_url)s">
       <notes>
         <note authority="authority-1" eats_id="%(assertion)d">This is a note.</note>
       </notes>
     </entity>
   </entities>
 </collection>''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
-                    'assertion': assertion.get_id()}
+                    'assertion': assertion.get_id(),
+                    'entity_url': entity.get_eats_subject_identifier()}
         self._compare_XML(annotated_import, expected_xml)
 
     def test_import_new_entity_subject_identifier (self):
@@ -972,12 +978,13 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
     </authority>
   </authorities>
   <entities>
-    <entity xml:id="entity-1" eats_id="%(entity)d">
+    <entity xml:id="entity-1" eats_id="%(entity)d" url="%(entity_url)s">
       <subject_identifiers>
         <subject_identifier authority="authority-1" eats_id="%(assertion)d">http://www.example.org/test/</subject_identifier>
       </subject_identifiers>
     </entity>
   </entities>
 </collection>''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
-                    'assertion': assertion.get_id()}
+                    'assertion': assertion.get_id(),
+                    'entity_url': entity.get_eats_subject_identifier()}
         self._compare_XML(annotated_import, expected_xml)        

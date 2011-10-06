@@ -260,7 +260,7 @@ class Entity (Topic):
         This is not a subject identifier property assertion, but
         rather the EATS system's own SID for this entity.
 
-        :rtype: `SubjectIdentifier`
+        :rtype: `Locator`
 
         """
         # QAZ: Raise an exception if there is not a single SID.

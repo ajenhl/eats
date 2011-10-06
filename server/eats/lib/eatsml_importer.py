@@ -414,6 +414,8 @@ class EATSMLImporter (EATSMLHandler):
             if eats_id is None:
                 entity = self._topic_map.create_entity()
                 entity_element.set('eats_id', str(entity.get_id()))
+                url = entity.get_eats_subject_identifier().to_external_form()
+                entity_element.set('url', url)
             self._add_mapping('entity', xml_id, entity)
             self._import_entity_type_assertions(entity, entity_element)
             self._import_existence_assertions(entity, entity_element)

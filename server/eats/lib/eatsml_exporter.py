@@ -89,7 +89,8 @@ class EATSMLExporter (EATSMLHandler):
         entity_id = str(entity.get_id())
         entity_element.set(XML + 'id', 'entity-%s' % entity_id)
         entity_element.set('eats_id', entity_id)
-        entity_element.set('url', entity.get_eats_subject_identifier().address)
+        url = entity.get_eats_subject_identifier().to_external_form()
+        entity_element.set('url', url)
         if extra:
             entity_element.set('related_entity', 'true')
         else:
