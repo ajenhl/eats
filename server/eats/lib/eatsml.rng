@@ -379,9 +379,11 @@
             <optional>
               <ref name="user_preferred_attribute"/>
             </optional>
-            <element name="assembled_form">
-              <text/>
-            </element>
+            <optional>
+              <element name="assembled_form">
+                <text/>
+              </element>
+            </optional>
             <element name="display_form">
               <text/>
             </element>

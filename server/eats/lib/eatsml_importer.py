@@ -5,7 +5,7 @@ from lxml import etree
 from eats.constants import EATS_NAMESPACE, XML
 from eats.exceptions import EATSMLException
 from eats.lib.eatsml_handler import EATSMLHandler
-from eats.models import Authority, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
+from eats.models import Authority, Calendar, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
 
 
 NSMAP = {'e': EATS_NAMESPACE}
@@ -213,6 +213,8 @@ class EATSMLImporter (EATSMLHandler):
                 calendar = self._topic_map.create_calendar(name)
                 eats_id = calendar.get_id()
                 calendar_element.set('eats_id', str(eats_id))
+            else:
+                calendar = Calendar.objects.get_by_identifier(eats_id)
             self._add_mapping('calendar', xml_id, calendar)
             
     def _import_date_periods (self, tree):
@@ -232,6 +234,8 @@ class EATSMLImporter (EATSMLHandler):
                 date_period = self._topic_map.create_date_period(name)
                 eats_id = date_period.get_id()
                 date_period_element.set('eats_id', str(eats_id))
+            else:
+                date_period = DatePeriod.objects.get_by_identifier(eats_id)
             self._add_mapping('date_period', xml_id, date_period)
 
     def _import_date_types (self, tree):
@@ -251,6 +255,8 @@ class EATSMLImporter (EATSMLHandler):
                 date_type = self._topic_map.create_date_type(name)
                 eats_id = date_type.get_id()
                 date_type_element.set('eats_id', str(eats_id))
+            else:
+                date_type = DateType.objects.get_by_identifier(eats_id)
             self._add_mapping('date_type', xml_id, date_type)
 
     def _import_entity_relationship_types (self, tree):
@@ -657,7 +663,7 @@ class EATSMLImporter (EATSMLHandler):
         """
         result = element.xpath(xpath, namespaces=NSMAP)
         if result:
-            text = result[0].text.strip()
+            text = result[0].text or ''
         else:
             text = ''
-        return text
+        return text.strip()

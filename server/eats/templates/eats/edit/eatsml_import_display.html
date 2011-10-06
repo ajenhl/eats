@@ -1,0 +1,23 @@
+{% extends "eats/edit/base.html" %}
+
+{% block eats_title %}{{ block.super }}View import{% endblock eats_title %}
+
+{% block eats_content %}
+<h1>View import</h1>
+
+<p>Description: {{ import.description }}
+
+<p>This import was performed at {{ import.import_date }} by
+{{ import.importer.user }}.</p>
+
+<ul>
+<li><a href="raw/">Raw XML</a> — the document that was imported</li>
+
+<li><a href="processed/">Processed XML</a> — the imported document
+annotated with the IDs of the created objects</li>
+</ul>
+
+<p><a href="../">All Imports</a></p>
+
+{% endblock eats_content %}
+

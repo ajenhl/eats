@@ -1,0 +1,48 @@
+{% extends "eats/edit/base.html" %}
+{% block eats_title %}{{ block.super }}Import data{% endblock eats_title %}
+{% block eats_content %}
+<h1>Import data</h1>
+
+<form action="." method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <p><input type="submit" value="Import"/></p>
+</form>
+
+<h1>Past imports</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Importer</th>
+      <th>XML</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for import in imports.object_list %}
+    <tr>
+      <td><a href="{{ import.id }}/">{{ import.import_date }}</a></td>
+      <td>{{ import.importer__username }}</td>
+      <td><a href="{{ import.id }}/raw/">Raw</a><br/>
+      <a href="{{ import.id }}/processed/">Annotated</a></td>
+      <td>{{ import.description }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="eats-pagination">
+  {% if imports.has_previous %}
+  <a href="?page={{ imports.previous_page_number }}">previous</a>
+  {% endif %}
+
+  Page {{ imports.number }} of {{ imports.paginator.num_pages }}
+
+  {% if imports.has_next %}
+  <a href="?page={{ imports.next_page_number }}">next</a>
+  {% endif %}
+</div>
+
+{% endblock eats_content %}

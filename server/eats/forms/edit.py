@@ -884,6 +884,12 @@ SubjectIdentifierFormSet = formset_factory(
     formset=SubjectIdentifierAssertionFormSet)
 
 
+class EATSMLImportForm (forms.Form):
+
+    import_file = forms.FileField()
+    description = forms.CharField(max_length=200)
+
+
 def create_choice_list (topic_map, queryset, default=False):
     """Return a list of 2-tuples created from the items in
     `queryset`.

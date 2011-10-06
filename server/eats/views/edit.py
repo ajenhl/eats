@@ -1,17 +1,22 @@
+import StringIO
+
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.shortcuts import render_to_response
+from django.core.paginator import Paginator, InvalidPage, EmptyPage
+from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 
 from lxml import etree
 
 from eats.lib.eatsml_exporter import EATSMLExporter
+from eats.lib.eatsml_importer import EATSMLImporter
 from eats.lib.property_assertions import EntityRelationshipPropertyAssertions, EntityTypePropertyAssertions, ExistencePropertyAssertions, NamePropertyAssertions, NotePropertyAssertions, SubjectIdentifierPropertyAssertions
 from eats.lib.user import get_user_preferences, user_is_editor
 from eats.decorators import add_topic_map
-from eats.forms.edit import CreateEntityForm, create_choice_list, CurrentAuthorityForm, DateForm
-from eats.models import Authority, Calendar, DatePeriod, DateType, Entity
+from eats.forms.edit import CreateEntityForm, create_choice_list, CurrentAuthorityForm, DateForm, EATSMLImportForm
+from eats.models import Authority, Calendar, DatePeriod, DateType, EATSMLImport, Entity
 
 
 @user_passes_test(user_is_editor)
@@ -212,3 +217,77 @@ def export_eatsml_base (request, topic_map):
     xml = etree.tostring(tree, encoding='utf-8', pretty_print=True)
     return HttpResponse(xml, mimetype='text/xml')
     
+@user_passes_test(user_is_editor)
+@add_topic_map
+def import_eatsml (request, topic_map):
+    """Imports a POSTed EATSML file."""
+    if request.method == 'POST':
+        form = EATSMLImportForm(request.POST, request.FILES)
+        user = request.user.eats_user
+        if form.is_valid():
+            eatsml_file = StringIO.StringIO()
+            for chunk in request.FILES['import_file'].chunks():
+                eatsml_file.write(chunk)
+            eatsml_file.seek(0)
+            # QAZ: After dealing with the uploaded file in chunks
+            # above, to prevent overwhelming the system with a huge
+            # file, straightaway the whole value is retrieved and
+            # passed to the importer.
+            eatsml = eatsml_file.getvalue()
+            with transaction.commit_manually():
+                try:
+                    annotated_tree = EATSMLImporter(topic_map).import_xml(
+                        eatsml, user)
+                    transaction.commit()
+                except Exception, e:
+                    transaction.rollback()
+                    response = render_to_response(
+                        '500.html', {'message': e},
+                        context_instance=RequestContext(request))
+                    response.status_code = 500
+                    return response
+            description = form.cleaned_data['description']
+            raw_xml = eatsml
+            annotated_xml = etree.tostring(annotated_tree, encoding='utf-8',
+                                           pretty_print=True)
+            eatsml_import = EATSMLImport(
+                importer=user, description=description, raw_xml=raw_xml,
+                annotated_xml=annotated_xml)
+            eatsml_import.save()
+            redirect_url = reverse('display-eatsml-import',
+                                   kwargs={'import_id': eatsml_import.id})
+            return HttpResponseRedirect(redirect_url)
+    else:
+        form = EATSMLImportForm()
+    import_list = EATSMLImport.objects.values('id', 'importer__user__username',
+                                              'description', 'import_date')
+    paginator = Paginator(import_list, 100)
+    try:
+        page = int(request.GET.get('page', '1'))
+    except ValueError:
+        page = 1
+    try:
+        imports = paginator.page(page)
+    except (EmptyPage, InvalidPage):
+        imports = paginator.page(paginator.num_pages)
+    context_data = {'form': form, 'imports': imports}
+    return render_to_response('eats/edit/eatsml_import.html', context_data,
+                              context_instance=RequestContext(request))
+
+@user_passes_test(user_is_editor)
+def display_eatsml_import (request, import_id):
+    eatsml_import = get_object_or_404(EATSMLImport, pk=import_id)
+    context_data = {'import': eatsml_import}
+    return render_to_response(
+        'eats/edit/eatsml_import_display.html', context_data,
+        context_instance=RequestContext(request))
+
+@user_passes_test(user_is_editor)
+def display_eatsml_import_raw (request, import_id):
+    eatsml_import = get_object_or_404(EATSMLImport, pk=import_id)
+    return HttpResponse(eatsml_import.raw_xml, mimetype='text/xml')
+
+@user_passes_test(user_is_editor)
+def display_eatsml_import_annotated (request, import_id):
+    eatsml_import = get_object_or_404(EATSMLImport, pk=import_id)
+    return HttpResponse(eatsml_import.annotated_xml, mimetype='text/xml')

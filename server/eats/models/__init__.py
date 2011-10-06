@@ -13,6 +13,7 @@ from date_period import DatePeriod
 from date_type import DateType
 from eats_topic_map import EATSTopicMap
 from eats_user import EATSUser
+from eatsml_import import EATSMLImport
 from entity import Entity
 from entity_relationship_property_assertion import EntityRelationshipPropertyAssertion
 from entity_relationship_type import EntityRelationshipType
