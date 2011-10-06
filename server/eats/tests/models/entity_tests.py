@@ -24,7 +24,7 @@ class EntityTestCase (ModelTestCase):
     def test_get_eats_subject_identifier (self):
         entity = self.tm.create_entity()
         self.assertEqual(len(entity.subject_identifiers.all()), 1)
-        view_url = reverse('entity-view', kwargs={'entity_id': entity.id})
+        view_url = reverse('entity-view', kwargs={'entity_id': entity.get_id()})
         url = 'http://%s%s' % (Site.objects.get_current().domain, view_url)
         subject_identifier = entity.get_eats_subject_identifier()
         self.assertEqual(subject_identifier.address, url)
