@@ -39,7 +39,7 @@ class Dispatcher (object):
     __urls = {
         'base_document': 'export/eatsml/base/',
         'edit_entity': 'entity/%s/edit/',
-        'import': 'edit/import/',
+        'import': 'import/',
         'lookup_name': 'search/eatsml/?%s'}
     
     def __init__ (self, base_url, username, password, http_username=None,
@@ -68,8 +68,6 @@ class Dispatcher (object):
         urllib2.install_opener(opener)
         self.__prune_infrastructure_transform = self.__create_XSLT_transformer(
             'remove-redundant-eatsml-infrastructure-data.xsl')
-        self.__prune_system_parts_transform = self.__create_XSLT_transformer(
-            'remove-redundant-eatsml-system-name-parts.xsl')
 
     @property
     def base_url (self):
@@ -148,7 +146,6 @@ class Dispatcher (object):
         """
         tree = etree.ElementTree(document)
         result_tree = self.__prune_infrastructure_transform(tree)
-        result_tree = self.__prune_system_parts_transform(result_tree)
         return result_tree.getroot()
 
     def import_document (self, document, import_message):
@@ -161,9 +158,12 @@ class Dispatcher (object):
         - `import_message`: string description of import
 
         """
-        document = self.__prune_eatsml(document)
-        fh = StringIO(etree.tostring(document, encoding='utf-8',
-                                     pretty_print=True))
+        #document = self.__prune_eatsml(document)
+        string = etree.tostring(document, encoding='utf-8', pretty_print=True)
+        log = open('/home/jamie/foo.xml', 'w')
+        log.write(string)
+        log.close()
+        fh = StringIO(string)
         params = {'description': import_message,
                   'import_file': fh,
                   'csrfmiddlewaretoken': self.__csrf_token}
@@ -171,16 +171,16 @@ class Dispatcher (object):
         handle = urllib2.urlopen(url, params)
         return handle.geturl()
 
-    def get_processed_import (self, base_url):
-        """Return a `CollectionElementClass` instance of processed for
-        of the import at `base_url`.
+    def get_annotated_import (self, base_url):
+        """Return a `CollectionElementClass` instance of the annotated
+        import at `base_url`.
 
         Arguments:
 
         - `base_url`: string URL of the import
 
         """
-        url = urlparse.urljoin(base_url, 'processed/')
+        url = urlparse.urljoin(base_url, 'annotated/')
         return self.__get_xml_from_server(url)
 
     def look_up_name (self, name):

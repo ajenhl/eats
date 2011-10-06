@@ -911,9 +911,9 @@ class MainModel (Model):
         if not entities:
             return
         for entity in entities:
-            entity_types = []
-            if len(entity_types):
-                entity_type = unicode(entity_types[0])
+            entity_type_assertions = entity.get_entity_types()
+            if len(entity_type_assertions):
+                entity_type = entity_type_assertions[0].entity_type.name
             else:
                 entity_type = ''
             name = entity.get_preferred_name()
@@ -978,7 +978,9 @@ class MainModel (Model):
         - `entity_type`: entity type element
 
         """
-        entity_type_value = entity_type.name
+        entity_type_value = None
+        if entity_type is not None:
+            entity_type_value = entity_type.name
         # Iterate over a copy of the selected NameInstance objects,
         # since that list is being modified within the loop.
         for name_instance in self.__get_selected_name_instances():
@@ -1000,7 +1002,6 @@ class MainModel (Model):
         key = entity.url
         entity_types = entity.get_preferred_entity_types(data['authority'])
         if entity_types:
-            print entity_types
             entity_type = entity_types[0]
         else:
             entity_type = data['entity_type']
@@ -1032,7 +1033,7 @@ class MainModel (Model):
                 'exception': err}
             return None
         try:
-            eatsml = self.__dispatcher.get_processed_import(url)
+            eatsml = self.__dispatcher.get_annotated_import(url)
         except Exception, err:
             self.exception = {
                 'text': 'Encountered the following error trying to get the new details for the entity:',
@@ -1116,17 +1117,12 @@ class MainModel (Model):
         doc = self.__dispatcher.get_base_document_copy()
         authority = data['authority']
         entity = doc.create_entity(xml_id='new_entity')
-        entity.create_existence(xml_id='new_existence_assertion',
-                                authority=authority)
-        entity.create_entity_type(
-            xml_id='new_entity_type_assertion', authority=authority,
-            entity_type=data['entity_type'])
-        name = entity.create_name(
-            xml_id='new_name_assertion', authority=authority,
-            name_type=data['name_type'], is_preferred=True)
-        name.language = data['language']
-        name.script = data['script']
-        name.display_form = data['display_form']
+        entity.create_existence(authority=authority)
+        entity.create_entity_type(authority=authority,
+                                  entity_type=data['entity_type'])
+        name = entity.create_name(authority, data['name_type'],
+                                  data['language'], data['script'],
+                                  data['display_form'])
         for name_part_type in ('terms_of_address', 'given_name', 'family_name'):
             if data[name_part_type]:
                 name.create_name_part(self.__name_part_types[name_part_type],
@@ -1143,7 +1139,7 @@ class MainModel (Model):
                 'exception': err}
             return None
         try:
-            eatsml = self.__dispatcher.get_processed_import(url)
+            eatsml = self.__dispatcher.get_annotated_import(url)
         except Exception, err:
             self.exception = {
                 'text': 'Encountered the following error trying to get the details for the new entity. However, the new entity was created, so do not try creating it again!',

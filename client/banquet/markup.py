@@ -245,12 +245,14 @@ class XMLFile (RowItem):
         """Return the count of keyed NameInstances within the file."""
         return self.__keyed_count
 
-    def __get_filelist_row_ref (self):
+    @property
+    def filelist_row_ref (self):
         """Return the gtk.TreeRowReference for the file in the
         filelist model."""
         return self.__filelist_row_ref
 
-    def __set_filelist_row_ref (self, row_ref):
+    @filelist_row_ref.setter
+    def filelist_row_ref (self, row_ref):
         """Set the `gtk.TreeRowReference` for the file in the filelist model.
 
         Arguments:
@@ -260,13 +262,13 @@ class XMLFile (RowItem):
         """
         self.__filelist_row_ref = row_ref
 
-    filelist_row_ref = property(__get_filelist_row_ref, __set_filelist_row_ref)
-
-    def __get_is_modified (self):
+    @property
+    def is_modified (self):
         """Return Boolean of whether the file has been modified."""
         return self.__is_modified
 
-    def __set_is_modified (self, is_modified):
+    @is_modified.setter
+    def is_modified (self, is_modified):
         """Set Boolean of whether the file has been modified.
 
         Arguments:
@@ -275,8 +277,6 @@ class XMLFile (RowItem):
 
         """
         self.__is_modified = is_modified
-
-    is_modified = property(__get_is_modified, __set_is_modified)
 
     def save (self):
         """Save the XML document, returning True if the file needed to
@@ -363,12 +363,14 @@ class NameInstance (object):
         """Return the textual context of the instance."""
         return self.__context
 
-    def __get_key (self):
+    @property
+    def key (self):
         """Return the Key object that represents the key value of the
         instance, or None if it is not keyed."""
         return self.__key
 
-    def __set_key (self, key):
+    @key.setter
+    def key (self, key):
         """Set the Key object that represents the key value of the
         instance."""
         if self.__key is None and key is not None:
@@ -382,8 +384,6 @@ class NameInstance (object):
         self.file.remove_name_instance(self)
         self.__key = key
         self.file.add_name_instance(self)
-
-    key = property(__get_key, __set_key)
         
     def __get_key_value (self):
         """Return the key attribute value of the instance."""
@@ -401,24 +401,26 @@ class NameInstance (object):
 
     key_value = property(__get_key_value, __set_key_value)
 
-    def __get_entity_type (self):
+    @property
+    def entity_type (self):
         """Return the entity type attribute value of the instance."""
         return self.element.get('type')
 
-    def __set_entity_type (self, entity_type):
+    @entity_type.setter
+    def entity_type (self, entity_type):
         """Set the entity type attribute value of the instance."""
         if entity_type is None:
             self.element.attrib.pop('type', None)
         else:
             self.element.set('type', entity_type)
 
-    entity_type = property(__get_entity_type, __set_entity_type)
-
-    def __get_row_refs (self):
+    @property
+    def row_refs (self):
         """Return the tuple of gtk.TreeRowReferences for the instance."""
         return self.__row_refs
 
-    def __set_row_refs (self, row_refs):
+    @row_refs.setter
+    def row_refs (self, row_refs):
         """Set the list of gtk.TreeRowReferences for the instance.
 
         Arguments:
@@ -428,8 +430,6 @@ class NameInstance (object):
 
         """
         self.__row_refs = row_refs
-
-    row_refs = property(__get_row_refs, __set_row_refs)
 
     def __get_name_context (self, preceding, following):
         """Return textual context of the name element.
@@ -454,5 +454,5 @@ class NameInstance (object):
             self.name.remove_name_instance(self, xml_file)
 
     def __unicode__ (self):
-        type = self.entity_type or 'no type'
-        return '[<i>%s</i>] %s' % (type, self.context)
+        entity_type = self.entity_type or 'no type'
+        return '[<i>%s</i>] %s' % (entity_type, self.context)

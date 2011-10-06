@@ -591,7 +591,7 @@ class MainController (Controller):
         key, entity_type = self.model.get_key_from_entity(entity, data)
         if key is not None:
             if self.__current_entity_type and \
-                    self.__current_entity_type != unicode(entity_type):
+                    self.__current_entity_type != entity_type.name:
                 response = self.view['confirm_change_entity_type_dialog'].run()
                 self.view['confirm_change_entity_type_dialog'].hide()
                 if response != gtk.RESPONSE_YES:
@@ -1122,6 +1122,7 @@ class MainController (Controller):
             self.model.default_language_iter)
         self.view['script_combobox'].set_active_iter(
             self.model.default_script_iter)
+        self.view['name_type_combobox'].set_active(0)
         entity_type, is_unanimous = self.model.get_entity_type(
             selected_name_instance)
         self.__current_entity_type = entity_type
