@@ -38,7 +38,6 @@ class Dispatcher (object):
 
     __urls = {
         'base_document': 'export/eatsml/base/',
-        'edit_entity': 'entity/%s/edit/',
         'import': 'import/',
         'lookup_name': 'search/eatsml/?%s'}
     
@@ -215,17 +214,15 @@ class Dispatcher (object):
                                encoded_parameters)
         return self.__get_xml_from_server(url)                      
 
-    def get_edit_url (self, entity):
-        """Return the full URL for the edit page for entity.
+    def get_edit_url (self, key):
+        """Return the full URL for the edit page for entity, based on `key`.
 
-        Arguments:
-
-        - `entity`: `etree.Element` of the EATSML entity
+        :param key: key of the entity
+        :type key: `str` URL
+        :rtype: `str`
 
         """
-        url = urlparse.urljoin(self.base_url, self.__urls['edit_entity'] %
-                               entity.eats_id)
-        return url
+        return urlparse.urljoin(key, 'edit/')
 
     def __get_xml_from_server (self, url):
         """Return an `lxml.Element` instance from the results of

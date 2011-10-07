@@ -800,7 +800,7 @@ class MainController (Controller):
     def on_edit_toolbutton_clicked (self, *args):
         """Open a web browser to edit the selected entity in EATS."""
         entity = self.__get_selected_entity()
-        self.model.open_entity_edit(entity)
+        self.model.open_entity_edit(entity.url)
 
     def on_context_toolbutton_clicked (self, *args):
         """Open a web browser to see the context of the selected

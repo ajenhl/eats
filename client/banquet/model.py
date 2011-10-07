@@ -1149,18 +1149,18 @@ class MainModel (Model):
         key, entity_type = self.get_key_from_entity(entity, data)
         if self.config.getboolean(TOOLS_CONFIG_SECTION,
                                   AUTO_EDIT_CONFIG_OPTION):
-            self.open_entity_edit(entity)
+            self.open_entity_edit(key)
         return key, entity_type
 
-    def open_entity_edit (self, entity):
-        """Open the webpage for editing `entity`.
+    def open_entity_edit (self, key):
+        """Open the webpage for editing the entity with `key`.
 
         Arguments:
 
-        - `entity`: entity element
+        - `key`: key of entity
 
         """
-        url = self.get_edit_url(entity)
+        url = self.__dispatcher.get_edit_url(key)
         webbrowser.open(url)
 
     def open_entity_context (self, entity):
