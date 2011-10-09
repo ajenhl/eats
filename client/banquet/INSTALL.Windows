@@ -1,0 +1,25 @@
+Installing Banquet on Windows
+=============================
+
+
+Install Python
+--------------
+
+Download and install the latest version of Python 2.7 from
+http://www.python.org/download/
+
+
+Install PyGTK All-in-one
+------------------------
+
+Download and install the appropriate pygtk-all-in-one file from
+http://ftp.gnome.org/pub/GNOME/binaries/win32/pygtk/2.24/
+
+It appears this is limited to 32bit.
+
+
+Install PyGTKMVC
+----------------
+
+Download and install the latest version of PyGTKMVC from
+http://sourceforge.net/projects/pygtkmvc/files/pygtkmvc/
