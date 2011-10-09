@@ -157,7 +157,7 @@ class Dispatcher (object):
         - `import_message`: string description of import
 
         """
-        #document = self.__prune_eatsml(document)
+        document = self.__prune_eatsml(document)
         string = etree.tostring(document, encoding='utf-8', pretty_print=True)
         log = open('/home/jamie/foo.xml', 'w')
         log.write(string)
