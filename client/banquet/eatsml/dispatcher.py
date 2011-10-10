@@ -159,9 +159,6 @@ class Dispatcher (object):
         """
         document = self.__prune_eatsml(document)
         string = etree.tostring(document, encoding='utf-8', pretty_print=True)
-        log = open('/home/jamie/foo.xml', 'w')
-        log.write(string)
-        log.close()
         fh = StringIO(string)
         params = {'description': import_message,
                   'import_file': fh,
