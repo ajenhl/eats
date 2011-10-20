@@ -23,3 +23,18 @@ Install PyGTKMVC
 
 Download and install the latest version of PyGTKMVC from
 http://sourceforge.net/projects/pygtkmvc/files/pygtkmvc/
+
+
+Install setuptools
+------------------
+
+Download and install setuptools from http://pypi.python.org/pypi/setuptools
+
+
+
+Install lxml
+------------
+
+Download a Python egg of version 2.2 or later from
+http://pypi.python.org/pypi/lxml/ and install it using the
+easy_install command that is part of setuptools.
