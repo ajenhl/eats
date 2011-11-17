@@ -216,6 +216,15 @@ def export_eatsml_base (request, topic_map):
         user=request.user.eats_user)
     xml = etree.tostring(tree, encoding='utf-8', pretty_print=True)
     return HttpResponse(xml, mimetype='text/xml')
+
+@user_passes_test(user_is_editor)
+@add_topic_map
+def export_eatsml_entities (request, topic_map):
+    """Exports all entities in EATSML."""
+    entities = Entity.objects.all()
+    tree = EATSMLExporter(topic_map).export_entities(entities)
+    xml = etree.tostring(tree, encoding='utf-8', pretty_print=True)
+    return HttpResponse(xml, mimetype='text/xml')
     
 @user_passes_test(user_is_editor)
 @add_topic_map
