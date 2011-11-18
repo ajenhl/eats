@@ -81,9 +81,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
         annotated_import = self.importer.import_xml(import_xml, self.admin)
         self.assertEqual(len(Authority.objects.all()), 1)
         self.assertEqual(len(Calendar.objects.all()), 1)
-        self.assertEqual(len(authority.get_calendars()), 1)
+        self.assertEqual(len(authority.get_calendars()), 0)
         calendar = Calendar.objects.all()[0]
-        self.assertTrue(calendar in authority.get_calendars())
+        self.assertFalse(calendar in authority.get_calendars())
         self.assertEqual(calendar.get_admin_name(), 'lifespan')
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
@@ -129,9 +129,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
         annotated_import = self.importer.import_xml(import_xml, self.admin)
         self.assertEqual(len(Authority.objects.all()), 1)
         self.assertEqual(len(DatePeriod.objects.all()), 1)
-        self.assertEqual(len(authority.get_date_periods()), 1)
+        self.assertEqual(len(authority.get_date_periods()), 0)
         date_period = DatePeriod.objects.all()[0]
-        self.assertTrue(date_period in authority.get_date_periods())
+        self.assertFalse(date_period in authority.get_date_periods())
         self.assertEqual(date_period.get_admin_name(), 'lifespan')
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
@@ -177,9 +177,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
         annotated_import = self.importer.import_xml(import_xml, self.admin)
         self.assertEqual(len(Authority.objects.all()), 1)
         self.assertEqual(len(DateType.objects.all()), 1)
-        self.assertEqual(len(authority.get_date_types()), 1)
+        self.assertEqual(len(authority.get_date_types()), 0)
         date_type = DateType.objects.all()[0]
-        self.assertTrue(date_type in authority.get_date_types())
+        self.assertFalse(date_type in authority.get_date_types())
         self.assertEqual(date_type.get_admin_name(), 'exact')
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
@@ -226,9 +226,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
         annotated_import = self.importer.import_xml(import_xml, self.admin)
         self.assertEqual(len(Authority.objects.all()), 1)
         self.assertEqual(len(EntityRelationshipType.objects.all()), 1)
-        self.assertEqual(len(authority.get_entity_relationship_types()), 1)
+        self.assertEqual(len(authority.get_entity_relationship_types()), 0)
         entity_relationship_type = EntityRelationshipType.objects.all()[0]
-        self.assertTrue(entity_relationship_type in
+        self.assertFalse(entity_relationship_type in
                         authority.get_entity_relationship_types())
         self.assertEqual(entity_relationship_type.get_admin_forward_name(),
                          'is child of')
@@ -279,9 +279,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
         annotated_import = self.importer.import_xml(import_xml, self.admin)
         self.assertEqual(len(Authority.objects.all()), 1)
         self.assertEqual(len(EntityType.objects.all()), 1)
-        self.assertEqual(len(authority.get_entity_types()), 1)
+        self.assertEqual(len(authority.get_entity_types()), 0)
         entity_type = EntityType.objects.all()[0]
-        self.assertTrue(entity_type in authority.get_entity_types())
+        self.assertFalse(entity_type in authority.get_entity_types())
         self.assertEqual(entity_type.get_admin_name(), 'exact')
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
@@ -328,9 +328,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
         annotated_import = self.importer.import_xml(import_xml, self.admin)
         self.assertEqual(len(Authority.objects.all()), 1)
         self.assertEqual(len(Language.objects.all()), 1)
-        self.assertEqual(len(authority.get_languages()), 1)
+        self.assertEqual(len(authority.get_languages()), 0)
         language = Language.objects.all()[0]
-        self.assertTrue(language in authority.get_languages())
+        self.assertFalse(language in authority.get_languages())
         self.assertEqual(language.get_admin_name(), 'English')
         self.assertEqual(language.get_code(), 'en')
         expected_xml = '''
@@ -391,10 +391,10 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
         self.assertEqual(len(Authority.objects.all()), 1)
         self.assertEqual(len(Language.objects.all()), 1)
         self.assertEqual(len(NamePartType.objects.all()), 1)
-        self.assertEqual(len(authority.get_name_part_types()), 1)
+        self.assertEqual(len(authority.get_name_part_types()), 0)
         name_part_type = NamePartType.objects.all()[0]
         self.assertEqual(language.name_part_types, [name_part_type])
-        self.assertTrue(name_part_type in authority.get_name_part_types())
+        self.assertFalse(name_part_type in authority.get_name_part_types())
         self.assertEqual(name_part_type.get_admin_name(), 'given')
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
@@ -450,9 +450,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
         annotated_import = self.importer.import_xml(import_xml, self.admin)
         self.assertEqual(len(Authority.objects.all()), 1)
         self.assertEqual(len(NameType.objects.all()), 1)
-        self.assertEqual(len(authority.get_name_types()), 1)
+        self.assertEqual(len(authority.get_name_types()), 0)
         name_type = NameType.objects.all()[0]
-        self.assertTrue(name_type in authority.get_name_types())
+        self.assertFalse(name_type in authority.get_name_types())
         self.assertEqual(name_type.get_admin_name(), 'regular')
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
@@ -500,9 +500,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
         annotated_import = self.importer.import_xml(import_xml, self.admin)
         self.assertEqual(len(Authority.objects.all()), 1)
         self.assertEqual(len(Script.objects.all()), 1)
-        self.assertEqual(len(authority.get_scripts()), 1)
+        self.assertEqual(len(authority.get_scripts()), 0)
         script = Script.objects.all()[0]
-        self.assertTrue(script in authority.get_scripts())
+        self.assertFalse(script in authority.get_scripts())
         self.assertEqual(script.get_admin_name(), 'Latin')
         self.assertEqual(script.get_code(), 'Latn')
         self.assertEqual(script.separator, ' ')

@@ -128,48 +128,51 @@ class EATSMLImporter (EATSMLHandler):
                 authority = self._topic_map.create_authority(name)
                 eats_id = authority.get_id()
                 authority_element.set('eats_id', str(eats_id))
+                calendar_elements = authority_element.xpath(
+                    'e:calendars/e:calendar', namespaces=NSMAP)
+                self._import_authority_infrastructure(
+                    authority.set_calendars, 'calendar', calendar_elements)
+                date_period_elements = authority_element.xpath(
+                    'e:date_periods/e:date_period', namespaces=NSMAP)
+                self._import_authority_infrastructure(
+                    authority.set_date_periods, 'date_period',
+                    date_period_elements)
+                date_type_elements = authority_element.xpath(
+                    'e:date_types/e:date_type', namespaces=NSMAP)
+                self._import_authority_infrastructure(
+                    authority.set_date_types, 'date_type', date_type_elements)
+                entity_relationship_type_elements = authority_element.xpath(
+                    'e:entity_relationship_types/e:entity_relationship_type',
+                    namespaces=NSMAP)
+                self._import_authority_infrastructure(
+                    authority.set_entity_relationship_types,
+                    'entity_relationship_type',
+                    entity_relationship_type_elements)
+                entity_type_elements = authority_element.xpath(
+                    'e:entity_types/e:entity_type', namespaces=NSMAP)
+                self._import_authority_infrastructure(
+                    authority.set_entity_types, 'entity_type',
+                    entity_type_elements)
+                language_elements = authority_element.xpath(
+                    'e:languages/e:language', namespaces=NSMAP)
+                self._import_authority_infrastructure(
+                    authority.set_languages, 'language', language_elements)
+                name_part_type_elements = authority_element.xpath(
+                    'e:name_part_types/e:name_part_type', namespaces=NSMAP)
+                self._import_authority_infrastructure(
+                    authority.set_name_part_types, 'name_part_type',
+                    name_part_type_elements)
+                name_type_elements = authority_element.xpath(
+                    'e:name_types/e:name_type', namespaces=NSMAP)
+                self._import_authority_infrastructure(
+                    authority.set_name_types, 'name_type', name_type_elements)
+                script_elements = authority_element.xpath(
+                    'e:scripts/e:script', namespaces=NSMAP)
+                self._import_authority_infrastructure(
+                    authority.set_scripts, 'script', script_elements)
             else:
                 authority = Authority.objects.get_by_identifier(eats_id)
             self._add_mapping('authority', xml_id, authority)
-            calendar_elements = authority_element.xpath(
-                'e:calendars/e:calendar', namespaces=NSMAP)
-            self._import_authority_infrastructure(
-                authority.set_calendars, 'calendar', calendar_elements)
-            date_period_elements = authority_element.xpath(
-                'e:date_periods/e:date_period', namespaces=NSMAP)
-            self._import_authority_infrastructure(
-                authority.set_date_periods, 'date_period', date_period_elements)
-            date_type_elements = authority_element.xpath(
-                'e:date_types/e:date_type', namespaces=NSMAP)
-            self._import_authority_infrastructure(
-                authority.set_date_types, 'date_type', date_type_elements)
-            entity_relationship_type_elements = authority_element.xpath(
-                'e:entity_relationship_types/e:entity_relationship_type',
-                namespaces=NSMAP)
-            self._import_authority_infrastructure(
-                authority.set_entity_relationship_types,
-                'entity_relationship_type', entity_relationship_type_elements)
-            entity_type_elements = authority_element.xpath(
-                'e:entity_types/e:entity_type', namespaces=NSMAP)
-            self._import_authority_infrastructure(
-                authority.set_entity_types, 'entity_type', entity_type_elements)
-            language_elements = authority_element.xpath(
-                'e:languages/e:language', namespaces=NSMAP)
-            self._import_authority_infrastructure(
-                authority.set_languages, 'language', language_elements)
-            name_part_type_elements = authority_element.xpath(
-                'e:name_part_types/e:name_part_type', namespaces=NSMAP)
-            self._import_authority_infrastructure(
-                authority.set_name_part_types, 'name_part_type',
-                name_part_type_elements)
-            name_type_elements = authority_element.xpath(
-                'e:name_types/e:name_type', namespaces=NSMAP)
-            self._import_authority_infrastructure(
-                authority.set_name_types, 'name_type', name_type_elements)
-            script_elements = authority_element.xpath(
-                'e:scripts/e:script', namespaces=NSMAP)
-            self._import_authority_infrastructure(
-                authority.set_scripts, 'script', script_elements)
 
     def _import_authority_infrastructure (self, setter, object_type,
                                           elements):
