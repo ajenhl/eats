@@ -727,8 +727,8 @@ class DateForm (forms.Form):
     start_taq = forms.CharField(label='Date', required=False)
     start_taq_calendar = forms.ChoiceField(choices=[], label='Calendar',
                                            required=False)
-    start__taq_normalised = forms.CharField(label='Normalised value',
-                                            required=False)
+    start_taq_normalised = forms.CharField(label='Normalised value',
+                                           required=False)
     start_taq_type = forms.ChoiceField(choices=[], label='Type', required=False)
     start_taq_certainty = forms.BooleanField(label='Certain', required=False)
     end = forms.CharField(label='Date', required=False)
