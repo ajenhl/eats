@@ -13,10 +13,8 @@ class PropertyAssertion (object):
         :rtype: `Topic`
 
         """
-        # QAZ: convert a possible IndexError into a more
-        # useful/descriptive exception. Also raise an exception if
-        # there is more than one theme.
-        topic = self.get_scope()[0]
+        topic = self.get_scope().filter(
+            types=self.eats_topic_map.authority_type)[0]
         return Authority.objects.get_by_identifier(topic.get_id())
 
     @transaction.commit_on_success
@@ -80,6 +78,24 @@ class PropertyAssertion (object):
         """
         date_roles = self.get_roles(self.eats_topic_map.date_role_type)
         return [role.get_player(proxy=Date) for role in date_roles]
+
+    @property
+    def is_preferred (self):
+        """Returns True if this property assertion is marked as
+        preferred, False otherwise.
+
+        :rtype: `Boolean`
+
+        """
+        return self.eats_topic_map.is_preferred in self.get_scope()
+
+    @is_preferred.setter
+    def is_preferred (self, is_preferred):
+        """Sets whether this property assertion is preferred."""
+        if is_preferred:
+            self.add_theme(self.eats_topic_map.is_preferred)
+        else:
+            self.remove_theme(self.eats_topic_map.is_preferred)
     
     def set_players (self, entity, property):
         raise NotImplementedError

@@ -117,7 +117,8 @@ class Entity (Topic):
         return assertion
 
     def create_name_property_assertion (self, authority, name_type, language,
-                                        script, display_form):
+                                        script, display_form,
+                                        is_preferred=True):
         """Creates a name property assertion asserted by `authority`.
 
         :param authority: authority asserting the property
@@ -130,14 +131,19 @@ class Entity (Topic):
         :type script: `Script`
         :param display_form: display form of the name
         :type display_form: unicode string
+        :param is_preferred: if the name is a preferred form
+        :type is_preferred: `Boolean`
         :rtype: `NamePropertyAssertion`
 
         """
         authority.validate_components(name_type=name_type, language=language,
                                       script=script)
         name = self.eats_topic_map.create_topic(proxy=Name)
+        scope = [authority]
+        if is_preferred:
+            scope.append(self.eats_topic_map.is_preferred)
         assertion = self.eats_topic_map.create_association(
-            self.eats_topic_map.name_assertion_type, scope=[authority],
+            self.eats_topic_map.name_assertion_type, scope=scope,
             proxy=NamePropertyAssertion)
         assertion.set_players(self, name)
         name.create_name(display_form, name_type)

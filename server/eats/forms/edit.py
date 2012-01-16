@@ -465,6 +465,7 @@ class NameForm (PropertyAssertionForm):
     language = forms.ChoiceField(choices=[])
     script = forms.ChoiceField(choices=[])
     display_form = forms.CharField(required=False)
+    is_preferred = forms.BooleanField(required=False)
 
     def __init__ (self, *args, **kwargs):
         name_type_choices = kwargs.pop('name_type_choices')
@@ -482,6 +483,7 @@ class NameForm (PropertyAssertionForm):
         data['name_type'] = name.name_type.get_id()
         data['language'] = name.language.get_id()
         data['script'] = name.script.get_id()
+        data['is_preferred'] = assertion.is_preferred
         return data
 
     def clean (self):
@@ -496,13 +498,16 @@ class NameForm (PropertyAssertionForm):
         language = self._get_construct('language', Language)
         script = self._get_construct('script', Script)
         display_form = self.cleaned_data['display_form']
+        is_preferred = self.cleaned_data['is_preferred']
         if self.instance is None:
             # Create a new assertion.
             assertion = self.entity.create_name_property_assertion(
-                self.authority, name_type, language, script, display_form)
+                self.authority, name_type, language, script, display_form,
+                is_preferred)
         else:
             # Update an existing assertion.
-            self.instance.update(name_type, language, script, display_form)
+            self.instance.update(name_type, language, script, display_form,
+                                 is_preferred)
             assertion = self.instance
         return assertion
 

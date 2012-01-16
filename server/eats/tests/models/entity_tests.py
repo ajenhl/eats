@@ -95,7 +95,7 @@ class EntityTestCase (ModelTestCase):
         self.assertEqual(preferred_name, None)
         name1 = entity.create_name_property_assertion(
             self.authority, self.name_type, self.language1, self.script1,
-            'Name1')
+            'Name1', False)
         # With a single name, get_preferred_name will return in that
         # one name regardless of the parameters.
         preferred_name = entity.get_preferred_name(
@@ -113,7 +113,7 @@ class EntityTestCase (ModelTestCase):
         # Create a second name, differing from the first in language.
         name2 = entity.create_name_property_assertion(
             self.authority, self.name_type, self.language2, self.script1,
-            'Name2')
+            'Name2', True)
         preferred_name = entity.get_preferred_name(
             self.authority, self.language1, self.script1)
         self.assertEqual(name1, preferred_name)
@@ -126,7 +126,7 @@ class EntityTestCase (ModelTestCase):
         # Create a third name, differing from the first in authority.
         name3 = entity.create_name_property_assertion(
             self.authority2, self.name_type, self.language1, self.script1,
-            'Name3')
+            'Name3', True)
         preferred_name = entity.get_preferred_name(
             self.authority2, self.language1, self.script1)
         self.assertEqual(name3, preferred_name)
@@ -144,7 +144,7 @@ class EntityTestCase (ModelTestCase):
         # authority.
         name4 = entity.create_name_property_assertion(
             self.authority2, self.name_type, self.language2, self.script2,
-            'Name4')
+            'Name4', True)
         # Script trumps authority.
         preferred_name = entity.get_preferred_name(
             self.authority2, self.language1, self.script1)
@@ -156,3 +156,11 @@ class EntityTestCase (ModelTestCase):
         preferred_name = entity.get_preferred_name(
             self.authority, self.language2, self.script2)
         self.assertEqual(name4, preferred_name)
+        # Create a fifth name, differing from the first in is_preferred.
+        name5 = entity.create_name_property_assertion(
+            self.authority, self.name_type, self.language1, self.script1,
+            'Name5', True)
+        # is_preferred trumps not is_preferred.
+        preferred_name = entity.get_preferred_name(
+            self.authority, self.language1, self.script1)
+        self.assertEqual(name5, preferred_name)

@@ -219,6 +219,7 @@ class EntityChangeViewTestCase (ViewTestCase):
         form['names-0-language'] = language.get_id()
         form['names-0-script'] = script.get_id()
         form['names-0-display_form'] = 'Carl Philipp Emanuel Bach'
+        form['names-0-is_preferred'] = True
         response = form.submit('_save').follow()
         self.assertEqual(response.request.url[len(response.request.host_url):],
                          url)
@@ -238,6 +239,7 @@ class EntityChangeViewTestCase (ViewTestCase):
         self.assertEqual(form_data['script'], name.script.get_id())
         self.assertEqual(form_data['display_form'], 'Carl Philipp Emanuel Bach')
         self.assertEqual(form_data['display_form'], name.display_form)
+        self.assertEqual(form_data['is_preferred'], assertion.is_preferred)
         # Test adding another name and deleting the existing one.
         name_type2 = self.create_name_type('irregular')
         language2 = self.create_language('Sanskrit', 'sa')
@@ -251,6 +253,7 @@ class EntityChangeViewTestCase (ViewTestCase):
         form['names-1-language'] = language2.get_id()
         form['names-1-script'] = script2.get_id()
         form['names-1-display_form'] = u'पद्म'
+        form['names-1-is_preferred'] = False
         response = form.submit('_save').follow()
         self.assertEqual(response.request.url[len(response.request.host_url):],
                          url)
@@ -270,12 +273,14 @@ class EntityChangeViewTestCase (ViewTestCase):
         self.assertEqual(form_data['script'], name.script.get_id())
         self.assertEqual(form_data['display_form'], u'पद्म')
         self.assertEqual(form_data['display_form'], name.display_form)
+        self.assertEqual(form_data['is_preferred'], assertion.is_preferred)
         # Test updating an existing name.
         form = self.app.get(url, user='user').forms['entity-change-form']
         form['names-0-name_type'] = name_type.get_id()
         form['names-0-language'] = language.get_id()
         form['names-0-script'] = script.get_id()
         form['names-0-display_form'] = 'Isaac Fuller'
+        form['names-0-is_preferred'] = True
         response = form.submit('_save').follow()
         self.assertEqual(response.request.url[len(response.request.host_url):],
                          url)
@@ -295,6 +300,7 @@ class EntityChangeViewTestCase (ViewTestCase):
         self.assertEqual(form_data['script'], name.script.get_id())
         self.assertEqual(form_data['display_form'], 'Isaac Fuller')
         self.assertEqual(form_data['display_form'], name.display_form)
+        self.assertEqual(form_data['is_preferred'], assertion.is_preferred)
 
     def test_post_notes (self):
         entity = self.tm.create_entity(self.authority)

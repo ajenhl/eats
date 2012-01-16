@@ -62,6 +62,7 @@ class NameTestCase (ModelTestCase):
         name = assertion.name
         self.assertEqual(name.display_form, 'Name')
         self.assertEqual(name.name_type, self.name_type)
+        self.assertEqual(assertion.is_preferred, True)
 
     def test_delete_name_property_assertion (self):
         self.assertEqual(0, len(self.entity.get_eats_names()))
@@ -107,13 +108,13 @@ class NameTestCase (ModelTestCase):
         name_type = self.create_name_type('pseudonym')
         script = self.create_script('Gujarati', 'Gujr', ' ')
         self.assertRaises(EATSValidationException, assertion.update, name_type,
-                          self.language, self.script, 'Name')
+                          self.language, self.script, 'Name', True)
         self.assertEqual(name.name_type, self.name_type)
         self.assertRaises(EATSValidationException, assertion.update,
-                          self.name_type, language, self.script, 'Name')
+                          self.name_type, language, self.script, 'Name', True)
         self.assertEqual(name.language, self.language)
         self.assertRaises(EATSValidationException, assertion.update,
-                          self.name_type, self.language, script, 'Name')
+                          self.name_type, self.language, script, 'Name', True)
         self.assertEqual(name.script, self.script)
 
     def test_update_name_property_assertion (self):
@@ -126,12 +127,14 @@ class NameTestCase (ModelTestCase):
         self.assertEqual(name.language, self.language)
         self.assertEqual(name.script, self.script)
         self.assertEqual(name.display_form, 'Name')
+        self.assertEqual(assertion.is_preferred, True)
         assertion.update(self.name_type2, self.language2,
-            self.script2, 'Name2')
+            self.script2, 'Name2', False)
         self.assertEqual(name.name_type, self.name_type2)
         self.assertEqual(name.language, self.language2)
         self.assertEqual(name.script, self.script2)
-        self.assertEqual(name.display_form, 'Name2')        
+        self.assertEqual(name.display_form, 'Name2')
+        self.assertEqual(assertion.is_preferred, False)
         
     def test_language (self):
         assertion = self.entity.create_name_property_assertion(
@@ -159,6 +162,14 @@ class NameTestCase (ModelTestCase):
         self.assertEqual(name.name_type, self.name_type)
         name.name_type = self.name_type2
         self.assertEqual(name.name_type, self.name_type2)
+
+    def test_is_preferred (self):
+        assertion = self.entity.create_name_property_assertion(
+            self.authority, self.name_type, self.language, self.script,
+            'Name', True)
+        self.assertEqual(assertion.is_preferred, True)
+        assertion.is_preferred = False
+        self.assertEqual(assertion.is_preferred, False)
         
     def test_display_form (self):
         assertion = self.entity.create_name_property_assertion(

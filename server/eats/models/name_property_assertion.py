@@ -17,7 +17,8 @@ class NamePropertyAssertionManager (BaseManager):
 
         The name that best fits first the script (completely
         unreadable names are bad), then the authority, then the
-        language, is returned.
+        language, is returned. If there are multiple matches, the
+        first name that is set as preferred is returned.
 
         :param entity: the entity that bears the name
         :type entity: `Entity`
@@ -35,6 +36,7 @@ class NamePropertyAssertionManager (BaseManager):
         script_type = self.eats_topic_map.script_role_type
         is_in_language_type = self.eats_topic_map.is_in_language_type
         language_type = self.eats_topic_map.language_role_type
+        is_preferred = self.eats_topic_map.is_preferred
         entity_names = self.filter_by_entity(entity)
         if not entity_names.count():
             raise self.model.DoesNotExist
@@ -66,7 +68,9 @@ class NamePropertyAssertionManager (BaseManager):
                 language_names = authority_names
         else:
             language_names = authority_names
-        names = language_names
+        names = language_names.filter(scope=is_preferred)
+        if not names.count():
+            names = language_names
         try:
             return names[0]
         except IndexError:
@@ -118,7 +122,7 @@ class NamePropertyAssertion (Association, PropertyAssertion):
         self._entity = entity
         name._entity = entity
         
-    def update (self, name_type, language, script, display_form):
+    def update (self, name_type, language, script, display_form, is_preferred):
         """Updates this property assertion, and its associated name.
 
         :param name_type: type of the name
@@ -129,8 +133,11 @@ class NamePropertyAssertion (Association, PropertyAssertion):
         :type script: `Topic`
         :param display_form: display form of the name
         :type display_form: unicode string
+        :param is_preferred: if the name is a preferred form
+        :type is_preferred: `Boolean`
 
         """
         self.authority.validate_components(language=language, script=script,
                                            name_type=name_type)
         self.name.update(name_type, language, script, display_form)
+        self.is_preferred = is_preferred
