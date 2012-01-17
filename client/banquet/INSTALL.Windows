@@ -8,11 +8,14 @@ Install Python
 Download and install the latest version of Python 2.7 from
 http://www.python.org/download/
 
+Since the PyGTK package appears to be 32bit only, use the 32bit Python
+version even if the machine is 64bit.
+
 
 Install PyGTK All-in-one
 ------------------------
 
-Download and install the appropriate pygtk-all-in-one file from
+Download and install the appropriate pygtk-all-in-one file (.msi) from
 http://ftp.gnome.org/pub/GNOME/binaries/win32/pygtk/2.24/
 
 It appears this is limited to 32bit.
