@@ -108,7 +108,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
                                        family_name_part_type])
         entity = self.tm.create_entity()
         assertion = entity.create_name_property_assertion(
-            authority, name_type, language, script, '')
+            authority, name_type, language, script, '', True)
         name = assertion.name
         name.create_name_part(given_name_part_type, language, script,
                               'Miriam', 1)
@@ -170,7 +170,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
   <entities>
     <entity xml:id="entity-%(entity)d" eats_id="%(entity)d" url="%(url)s">
       <names>
-        <name authority="authority-%(authority)d" eats_id="%(name)d" language="language-%(language)d" name_type="name_type-%(name_type)d" script="script-%(script)d">
+        <name authority="authority-%(authority)d" eats_id="%(name)d" is_preferred="true" language="language-%(language)d" name_type="name_type-%(name_type)d" script="script-%(script)d">
           <assembled_form>Miriam Clare Frost</assembled_form>
           <display_form></display_form>
           <name_parts>
@@ -205,7 +205,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         name1 = entity.create_name_property_assertion(authority, name_type,
                                                       english, latin, 'Gerald')
         name2 = entity.create_name_property_assertion(
-            authority, name_type, french, arabic, u'عبّاس')
+            authority, name_type, french, arabic, u'عبّاس', False)
         django_user = self.create_django_user('test', 'test@example.org',
                                               'password')
         user = self.create_user(django_user)
@@ -262,11 +262,11 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
   <entities>
     <entity xml:id="entity-%(entity)d" eats_id="%(entity)d" url="%(url)s">
       <names>
-        <name authority="authority-%(authority)d" eats_id="%(name1)d" language="language-%(english)d" name_type="name_type-%(name_type)d" script="script-%(latin)d" user_preferred="true">
+        <name authority="authority-%(authority)d" eats_id="%(name1)d" is_preferred="true" language="language-%(english)d" name_type="name_type-%(name_type)d" script="script-%(latin)d" user_preferred="true">
           <assembled_form>Gerald</assembled_form>
           <display_form>Gerald</display_form>
         </name>
-        <name authority="authority-%(authority)d" eats_id="%(name2)d" language="language-%(french)d" name_type="name_type-%(name_type)d" script="script-%(arabic)d">
+        <name authority="authority-%(authority)d" eats_id="%(name2)d" is_preferred="false" language="language-%(french)d" name_type="name_type-%(name_type)d" script="script-%(arabic)d">
           <assembled_form>عبّاس</assembled_form>
           <display_form>عبّاس</display_form>
         </name>

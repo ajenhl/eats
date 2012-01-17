@@ -393,7 +393,7 @@ class Entity (EATSMLElementBase):
         assertion.authority = authority
 
     def create_name (self, authority, name_type, language, script,
-                     display_form):
+                     display_form, is_preferred=True):
         """Returns a newly created `NamePropertyAssertion`, using the
         details provided.
 
@@ -407,6 +407,8 @@ class Entity (EATSMLElementBase):
         :type script: `Script`
         :param display_form: display form of the name
         :type display_form: `str`
+        :param is_preferred: whether the name is preferred
+        :type is_preferred: `bool`
         :rtype: `NamePropertyAssertion`
         
         """
@@ -418,6 +420,7 @@ class Entity (EATSMLElementBase):
         assertion.language = language
         assertion.script = script
         assertion.display_form = display_form
+        assertion.is_preferred = is_preferred
         return assertion
         
     def get_entity_types (self):
@@ -618,6 +621,34 @@ class NamePropertyAssertion (NameElement, PropertyAssertion):
         separator = self.script.separator
         return separator.join([name_part.text for name_part in name_parts])
 
+    @property
+    def is_preferred (self):
+        """Returns whether this name is preferred or not.
+
+        :rtype: `bool`
+
+        """
+        text = self.get('is_preferred')
+        if text == 'true':
+            value = True
+        else:
+            value = False
+        return value
+
+    @is_preferred.setter
+    def is_preferred (self, is_preferred):
+        """Sets whether this name is preferred.
+
+        :param is_preferred: preference value to set
+        :type is_preferred: `bool`
+
+        """
+        if is_preferred:
+            value = 'true'
+        else:
+            value = 'false'
+        self.set('is_preferred', value)
+    
     @property
     def name_type (self):
         """Returns the type of this name.

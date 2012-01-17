@@ -371,6 +371,7 @@
             <optional>
               <ref name="eats_id_attribute"/>
             </optional>
+            <ref name="is_preferred_attribute"/>
             <ref name="language_attribute"/>
             <attribute name="name_type">
               <data type="IDREF"/>
@@ -526,6 +527,12 @@
   <define name="authority_attribute">
     <attribute name="authority">
       <data type="IDREF"/>
+    </attribute>
+  </define>
+
+  <define name="is_preferred_attribute">
+    <attribute name="is_preferred">
+      <data type="boolean"/>
     </attribute>
   </define>
 

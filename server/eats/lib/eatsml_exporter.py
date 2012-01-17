@@ -273,6 +273,7 @@ class EATSMLExporter (EATSMLHandler):
         script = name.script
         name_element.set('authority', 'authority-%d' % authority.get_id())
         name_element.set('eats_id', str(assertion.get_id()))
+        name_element.set('is_preferred', str(assertion.is_preferred).lower())
         name_element.set('language', 'language-%d' % language.get_id())
         name_element.set('name_type', 'name_type-%d' % name_type.get_id())
         name_element.set('script', 'script-%d' % script.get_id())

@@ -487,6 +487,7 @@ class EATSMLImporter (EATSMLHandler):
             if eats_id is None:
                 authority = self._get_mapped_object(element, 'authority',
                                                     'authority')
+                is_preferred = self._get_boolean(element, '.')
                 name_type = self._get_mapped_object(element, 'name_type',
                                                     'name_type')
                 language = self._get_mapped_object(element, 'language',
@@ -494,7 +495,8 @@ class EATSMLImporter (EATSMLHandler):
                 script = self._get_mapped_object(element, 'script', 'script')
                 display_form = self._get_text(element, 'e:display_form')
                 assertion = entity.create_name_property_assertion(
-                    authority, name_type, language, script, display_form)
+                    authority, name_type, language, script, display_form,
+                    is_preferred)
                 element.set('eats_id', str(assertion.get_id()))
                 self._import_name_parts(assertion.name, element)
 
@@ -672,3 +674,21 @@ class EATSMLImporter (EATSMLHandler):
         else:
             text = ''
         return text.strip()
+
+    def _get_boolean (self, element, xpath):
+        """Returns a Boolean derived from the text of the element
+        result of performing `xpath` query on `element`.
+
+        :param element: root element of `xpath` query
+        :type element: `Element`
+        :param xpath: XPath query
+        :type xpath: `str`
+        :rtype: `boolean`
+
+        """
+        text = self._get_text(element, xpath)
+        if text == 'true':
+            result = True
+        else:
+            result = False
+        return result
