@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from eats.models import Authority, Calendar, DatePeriod, DateType, Entity, EntityRelationshipType, EntityType, Language, NameType, Script
 from eats.tests.models.model_test_case import ModelTestCase
 
@@ -141,6 +143,9 @@ class EATSTopicMapTestCase (ModelTestCase):
         self.assertEqual(self.tm.lookup_entities('Johann'), [entity1])
         # Partial (initial) matches are allowed.
         self.assertEqual(self.tm.lookup_entities('Seb'), [entity1])
+        # Punctuation does not matter.
+        self.assertEqual(self.tm.lookup_entities('J. Sebastian Bach'),
+                         [entity1])
         # Case does not matter.
         self.assertEqual(self.tm.lookup_entities('ba'), [entity1])
         # Order of search terms need not match order in name.
@@ -157,3 +162,31 @@ class EATSTopicMapTestCase (ModelTestCase):
                          set([entity1, entity2]))
         self.assertEqual(self.tm.lookup_entities('B s'), [entity1])
         self.assertEqual(self.tm.lookup_entities('u'), [])
+
+    def test_lookup_entities_alternate (self):
+        self.assertEqual(Entity.objects.count(), 0)
+        self.assertEqual(self.tm.lookup_entities('Maori'), [])
+        language = self.create_language('English', 'en')
+        name_part_type1 = self.create_name_part_type('given')
+        name_part_type2 = self.create_name_part_type('family')
+        name_type = self.create_name_type('regular')
+        script = self.create_script('Latin', 'Latn', ' ')
+        self.authority.set_languages([language])
+        self.authority.set_name_part_types([name_part_type1, name_part_type2])
+        self.authority.set_name_types([name_type])
+        self.authority.set_scripts([script])
+        entity1 = self.tm.create_entity(self.authority)
+        entity1_name1 = entity1.create_name_property_assertion(
+            self.authority, name_type, language, script,
+            u'Māori')
+        self.assertEqual(self.tm.lookup_entities(u'Māori'), [entity1])
+        self.assertEqual(self.tm.lookup_entities('Maori'), [entity1])
+        self.assertEqual(self.tm.lookup_entities('Maaori'), [entity1])
+        entity2 = self.tm.create_entity(self.authority)
+        entity2_name1 = entity2.create_name_property_assertion(
+            self.authority, name_type, language, script, u'Maori')
+        self.assertEqual(set(self.tm.lookup_entities(u'Māori')),
+                         set([entity1, entity2]))
+        self.assertEqual(set(self.tm.lookup_entities('Maori')),
+                         set([entity1, entity2]))
+        self.assertEqual(self.tm.lookup_entities('Maaori'), [entity1])

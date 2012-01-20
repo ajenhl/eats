@@ -5,6 +5,7 @@ from django.db.models import Q
 from tmapi.models import Locator, TopicMap
 
 from eats.constants import ADMIN_NAME_TYPE_IRI, AUTHORITY_HAS_CALENDAR_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_DATE_PERIOD_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_DATE_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_ENTITY_RELATIONSHIP_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_ENTITY_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_LANGUAGE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_NAME_PART_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_NAME_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_SCRIPT_ASSOCIATION_TYPE_IRI, AUTHORITY_ROLE_TYPE_IRI, AUTHORITY_TYPE_IRI, CALENDAR_TYPE_IRI, DATE_CERTAINTY_TYPE_IRI, DATE_FULL_CERTAINTY_IRI, DATE_NO_CERTAINTY_IRI, DATE_PERIOD_ASSOCIATION_TYPE, DATE_PERIOD_ROLE_TYPE, DATE_PERIOD_TYPE_IRI, DATE_ROLE_TYPE_IRI, DATE_TYPE_IRI, DATE_TYPE_TYPE_IRI, DOMAIN_ENTITY_ROLE_TYPE_IRI, END_DATE_TYPE_IRI, END_TAQ_DATE_TYPE_IRI, END_TPQ_DATE_TYPE_IRI, ENTITY_RELATIONSHIP_ASSERTION_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_ROLE_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_ROLE_TYPE_IRI, ENTITY_TYPE_IRI, ENTITY_TYPE_ASSERTION_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, EXISTENCE_IRI, EXISTENCE_ASSERTION_TYPE_IRI, INFRASTRUCTURE_ROLE_TYPE_IRI, IS_IN_LANGUAGE_TYPE_IRI, IS_IN_SCRIPT_TYPE_IRI, IS_PREFERRED_IRI, LANGUAGE_CODE_TYPE_IRI, LANGUAGE_ROLE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_ASSERTION_TYPE_IRI, NAME_HAS_NAME_PART_ASSOCIATION_TYPE_IRI, NAME_PART_ORDER_TYPE_IRI, NAME_PART_ROLE_TYPE_IRI, NAME_PART_TYPE_IRI, NAME_PART_TYPE_ORDER_IN_LANGUAGE_TYPE_IRI, NAME_PART_TYPE_TYPE_IRI, NAME_ROLE_TYPE_IRI, NAME_TYPE_TYPE_IRI, NORMALISED_DATE_FORM_TYPE_IRI, NOTE_ASSERTION_TYPE_IRI, POINT_DATE_TYPE_IRI, POINT_TAQ_DATE_TYPE_IRI, POINT_TPQ_DATE_TYPE_IRI, PROPERTY_ROLE_TYPE_IRI, RANGE_ENTITY_ROLE_TYPE_IRI, RELATIONSHIP_NAME_TYPE_IRI, REVERSE_RELATIONSHIP_NAME_TYPE_IRI, SCRIPT_CODE_TYPE_IRI, SCRIPT_ROLE_TYPE_IRI, SCRIPT_SEPARATOR_TYPE_IRI, SCRIPT_TYPE_IRI, START_DATE_TYPE_IRI, START_TAQ_DATE_TYPE_IRI, START_TPQ_DATE_TYPE_IRI, SUBJECT_IDENTIFIER_ASSERTION_TYPE_IRI
+from eats.lib.name_form import create_name_forms
 from authority import Authority
 from calendar import Calendar
 from date_period import DatePeriod
@@ -519,7 +520,8 @@ class EATSTopicMap (TopicMap):
         names = query.split()
         queries = []
         for name in names:
-            queries.append(Q(indexed_names__form__istartswith=name))
+            query = self._create_lookup_query(unicode(name))
+            queries.append(query)
         sets = []
         for query in queries:
             sets.append(set(Entity.objects.filter(query)))
@@ -531,6 +533,16 @@ class EATSTopicMap (TopicMap):
             intersected_set = intersected_set.intersection(sets[i])
         # QAZ: Is there any reason to return a list rather than a set?
         return list(intersected_set)
+
+    def _create_lookup_query (self, name):
+        query = None
+        name_forms = create_name_forms(unicode(name))
+        for name_form in name_forms:
+            if query is None:
+                query = Q(indexed_names__form__istartswith=name_form)
+            else:
+                query = query | Q(indexed_names__form__istartswith=name_form)
+        return query
     
     @property
     def name_assertion_type (self):

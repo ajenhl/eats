@@ -5,6 +5,8 @@ from name_element import NameElement
 from name_index import NameIndex
 from name_part_type import NamePartType
 
+from eats.lib.name_form import create_name_forms
+
 
 class NamePartManager (BaseManager):
 
@@ -33,8 +35,14 @@ class NamePart (Topic, NameElement):
 
     def _add_name_index (self):
         """Adds the forms of this name to the name index."""
-        parts = self.display_form.split()
-        for part in parts:
+        parts = []
+        language_code = self.language.get_code()
+        script_code = self.script.get_code()
+        name_forms = create_name_forms(self.display_form, language_code,
+                                       script_code)
+        for name in name_forms:
+            parts.extend(name.split())
+        for part in set(parts):
             indexed_form = NameIndex(entity=self.name.entity, name=self.name,
                                      name_part=self, form=part)
             indexed_form.save()
