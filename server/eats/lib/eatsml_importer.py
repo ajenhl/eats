@@ -487,7 +487,7 @@ class EATSMLImporter (EATSMLHandler):
             if eats_id is None:
                 authority = self._get_mapped_object(element, 'authority',
                                                     'authority')
-                is_preferred = self._get_boolean(element, '.')
+                is_preferred = self._get_boolean(element.get('is_preferred'))
                 name_type = self._get_mapped_object(element, 'name_type',
                                                     'name_type')
                 language = self._get_mapped_object(element, 'language',
@@ -675,19 +675,15 @@ class EATSMLImporter (EATSMLHandler):
             text = ''
         return text.strip()
 
-    def _get_boolean (self, element, xpath):
-        """Returns a Boolean derived from the text of the element
-        result of performing `xpath` query on `element`.
+    def _get_boolean (self, value):
+        """Returns a Boolean derived from `value`.
 
-        :param element: root element of `xpath` query
-        :type element: `Element`
-        :param xpath: XPath query
-        :type xpath: `str`
+        :param value: value to be converted to a Boolean
+        :type value: XSD Boolean string
         :rtype: `boolean`
 
         """
-        text = self._get_text(element, xpath)
-        if text == 'true':
+        if value == 'true':
             result = True
         else:
             result = False

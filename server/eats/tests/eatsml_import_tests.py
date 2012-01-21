@@ -799,7 +799,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   <entities>
     <entity xml:id="entity-1">
       <names>
-        <name authority="authority-1" is_preferred="false" language="language-1" name_type="name_type-1" script="script-1">
+        <name authority="authority-1" is_preferred="true" language="language-1" name_type="name_type-1" script="script-1">
           <display_form>Miri Frost</display_form>
           <name_parts>
             <name_part name_part_type="name_part_type-2" language="language-1" script="script-1">Frost</name_part>
@@ -824,7 +824,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
         self.assertEqual(name.display_form, 'Miri Frost')
         self.assertEqual(name.language, language)
         self.assertEqual(name.script, script)
-        self.assertEqual(assertion.is_preferred, False)
+        self.assertEqual(assertion.is_preferred, True)
         name_parts = name.get_name_parts()
         family_name_parts = name_parts[family_name_part_type]
         self.assertEqual(len(family_name_parts), 1)
@@ -887,7 +887,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   <entities>
     <entity xml:id="entity-1" eats_id="%(entity)d" url="%(entity_url)s">
       <names>
-        <name authority="authority-1" eats_id="%(assertion)d" is_preferred="false" language="language-1" name_type="name_type-1" script="script-1">
+        <name authority="authority-1" eats_id="%(assertion)d" is_preferred="true" language="language-1" name_type="name_type-1" script="script-1">
           <display_form>Miri Frost</display_form>
           <name_parts>
             <name_part name_part_type="name_part_type-2" language="language-1" script="script-1">Frost</name_part>
