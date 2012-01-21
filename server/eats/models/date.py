@@ -250,7 +250,7 @@ class Date (Topic):
 
     def remove (self):
         for role in self.get_roles_played(self.eats_topic_map.date_role_type):
-            role.get_parent().remove()
+            role.remove()
         super(Date, self).remove()
     
     @property

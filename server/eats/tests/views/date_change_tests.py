@@ -151,6 +151,7 @@ class DateChangeViewTestCase (ViewTestCase):
     def test_delete (self):
         self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
+        self.assertEqual(1, len(entity.get_existences()))
         existence = entity.get_existences()[0]
         self.assertEqual(0, len(existence.get_dates()))
         date_data = {'date_period': self.date_period, 'point': '1 January 1900',
@@ -169,6 +170,7 @@ class DateChangeViewTestCase (ViewTestCase):
         url2 = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
         self.assertRedirects(response, url2)
         self.assertEqual(0, len(existence.get_dates()))
+        self.assertEqual(1, len(entity.get_existences()))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404,
                          'Expected a 404 HTTP response code for a non-existent (deleted) date')
