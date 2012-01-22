@@ -2,14 +2,14 @@ from eats.exceptions import EATSValidationException
 from eats.tests.models.model_test_case import ModelTestCase
 
 
-class DateTest (ModelTestCase):
+class DateTestCase (ModelTestCase):
 
     def setUp (self):
-        super(DateTest, self).setUp()
+        super(DateTestCase, self).setUp()
         self.calendar = self.create_calendar('Gregorian')
         self.date_period = self.create_date_period('lifespan')
         self.date_type = self.create_date_type('exact')
-        self.entity = self.tm.create_entity(self.authority)
+        self.entity = self.tm.create_entity()
         self.authority.set_calendars([self.calendar])
         self.authority.set_date_periods([self.date_period])
         self.authority.set_date_types([self.date_type])
@@ -208,3 +208,31 @@ class DateTest (ModelTestCase):
         assertion.create_date(date_data)
         date = assertion.get_dates()[0]
         self.assertEqual(date.point.get_normalised_value(), '1990-01-01')
+
+    def test_remove (self):
+        self.assertEqual(len(self.entity.get_existences()), 0)
+        assertion = self.entity.create_existence_property_assertion(
+            self.authority)
+        date_data = {'point': '1 January 1990', 'point_calendar': self.calendar,
+                     'point_type': self.date_type,
+                     'point_normalised': '1990-01-01',
+                     'point_certainty': self.tm.date_full_certainty,
+                     'date_period': self.date_period}
+        date1 = assertion.create_date(date_data)
+        self.assertEqual(len(assertion.get_dates()), 1)
+        self.assertEqual(assertion.get_dates()[0], date1)
+        date_data = {'start': '9 November 2001',
+                     'start_calendar': self.calendar,
+                     'start_type': self.date_type,
+                     'start_normalised': '2001-11-09',
+                     'start_certainty': self.tm.date_full_certainty,
+                     'date_period': self.date_period}
+        date2 = assertion.create_date(date_data)
+        self.assertEqual(len(assertion.get_dates()), 2)
+        self.assertTrue(date1 in assertion.get_dates())
+        self.assertTrue(date2 in assertion.get_dates())
+        date1.remove()
+        self.assertEqual(len(assertion.get_dates()), 1)
+        self.assertTrue(date2 in assertion.get_dates())
+        self.assertEqual(len(self.entity.get_existences()), 1)
+        
