@@ -3,13 +3,32 @@
 {% block eats_content %}
 <h1>Select user to change</h1>
 
+<h2>Activated users</h2>
+
 <ul>
   {% for eats_user in eats_users %}
   <li><a href="{{ eats_user.pk }}/">{{ eats_user.user }}</a></li>
   {% endfor %}
 </ul>
 
+<h2>Unactivated users</h2>
 
+{% if django_users %}
+<p>The following users exist, but are not set up as EATS users.</p>
+
+<form action="activate/" method="post">
+{% csrf_token %}
+
+<ul>
+  {% for user in django_users %}
+  <li>{{ user }} <input name="user_id" type="hidden" value="{{ user.pk }}" /><input type="submit" value="Activate" /></li>
+  {% endfor %}
+</ul>
+</form>
+
+{% else %}
+<p>There are no unactivated users.</p>
+{% endif %}
 
 <p><a href="{% url administration-panel %}">Administration Panel</a></p>
 

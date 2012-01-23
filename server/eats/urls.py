@@ -117,4 +117,5 @@ urlpatterns += patterns(
     url(r'^administer/user/$', 'user_list', name='user-list'),
     url(r'^administer/user/(?P<eats_user_id>\d+)/$', 'user_change',
         name='user-change'),
+    url(r'^administer/user/activate/$', 'user_activate', name='user-activate'),
     )

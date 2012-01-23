@@ -141,7 +141,7 @@ def get_redirect_url (form, opts, topic):
 
 def user_list (request):
     eats_users = EATSUser.objects.all()
-    django_users = User.objects.all()
+    django_users = User.objects.filter(eats_user__isnull=True)
     context_data = {'eats_users': eats_users, 'django_users': django_users}
     return render_to_response('eats/admin/user_list.html', context_data,
                               context_instance=RequestContext(request))
@@ -171,3 +171,22 @@ def user_change (request, eats_user_id):
     context_data = {'form': form, 'user': eats_user.user}
     return render_to_response('eats/admin/user_change.html', context_data,
                               context_instance=RequestContext(request))
+
+def user_activate (request):
+    """Creates an EATS user for the POSTed Django user ID."""
+    redirect_url = reverse('user-list')
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id', None)
+        if user_id is not None:
+            try:
+                user = User.objects.get(id=user_id)
+                try:
+                    eats_user = user.eats_user
+                except EATSUser.DoesNotExist:
+                    eats_user = EATSUser(user=user)
+                    eats_user.save()
+                    redirect_url = reverse('user-change', kwargs={
+                            'eats_user_id': user_id})
+            except User.DoesNotExist:
+                pass
+    return HttpResponseRedirect(redirect_url)
