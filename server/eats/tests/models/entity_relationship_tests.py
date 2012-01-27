@@ -1,11 +1,12 @@
 from eats.exceptions import EATSValidationException
+from eats.models import Entity
 from eats.tests.models.model_test_case import ModelTestCase
 
 
-class EntityRelationshipTest (ModelTestCase):
+class EntityRelationshipTestCase (ModelTestCase):
 
     def setUp (self):
-        super(EntityRelationshipTest, self).setUp()
+        super(EntityRelationshipTestCase, self).setUp()
         self.entity = self.tm.create_entity(self.authority)
         self.entity2 = self.tm.create_entity(self.authority)
         self.entity3 = self.tm.create_entity(self.authority)
@@ -51,6 +52,7 @@ class EntityRelationshipTest (ModelTestCase):
     def test_delete_entity_relationship_property_assertion (self):
         # Test that both forward and reverse relationships are picked
         # up by get_entity_relationships().
+        self.assertEqual(3, Entity.objects.all().count())
         self.assertEqual(0, len(self.entity.get_entity_relationships()))
         self.assertEqual(0, len(self.entity2.get_entity_relationships()))
         self.assertEqual(0, len(self.entity3.get_entity_relationships()))
@@ -67,10 +69,12 @@ class EntityRelationshipTest (ModelTestCase):
         self.assertEqual(1, len(self.entity2.get_entity_relationships()))
         self.assertEqual(1, len(self.entity3.get_entity_relationships()))
         assertion2.remove()
+        self.assertEqual(3, Entity.objects.all().count())
         self.assertEqual(1, len(self.entity.get_entity_relationships()))
         self.assertEqual(1, len(self.entity2.get_entity_relationships()))
         self.assertEqual(0, len(self.entity3.get_entity_relationships()))
         assertion1.remove()
+        self.assertEqual(3, Entity.objects.all().count())
         self.assertEqual(0, len(self.entity.get_entity_relationships()))
         self.assertEqual(0, len(self.entity2.get_entity_relationships()))
         self.assertEqual(0, len(self.entity3.get_entity_relationships()))

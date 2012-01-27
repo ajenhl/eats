@@ -349,3 +349,12 @@ class Entity (Topic):
         """
         return SubjectIdentifierPropertyAssertion.objects.filter_by_entity(self)
 
+    def remove (self):
+        """Removes this entity from the EATS Topic Map."""
+        assertion_getters = [self.get_eats_names, self.get_entity_relationships,
+                             self.get_entity_types, self.get_existences,
+                             self.get_subject_identifiers]
+        for assertion_getter in assertion_getters:
+            for assertion in assertion_getter():
+                assertion.remove()
+        super(Entity, self).remove()

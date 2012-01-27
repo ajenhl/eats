@@ -1,6 +1,7 @@
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 
+from eats.models import Entity, EntityRelationshipPropertyAssertion, ExistencePropertyAssertion
 from eats.tests.models.model_test_case import ModelTestCase
 
 
@@ -164,3 +165,35 @@ class EntityTestCase (ModelTestCase):
         preferred_name = entity.get_preferred_name(
             self.authority, self.language1, self.script1)
         self.assertEqual(name5, preferred_name)
+
+    def test_remove (self):
+        self.assertEqual(Entity.objects.all().count(), 0)
+        self.assertEqual(ExistencePropertyAssertion.objects.all().count(), 0)
+        # Create an entity with no property assertions.
+        entity = self.tm.create_entity()
+        self.assertEqual(Entity.objects.all().count(), 1)
+        self.assertEqual(ExistencePropertyAssertion.objects.all().count(), 0)
+        entity.remove()
+        self.assertEqual(Entity.objects.all().count(), 0)
+        self.assertEqual(ExistencePropertyAssertion.objects.all().count(), 0)
+        # Create an entity with an existence property assertion.
+        entity = self.tm.create_entity(self.authority)
+        self.assertEqual(Entity.objects.all().count(), 1)
+        self.assertEqual(ExistencePropertyAssertion.objects.all().count(), 1)
+        entity.remove()
+        self.assertEqual(Entity.objects.all().count(), 0)
+        self.assertEqual(ExistencePropertyAssertion.objects.all().count(), 0)
+        entity = self.tm.create_entity()
+        entity2 = self.tm.create_entity()
+        self.assertEqual(Entity.objects.all().count(), 2)
+        self.assertEqual(EntityRelationshipPropertyAssertion.objects.all().count(), 0)
+        entity_relationship_type = self.create_entity_relationship_type(
+            'is child of', 'is parent of')
+        self.authority.set_entity_relationship_types(
+            [entity_relationship_type])
+        entity.create_entity_relationship_property_assertion(
+            self.authority, entity_relationship_type, entity, entity2)
+        self.assertEqual(EntityRelationshipPropertyAssertion.objects.all().count(), 1)
+        entity.remove()
+        self.assertEqual(Entity.objects.all().count(), 1)
+        self.assertEqual(EntityRelationshipPropertyAssertion.objects.all().count(), 0)
