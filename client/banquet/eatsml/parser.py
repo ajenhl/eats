@@ -536,7 +536,7 @@ class NamePart (NameElement):
         :type display_form: `str`
 
         """
-        self.text = display_form
+        self.text = display_form.decode('utf-8')
 
     @property
     def name_part_type (self):
@@ -605,7 +605,7 @@ class NamePropertyAssertion (NameElement, PropertyAssertion):
         """
         element = self._get_or_create_element(_get_display_form_element,
                                               EATSML + 'display_form')
-        element.text = display_form
+        element.text = display_form.decode('utf-8')
     
     def get_name_part (self, name_part_type):
         """Returns the combined display form of all name parts of
