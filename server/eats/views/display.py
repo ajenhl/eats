@@ -8,9 +8,15 @@ from lxml import etree
 from eats.decorators import add_topic_map
 from eats.forms.display import EntitySearchForm
 from eats.lib.eatsml_exporter import EATSMLExporter
-from eats.lib.user import get_user_preferences
+from eats.lib.user import get_user_preferences, user_is_editor
 from eats.models import Entity
 
+
+def home (request):
+    context_data = {}
+    context_data['user_is_editor'] = user_is_editor(request.user)
+    return render_to_response('eats/display/home.html', context_data,
+                              context_instance=RequestContext(request))
 
 def entity_view (request, entity_id):
     try:
