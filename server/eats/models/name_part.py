@@ -139,6 +139,7 @@ class NamePart (Topic, NameElement):
         for role in self.get_roles_played():
             association = role.get_parent()
             association.remove()
+        self.name.update_name_cache()
         super(NamePart, self).remove()
         
     @property

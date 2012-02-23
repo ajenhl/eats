@@ -1,4 +1,4 @@
-from eats.models import NameIndex
+from eats.models import NameCache, NameIndex
 from eats.tests.models.model_test_case import ModelTestCase
 
 
@@ -9,6 +9,8 @@ class NamePartTestCase (ModelTestCase):
         self.language = self.create_language('English', 'en')
         self.name_part_type1 = self.create_name_part_type('given')
         self.name_part_type2 = self.create_name_part_type('family')
+        self.language.name_part_types = [self.name_part_type1,
+                                         self.name_part_type2]
         self.name_type = self.create_name_type('regular')
         self.script = self.create_script('Latin', 'Latn', ' ')
         self.authority.set_languages([self.language])
@@ -110,3 +112,36 @@ class NamePartTestCase (ModelTestCase):
         index_items = NameIndex.objects.filter(entity=self.entity)
         indexed_names = set([item.form for item in index_items])
         self.assertEqual(indexed_names, set(['Sam', 'Marie']))
+
+    def test_name_cache (self):
+        cache_items = NameCache.objects.filter(entity=self.entity)
+        self.assertEqual(cache_items.count(), 0)
+        name_part = self.name.create_name_part(
+            self.name_part_type1, self.language, self.script, 'Sam', 1)
+        cache_items = NameCache.objects.filter(entity=self.entity)
+        self.assertEqual(cache_items.count(), 1)
+        cache_item = cache_items[0]
+        self.assertEqual(cache_item.form, 'Sam')
+        self.assertEqual(cache_item.authority, self.authority)
+        self.assertEqual(cache_item.language, self.language)
+        self.assertEqual(cache_item.script, self.script)
+        self.assertEqual(cache_item.name, self.name)
+        name_part.display_form = 'Marie'
+        # Language in cache is of the name, not any of the name parts.
+        language2 = self.create_language('French', 'fr')
+        name_part.language = language2
+        self.name.update_name_cache()
+        cache_items = NameCache.objects.filter(entity=self.entity)
+        self.assertEqual(cache_items.count(), 1)
+        cache_item = cache_items[0]
+        self.assertEqual(cache_item.form, 'Marie')
+        self.assertEqual(cache_item.language, self.language)
+        name_part2 = self.name.create_name_part(
+            self.name_part_type2, self.language, self.script, 'Donal', 1)
+        cache_items = NameCache.objects.filter(entity=self.entity)
+        self.assertEqual(cache_items.count(), 1)
+        self.assertEqual(cache_items[0].form, 'Marie Donal')
+        name_part2.remove()
+        cache_items = NameCache.objects.filter(entity=self.entity)
+        self.assertEqual(cache_items.count(), 1)
+        self.assertEqual(cache_items[0].form, 'Marie')

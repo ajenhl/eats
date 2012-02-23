@@ -162,6 +162,7 @@ class Entity (Topic):
         script_association.create_role(self.eats_topic_map.name_role_type, name)
         script_association.create_role(self.eats_topic_map.script_role_type,
                                        script)
+        name.update_name_cache()
         name.update_name_index()
         return assertion
 

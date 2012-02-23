@@ -2,6 +2,7 @@ from operator import attrgetter
 
 from tmapi.models import Topic
 
+from name_cache import NameCache
 from name_element import NameElement
 from name_index import NameIndex
 from name_part import NamePart
@@ -15,6 +16,16 @@ class Name (Topic, NameElement):
     class Meta:
         proxy = True
         app_label = 'eats'
+
+    def _add_name_cache (self):
+        """Adds this name to the name cache."""
+        form = self.assembled_form
+        if form:
+            cached_name = NameCache(
+                entity=self.entity, name=self, form=form,
+                language=self.language, script=self.script,
+                authority=self.assertion.authority)
+            cached_name.save()
 
     def _add_name_index (self):
         """Adds the forms of this name to the name index."""
@@ -42,6 +53,16 @@ class Name (Topic, NameElement):
     @property
     def assembled_form (self):
         return self.display_form or self._assemble_name_parts()
+
+    @property
+    def assertion (self):
+        if not hasattr(self, '_assertion'):
+            from name_property_assertion import NamePropertyAssertion
+            property_role = self.get_roles_played(
+                self.eats_topic_map.property_role_type)[0]
+            self._assertion = property_role.get_parent(
+                proxy=NamePropertyAssertion)
+        return self._assertion       
 
     def create_name_part (self, name_part_type, language, script, display_form,
                           order):
@@ -84,7 +105,12 @@ class Name (Topic, NameElement):
         script_association.create_role(self.eats_topic_map.script_role_type,
                                        script)
         name_part.update_name_index()
+        self.update_name_cache()
         return name_part
+
+    def _delete_name_cache (self):
+        """Deletes the cache for this name."""
+        self.cached_name.all().delete()
 
     def _delete_name_index_forms (self):
         """Deletes the indexed forms of this name."""
@@ -99,10 +125,7 @@ class Name (Topic, NameElement):
         """
         if not hasattr(self, '_entity'):
             from entity import Entity
-            property_role = self.get_roles_played(
-                self.eats_topic_map.property_role_type)[0]
-            assertion = property_role.get_parent()
-            entity_role = assertion.get_roles(
+            entity_role = self.assertion.get_roles(
                 self.eats_topic_map.entity_role_type)[0]
             self._entity = entity_role.get_player(proxy=Entity)
         return self._entity
@@ -187,4 +210,11 @@ class Name (Topic, NameElement):
         self.language = language
         self.script = script
         self.display_form = display_form
+        self.update_name_cache()
         self.update_name_index()
+
+    def update_name_cache (self):
+        """Updates the name cache for this name."""
+        self._delete_name_cache()
+        self._add_name_cache()
+

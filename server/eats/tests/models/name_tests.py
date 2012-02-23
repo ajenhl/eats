@@ -1,7 +1,7 @@
 from tmapi.indices.type_instance_index import TypeInstanceIndex
 
 from eats.exceptions import EATSValidationException
-from eats.models import NameIndex, NamePart
+from eats.models import NameCache, NameIndex, NamePart
 from eats.tests.models.model_test_case import ModelTestCase
 
 
@@ -182,8 +182,7 @@ class NameTestCase (ModelTestCase):
 
     def test_name_index (self):
         assertion = self.entity.create_name_property_assertion(
-            self.authority, self.name_type, self.language, self.script,
-            '')
+            self.authority, self.name_type, self.language, self.script, '')
         name = assertion.name
         index_items = NameIndex.objects.filter(entity=self.entity)
         self.assertEqual(index_items.count(), 0)
@@ -213,6 +212,40 @@ class NameTestCase (ModelTestCase):
         indexed_names = set([item.form for item in index_items])
         self.assertEqual(indexed_names, set(['Carl', 'Philipp', 'Emanuel',
                                              'Bach']))
+
+    def test_name_cache (self):
+        cache_items = NameCache.objects.filter(entity=self.entity)
+        self.assertEqual(cache_items.count(), 0)
+        # An empty name should not be stored in the cache.
+        assertion = self.entity.create_name_property_assertion(
+            self.authority, self.name_type, self.language, self.script, '')
+        cache_items = NameCache.objects.filter(entity=self.entity)
+        self.assertEqual(cache_items.count(), 0)
+        assertion.name.display_form = 'Dee'
+        assertion.name.update_name_cache()
+        cache_items = NameCache.objects.filter(entity=self.entity)
+        self.assertEqual(cache_items.count(), 1)
+        cache_item = cache_items[0]
+        self.assertEqual(cache_item.form, 'Dee')
+        self.assertEqual(cache_item.authority, self.authority)
+        self.assertEqual(cache_item.language, self.language)
+        self.assertEqual(cache_item.script, self.script)
+        self.assertEqual(cache_item.name, assertion.name)
+        assertion2 = self.entity.create_name_property_assertion(
+            self.authority, self.name_type, self.language, self.script,
+            'Tweedle')
+        cache_items = NameCache.objects.filter(entity=self.entity).order_by(
+            'form')
+        self.assertEqual(cache_items.count(), 2)
+        self.assertEqual(cache_items[0].form, 'Dee')
+        self.assertEqual(cache_items[1].form, 'Tweedle')
+        assertion2.remove()
+        cache_items = NameCache.objects.filter(entity=self.entity)
+        self.assertEqual(cache_items.count(), 1)
+        self.assertEqual(cache_items[0].form, 'Dee')
+        assertion.remove()
+        cache_items = NameCache.objects.filter(entity=self.entity)
+        self.assertEqual(cache_items.count(), 0)
 
     def test_assembled_form (self):
         assertion = self.entity.create_name_property_assertion(
