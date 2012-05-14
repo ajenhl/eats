@@ -21,10 +21,12 @@ class Name (Topic, NameElement):
         """Adds this name to the name cache."""
         form = self.assembled_form
         if form:
+            assertion = self.assertion
             cached_name = NameCache(
-                entity=self.entity, name=self, form=form,
-                language=self.language, script=self.script,
-                authority=self.assertion.authority)
+                entity=self.entity, assertion=assertion, name=self,
+                form=form, language=self.language, script=self.script,
+                authority=self.assertion.authority,
+                is_preferred=assertion.is_preferred)
             cached_name.save()
 
     def _add_name_index (self):

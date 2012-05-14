@@ -2,6 +2,7 @@ from tmapi.models import Association
 
 from base_manager import BaseManager
 from name import Name
+from name_cache import NameCache
 from property_assertion import PropertyAssertion
 
 
@@ -31,48 +32,32 @@ class NamePropertyAssertionManager (BaseManager):
         :rtype: `NamePropertyAssertion` or None
         
         """
-        name_role_type = self.eats_topic_map.name_role_type
-        is_in_script_type = self.eats_topic_map.is_in_script_type
-        script_type = self.eats_topic_map.script_role_type
-        is_in_language_type = self.eats_topic_map.is_in_language_type
-        language_type = self.eats_topic_map.language_role_type
-        is_preferred = self.eats_topic_map.is_preferred
-        entity_names = self.filter_by_entity(entity)
+        entity_names = NameCache.objects.filter(entity=entity)
         if not entity_names.count():
             raise self.model.DoesNotExist
         if script is not None:
-            script_names = entity_names.filter(
-                roles__type=self.eats_topic_map.property_role_type,
-                roles__player__role_players__type=name_role_type,
-                roles__player__role_players__association__type=is_in_script_type,
-                roles__player__role_players__association__roles__type=script_type,
-                roles__player__role_players__association__roles__player=script)
+            script_names = entity_names.filter(script=script)
             if not script_names.count():
                 script_names = entity_names
         else:
             script_names = entity_names
         if authority is not None:
-            authority_names = script_names.filter(scope=authority)
+            authority_names = script_names.filter(authority=authority)
             if not authority_names.count():
                 authority_names = script_names
         else:
             authority_names = script_names
         if language is not None:
-            language_names = authority_names.filter(
-                roles__type=self.eats_topic_map.property_role_type,
-                roles__player__role_players__type=name_role_type,
-                roles__player__role_players__association__type=is_in_language_type,
-                roles__player__role_players__association__roles__type=language_type,
-            roles__player__role_players__association__roles__player=language)
+            language_names = authority_names.filter(language=language)
             if not language_names.count():
                 language_names = authority_names
         else:
             language_names = authority_names
-        names = language_names.filter(scope=is_preferred)
+        names = language_names.filter(is_preferred=True)
         if not names.count():
             names = language_names
         try:
-            return names[0]
+            return names[0].assertion
         except IndexError:
             raise self.model.DoesNotExist
     
