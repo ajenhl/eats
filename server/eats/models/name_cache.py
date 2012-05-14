@@ -3,6 +3,16 @@ from django.db import models
 
 class NameCache (models.Model):
 
+    """Model providing a "cache" of names, shortcutting the highly
+    disaggregated topic map representation in order to improve
+    performance.
+
+    NameCache and NameIndex are both necessary: the index must be able
+    to handle searches over two name parts that are joined by the
+    empty string.
+
+    """
+
     entity = models.ForeignKey('Entity', related_name='cached_names')
     assertion = models.ForeignKey('NamePropertyAssertion',
                                   related_name='cached_name', unique=True)
