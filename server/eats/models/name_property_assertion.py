@@ -76,6 +76,21 @@ class NamePropertyAssertion (Association, PropertyAssertion):
         app_label = 'eats'
 
     @property
+    def is_preferred (self):
+        return super(NamePropertyAssertion, self).is_preferred
+        
+    @is_preferred.setter
+    def is_preferred (self, is_preferred):
+        """Sets whether this property assertion is preferred."""
+        if is_preferred:
+            self.add_theme(self.eats_topic_map.is_preferred)
+        else:
+            self.remove_theme(self.eats_topic_map.is_preferred)
+        cached_name = self.cached_name.all()[0]
+        cached_name.is_preferred = is_preferred
+        cached_name.save()
+    
+    @property
     def name (self):
         """Returns the name being asserted."""
         if not hasattr(self, '_name'):

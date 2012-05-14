@@ -231,6 +231,12 @@ class NameTestCase (ModelTestCase):
         self.assertEqual(cache_item.language, self.language)
         self.assertEqual(cache_item.script, self.script)
         self.assertEqual(cache_item.name, assertion.name)
+        self.assertEqual(cache_item.assertion, assertion)
+        self.assertEqual(cache_item.is_preferred, assertion.is_preferred)
+        self.assertEqual(cache_item.is_preferred, True)
+        assertion.is_preferred = False
+        cache_item = NameCache.objects.filter(entity=self.entity)[0]
+        self.assertEqual(cache_item.is_preferred, False)
         assertion2 = self.entity.create_name_property_assertion(
             self.authority, self.name_type, self.language, self.script,
             'Tweedle')
