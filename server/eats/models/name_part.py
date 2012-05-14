@@ -136,10 +136,14 @@ class NamePart (Topic, NameElement):
         return occurrence
 
     def remove (self):
+        # self.name will raise an exception if it has not been called
+        # before this method and after the association is deleted, so
+        # get a local reference to the name.
+        name = self.name
         for role in self.get_roles_played():
             association = role.get_parent()
             association.remove()
-        self.name.update_name_cache()
+        name.update_name_cache()
         super(NamePart, self).remove()
         
     @property
