@@ -29,6 +29,340 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
         root.getroottree().write_c14n(expected)
         self.assertEqual(actual.getvalue(), expected.getvalue())
 
+    def test_prune_1 (self):
+        # Elements with an eats_id that are not referenced by a new
+        # element are removed.
+        entity_type = self.create_entity_type('person')
+        import_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <entity_types>
+    <entity_type xml:id="entity_type-1" eats_id="%(entity_type)d">
+      <name>person</name>
+    </entity_type>
+  </entity_types>
+</collection>
+''' % {'entity_type': entity_type.get_id()}
+        import_tree = self.importer.import_xml(import_xml, self.admin)[0]
+        expected_xml = '<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/"></collection>'
+        self._compare_XML(import_tree, expected_xml)
+
+    def test_prune_2 (self):
+        # Infrastructure elements without an eats_id are always
+        # retained.
+        authority = self.create_authority('Test')
+        import_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-1" eats_id="%(authority)d">
+      <name>Test</name>
+    </authority>
+  </authorities>
+  <entity_types>
+    <entity_type xml:id="entity_type-1">
+      <name>person</name>
+    </entity_type>
+  </entity_types>
+  <entities>
+    <entity xml:id="entity-1">
+      <existences>
+        <existence authority="authority-1"/>
+      </existences>
+    </entity>
+  </entities>
+</collection>
+''' % {'authority': authority.get_id()}
+        import_tree = self.importer.import_xml(import_xml, self.admin)[0]
+        self._compare_XML(import_tree, import_xml)
+
+    def test_prune_3 (self):
+        # An authority's references are only kept if the authority has
+        # no eats_id, or if there are no entities. The importer does
+        # not modify an existing authority's associated elements.
+        authority = self.create_authority('Test1')
+        entity_type = self.create_entity_type('person')
+        authority.set_entity_types([entity_type])
+        import_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-1" eats_id="%(authority)d">
+      <name>Test1</name>
+      <entity_types>
+        <entity_type ref="entity_type-1"/>
+      </entity_types>
+    </authority>
+    <authority xml:id="authority-2">
+      <name>Test2</name>
+      <entity_types>
+        <entity_type ref="entity_type-1"/>
+      </entity_types>
+    </authority>
+  </authorities>
+  <entity_types>
+    <entity_type xml:id="entity_type-1" eats_id="%(entity_type)d">
+      <name>person</name>
+    </entity_type>
+  </entity_types>
+  <entities>
+    <entity xml:id="entity-1">
+      <entity_types>
+        <entity_type authority="authority-1" entity_type="entity_type-1"/>
+      </entity_types>
+    </entity>
+  </entities>
+</collection>
+''' % {'authority': authority.get_id(), 'entity_type': entity_type.get_id()}
+        import_tree = self.importer.import_xml(import_xml, self.admin)[0]
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-1" eats_id="%(authority)d">
+      <name>Test1</name>
+    </authority>
+    <authority xml:id="authority-2">
+      <name>Test2</name>
+      <entity_types>
+        <entity_type ref="entity_type-1"/>
+      </entity_types>
+    </authority>
+  </authorities>
+  <entity_types>
+    <entity_type xml:id="entity_type-1" eats_id="%(entity_type)d">
+      <name>person</name>
+    </entity_type>
+  </entity_types>
+  <entities>
+    <entity xml:id="entity-1">
+      <entity_types>
+        <entity_type authority="authority-1" entity_type="entity_type-1"/>
+      </entity_types>
+    </entity>
+  </entities>
+</collection>
+''' % {'authority': authority.get_id(), 'entity_type': entity_type.get_id()}
+        self._compare_XML(import_tree, expected_xml)
+
+    def test_prune_4 (self):
+        # Pruning must retain referential integrity.
+        authority = self.create_authority('Test1')
+        calendar = self.create_calendar('Gregorian')
+        date_period = self.create_date_period('lifespan')
+        date_type = self.create_date_type('exact')
+        entity_relationship_type = self.create_entity_relationship_type(
+            'is a child of', 'is a parent of')
+        entity_type = self.create_entity_type('person')
+        language = self.create_language('English', 'en')
+        name_part_type = self.create_name_part_type('given')
+        name_type = self.create_name_type('regular')
+        script = self.create_script('English', 'en', ' ')
+        authority.set_entity_types([entity_type])
+        import_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-1">
+      <name>Test</name>
+      <calendars>
+        <calendar ref="calendar-1"/>
+      </calendars>
+      <date_periods>
+        <date_period ref="date_period-1"/>
+      </date_periods>
+      <date_types>
+        <date_type ref="date_type-1"/>
+      </date_types>
+      <entity_relationship_types>
+        <entity_relationship_type ref="entity_relationship_type-1"/>
+      </entity_relationship_types>
+      <entity_types>
+        <entity_type ref="entity_type-1"/>
+        <entity_type ref="entity_type-2"/>
+      </entity_types>
+      <languages>
+        <language ref="language-1"/>
+      </languages>
+      <name_part_types>
+        <name_part_type ref="name_part_type-1"/>
+      </name_part_types>
+      <name_types>
+        <name_type ref="name_type-1"/>
+      </name_types>
+      <scripts>
+        <script ref="script-1"/>
+      </scripts>
+    </authority>
+  </authorities>
+  <calendars>
+    <calendar xml:id="calendar-1" eats_id="%(calendar)d">
+      <name>Gregorian</name>
+    </calendar>
+  </calendars>
+  <date_periods>
+    <date_period xml:id="date_period-1" eats_id="%(date_period)d">
+      <name>lifespan</name>
+    </date_period>
+  </date_periods>
+  <date_types>
+    <date_type xml:id="date_type-1" eats_id="%(date_type)d">
+      <name>exact</name>
+    </date_type>
+  </date_types>
+  <entity_relationship_types>
+    <entity_relationship_type xml:id="entity_relationship_type-1" eats_id="%(entity_relationship_type)d">
+      <name>is a child of</name>
+      <reverse_name>is a parent of</reverse_name>
+    </entity_relationship_type>
+  </entity_relationship_types>
+  <entity_types>
+    <entity_type xml:id="entity_type-1" eats_id="%(entity_type)d">
+      <name>person</name>
+    </entity_type>
+    <entity_type xml:id="entity_type-2">
+      <name>place</name>
+    </entity_type>
+  </entity_types>
+  <languages>
+    <language xml:id="language-1" eats_id="%(language)d">
+      <name>English</name>
+      <code>en</code>
+      <name_part_types>
+        <name_part_type ref="name_part_type-1"/>
+      </name_part_types>
+    </language>
+  </languages>
+  <name_part_types>
+    <name_part_type xml:id="name_part_type-1" eats_id="%(name_part_type)d">
+      <name>given</name>
+    </name_part_type>
+  </name_part_types>
+  <name_types>
+    <name_type xml:id="name_type-1" eats_id="%(name_type)d">
+      <name>regular</name>
+    </name_type>
+  </name_types>
+  <scripts>
+    <script xml:id="script-1" eats_id="%(script)d">
+      <name>Latin</name>
+      <code>Latn</code>
+      <separator> </separator>
+    </script>
+  </scripts>
+  <entities>
+    <entity xml:id="entity-1">
+      <entity_types>
+        <entity_type authority="authority-1" entity_type="entity_type-2"/>
+      </entity_types>
+    </entity>
+  </entities>
+</collection>
+''' % {'authority': authority.get_id(), 'calendar': calendar.get_id(),
+       'date_period': date_period.get_id(), 'date_type': date_type.get_id(),
+       'entity_relationship_type': entity_relationship_type.get_id(),
+       'entity_type': entity_type.get_id(), 'language': language.get_id(),
+       'name_part_type': name_part_type.get_id(),
+       'name_type': name_type.get_id(), 'script': script.get_id()}
+        import_tree = self.importer.import_xml(import_xml, self.admin)[0]
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-1">
+      <name>Test</name>
+      <calendars>
+        <calendar ref="calendar-1"/>
+      </calendars>
+      <date_periods>
+        <date_period ref="date_period-1"/>
+      </date_periods>
+      <date_types>
+        <date_type ref="date_type-1"/>
+      </date_types>
+      <entity_relationship_types>
+        <entity_relationship_type ref="entity_relationship_type-1"/>
+      </entity_relationship_types>
+      <entity_types>
+        <entity_type ref="entity_type-1"/>
+        <entity_type ref="entity_type-2"/>
+      </entity_types>
+      <languages>
+        <language ref="language-1"/>
+      </languages>
+      <name_part_types>
+        <name_part_type ref="name_part_type-1"/>
+      </name_part_types>
+      <name_types>
+        <name_type ref="name_type-1"/>
+      </name_types>
+      <scripts>
+        <script ref="script-1"/>
+      </scripts>
+    </authority>
+  </authorities>
+  <calendars>
+    <calendar xml:id="calendar-1" eats_id="%(calendar)d">
+      <name>Gregorian</name>
+    </calendar>
+  </calendars>
+  <date_periods>
+    <date_period xml:id="date_period-1" eats_id="%(date_period)d">
+      <name>lifespan</name>
+    </date_period>
+  </date_periods>
+  <date_types>
+    <date_type xml:id="date_type-1" eats_id="%(date_type)d">
+      <name>exact</name>
+    </date_type>
+  </date_types>
+  <entity_relationship_types>
+    <entity_relationship_type xml:id="entity_relationship_type-1" eats_id="%(entity_relationship_type)d">
+      <name>is a child of</name>
+      <reverse_name>is a parent of</reverse_name>
+    </entity_relationship_type>
+  </entity_relationship_types>
+  <entity_types>
+    <entity_type xml:id="entity_type-1" eats_id="%(entity_type)d">
+      <name>person</name>
+    </entity_type>
+    <entity_type xml:id="entity_type-2">
+      <name>place</name>
+    </entity_type>
+  </entity_types>
+  <languages>
+    <language xml:id="language-1" eats_id="%(language)d">
+      <name>English</name>
+      <code>en</code>
+    </language>
+  </languages>
+  <name_part_types>
+    <name_part_type xml:id="name_part_type-1" eats_id="%(name_part_type)d">
+      <name>given</name>
+    </name_part_type>
+  </name_part_types>
+  <name_types>
+    <name_type xml:id="name_type-1" eats_id="%(name_type)d">
+      <name>regular</name>
+    </name_type>
+  </name_types>
+  <scripts>
+    <script xml:id="script-1" eats_id="%(script)d">
+      <name>Latin</name>
+      <code>Latn</code>
+      <separator> </separator>
+    </script>
+  </scripts>
+  <entities>
+    <entity xml:id="entity-1">
+      <entity_types>
+        <entity_type authority="authority-1" entity_type="entity_type-2"/>
+      </entity_types>
+    </entity>
+  </entities>
+</collection>
+''' % {'authority': authority.get_id(), 'calendar': calendar.get_id(),
+       'date_period': date_period.get_id(), 'date_type': date_type.get_id(),
+       'entity_relationship_type': entity_relationship_type.get_id(),
+       'entity_type': entity_type.get_id(), 'language': language.get_id(),
+       'name_part_type': name_part_type.get_id(),
+       'name_type': name_type.get_id(), 'script': script.get_id()}
+        self._compare_XML(import_tree, expected_xml)
+        
     def test_import_authority (self):
         self.assertEqual(Authority.objects.all().count(), 0)
         import_xml = '''
@@ -40,7 +374,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   </authorities>
 </collection>
 '''
-        annotated_import = self.importer.import_xml(import_xml, self.admin)
+        annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
         self.assertEqual(Authority.objects.all().count(), 1)
         authority = Authority.objects.all()[0]
         authority_name = authority.get_admin_name()
@@ -78,23 +412,16 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   </calendars>
 </collection>
 ''' % {'authority': authority.get_id()}
-        annotated_import = self.importer.import_xml(import_xml, self.admin)
+        annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
         self.assertEqual(len(Authority.objects.all()), 1)
         self.assertEqual(len(Calendar.objects.all()), 1)
         self.assertEqual(len(authority.get_calendars()), 0)
         calendar = Calendar.objects.all()[0]
+        # An import will not change an existing authority's references.
         self.assertFalse(calendar in authority.get_calendars())
         self.assertEqual(calendar.get_admin_name(), 'lifespan')
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
-  <authorities>
-    <authority xml:id="authority-1" eats_id="%(authority)d">
-      <name>Test</name>
-      <calendars>
-        <calendar ref="calendar-1"/>
-      </calendars>
-    </authority>
-  </authorities>
   <calendars>
     <calendar xml:id="calendar-1" eats_id="%(calendar)d">
       <name>lifespan</name>
@@ -126,23 +453,16 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   </date_periods>
 </collection>
 ''' % {'authority': authority.get_id()}
-        annotated_import = self.importer.import_xml(import_xml, self.admin)
+        annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
         self.assertEqual(len(Authority.objects.all()), 1)
         self.assertEqual(len(DatePeriod.objects.all()), 1)
         self.assertEqual(len(authority.get_date_periods()), 0)
         date_period = DatePeriod.objects.all()[0]
+        # An import will not change an existing authority's references.
         self.assertFalse(date_period in authority.get_date_periods())
         self.assertEqual(date_period.get_admin_name(), 'lifespan')
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
-  <authorities>
-    <authority xml:id="authority-1" eats_id="%(authority)d">
-      <name>Test</name>
-      <date_periods>
-        <date_period ref="date_period-1"/>
-      </date_periods>
-    </authority>
-  </authorities>
   <date_periods>
     <date_period xml:id="date_period-1" eats_id="%(date_period)d">
       <name>lifespan</name>
@@ -174,23 +494,16 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   </date_types>
 </collection>
 ''' % {'authority': authority.get_id()}
-        annotated_import = self.importer.import_xml(import_xml, self.admin)
+        annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
         self.assertEqual(len(Authority.objects.all()), 1)
         self.assertEqual(len(DateType.objects.all()), 1)
         self.assertEqual(len(authority.get_date_types()), 0)
         date_type = DateType.objects.all()[0]
+        # An import will not change an existing authority's references.
         self.assertFalse(date_type in authority.get_date_types())
         self.assertEqual(date_type.get_admin_name(), 'exact')
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
-  <authorities>
-    <authority xml:id="authority-1" eats_id="%(authority)d">
-      <name>Test</name>
-      <date_types>
-        <date_type ref="date_type-1"/>
-      </date_types>
-    </authority>
-  </authorities>
   <date_types>
     <date_type xml:id="date_type-1" eats_id="%(date_type)d">
       <name>exact</name>
@@ -223,11 +536,12 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   </entity_relationship_types>
 </collection>
 ''' % {'authority': authority.get_id()}
-        annotated_import = self.importer.import_xml(import_xml, self.admin)
+        annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
         self.assertEqual(len(Authority.objects.all()), 1)
         self.assertEqual(len(EntityRelationshipType.objects.all()), 1)
         self.assertEqual(len(authority.get_entity_relationship_types()), 0)
         entity_relationship_type = EntityRelationshipType.objects.all()[0]
+        # An import will not change an existing authority's references.
         self.assertFalse(entity_relationship_type in
                         authority.get_entity_relationship_types())
         self.assertEqual(entity_relationship_type.get_admin_forward_name(),
@@ -236,14 +550,6 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
                          'is parent of')
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
-  <authorities>
-    <authority xml:id="authority-1" eats_id="%(authority)d">
-      <name>Test</name>
-      <entity_relationship_types>
-        <entity_relationship_type ref="entity_relationship_type-1"/>
-      </entity_relationship_types>
-    </authority>
-  </authorities>
   <entity_relationship_types>
     <entity_relationship_type xml:id="entity_relationship_type-1" eats_id="%(entity_relationship_type)d">
       <name>is child of</name>
@@ -276,23 +582,16 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   </entity_types>
 </collection>
 ''' % {'authority': authority.get_id()}
-        annotated_import = self.importer.import_xml(import_xml, self.admin)
+        annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
         self.assertEqual(len(Authority.objects.all()), 1)
         self.assertEqual(len(EntityType.objects.all()), 1)
         self.assertEqual(len(authority.get_entity_types()), 0)
         entity_type = EntityType.objects.all()[0]
+        # An import will not change an existing authority's references.
         self.assertFalse(entity_type in authority.get_entity_types())
         self.assertEqual(entity_type.get_admin_name(), 'exact')
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
-  <authorities>
-    <authority xml:id="authority-1" eats_id="%(authority)d">
-      <name>Test</name>
-      <entity_types>
-        <entity_type ref="entity_type-1"/>
-      </entity_types>
-    </authority>
-  </authorities>
   <entity_types>
     <entity_type xml:id="entity_type-1" eats_id="%(entity_type)d">
       <name>exact</name>
@@ -325,24 +624,17 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   </languages>
 </collection>
 ''' % {'authority': authority.get_id()}
-        annotated_import = self.importer.import_xml(import_xml, self.admin)
+        annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
         self.assertEqual(len(Authority.objects.all()), 1)
         self.assertEqual(len(Language.objects.all()), 1)
         self.assertEqual(len(authority.get_languages()), 0)
         language = Language.objects.all()[0]
+        # An import will not change an existing authority's references.
         self.assertFalse(language in authority.get_languages())
         self.assertEqual(language.get_admin_name(), 'English')
         self.assertEqual(language.get_code(), 'en')
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
-  <authorities>
-    <authority xml:id="authority-1" eats_id="%(authority)d">
-      <name>Test</name>
-      <languages>
-        <language ref="language-1"/>
-      </languages>
-    </authority>
-  </authorities>
   <languages>
     <language xml:id="language-1" eats_id="%(language)d">
       <name>English</name>
@@ -387,34 +679,20 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   </name_part_types>
 </collection>
 ''' % {'authority': authority.get_id(), 'language': language.get_id()}
-        annotated_import = self.importer.import_xml(import_xml, self.admin)
+        annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
         self.assertEqual(len(Authority.objects.all()), 1)
         self.assertEqual(len(Language.objects.all()), 1)
         self.assertEqual(len(NamePartType.objects.all()), 1)
+        # An import will not change an existing authority's references.
         self.assertEqual(len(authority.get_name_part_types()), 0)
         name_part_type = NamePartType.objects.all()[0]
-        self.assertEqual(language.name_part_types, [name_part_type])
+        # An existing language can not have its associated name part
+        # types changed by an import.
+        self.assertEqual(language.name_part_types, [])
         self.assertFalse(name_part_type in authority.get_name_part_types())
         self.assertEqual(name_part_type.get_admin_name(), 'given')
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
-  <authorities>
-    <authority xml:id="authority-1" eats_id="%(authority)d">
-      <name>Test</name>
-      <name_part_types>
-        <name_part_type ref="name_part_type-1"/>
-      </name_part_types>
-    </authority>
-  </authorities>
-  <languages>
-    <language xml:id="language-1" eats_id="%(language)d">
-      <name>English</name>
-      <code>en</code>
-      <name_part_types>
-        <name_part_type ref="name_part_type-1"/>
-      </name_part_types>
-    </language>
-  </languages>
   <name_part_types>
     <name_part_type xml:id="name_part_type-1" eats_id="%(name_part_type)d">
       <name>given</name>
@@ -447,23 +725,16 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   </name_types>
 </collection>
 ''' % {'authority': authority.get_id()}
-        annotated_import = self.importer.import_xml(import_xml, self.admin)
+        annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
         self.assertEqual(len(Authority.objects.all()), 1)
         self.assertEqual(len(NameType.objects.all()), 1)
         self.assertEqual(len(authority.get_name_types()), 0)
         name_type = NameType.objects.all()[0]
+        # An import will not change an existing authority's references.
         self.assertFalse(name_type in authority.get_name_types())
         self.assertEqual(name_type.get_admin_name(), 'regular')
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
-  <authorities>
-    <authority xml:id="authority-1" eats_id="%(authority)d">
-      <name>Test</name>
-      <name_types>
-        <name_type ref="name_type-1"/>
-      </name_types>
-    </authority>
-  </authorities>
   <name_types>
     <name_type xml:id="name_type-1" eats_id="%(name_type)d">
       <name>regular</name>
@@ -497,25 +768,18 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   </scripts>
 </collection>
 ''' % {'authority': authority.get_id()}
-        annotated_import = self.importer.import_xml(import_xml, self.admin)
+        annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
         self.assertEqual(len(Authority.objects.all()), 1)
         self.assertEqual(len(Script.objects.all()), 1)
         self.assertEqual(len(authority.get_scripts()), 0)
         script = Script.objects.all()[0]
+        # An import will not change an existing authority's references.
         self.assertFalse(script in authority.get_scripts())
         self.assertEqual(script.get_admin_name(), 'Latin')
         self.assertEqual(script.get_code(), 'Latn')
         self.assertEqual(script.separator, ' ')
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
-  <authorities>
-    <authority xml:id="authority-1" eats_id="%(authority)d">
-      <name>Test</name>
-      <scripts>
-        <script ref="script-1"/>
-      </scripts>
-    </authority>
-  </authorities>
   <scripts>
     <script xml:id="script-1" eats_id="%(script)d">
       <name>Latin</name>
@@ -587,7 +851,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   </entities>
 </collection>''' % {'authority': authority.get_id(),
                     'entity_relationship_type': entity_relationship_type.get_id()}
-        annotated_import = self.importer.import_xml(import_xml, self.admin)
+        annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
         entity1 = Entity.objects.all()[0]
         entity2 = Entity.objects.all()[1]
         assertion = entity1.get_entity_relationships()[0]
@@ -601,9 +865,6 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   <authorities>
     <authority xml:id="authority-1" eats_id="%(authority)d">
       <name>Test</name>
-      <entity_relationship_types>
-        <entity_relationship_type ref="entity_relationship_type-1"/>
-      </entity_relationship_types>
     </authority>
   </authorities>
   <entity_relationship_types>
@@ -660,7 +921,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   </entities>
 </collection>''' % {'authority': authority.get_id(),
                     'entity_type': entity_type.get_id()}
-        annotated_import = self.importer.import_xml(import_xml, self.admin)
+        annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
         entity = Entity.objects.all()[0]
         entity_type_assertion = entity.get_entity_types()[0]
         self.assertEqual(entity_type_assertion.authority, authority)
@@ -670,9 +931,6 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   <authorities>
     <authority xml:id="authority-1" eats_id="%(authority)d">
       <name>Test</name>
-      <entity_types>
-        <entity_type ref="entity_type-1"/>
-      </entity_types>
     </authority>
   </authorities>
   <entity_types>
@@ -710,7 +968,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
     </entity>
   </entities>
 </collection>''' % {'authority': authority.get_id()}
-        annotated_import = self.importer.import_xml(import_xml, self.admin)
+        annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
         entity = Entity.objects.all()[0]
         existence = entity.get_existences()[0]
         self.assertEqual(existence.authority, authority)
@@ -816,7 +1074,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
                     'given_name_part_type': given_name_part_type.get_id(),
                     'family_name_part_type': family_name_part_type.get_id(),
                     }
-        annotated_import = self.importer.import_xml(import_xml, self.admin)
+        annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
         entity = Entity.objects.all()[0]
         assertion = entity.get_eats_names()[0]
         self.assertEqual(assertion.authority, authority)
@@ -839,29 +1097,12 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   <authorities>
     <authority xml:id="authority-1" eats_id="%(authority)d">
       <name>Test1</name>
-      <languages>
-        <language ref="language-1"/>
-      </languages>
-      <name_part_types>
-        <name_part_type ref="name_part_type-1"/>
-        <name_part_type ref="name_part_type-2"/>
-      </name_part_types>
-      <name_types>
-        <name_type ref="name_type-1"/>
-      </name_types>
-      <scripts>
-        <script ref="script-1"/>
-      </scripts>
     </authority>
   </authorities>
   <languages>
     <language xml:id="language-1" eats_id="%(language)d">
       <name>English</name>
       <code>en</code>
-      <name_part_types>
-        <name_part_type ref="name_part_type-1"/>
-        <name_part_type ref="name_part_type-2"/>
-      </name_part_types>
     </language>
   </languages>
   <name_part_types>
@@ -924,7 +1165,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
     </entity>
   </entities>
 </collection>''' % {'authority': authority.get_id()}
-        annotated_import = self.importer.import_xml(import_xml, self.admin)
+        annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
         entity = Entity.objects.all()[0]
         assertion = entity.get_notes()[0]
         self.assertEqual(assertion.note, 'This is a note.')
@@ -965,7 +1206,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
     </entity>
   </entities>
 </collection>''' % {'authority': authority.get_id()}
-        annotated_import = self.importer.import_xml(import_xml, self.admin)
+        annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
         entity = Entity.objects.all()[0]
         assertion = entity.get_subject_identifiers()[0]
         self.assertEqual(assertion.subject_identifier,

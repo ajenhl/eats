@@ -31,6 +31,12 @@ class EATSMLImporter (EATSMLHandler):
     created only when the domain_entity attribute references the
     entity ancestor's XML ID, preventing the same relationship being
     created twice.
+
+    Associations between infrastructural elements (the scripts
+    associated with an authority, for example, or the name parts
+    associated with a language) are only imported if the containing
+    element is new (ie, has no eats_id); otherwise, the XML is
+    ignored.
        
     Since an import may create database objects before encountering a
     fatal error (for example, an attempt to create an infrastructure
@@ -63,14 +69,14 @@ class EATSMLImporter (EATSMLHandler):
     def import_xml (self, eatsml, user):
         """Imports EATSML document into EATS.
 
-        Returns an XML tree of the original document annotated with
-        ids.
+        Returns a tuple of two XML trees, the original document and
+        the original document annotated with ids.
         
         :param eatsml: XML of EATSML to import
         :type eatsml: `str`
         :param user: user performing the import
         :type user: `EATSUser`
-        :rtype: `ElementTree`
+        :rtype: tuple of `ElementTree`
 
         """
         # QAZ: check the authorities listed in the EATSML against the
@@ -84,10 +90,11 @@ class EATSMLImporter (EATSMLHandler):
             message = 'EATSML is not well-formed: %s' % str(e)
             raise EATSMLException(message)
         self._validate(import_tree)
+        import_tree = self._prune_eatsml(import_tree)
         annotated_tree = copy.deepcopy(import_tree)
         self._import_infrastructure(annotated_tree)
         self._import_entities(annotated_tree)
-        return annotated_tree
+        return (import_tree, annotated_tree)
 
     def _import_infrastructure (self, tree):
         """Imports the infrastructural elements from XML `tree`.
@@ -324,17 +331,17 @@ class EATSMLImporter (EATSMLHandler):
                 language = self._topic_map.create_language(name, code)
                 eats_id = language.get_id()
                 language_element.set('eats_id', str(eats_id))
+                name_part_types = []
+                for name_part_type_element in language_element.xpath(
+                    'e:name_part_types/e:name_part_type', namespaces=NSMAP):
+                    xml_id = name_part_type_element.get('ref')
+                    name_part_type = self._xml_object_map['name_part_type'][xml_id]
+                    name_part_types.append(name_part_type)
+                if name_part_types:
+                    language.name_part_types = name_part_types
             else:
                 language = Language.objects.get_by_identifier(eats_id)
             self._add_mapping('language', xml_id, language)
-            name_part_types = []
-            for name_part_type_element in language_element.xpath(
-                'e:name_part_types/e:name_part_type', namespaces=NSMAP):
-                xml_id = name_part_type_element.get('ref')
-                name_part_type = self._xml_object_map['name_part_type'][xml_id]
-                name_part_types.append(name_part_type)
-            if name_part_types:
-                language.name_part_types = name_part_types
 
     def _import_name_part_types (self, tree):
         """Imports name part types from XML `tree`.
@@ -680,7 +687,7 @@ class EATSMLImporter (EATSMLHandler):
 
         :param value: value to be converted to a Boolean
         :type value: XSD Boolean string
-        :rtype: `boolean`
+        :rtype: `bool`
 
         """
         if value == 'true':
