@@ -17,10 +17,6 @@ from MultipartPostHandler import MultipartPostHandler
 import parser
 
 
-# Full path to this directory.
-PATH = abspath(dirname(__file__))
-
-
 # See http://bugs.python.org/issue9639 for the bug this is working
 # around.
 if sys.version_info[:2] == (2, 6) and sys.version_info[2] >= 6:
@@ -65,8 +61,6 @@ class Dispatcher (object):
             handlers.append(basic_auth_handler)
         opener = urllib2.build_opener(*handlers)
         urllib2.install_opener(opener)
-        self.__prune_infrastructure_transform = self.__create_XSLT_transformer(
-            'remove-redundant-eatsml-infrastructure-data.xsl')
 
     @property
     def base_url (self):
@@ -83,18 +77,6 @@ class Dispatcher (object):
         """Return the password."""
         return self.__password
 
-    def __create_XSLT_transformer (self, xslt_filename):
-        """Return an XSLT transformer from the XSLT in
-        `xslt_filename`.
-
-        Arguments:
-
-        - `xslt_filename`: string filename of XSLT
-
-        """
-        xslt_doc = etree.parse(join(PATH, xslt_filename))
-        return etree.XSLT(xslt_doc)
-    
     def login (self):
         """Log in to the EATS server.
 
@@ -135,18 +117,6 @@ class Dispatcher (object):
         """Return a deep copy of the base document."""
         return deepcopy(self.__base_doc)
 
-    def __prune_eatsml (self, document):
-        """Return `doc` with all redundant elements removed.
-
-        Arguments:
-
-        - `document`: EATSML document
-
-        """
-        tree = etree.ElementTree(document)
-        result_tree = self.__prune_infrastructure_transform(tree)
-        return result_tree.getroot()
-
     def import_document (self, document, import_message):
         """Import `document` into EATS. Return the URL of the
         resulting page.
@@ -157,7 +127,6 @@ class Dispatcher (object):
         - `import_message`: string description of import
 
         """
-        document = self.__prune_eatsml(document)
         string = etree.tostring(document, encoding='utf-8', pretty_print=True)
         fh = StringIO(string)
         params = {'description': import_message,
