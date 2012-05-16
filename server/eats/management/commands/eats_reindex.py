@@ -10,6 +10,6 @@ class Command (BaseCommand):
     help = 'Regenerates the name index and cache.'
 
     def handle (self, *args, **options):
-        for name in Name.objects.all():
+        for name in Name.objects.all().iterator():
             name.update_name_cache()
             name.update_name_index()
