@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project basedir="." default="dist" name="eatslookup">
+  <description>build file for the eatsml library.</description>
+
+  <!-- properties -->
+  <property name="src" location="src" />
+  <property name="lib" location="lib" />
+  <property name="build" location="build" />
+  <property name="reports" location="${build}/reports" />
+  <property name="dist" location="dist" />
+  <property name="xslt" location="etc/xslt" />
+
+  <path id="project.class.path">
+    <fileset dir="${lib}/" includes="*.jar" />
+  </path>
+  <path id="test.class.path">
+    <path refid="project.class.path" />
+    <pathelement location="${build}" />
+  </path>
+
+  <target name="init">
+    <tstamp />
+    <mkdir dir="${build}" />
+  </target>
+
+  <target name="compile" depends="init" description="compile the source">
+    <javac srcdir="${src}" destdir="${build}" classpathref="project.class.path" debug="true" debuglevel="lines,vars,source" />
+  </target>
+
+  <target name="test" depends="compile" description="run junit tests and generate a report">
+    <mkdir dir="${reports}" />
+
+    <junit printsummary="true" haltonerror="false" haltonfailure="false">
+      <classpath refid="test.class.path" />
+      <formatter type="xml" />
+
+      <batchtest todir="${reports}">
+        <fileset dir="${src}" includes="**/*Test.java" />
+      </batchtest>
+    </junit>
+
+    <junitreport todir="${reports}">
+      <fileset dir="${reports}">
+        <include name="TEST-*.xml" />
+      </fileset>
+      <report format="frames" todir="${dist}/reports/html" />
+    </junitreport>
+  </target>
+
+  <target name="dist" depends="test" description="generate the distribution">
+    <mkdir dir="${dist}" />
+    <mkdir dir="${dist}/xslt" />
+
+    <jar jarfile="${dist}/${ant.project.name}.jar" basedir="${build}" />
+    
+    <copy todir="${dist}/xslt">
+      <fileset dir="${xslt}" includes="*.xsl" />
+    </copy>
+  </target>
+
+  <target name="clean" description="clean up">
+    <delete dir="${build}" />
+    <delete dir="${dist}" />
+  </target>
+</project>

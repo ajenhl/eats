@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project basedir="." default="dist" name="eatsml">
+  <description>build file for the eatsml library.</description>
+
+  <!-- properties -->
+  <property name="src" location="src" />
+  <property name="lib" location="lib" />
+  <property name="build" location="build" />
+  <property name="reports" location="${build}/reports" />
+  <property name="dist" location="dist" />
+
+  <path id="project.class.path">
+    <fileset dir="${lib}/" includes="*.jar" />
+  </path>
+  <path id="test.class.path">
+    <path refid="project.class.path" />
+    <pathelement location="${build}" />
+  </path>
+
+  <target name="init">
+    <tstamp />
+    <mkdir dir="${build}" />
+  </target>
+
+  <target name="compile" depends="init" description="compile the source">
+    <javac srcdir="${src}" destdir="${build}" classpathref="project.class.path"  debug="true" debuglevel="lines,vars,source" />
+  </target>
+
+  <target name="dist" description="generate the distribution">
+    <mkdir dir="${dist}" />
+
+    <jar jarfile="${dist}/${ant.project.name}.jar" basedir="${build}" />
+  </target>
+
+  <target name="clean" description="clean up">
+    <delete dir="${build}" />
+    <delete dir="${dist}" />
+  </target>
+</project>

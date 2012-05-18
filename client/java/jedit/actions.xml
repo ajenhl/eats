@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ACTIONS>
+  <ACTION NAME="eatslookup.lookup_person">
+    <CODE>
+      plugin = new nz.ac.victoria.wtapress.eats.lookup.plugin.jedit.EatsLookupPlugin();
+      plugin.lookup(view, "person");
+    </CODE>
+  </ACTION>
+</ACTIONS>

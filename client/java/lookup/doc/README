@@ -1,0 +1,153 @@
+                EATS oXygen plugin
+
+The EATS oXygen plugin is a tool for performing searches across the
+entities in an EATS server instance, creating new entities, and
+marking up TEI documents with keyed name markup, all within the
+oXygen XML editor.
+
+Its use is straightforward. The user selects a piece of text within
+the editor (this text may contain markup, provided the text would be
+well-formed if wrapped in an element) and activates the plugin. The
+plugin window appears, with the "display name" text field prepopulated
+with the selected text (minus any markup).
+
+[* screenshot here *]
+
+The user may then modify the form fields in the search pane (on the
+left of the window), perform a search on the contents of the name
+field(s), or create a new entity with the details as specified in the
+form.
+
+On selecting an existing entity, or creating a new entity, the
+selected text in oXygen is replaced by that text wrapped in a TEI name
+element, with a key attribute set to the key associated with the
+entity.
+
+If the selected text consists entirely of a single TEI name element,
+then no new name element is created, but rather the existing element
+has its type and key added or changed, as appropriate, to those of the
+chosen entity.
+
+
+        Search Form
+
+The search form, on the left of the plugin window, consists of text
+fields and select boxes to specify information about the name/entity
+being searched for or created. Each of these is described below.
+
+
+Authority:
+
+  This is an informational field and cannot be edited. It displays the
+  name of the authority associated with the actions and information of
+  the plugin. It reflects the authority that is set as the user's
+  default in their user profile on the EATS server.
+
+
+Display name:
+
+  This field represents a name (whether partial, complete, or a
+  combination of multiple names associated with the entity) of the
+  entity when a search is made. A search uses only the text in this
+  field, and the text in any name part fields (see below); no other
+  information, including entity type, is used to limit the search
+  results.
+
+  When an entity is created, the text in this field becomes the
+  display form of the name in the EATS record. The display form gives
+  the name as it should appear, in full. It should be specified when
+  there are no applicable name parts, or if the name is too
+  complicated to be correctly constructed from the name parts by the
+  EATS system. Having a display name does not preclude having name
+  parts specified, but in either case the display form is the form of
+  the name that will be displayed in any context.
+
+
+Entity type:
+
+  The type of the entity. While an entity may be assigned multiple
+  entity types in the web editing interface, the plugin allows one and
+  only one to be selected. The selected value is used to determine the
+  value of the type attribute, or the specific name element, that is
+  created in the TEI document.
+
+  This field is only relevant when creating a new entity; it has no
+  effect on the search results.
+
+
+Name type:
+
+  The type of the name. This is only relevant when creating a new
+  entity; it has no effect on the search results.
+
+
+Language:
+
+  The language of the name, as a whole. This is only relevant when
+  creating a new entity; it has no effect on the search results.
+
+
+Script:
+
+  The script of the name, as a whole. This is only relevant when
+  creating a new entity; it has no effect on the search results.
+
+
+Name parts:
+
+  The form contains a text field For each name part type associated
+  with the authority in the EATS system. The text in these fields is
+  used when searching, and forms part of the name when a new entity is
+  created.
+
+
+Multiple searches, using different search terms, may be performed in
+order to be sure that the entity isn't in the EATS system before
+creating a new entity.
+
+Changing the data in the form has absolutely no effect on the contents
+of the TEI document being edited in oXygen; it only changes what is
+searched for, and the details of any new entity that is created in the
+EATS system..
+
+
+        Search Results
+
+When a search is performed, any results are shown in the results panel
+on the right of the window. The number of results is shown in the
+status bar at the bottom of the window. The major details of each
+entity result is shown in the top part of the panel, in columns that
+can be sorted and reordered with respect to each other.
+
+If a row in the results panel is selected, further details of the
+entity are shown in the box below the results.
+
+If a result row is activated (eg, by double-clicking it), the plugin
+window closes and the selected text in oXygen is replaced by that text
+wrapped in a TEI name element, with a key attribute set to the key
+associated with the activated entity.
+
+
+        Creating a New Entity
+
+When there is no matching entity in the EATS system, a new entity must
+be created. All of the information in the search form becomes part of
+the created record. The new entity is automatically given a new
+authority record which carries the key used in the TEI name markup. On
+creating an entity, the plugin window disappears.
+
+
+         Editing an Entity
+
+An entity listed in the search results may contain incorrect or
+incomplete information. The edit entity toolbar button opens the
+editing web page for the selected entity.
+
+
+        Configuring the Plugin
+
+Before the plugin can be used, it must be configured. The base URL of
+an EATS server must be specified, along with a username and password
+for that system.
+
+[* other options to link specific entity types to TEi elements? *]

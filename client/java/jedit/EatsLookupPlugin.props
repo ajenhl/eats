@@ -1,0 +1,17 @@
+# General plugin information.
+plugin.nz.ac.victoria.wtapress.eats.lookup.plugin.jedit.EatsLookupPlugin.activate=defer
+plugin.nz.ac.victoria.wtapress.eats.lookup.plugin.jedit.EatsLookupPlugin.name=EATS Lookup Plugin
+plugin.nz.ac.victoria.wtapress.eats.lookup.plugin.jedit.EatsLookupPlugin.author=Jamie Norrish
+plugin.nz.ac.victoria.wtapress.eats.lookup.plugin.jedit.EatsLookupPlugin.version=1.0
+#plugin.nz.ac.victoria.wtapress.eats.lookup.plugin.jedit.EatsLookupPlugin.jars=eatslookup.jar
+plugin.nz.ac.victoria.wtapress.eats.lookup.plugin.jedit.EatsLookupPlugin.depend.0=jedit 04.02.99.00
+plugin.nz.ac.victoria.wtapress.eats.lookup.plugin.jedit.EatsLookupPlugin.depend.1=jdk 1.5
+plugin.nz.ac.victoria.wtapress.eats.lookup.plugin.jedit.EatsLookupPlugin.description=This plugin provides an interface to an EATS interface allowing names (highlighted text) to be looked up and returned with TEI name markup.
+
+# Plugin menu.
+plugin.nz.ac.victoria.wtapress.eats.lookup.plugin.jedit.EatsLookupPlugin.menu=eatslookup.lookup_person
+
+# Action labels.
+eatslookup.lookup_person.label=Look up person
+
+

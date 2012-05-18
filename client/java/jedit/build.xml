@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project basedir="." default="dist" name="EatsLookupPlugin">
+  <description>Build file for the EATS jEdit lookup plugin.</description>
+
+  <property name="src" location="src"/>
+  <property name="lib" location="lib"/>
+  <property name="build" location="build"/>
+  <property name="dist" location="dist"/>
+  <property name="xslt" location="etc/xslt"/>
+
+  <path id="project.class.path">
+    <fileset dir="${lib}/" includes="*.jar"/>
+  </path>
+
+  <target name="init">
+    <tstamp/>
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="compile" depends="init" description="Compile the source.">
+    <javac srcdir="${src}" destdir="${build}" classpathref="project.class.path"/>
+  </target>
+
+  <target name="dist" depends="compile" description="Generate the distribution.">
+    <jar destfile="${dist}/${ant.project.name}/${ant.project.name}.jar">
+      <fileset dir="${build}"/>
+      <fileset file="actions.xml"/>
+      <fileset file="EatsLookupPlugin.props"/>
+    </jar>
+
+    <copy todir="${dist}/${ant.project.name}">
+      <fileset dir="${lib}"/>
+      <fileset dir="${xslt}" includes="*.xsl"/>
+    </copy>
+  </target>
+
+  <target name="clean" description="Clean up previous build.">
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+  </target>
+</project>

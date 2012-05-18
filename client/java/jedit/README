@@ -1,0 +1,6 @@
+To build the jEdit lookup plugin, the eatsml.jar and eatslookup.jar
+from ../eatsml/dist and ../lookup/dist need to be copied into the lib
+directory. Their dependent JAR files will also need to be copied into
+the .jedit/jars/ directory, while the XSLT files need to be copied
+into
+.jedit/plugins/nz.ac.victoria.wtapress.eats.lookup.plugin.jedit.EatsLookupPlugin.

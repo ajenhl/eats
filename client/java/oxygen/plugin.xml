@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plugin SYSTEM "../plugin.dtd">
+<plugin
+    name="EATSLookup"
+    description="Lookup a name in an EATS system"
+    version="1.0.0"
+    class="uk.ac.kcl.cch.eats.lookup.plugin.oxygen.LookupPlugin">
+    <runtime>
+        <library name="apache-mime4j-0.6.jar" />
+        <library name="commons-codec-1.3.jar"/>
+        <library name="commons-logging-1.1.1.jar"/>
+        <library name="eatslookup-oxygen.jar"/>
+        <library name="eatslookup.jar"/>
+        <library name="eatsml.jar"/>
+        <library name="httpclient-4.0.1-tests.jar"/>
+        <library name="httpclient-4.0.1.jar"/>
+        <library name="httpcore-4.0.1.jar"/>
+        <library name="httpmime-4.0.1.jar"/>
+	<library name="saxon9he.jar" />
+    </runtime>
+    <extension type="selectionProcessor" 
+        class="uk.ac.kcl.cch.eats.lookup.plugin.oxygen.LookupPluginExtension"/>
+</plugin>
