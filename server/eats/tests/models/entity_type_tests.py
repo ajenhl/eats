@@ -2,10 +2,10 @@ from eats.exceptions import EATSValidationException
 from eats.tests.models.model_test_case import ModelTestCase
 
 
-class EntityTypeTest (ModelTestCase):
+class EntityTypeTestCase (ModelTestCase):
 
     def setUp (self):
-        super(EntityTypeTest, self).setUp()
+        super(EntityTypeTestCase, self).setUp()
         self.entity = self.tm.create_entity(self.authority)
         self.entity_type = self.create_entity_type('Person')
         self.entity_type2 = self.create_entity_type('Place')
