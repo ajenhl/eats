@@ -231,6 +231,10 @@ class EntityRelationshipForm (AdminForm):
             er_type.set_admin_name(name, reverse_name)
         return er_type
 
+    def _topic_to_dict (self, topic):
+        return {'name': topic.get_admin_forward_name(),
+                'reverse_name': topic.get_admin_reverse_name()}
+
 
 class EntityTypeForm (AdminForm):
 
