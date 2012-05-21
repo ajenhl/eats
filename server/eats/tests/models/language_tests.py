@@ -1,3 +1,5 @@
+from tmapi.exceptions import TopicInUseException
+from eats.models import Language
 from eats.tests.models.model_test_case import ModelTestCase
 
 
@@ -18,6 +20,25 @@ class LanguageTestCase (ModelTestCase):
         self.assertEqual(language.get_code(), 'eng')
         language2 = self.create_language('French', 'fr')
         self.assertRaises(Exception, language2.set_code, 'eng')
+
+    def test_language_delete (self):
+        self.assertEqual(Language.objects.count(), 0)
+        authority = self.create_authority('test')
+        language = self.create_language('English', 'en')
+        self.assertEqual(Language.objects.count(), 1)
+        authority.set_languages([language])
+        self.assertRaises(TopicInUseException, language.remove)
+        self.assertEqual(Language.objects.count(), 1)
+        authority.set_languages([])
+        language.remove()
+        self.assertEqual(Language.objects.count(), 0)
+        # A language being associated with a name part type should not
+        # prevent the language being removed.
+        language = self.create_language('English', 'en')
+        name_part_type = self.create_name_part_type('given')
+        language.name_part_types = [name_part_type]
+        language.remove()
+        self.assertEqual(Language.objects.count(), 0)
 
     def test_language_name_part_types (self):
         language = self.create_language('English', 'en')

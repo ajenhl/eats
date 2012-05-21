@@ -1,3 +1,5 @@
+from tmapi.exceptions import TopicInUseException
+from eats.models import Script
 from eats.tests.models.model_test_case import ModelTestCase
 
 
@@ -18,6 +20,18 @@ class ScriptTestCase (ModelTestCase):
         self.assertEqual(script.get_code(), 'Arab')
         script2 = self.create_script('Gujarati', 'Gujr', ' ')
         self.assertRaises(Exception, script2.set_code, 'Arab')
+
+    def test_script_delete (self):
+        self.assertEqual(Script.objects.count(), 0)
+        authority = self.create_authority('test')
+        script = self.create_script('Latin', 'Latn', ' ')
+        self.assertEqual(Script.objects.count(), 1)
+        authority.set_scripts([script])
+        self.assertRaises(TopicInUseException, script.remove)
+        self.assertEqual(Script.objects.count(), 1)
+        authority.set_scripts([])
+        script.remove()
+        self.assertEqual(Script.objects.count(), 0)
 
     def test_script_separator (self):
         script = self.create_script('Latin', 'Latn', '')

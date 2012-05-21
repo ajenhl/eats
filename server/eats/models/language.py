@@ -78,6 +78,20 @@ class Language (Topic, Infrastructure):
         for occurrence in existing.values():
             occurrence.remove()
 
+    def remove (self):
+        """Deletes this language.
+
+        Automatically deletes any occurrences linking this language to
+        name part types. Otherwise, normal topic removal rules apply.
+
+        """
+        index = self.eats_topic_map.get_index(ScopedIndex)
+        index.open()
+        for occurrence in index.get_occurrences(self).filter(
+            type=self.eats_topic_map.name_part_type_order_in_language_type):
+            occurrence.remove()
+        super(Language, self).remove()
+
     def set_code (self, code):
         if code == self.get_code():
             return
