@@ -1,3 +1,5 @@
+from django.db import transaction
+
 from tmapi.indices import ScopedIndex
 from tmapi.models import Topic
 
@@ -78,6 +80,7 @@ class Language (Topic, Infrastructure):
         for occurrence in existing.values():
             occurrence.remove()
 
+    @transaction.commit_manually
     def remove (self):
         """Deletes this language.
 
@@ -87,10 +90,16 @@ class Language (Topic, Infrastructure):
         """
         index = self.eats_topic_map.get_index(ScopedIndex)
         index.open()
-        for occurrence in index.get_occurrences(self).filter(
-            type=self.eats_topic_map.name_part_type_order_in_language_type):
-            occurrence.remove()
-        super(Language, self).remove()
+        try:
+            for occurrence in index.get_occurrences(self).filter(
+                type=self.eats_topic_map.name_part_type_order_in_language_type):
+                occurrence.remove()
+            super(Language, self).remove()
+        except:
+            transaction.rollback()
+            raise
+        else:
+            transaction.commit()
 
     def set_code (self, code):
         if code == self.get_code():

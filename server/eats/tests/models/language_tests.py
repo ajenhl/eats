@@ -25,17 +25,19 @@ class LanguageTestCase (ModelTestCase):
         self.assertEqual(Language.objects.count(), 0)
         authority = self.create_authority('test')
         language = self.create_language('English', 'en')
+        name_part_type = self.create_name_part_type('given')
+        language.name_part_types = [name_part_type]
         self.assertEqual(Language.objects.count(), 1)
         authority.set_languages([language])
         self.assertRaises(TopicInUseException, language.remove)
         self.assertEqual(Language.objects.count(), 1)
+        self.assertEqual(language.name_part_types, [name_part_type])
         authority.set_languages([])
         language.remove()
         self.assertEqual(Language.objects.count(), 0)
         # A language being associated with a name part type should not
         # prevent the language being removed.
         language = self.create_language('English', 'en')
-        name_part_type = self.create_name_part_type('given')
         language.name_part_types = [name_part_type]
         language.remove()
         self.assertEqual(Language.objects.count(), 0)
