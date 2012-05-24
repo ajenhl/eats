@@ -70,6 +70,7 @@ def search (request, topic_map):
         results = topic_map.lookup_entities(name)
         user_preferences = get_user_preferences(request)
     context_data = {'search_form': form, 'search_results': results}
+    context_data['user_is_editor'] = user_is_editor(request.user)
     context_data.update(user_preferences)
     return render_to_response('eats/display/search.html', context_data,
                               context_instance=RequestContext(request))
