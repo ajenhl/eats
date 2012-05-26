@@ -12,6 +12,12 @@ from property_assertion import PropertyAssertion
 
 class EntityRelationshipPropertyAssertionManager (BaseManager):
 
+    def filter_by_authority_entity_relationship_type (self, authority,
+                                                      entity_relationship_type):
+        return self.filter(scope=authority).filter(
+            roles__type=self.eats_topic_map.entity_relationship_type_role_type,
+            roles__player=entity_relationship_type)
+
     def filter_by_entity (self, entity):
         domain_role_type = self.eats_topic_map.domain_entity_role_type
         range_role_type = self.eats_topic_map.range_entity_role_type

@@ -83,6 +83,12 @@ class Name (Topic, NameElement):
         :rtype: `NamePart`
 
         """
+        # QAZ: This needs to check that the parameters are all
+        # associated with the name's authority, by calling
+        # self.assertion.authority.validate_components(). name_parts
+        # should also be updated through an update method, which calls
+        # private individual functions, so that validation can easily
+        # take place there also.
         association_type = self.eats_topic_map.name_has_name_part_association_type
         name_role_type = self.eats_topic_map.name_role_type
         association = self.eats_topic_map.create_association(association_type)

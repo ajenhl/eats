@@ -80,7 +80,8 @@ class Authority (Topic, Infrastructure):
 
         """
         association_type = self.eats_topic_map.authority_has_calendar_association_type
-        self._set_infrastructure_elements(calendars, association_type)
+        self._set_infrastructure_elements(
+            self.get_calendars(), calendars, association_type, 'calendar')
 
     def set_date_periods (self, date_periods):
         """Sets the date periods available to this authority to
@@ -91,7 +92,9 @@ class Authority (Topic, Infrastructure):
 
         """
         association_type = self.eats_topic_map.authority_has_date_period_association_type
-        self._set_infrastructure_elements(date_periods, association_type)
+        self._set_infrastructure_elements(
+            self.get_date_periods(), date_periods, association_type,
+            'date_period')
 
     def set_date_types (self, date_types):
         """Sets the date types available to this authority to
@@ -102,7 +105,8 @@ class Authority (Topic, Infrastructure):
 
         """
         association_type = self.eats_topic_map.authority_has_date_type_association_type
-        self._set_infrastructure_elements(date_types, association_type)
+        self._set_infrastructure_elements(
+            self.get_date_types(), date_types, association_type, 'date_type')
 
     def set_editors (self, editors):
         self.editors = editors
@@ -117,8 +121,9 @@ class Authority (Topic, Infrastructure):
 
         """
         association_type = self.eats_topic_map.authority_has_entity_relationship_type_association_type
-        self._set_infrastructure_elements(entity_relationship_types,
-                                          association_type)
+        self._set_infrastructure_elements(
+            self.get_entity_relationship_types(), entity_relationship_types,
+            association_type, 'entity_relationship_type')
         
     def set_entity_types (self, entity_types):
         """Sets the entity types available to this authority to
@@ -129,7 +134,9 @@ class Authority (Topic, Infrastructure):
 
         """
         association_type = self.eats_topic_map.authority_has_entity_type_association_type
-        self._set_infrastructure_elements(entity_types, association_type)
+        self._set_infrastructure_elements(
+            self.get_entity_types(), entity_types, association_type,
+            'entity_type')
 
     def set_languages (self, languages):
         """Sets the languages available to this authority to `languages`.
@@ -139,7 +146,8 @@ class Authority (Topic, Infrastructure):
 
         """
         association_type = self.eats_topic_map.authority_has_language_association_type
-        self._set_infrastructure_elements(languages, association_type)
+        self._set_infrastructure_elements(
+            self.get_languages(), languages, association_type, 'language')
 
     def set_name_part_types (self, name_part_types):
         """Sets the name part types available to this authority to
@@ -150,7 +158,9 @@ class Authority (Topic, Infrastructure):
 
         """
         association_type = self.eats_topic_map.authority_has_name_part_type_association_type
-        self._set_infrastructure_elements(name_part_types, association_type)
+        self._set_infrastructure_elements(
+            self.get_name_part_types(), name_part_types, association_type,
+            'name_part_type')
 
     def set_name_types (self, name_types):
         """Sets the name types available to this authority to `name_types`.
@@ -160,7 +170,8 @@ class Authority (Topic, Infrastructure):
 
         """
         association_type = self.eats_topic_map.authority_has_name_type_association_type
-        self._set_infrastructure_elements(name_types, association_type)
+        self._set_infrastructure_elements(
+            self.get_name_types(), name_types, association_type, 'name_type')
 
 
     def set_scripts (self, scripts):
@@ -171,15 +182,21 @@ class Authority (Topic, Infrastructure):
 
         """
         association_type = self.eats_topic_map.authority_has_script_association_type
-        self._set_infrastructure_elements(scripts, association_type)
+        self._set_infrastructure_elements(
+            self.get_scripts(), scripts, association_type, 'script')
         
-    def _set_infrastructure_elements (self, elements, association_type):
+    def _set_infrastructure_elements (self, old_elements, new_elements,
+                                      association_type, element_name):
         """Sets the infrastructure elements available to this authority.
 
-        :param elements: infrastructure elements to make available
-        :type elements: list of `Topic`s
+        :param old_elements: infrastructure elements currently available
+        :param old_elements: list of `Topic`s
+        :param new_elements: infrastructure elements to make available
+        :type new_elements: list of `Topic`s
         :param association_type: type of association
         :type association_type: `Topic`
+        :param element_name: name of the element type
+        :type model: `str`
 
         """
         authority_role_type = self.eats_topic_map.authority_role_type
@@ -192,16 +209,21 @@ class Authority (Topic, Infrastructure):
             association.create_role(authority_role_type, self)
         else:
             association = roles[0].get_parent()
+            # Validate that no element is being removed that is
+            # associated with a property assertion asserted by this
+            # authority.
+            self._validate_element_removal(element_name, old_elements,
+                                           new_elements)
         infrastructure_roles = association.get_roles(infrastructure_role_type)
         for role in infrastructure_roles:
             role.remove()
-        for element in elements:
+        for element in new_elements:
             association.create_role(infrastructure_role_type, element)
 
     def validate_components (self, calendar=None, date_period=None,
                              date_type=None, entity_relationship_type=None,
-                             entity_type=None, language=None, name_type=None,
-                             script=None):
+                             entity_type=None, language=None,
+                             name_part_type=None, name_type=None, script=None):
         if calendar and calendar not in self.get_calendars():
             raise EATSValidationException
         if date_period and date_period not in self.get_date_periods():
@@ -215,7 +237,68 @@ class Authority (Topic, Infrastructure):
             raise EATSValidationException
         if language and language not in self.get_languages():
             raise EATSValidationException
+        if name_part_type and name_part_type not in self.get_name_part_types():
+            raise EATSValidationException
         if name_type and name_type not in self.get_name_types():
             raise EATSValidationException
         if script and script not in self.get_scripts():
             raise EATSValidationException
+
+    def _validate_element_removal (self, element_name, old_elements,
+                                   new_elements):
+        """Raises an EATSValidationException if an element of
+        old_elements is not in new_elements and is associated with a
+        property assertion asserted by this authority.
+
+        """
+        removed = set(old_elements) - set(new_elements)
+        if removed:
+            method_name = '_validate_element_removal_' + element_name
+            validate = getattr(self, method_name)
+            for element in removed:
+                if validate(element):
+                    raise EATSValidationException
+
+    def _validate_element_removal_calendar (self, element):
+        from eats.models import Date
+        return Date.objects.filter_by_authority_calendar(self, element).count()
+
+    def _validate_element_removal_date_period (self, element):
+        from eats.models import Date
+        return Date.objects.filter_by_authority_date_period(
+            self, element).count()
+
+    def _validate_element_removal_date_type (self, element):
+        from eats.models import Date
+        return Date.objects.filter_by_authority_date_type(
+            self, element).count()
+
+    def _validate_element_removal_entity_relationship_type (self, element):
+        from eats.models import EntityRelationshipPropertyAssertion
+        return EntityRelationshipPropertyAssertion.objects.filter_by_authority_entity_relationship_type(self, element).count()
+
+    def _validate_element_removal_entity_type (self, element):
+        from eats.models import EntityTypePropertyAssertion
+        return EntityTypePropertyAssertion.objects.filter_by_authority_entity_type(self, element).count()
+
+    def _validate_element_removal_language (self, element):
+        from eats.models import NamePropertyAssertion
+        return NamePropertyAssertion.objects.filter_by_authority_language(
+            self, element).count()
+
+    def _validate_element_removal_name_part_type (self, element):
+        from eats.models import NamePropertyAssertion
+        return NamePropertyAssertion.objects.filter_by_authority_name_part_type(
+            self, element).count()
+
+    def _validate_element_removal_name_type (self, element):
+        from eats.models import NamePropertyAssertion
+        return NamePropertyAssertion.objects.filter_by_authority_name_type(
+            self, element).count()
+
+    def _validate_element_removal_script (self, element):
+        from eats.models import NamePropertyAssertion
+        return NamePropertyAssertion.objects.filter_by_authority_script(
+            self, element).count()
+                                                                        
+        

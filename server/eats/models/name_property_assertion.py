@@ -1,3 +1,5 @@
+from django.db.models import Q
+
 from tmapi.models import Association
 
 from base_manager import BaseManager
@@ -7,6 +9,68 @@ from property_assertion import PropertyAssertion
 
 
 class NamePropertyAssertionManager (BaseManager):
+
+    def filter_by_authority_name_type (self, authority, name_type):
+        """Returns a `QuerySet` of `NamePropertyAssertion` that match
+        `authority` and `name_type`.
+
+        :param authority: authority to filter on
+        :type authority: `Authority`
+        :param name_type: name type to filter on
+        :type name_type: `NameType`
+        :rtype: `QuerySet`
+        
+        """
+        return self.filter(scope=authority).filter(
+            roles__type=self.eats_topic_map.property_role_type,
+            roles__player__names__type=name_type)
+
+    def filter_by_authority_language (self, authority, language):
+        property_role = self.eats_topic_map.property_role_type
+        name_role = self.eats_topic_map.name_role_type
+        name_part_role = self.eats_topic_map.name_part_role_type
+        language_role = self.eats_topic_map.language_role_type
+        name_languages = Q(
+            roles__type=property_role,
+            roles__player__role_players__type=name_role,
+            roles__player__role_players__association__roles__type=language_role,
+            roles__player__role_players__association__roles__player=language)
+        name_part_languages = Q(
+            roles__type=property_role,
+            roles__player__role_players__type=name_role,
+            roles__player__role_players__association__roles__type=name_part_role,
+            roles__player__role_players__association__roles__player__role_players__association__roles__type=language_role,
+            roles__player__role_players__association__roles__player__role_players__association__roles__player=language)
+        return self.filter(scope=authority).filter(
+            name_languages | name_part_languages)
+
+    def filter_by_authority_name_part_type (self, authority, name_part_type):
+        name_role = self.eats_topic_map.name_role_type
+        name_part_role = self.eats_topic_map.name_part_role_type
+        return self.filter(scope=authority).filter(
+            roles__type=self.eats_topic_map.property_role_type,
+            roles__player__role_players__type=name_role,
+            roles__player__role_players__association__roles__type=name_part_role,
+            roles__player__role_players__association__roles__player__names__type=name_part_type)
+
+    def filter_by_authority_script (self, authority, script):
+        property_role = self.eats_topic_map.property_role_type
+        name_role = self.eats_topic_map.name_role_type
+        name_part_role = self.eats_topic_map.name_part_role_type
+        script_role = self.eats_topic_map.script_role_type
+        name_scripts = Q(
+            roles__type=property_role,
+            roles__player__role_players__type=name_role,
+            roles__player__role_players__association__roles__type=script_role,
+            roles__player__role_players__association__roles__player=script)
+        name_part_scripts = Q(
+            roles__type=property_role,
+            roles__player__role_players__type=name_role,
+            roles__player__role_players__association__roles__type=name_part_role,
+            roles__player__role_players__association__roles__player__role_players__association__roles__type=script_role,
+            roles__player__role_players__association__roles__player__role_players__association__roles__player=script)
+        return self.filter(scope=authority).filter(
+            name_scripts | name_part_scripts)
 
     def filter_by_entity (self, entity):
         return self.filter(roles__type=self.eats_topic_map.entity_role_type,

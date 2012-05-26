@@ -7,6 +7,30 @@ from date_period import DatePeriod
 
 class DateManager (BaseManager):
 
+    def filter_by_authority_calendar (self, authority, calendar):
+        return self.filter(
+            role_players__type=self.eats_topic_map.date_role_type,
+            role_players__association__scope=authority).filter(
+            names__scope=calendar)
+
+    def filter_by_authority_date_period (self, authority, date_period):
+        date_role_type = self.eats_topic_map.date_role_type
+        date_period_association_type = self.eats_topic_map.date_period_association_type
+        date_period_role_type = self.eats_topic_map.date_period_role_type
+        return self.filter(
+            role_players__type=date_role_type,
+            role_players__association__scope=authority).filter(
+            role_players__type=date_role_type,
+            role_players__association__type=date_period_association_type,
+            role_players__association__roles__type=date_period_role_type,
+            role_players__association__roles__player=date_period)
+
+    def filter_by_authority_date_type (self, authority, date_type):
+        return self.filter(
+            role_players__type=self.eats_topic_map.date_role_type,
+            role_players__association__scope=authority).filter(
+            names__scope=date_type)
+
     def filter_by_entity_existences (self, entity):
         date_role_type = self.eats_topic_map.date_role_type
         entity_role_type = self.eats_topic_map.entity_role_type
