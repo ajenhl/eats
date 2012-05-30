@@ -5,6 +5,7 @@ from date_add_tests import *
 from date_change_tests import *
 from date_period_tests import *
 from date_type_tests import *
+from eatsml_import_tests import *
 from entity_add_tests import *
 from entity_change_tests import *
 from entity_relationship_type_tests import *

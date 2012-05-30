@@ -3,7 +3,7 @@
 {% block eats_content %}
 <h1>Import data</h1>
 
-<form action="." method="post" enctype="multipart/form-data">
+<form action="." id='eatsml-import-form' method="post" enctype="multipart/form-data">
   {% csrf_token %}
   {{ form.as_p }}
   <p><input type="submit" value="Import"/></p>
