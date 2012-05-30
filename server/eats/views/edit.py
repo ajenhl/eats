@@ -128,6 +128,15 @@ def entity_change (request, topic_map, entity_id):
 
 @user_passes_test(user_is_editor)
 @add_topic_map
+def entity_delete (request, topic_map, entity_id):
+    try:
+        entity = Entity.objects.get_by_identifier(entity_id)
+    except Entity.DoesNotExist:
+        raise Http404
+    editor = request.user.eats_user
+
+@user_passes_test(user_is_editor)
+@add_topic_map
 def date_add (request, topic_map, entity_id, assertion_id):
     try:
         entity = Entity.objects.get_by_identifier(entity_id)
@@ -245,8 +254,8 @@ def import_eatsml (request, topic_map):
             eatsml = eatsml_file.getvalue()
             with transaction.commit_manually():
                 try:
-                    annotated_tree = EATSMLImporter(topic_map).import_xml(
-                        eatsml, user)
+                    import_tree, annotated_tree = EATSMLImporter(
+                        topic_map).import_xml(eatsml, user)
                     transaction.commit()
                 except Exception, e:
                     transaction.rollback()
@@ -256,11 +265,12 @@ def import_eatsml (request, topic_map):
                     response.status_code = 500
                     return response
             description = form.cleaned_data['description']
-            raw_xml = eatsml
+            imported_xml = etree.tostring(import_tree, encoding='utf-8',
+                                          pretty_print=True)
             annotated_xml = etree.tostring(annotated_tree, encoding='utf-8',
                                            pretty_print=True)
             eatsml_import = EATSMLImport(
-                importer=user, description=description, raw_xml=raw_xml,
+                importer=user, description=description, raw_xml=imported_xml,
                 annotated_xml=annotated_xml)
             eatsml_import.save()
             redirect_url = reverse('display-eatsml-import',
