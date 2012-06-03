@@ -32,74 +32,61 @@ class DateChangeViewTestCase (ViewTestCase):
                     'assertion_id': existence.get_id()}
         url = reverse('date-change', kwargs=url_args)
         login_url = settings.LOGIN_URL + '?next=' + url
-        response = self.client.get(url)
+        response = self.app.get(url)
         self.assertRedirects(response, login_url)
-        user = self.create_django_user('user2', 'user@example.org', 'password')
-        self.client.login(username='user2', password='password')
-        response = self.client.get(url)
+        user = self.create_django_user('user2', 'user2@example.org', 'password')
+        response = self.app.get(url, user='user2')
         self.assertRedirects(response, login_url)
         eats_user = self.create_user(user)
-        response = self.client.get(url)
+        response = self.app.get(url, user='user2')
         self.assertRedirects(response, login_url)        
         authority = self.create_authority('Test2')
         eats_user.editable_authorities = [self.authority, authority]
         eats_user.set_current_authority(authority)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 404)
+        self.app.get(url, status=404, user='user2')
 
     def test_non_matching_date_change (self):
         """Tests that the entity, assertion, and date match when
         editing a date."""
-        self.client.login(username='user', password='password')
         # Test with none of entity, assertion and date existing.
         url_args = {'entity_id': 0, 'assertion_id': 0, 'date_id': 0}
-        response = self.client.get(reverse('date-change', kwargs=url_args))
-        self.assertEqual(
-            response.status_code, 404,
-            'Expected a 404 HTTP response code for a non-existent entity')
+        self.app.get(reverse('date-change', kwargs=url_args), status=404,
+                     user='user')
         # Test with only the entity existing.
         entity = self.tm.create_entity(self.authority)
         url_args['entity_id'] = entity.get_id()
-        response = self.client.get(reverse('date-change', kwargs=url_args))
-        self.assertEqual(
-            response.status_code, 404,
-            'Expected a 404 HTTP response code for a non-existent assertion')
+        self.app.get(reverse('date-change', kwargs=url_args), status=404,
+                     user='user')
         # Test with only the entity and assertion existing.
         assertion = entity.get_existences()[0]
         url_args['assertion_id'] = assertion.get_id()
-        response = self.client.get(reverse('date-change', kwargs=url_args))
-        self.assertEqual(
-            response.status_code, 404,
-            'Expected a 404 HTTP response code for a non-existent date')
+        self.app.get(reverse('date-change', kwargs=url_args), status=404,
+                     user='user')
         # Test that the assertion must be associated with the entity.
         date = assertion.create_date({'date_period': self.date_period})
         url_args['date_id'] = date.get_id()
         entity2 = self.tm.create_entity(self.authority)
         url_args['entity_id'] = entity2.get_id()
-        response = self.client.get(reverse('date-change', kwargs=url_args))
-        self.assertEqual(response.status_code, 404,
-                         'Expected a 404 HTTP response code for an assertion for a different entity')
+        self.app.get(reverse('date-change', kwargs=url_args), status=404,
+                     user='user')
         # Test that the date must be associated with the assertion.
         assertion2 = entity2.get_existences()[0]
         url_args['assertion_id'] = assertion2.get_id()
-        response = self.client.get(reverse('date-change', kwargs=url_args))
-        self.assertEqual(response.status_code, 404,
-                         'Expected a 404 HTTP response code for a date for a different assertion')
+        self.app.get(reverse('date-change', kwargs=url_args), status=404,
+                     user='user')
 
     def test_get_request (self):
-        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         date = existence.create_date({'date_period': self.date_period})
-        response = self.client.get(reverse(
-                'date-change', kwargs={'entity_id': entity.get_id(),
-                                       'assertion_id': existence.get_id(),
-                                       'date_id': date.get_id()}))
+        url = reverse('date-change', kwargs={'entity_id': entity.get_id(),
+                                             'assertion_id': existence.get_id(),
+                                             'date_id': date.get_id()})
+        response = self.app.get(url, user='user')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'eats/edit/date_change.html')
 
     def test_valid_post_request (self):
-        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         date_data = {'date_period': self.date_period, 'point': '1 January 1900',
@@ -114,14 +101,19 @@ class DateChangeViewTestCase (ViewTestCase):
         url = reverse('date-change', kwargs=url_args)
         date_period2 = self.create_date_period('floruit')
         self.authority.set_date_periods([self.date_period, date_period2])
-        post_data = {'date_period': date_period2.get_id(),
-                     'point_taq_calendar': self.calendar.get_id(),
-                     'point_taq_certainty': 'on',
-                     'point_taq_type': self.date_type.get_id(),
-                     'point_taq': '9 February 2011',
-                     'point_taq_normalised': '2011-02-09',
-                     '_continue': 'Save and continue editing'}
-        response = self.client.post(url, post_data, follow=True)
+        form = self.app.get(url, user='user').forms['date-change-form']
+        form['date_period'] = date_period2.get_id()
+        form['point_taq_calendar'] = self.calendar.get_id()
+        form['point_taq_certainty'] = 'on'
+        form['point_taq_type'] = self.date_type.get_id()
+        form['point_taq'] = '9 February 2011'
+        form['point_taq_normalised'] = '2011-02-09'
+        form['point'] = ''
+        form['point_normalised'] = ''
+        form['point_calendar'] = ''
+        form['point_type'] = ''
+        form['point_certainty'] = None
+        response = form.submit('_continue')
         self.assertRedirects(response, url)
         date = existence.get_dates()[0]
         self.assertEqual(date.period, date_period2)
@@ -131,11 +123,17 @@ class DateChangeViewTestCase (ViewTestCase):
         self.assertEqual(date.point_taq.get_value(), '9 February 2011')
         self.assertEqual(date.point_taq.get_normalised_value(), '2011-02-09')
         self.assertEqual(date.point.get_value(), '')
-        post_data = {'date_period': self.date_period.get_id(),
-                     'start': '6 June 1812', 'start_normalised': '1812-06-06',
-                     'start_calendar': self.calendar.get_id(),
-                     'start_type': self.date_type.get_id(), '_save': 'Save'}
-        response = self.client.post(url, post_data, follow=True)
+        form['date_period'] = self.date_period.get_id()
+        form['start'] = '6 June 1812'
+        form['start_normalised'] = '1812-06-06'
+        form['start_calendar'] = self.calendar.get_id()
+        form['start_type'] = self.date_type.get_id()
+        form['point_taq_calendar'] = ''
+        form['point_taq_certainty'] = None
+        form['point_taq_type'] = ''
+        form['point_taq'] = ''
+        form['point_taq_normalised'] = ''
+        response = form.submit('_save')
         url2 = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
         self.assertRedirects(response, url2)
         date = existence.get_dates()[0]
@@ -149,7 +147,6 @@ class DateChangeViewTestCase (ViewTestCase):
         self.assertEqual(date.point_taq.get_value(), '')
 
     def test_delete (self):
-        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
         self.assertEqual(1, len(entity.get_existences()))
         existence = entity.get_existences()[0]
@@ -165,12 +162,10 @@ class DateChangeViewTestCase (ViewTestCase):
                     'assertion_id': existence.get_id(),
                     'date_id': date.get_id()}
         url = reverse('date-change', kwargs=url_args)
-        post_data = {'_delete': 'Delete'}
-        response = self.client.post(url, post_data, follow=True)
+        form = self.app.get(url, user='user').forms['date-change-form']
+        response = form.submit('_delete')
         url2 = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
         self.assertRedirects(response, url2)
         self.assertEqual(0, len(existence.get_dates()))
         self.assertEqual(1, len(entity.get_existences()))
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 404,
-                         'Expected a 404 HTTP response code for a non-existent (deleted) date')
+        self.app.get(url, status=404, user='user')

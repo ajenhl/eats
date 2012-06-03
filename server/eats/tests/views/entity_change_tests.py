@@ -24,24 +24,24 @@ class EntityChangeViewTestCase (ViewTestCase):
         login_url = settings.LOGIN_URL + '?next=' + url
         response = self.app.get(url)
         self.assertRedirects(response, login_url)
-        user = self.create_django_user('user2', 'user@example.org', 'password')
-        self.client.login(username='user2', password='password')
-        response = self.app.get(url)
+        user = self.create_django_user('user2', 'user2@example.org', 'password')
+        response = self.app.get(url, user='user2')
         self.assertRedirects(response, login_url)
         self.create_user(user)
-        response = self.app.get(url)
+        response = self.app.get(url, user='user2')
         self.assertRedirects(response, login_url)
+        response = self.app.get(url, user='user')
+        self.assertEqual(response.status_code, 200)
 
     def test_non_existent_entity (self):
         url = reverse('entity-change', kwargs={'entity_id': 0})
         self.app.get(url, status=404, user='user')
     
     def test_empty_entity (self):
-        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
-        response = self.client.get(reverse(
-                'entity-change', kwargs={'entity_id': entity.get_id()}))
+        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        response = self.app.get(url, user='user')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'eats/edit/entity_change.html')
         # A newly created entity will have one existence property

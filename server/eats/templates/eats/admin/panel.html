@@ -24,7 +24,7 @@
   {% if tm_status == 'no_tm' %}
 <p>In order to begin using EATS, you must create a database, using the following button.</p>
 
-<form action="create_topic_map/" method="post">
+<form action="create_topic_map/" id="create-topic-map-form" method="post">
   {% csrf_token %}
   <button name="submit" type="submit">Create EATS Topic Map</button>
 </form>

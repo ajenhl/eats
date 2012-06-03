@@ -17,25 +17,23 @@ class EntityAddViewTestCase (ViewTestCase):
     def test_authentication (self):
         url = reverse('entity-add')
         login_url = settings.LOGIN_URL + '?next=' + url
-        response = self.client.get(url)
+        response = self.app.get(url)
         self.assertRedirects(response, login_url)
-        user = self.create_django_user('user2', 'user@example.org', 'password')
-        self.client.login(username='user2', password='password')
-        response = self.client.get(url)
+        user = self.create_django_user('user2', 'user2@example.org', 'password')
+        response = self.app.get(url, user='user2')
         self.assertRedirects(response, login_url)
         self.create_user(user)
-        response = self.client.get(url)
+        response = self.app.get(url, user='user2')
         self.assertRedirects(response, login_url)
-        self.client.login(username='user', password='password')
-        response = self.client.get(url)
+        response = self.app.get(url, user='user')
         self.assertEqual(response.status_code, 200)
 
     def test_add_entity (self):
-        self.client.login(username='user', password='password')
         self.assertEqual(Entity.objects.count(), 0)
         url = reverse('entity-add')
-        response = self.client.post(url, {'authority': self.authority.get_id(),
-                                          '_save': 'Create and edit'})
+        form = self.app.get(url, user='user').forms['entity-add-form']
+        form['authority'] = self.authority.get_id()
+        response = form.submit('_save')
         self.assertEqual(Entity.objects.count(), 1)
         entity_id = Entity.objects.all()[0].get_id()
         redirect_url = reverse('entity-change', kwargs={'entity_id': entity_id})
@@ -45,14 +43,17 @@ class EntityAddViewTestCase (ViewTestCase):
         authority = self.create_authority('Test2')
         self.editor.editable_authorities = [self.authority, authority]
         self.assertEqual(self.editor.get_current_authority(), self.authority)
-        self.client.login(username='user', password='password')
         self.assertEqual(Entity.objects.count(), 0)
         url = reverse('entity-add')
-        self.client.post(url, {'authority': authority.get_id(),
-                               '_save': 'Create and edit'})
+        form = self.app.get(url, user='user').forms['entity-add-form']
+        form['authority'] = authority.get_id()
+        response = form.submit('_save')
         self.assertEqual(Entity.objects.count(), 1)
+        entity_id = Entity.objects.all()[0].get_id()
         # self.editor is out-of-date, since the view has changed the
         # database in the meantime. Therefore instantiate a new model
         # object.
         editor = EATSUser.objects.get(pk=self.editor.pk)
         self.assertEqual(editor.get_current_authority(), authority)
+        redirect_url = reverse('entity-change', kwargs={'entity_id': entity_id})
+        self.assertRedirects(response, redirect_url)

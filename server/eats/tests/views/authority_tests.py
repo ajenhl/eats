@@ -8,33 +8,36 @@ class AuthorityViewsTestCase (ViewTestCase):
 
     def test_authority_list (self):
         url = reverse('authority-list')
-        response = self.client.get(url)
+        response = self.app.get(url)
         self.assertEqual(response.context['opts'], Authority._meta)
         self.assertEqual(len(response.context['topics']), 1)
         self.assertTrue(self.authority in response.context['topics'])
         authority2 = self.create_authority('Test2')
-        response = self.client.get(url)
+        response = self.app.get(url)
         self.assertEqual(len(response.context['topics']), 2)
         self.assertTrue(self.authority in response.context['topics'])
         self.assertTrue(authority2 in response.context['topics'])
 
     def test_authority_add_get (self):
         url = reverse('authority-add')
-        response = self.client.get(url)
+        response = self.app.get(url)
         self.assertEqual(response.context['opts'], Authority._meta)
         
     def test_authority_add_post_redirects (self):
         url = reverse('authority-add')
-        post_data = {'name': 'Test2', '_save': 'Save'}
-        response = self.client.post(url, post_data, follow=True)
+        form = self.app.get(url).forms['infrastructure-add-form']
+        form['name'] = 'Test2'
+        response = form.submit('_save')
         self.assertRedirects(response, reverse('authority-list'))
         self.assertEqual(Authority.objects.count(), 2)
-        post_data = {'name': 'Test3', '_addanother': 'Save and add another'}
-        response = self.client.post(url, post_data, follow=True)
+        form = self.app.get(url).forms['infrastructure-add-form']
+        form['name'] = 'Test3'
+        response = form.submit('_addanother')
         self.assertRedirects(response, url)
         self.assertEqual(Authority.objects.count(), 3)
-        post_data = {'name': 'Test4', '_continue': 'Save and continue editing'}
-        response = self.client.post(url, post_data, follow=True)
+        form = self.app.get(url).forms['infrastructure-add-form']
+        form['name'] = 'Test4'
+        response = form.submit('_continue')
         authority = Authority.objects.get_by_admin_name('Test4')
         redirect_url = reverse('authority-change',
                                kwargs={'topic_id': authority.get_id()})
@@ -55,17 +58,18 @@ class AuthorityViewsTestCase (ViewTestCase):
         script = self.create_script('Latin', 'Latn', ' ')
         user = self.create_django_user('user1', 'user1@example.org', 'password')
         editor = self.create_user(user)
-        post_data = {
-            'name': 'Test1',
-            'calendars': [calendar1.get_id(), calendar2.get_id()],
-            'date_periods': [date_period.get_id()],
-            'date_types': [date_type.get_id()],
-            'entity_relationship_types': [entity_relationship_type.get_id()],
-            'entity_types': [entity_type.get_id()],
-            'languages': [language.get_id()],
-            'name_types': [name_type.get_id()], 'scripts': [script.get_id()],
-            'editors': [editor.pk], '_save': 'Save'}
-        self.client.post(url, post_data, follow=True)
+        form = self.app.get(url).forms['infrastructure-add-form']
+        form['name'] = 'Test1'
+        form['calendars'] = [calendar1.get_id(), calendar2.get_id()]
+        form['date_periods'] = [date_period.get_id()]
+        form['date_types'] = [date_type.get_id()]
+        form['entity_relationship_types'] = [entity_relationship_type.get_id()]
+        form['entity_types'] = [entity_type.get_id()]
+        form['languages'] = [language.get_id()]
+        form['name_types'] = [name_type.get_id()]
+        form['scripts'] = [script.get_id()]
+        form['editors'] = [editor.pk]
+        form.submit('_save')
         authority = Authority.objects.get_by_admin_name('Test1')
         self.assertEqual(len(authority.get_calendars()), 2)
         self.assertTrue(calendar1 in authority.get_calendars())
@@ -91,20 +95,20 @@ class AuthorityViewsTestCase (ViewTestCase):
     def test_authority_add_illegal_post (self):
         self.assertEqual(Authority.objects.count(), 1)
         url = reverse('authority-add')
-        post_data = {'name': 'Test'}
-        response = self.client.post(url, post_data)
+        form = self.app.get(url).forms['infrastructure-add-form']
+        form['name'] = 'Test'
+        response = form.submit('_save')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Authority.objects.count(), 1)
         
     def test_authority_change_illegal_get (self):
         url = reverse('authority-change', kwargs={'topic_id': 0})
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 404)
+        self.app.get(url, status=404)
 
     def test_authority_change_get (self):
         url = reverse('authority-change', kwargs={
                 'topic_id': self.authority.get_id()})
-        response = self.client.get(url)
+        response = self.app.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['form'].instance, self.authority)
 
@@ -138,17 +142,18 @@ class AuthorityViewsTestCase (ViewTestCase):
         user2 = self.create_django_user('user2', 'user2@example.org',
                                         'password')
         editor2 = self.create_user(user2)
-        post_data = {
-            'name': 'Test1',
-            'calendars': [calendar1.get_id(), calendar2.get_id()],
-            'date_periods': [date_period.get_id()],
-            'date_types': [date_type.get_id()],
-            'entity_relationship_types': [entity_relationship_type.get_id()],
-            'entity_types': [entity_type.get_id()],
-            'languages': [language.get_id()],
-            'name_types': [name_type.get_id()], 'scripts': [script.get_id()],
-            'editors': [editor1.pk, editor2.pk], '_save': 'Save'}
-        response = self.client.post(url, post_data, follow=True)
+        form = self.app.get(url).forms['infrastructure-change-form']
+        form['name'] = 'Test1'
+        form['calendars'] = [calendar1.get_id(), calendar2.get_id()]
+        form['date_periods'] = [date_period.get_id()]
+        form['date_types'] = [date_type.get_id()]
+        form['entity_relationship_types'] = [entity_relationship_type.get_id()]
+        form['entity_types'] = [entity_type.get_id()]
+        form['languages'] = [language.get_id()]
+        form['name_types'] = [name_type.get_id()]
+        form['scripts'] = [script.get_id()]
+        form['editors'] = [editor1.pk, editor2.pk]
+        response = form.submit('_save')
         self.assertRedirects(response, reverse('authority-list'))
         self.assertEqual(Authority.objects.count(), 1)
         self.assertEqual(self.authority.get_admin_name(), 'Test1')

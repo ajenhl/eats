@@ -20,60 +20,51 @@ class DateAddViewTestCase (ViewTestCase):
         url = reverse('date-add', kwargs={'entity_id': entity.get_id(),
                                           'assertion_id': existence.get_id()})
         login_url = settings.LOGIN_URL + '?next=' + url
-        response = self.client.get(url)
+        response = self.app.get(url)
         self.assertRedirects(response, login_url)
-        user = self.create_django_user('user2', 'user@example.org', 'password')
-        self.client.login(username='user2', password='password')
-        response = self.client.get(url)
+        user = self.create_django_user('user2', 'user2@example.org', 'password')
+        response = self.app.get(url, user='user2')
         self.assertRedirects(response, login_url)
         eats_user = self.create_user(user)
-        response = self.client.get(url)
+        response = self.app.get(url, user='user2')
         self.assertRedirects(response, login_url)
         authority = self.create_authority('Test2')
         eats_user.editable_authorities = [self.authority, authority]
         eats_user.set_current_authority(authority)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 404)
+        response = self.app.get(url, status=404, user='user2')
 
     def test_non_matching_date_add (self):
         """Tests that the entity and assertion match when adding a
         date."""
-        self.client.login(username='user', password='password')
         url_args = {'entity_id': 0, 'assertion_id': 0}
         # Test with non-existent entity and assertion.
-        response = self.client.get(reverse('date-add', kwargs=url_args))
-        self.assertEqual(
-            response.status_code, 404,
-            'Expected a 404 HTTP response code for a non-existent entity')
+        self.app.get(reverse('date-add', kwargs=url_args), status=404,
+                     user='user')
         # Test with non-existent assertion.
         entity = self.tm.create_entity(self.authority)
         url_args['entity_id'] = entity.get_id()
-        response = self.client.get(reverse('date-add', kwargs=url_args))
-        self.assertEqual(
-            response.status_code, 404,
-            'Expected a 404 HTTP response code for a non-existent assertion')
+        self.app.get(reverse('date-add', kwargs=url_args), status=404,
+                     user='user')
         # Test with the assertion not belonging to the entity.
         entity2 = self.tm.create_entity(self.authority)
         assertion = entity2.get_existences()[0]
         url_args['assertion_id'] = assertion.get_id()
-        response = self.client.get(reverse('date-add', kwargs=url_args))
-        self.assertEqual(response.status_code, 404,
-                         'Expected a 404 HTTP response code for an assertion that does not belong to the entity')
+        self.app.get(reverse('date-add', kwargs=url_args), status=404,
+                     user='user')
 
     def test_get_request (self):
-        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
-        response = self.client.get(reverse(
-                'date-add', kwargs={'entity_id': entity.get_id(),
-                                    'assertion_id': existence.get_id()}))
+        url = reverse('date-add', kwargs={'entity_id': entity.get_id(),
+                                          'assertion_id': existence.get_id()})
+        response = self.app.get(url, user='user')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'eats/edit/date_add.html')
         
     def test_valid_post_request_continue (self):
-        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
+        self.assertEqual(len(existence.get_dates()), 0)
         url = reverse('date-add', kwargs={'entity_id': entity.get_id(),
                                           'assertion_id': existence.get_id()})
         date_period = self.create_date_period('lifespan')
@@ -82,14 +73,15 @@ class DateAddViewTestCase (ViewTestCase):
         self.authority.set_date_periods([date_period])
         self.authority.set_calendars([calendar])
         self.authority.set_date_types([date_type])
-        post_data = {'date_period': date_period.get_id(),
-                     'point_calendar': calendar.get_id(),
-                     'point_certainty': 'on',
-                     'point_type': date_type.get_id(),
-                     'point': '9 February 2011',
-                     'point_normalised': '2011-02-09',
-                     '_continue': 'Save and continue editing'}
-        response = self.client.post(url, post_data)
+        form = self.app.get(url, user='user').forms['date-add-form']
+        form['date_period'] = date_period.get_id()
+        form['point_calendar'] = calendar.get_id()
+        form['point_certainty'] = 'on'
+        form['point_type'] = date_type.get_id()
+        form['point'] = '9 February 2011'
+        form['point_normalised'] = '2011-02-09'
+        response = form.submit('_continue')
+        self.assertEqual(len(existence.get_dates()), 1)
         date = existence.get_dates()[0]
         self.assertEqual(date.period, date_period)
         self.assertEqual(date.point.calendar, calendar)
@@ -104,9 +96,9 @@ class DateAddViewTestCase (ViewTestCase):
         self.assertRedirects(response, redirect_url)
 
     def test_valid_post_request_save (self):
-        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
+        self.assertEqual(len(existence.get_dates()), 0)
         url = reverse('date-add', kwargs={'entity_id': entity.get_id(),
                                           'assertion_id': existence.get_id()})
         date_period = self.create_date_period('lifespan')
@@ -115,22 +107,30 @@ class DateAddViewTestCase (ViewTestCase):
         self.authority.set_date_periods([date_period])
         self.authority.set_calendars([calendar])
         self.authority.set_date_types([date_type])
-        post_data = {'date_period': date_period.get_id(),
-                     'point_calendar': calendar.get_id(),
-                     'point_certainty': 'on',
-                     'point_type': date_type.get_id(),
-                     'point': '9 February 2011',
-                     'point_normalised': '2011-02-09',
-                     '_save': 'Save'}
-        response = self.client.post(url, post_data)
+        form = self.app.get(url, user='user').forms['date-add-form']
+        form['date_period'] = date_period.get_id()
+        form['point_calendar'] = calendar.get_id()
+        form['point_certainty'] = 'on'
+        form['point_type'] = date_type.get_id()
+        form['point'] = '9 February 2011'
+        form['point_normalised'] = '2011-02-09'
+        response = form.submit('_save')
+        self.assertEqual(len(existence.get_dates()), 1)
+        date = existence.get_dates()[0]
+        self.assertEqual(date.period, date_period)
+        self.assertEqual(date.point.calendar, calendar)
+        self.assertEqual(date.point.certainty, self.tm.date_full_certainty)
+        self.assertEqual(date.point.date_type, date_type)
+        self.assertEqual(date.point.get_value(), '9 February 2011')
+        self.assertEqual(date.point.get_normalised_value(), '2011-02-09')
         redirect_url = reverse('entity-change',
                                kwargs={'entity_id': entity.get_id()})
         self.assertRedirects(response, redirect_url)
 
     def test_invalid_post_request (self):
-        self.client.login(username='user', password='password')
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
+        self.assertEqual(len(existence.get_dates()), 0)
         url = reverse('date-add', kwargs={'entity_id': entity.get_id(),
                                           'assertion_id': existence.get_id()})
         date_period = self.create_date_period('lifespan')
@@ -139,10 +139,12 @@ class DateAddViewTestCase (ViewTestCase):
         self.authority.set_calendars([calendar])
         # Omitting the point date type should make the form submission
         # invalid.
-        post_data = {'date_period': date_period.get_id(),
-                     'point_calendar': calendar.get_id(),
-                     'point_certainty': 'on',
-                     'point': '9 February 2011',
-                     'point_normalised': '2011-02-09'}
-        response = self.client.post(url, post_data)
+        form = self.app.get(url, user='user').forms['date-add-form']
+        form['date_period'] = date_period.get_id()
+        form['point_calendar'] = calendar.get_id()
+        form['point_certainty'] = 'on'
+        form['point'] = '9 February 2011'
+        form['point_normalised'] = '2011-02-09'
+        response = form.submit('_save')
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(existence.get_dates()), 0)
