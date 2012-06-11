@@ -346,9 +346,10 @@ public class Dispatcher {
 		// creates a new document builder from the factory
 		DocumentBuilder builder = dbf.newDocumentBuilder();
 
+		String entityContent = EntityUtils.toString(entity);
+		
 		// parses the response
-		Document doc = builder.parse(new ByteArrayInputStream(EntityUtils
-				.toString(entity).getBytes()));
+		Document doc = builder.parse(new ByteArrayInputStream(entityContent.getBytes()));
 
 		// gets a XPathFactory
 		XPathFactory factory = XPathFactory.newInstance();
@@ -539,7 +540,7 @@ public class Dispatcher {
 		File file = null;
 
 		try {
-			if (csrfToken.isEmpty()) {
+			if (csrfToken == null || csrfToken.isEmpty()) {
 				// creates a new get request to get the login form
 				HttpGet get = new HttpGet(serverUrl + IMPORT_URL);
 				get.setParams(httpParams);
@@ -568,6 +569,7 @@ public class Dispatcher {
 
 			// creates a new post request to upload the file
 			HttpPost post = new HttpPost(serverUrl + IMPORT_URL);
+			post.addHeader("Referer", serverUrl + IMPORT_URL);
 
 			// creates a new multipart entity to set the post parameters
 			MultipartEntity entity = new MultipartEntity();
