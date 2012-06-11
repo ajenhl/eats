@@ -539,6 +539,20 @@ public class Dispatcher {
 		File file = null;
 
 		try {
+			if (csrfToken.isEmpty()) {
+				// creates a new get request to get the login form
+				HttpGet get = new HttpGet(serverUrl + IMPORT_URL);
+				get.setParams(httpParams);
+
+				// executes the get request
+				response = httpClient.execute(get, localContext);
+
+				if (response != null && response.getEntity() != null) {
+					// gets the crsf token
+					csrfToken = getCsrf(response.getEntity());
+				}
+			}
+			
 			// creates a new temporary file to save the given collection
 			file = File.createTempFile("eats", ".xml");
 
@@ -585,6 +599,14 @@ public class Dispatcher {
 		} catch (JAXBException e) {
 			throw new DispatcherException(e.getMessage(), e);
 		} catch (IOException e) {
+			throw new DispatcherException(e.getMessage(), e);
+		} catch (ParseException e) {
+			throw new DispatcherException(e.getMessage(), e);
+		} catch (XPathExpressionException e) {
+			throw new DispatcherException(e.getMessage(), e);
+		} catch (ParserConfigurationException e) {
+			throw new DispatcherException(e.getMessage(), e);
+		} catch (SAXException e) {
 			throw new DispatcherException(e.getMessage(), e);
 		} finally {
 			// releases resources
