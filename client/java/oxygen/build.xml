@@ -24,7 +24,7 @@
   </target>
 
   <target name="compile" depends="init" description="compile the source">
-    <javac srcdir="${src}" destdir="${build}" classpathref="project.class.path" debug="true" debuglevel="lines,vars,source" />
+    <javac source="1.6" target="1.6" srcdir="${src}" destdir="${build}" classpathref="project.class.path" debug="true" debuglevel="lines,vars,source" />
   </target>
 
   <target name="test" depends="compile" description="run junit tests and generate a report">
