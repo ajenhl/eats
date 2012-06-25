@@ -20,6 +20,8 @@ urlpatterns += patterns(
     url(r'^entity/add/$', 'entity_add', name='entity-add'),
     url(r'^entity/(?P<entity_id>\d+)/edit/$', 'entity_change',
         name='entity-change'),
+    url(r'^entity/(?P<entity_id>\d+)/delete/$', 'entity_delete',
+        name='entity-delete'),
     url(r'^entity/(?P<entity_id>\d+)/edit/(?P<assertion_id>\d+)/date/add/$',
         'date_add', name='date-add'),
     url(r'^entity/(?P<entity_id>\d+)/edit/(?P<assertion_id>\d+)/date/(?P<date_id>\d+)/$', 'date_change', name='date-change'),

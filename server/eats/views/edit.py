@@ -133,7 +133,21 @@ def entity_delete (request, topic_map, entity_id):
         entity = Entity.objects.get_by_identifier(entity_id)
     except Entity.DoesNotExist:
         raise Http404
-    editor = request.user.eats_user
+    editable_authorities = request.user.eats_user.editable_authorities.all()
+    assertion_getters = [entity.get_eats_names, entity.get_entity_relationships,
+                         entity.get_entity_types, entity.get_existences,
+                         entity.get_subject_identifiers, entity.get_notes]
+    can_delete = True
+    for assertion_getter in assertion_getters:
+        for assertion in assertion_getter():
+            if assertion.authority not in editable_authorities:
+                can_delete = False
+    if request.method == 'POST' and can_delete:
+        entity.remove()
+        return HttpResponseRedirect(reverse('search'))
+    context_data = {'can_delete': can_delete}
+    return render_to_response('eats/edit/entity_delete.html', context_data,
+                              context_instance=RequestContext(request))
 
 @user_passes_test(user_is_editor)
 @add_topic_map

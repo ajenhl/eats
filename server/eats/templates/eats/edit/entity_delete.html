@@ -1,0 +1,31 @@
+{% extends "eats/edit/base.html" %}
+
+{% block eats_title %}{{ block.super }} (DELETE) entity {{ preferred_name }}{% endblock %}
+
+{% block eats_content %}
+<article class="entity-display">
+  <h1>Delete entity {{ preferred_name }}</h1>
+
+  {% if can_delete %}
+
+  <div>
+    <p>You have sufficient permission to delete this entity.</p>
+
+    <p>However, please be aware that if the URL for this entity is
+    being used, whether in one of your own systems or another,
+    deleting the entity will weaken that system. Further, it will
+    weaken the usefulness of, and trust in, this EATS
+    installation.</p>
+
+    <form action="" method="post">
+      {% csrf_token %}
+      <input type="submit" value="Delete" name="_delete"/>
+    </form>
+  </div>
+  {% else %}
+    <p>This entity has information associated with authorities that you are not an editor for. Consequently, you may not delete it.</p>
+  {% endif %}
+
+</article>
+{% endblock eats_content %}
+
