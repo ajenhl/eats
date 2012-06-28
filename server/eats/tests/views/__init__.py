@@ -8,6 +8,7 @@ from date_type_tests import *
 from eatsml_import_tests import *
 from entity_add_tests import *
 from entity_change_tests import *
+from entity_delete_tests import *
 from entity_relationship_type_tests import *
 from entity_type_tests import *
 from language_tests import *
