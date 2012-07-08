@@ -11,6 +11,7 @@ from tmapi.exceptions import TopicMapExistsException
 from tmapi.models import TopicMap, TopicMapSystemFactory
 
 from eats.decorators import add_topic_map
+from eats.lib.views import get_topic_or_404
 from eats.models import Authority, Calendar, DatePeriod, DateType, EATSUser, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
 from eats.forms.admin import AuthorityForm, CalendarForm, DatePeriodForm, DateTypeForm, EntityRelationshipForm, EntityTypeForm, LanguageForm, NamePartTypeForm, NameTypeForm, ScriptForm
 
@@ -80,10 +81,7 @@ def topic_add (request, topic_map, model):
 
 @add_topic_map
 def topic_change (request, topic_map, topic_id, model):
-    try:
-        topic = model.objects.get_by_identifier(topic_id)
-    except model.DoesNotExist:
-        raise Http404
+    topic = get_topic_or_404(model, topic_id)
     opts = model._meta
     form_class = get_form_class(model)
     if request.method == 'POST':
@@ -97,6 +95,10 @@ def topic_change (request, topic_map, topic_id, model):
     context_data = {'form': form, 'opts': opts, 'name': topic.get_admin_name()}
     return render_to_response('eats/admin/topic_change.html', context_data,
                               context_instance=RequestContext(request))
+
+@add_topic_map
+def topic_delete (request, topic_map, topic_id, model):
+    topic = get_topic_or_404(model, topic_id)
 
 def get_form_class (model):
     """Returns the class of the admin form to use for `model` topics.

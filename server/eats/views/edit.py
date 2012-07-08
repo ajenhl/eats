@@ -14,6 +14,7 @@ from eats.lib.eatsml_exporter import EATSMLExporter
 from eats.lib.eatsml_importer import EATSMLImporter
 from eats.lib.property_assertions import EntityRelationshipPropertyAssertions, EntityTypePropertyAssertions, ExistencePropertyAssertions, NamePropertyAssertions, NotePropertyAssertions, SubjectIdentifierPropertyAssertions
 from eats.lib.user import get_user_preferences, user_is_editor
+from eats.lib.views import get_topic_or_404
 from eats.decorators import add_topic_map
 from eats.forms.edit import CreateEntityForm, create_choice_list, CurrentAuthorityForm, DateForm, EATSMLImportForm
 from eats.models import Authority, Calendar, DatePeriod, DateType, EATSMLImport, Entity
@@ -44,10 +45,7 @@ def entity_add (request, topic_map):
 @user_passes_test(user_is_editor)
 @add_topic_map
 def entity_change (request, topic_map, entity_id):
-    try:
-        entity = Entity.objects.get_by_identifier(entity_id)
-    except Entity.DoesNotExist:
-        raise Http404
+    entity = get_topic_or_404(Entity, entity_id)
     editor = request.user.eats_user
     context_data = {'entity': entity}
     authority = editor.get_current_authority()
@@ -129,10 +127,7 @@ def entity_change (request, topic_map, entity_id):
 @user_passes_test(user_is_editor)
 @add_topic_map
 def entity_delete (request, topic_map, entity_id):
-    try:
-        entity = Entity.objects.get_by_identifier(entity_id)
-    except Entity.DoesNotExist:
-        raise Http404
+    entity = get_topic_or_404(Entity, entity_id)
     editable_authorities = request.user.eats_user.editable_authorities.all()
     assertion_getters = [entity.get_eats_names, entity.get_entity_relationships,
                          entity.get_entity_types, entity.get_existences,
@@ -152,10 +147,7 @@ def entity_delete (request, topic_map, entity_id):
 @user_passes_test(user_is_editor)
 @add_topic_map
 def date_add (request, topic_map, entity_id, assertion_id):
-    try:
-        entity = Entity.objects.get_by_identifier(entity_id)
-    except Entity.DoesNotExist:
-        raise Http404
+    entity = get_topic_or_404(Entity, entity_id)
     assertion = entity.get_assertion(assertion_id)
     if assertion is None:
         raise Http404
@@ -191,10 +183,7 @@ def date_add (request, topic_map, entity_id, assertion_id):
 @user_passes_test(user_is_editor)
 @add_topic_map
 def date_change (request, topic_map, entity_id, assertion_id, date_id):
-    try:
-        entity = Entity.objects.get_by_identifier(entity_id)
-    except Entity.DoesNotExist:
-        raise Http404
+    entity = get_topic_or_404(Entity, entity_id)
     assertion = entity.get_assertion(assertion_id)
     if assertion is None:
         raise Http404
