@@ -21,3 +21,6 @@ EATS depends on two other Django applications, `django-tmapi`_ and
 Project settings
 ----------------
 
+EATS uses Django's built-in sites framework as the source for the URLs
+it associates with the entities it creates. Set the domain name
+appropriately.
