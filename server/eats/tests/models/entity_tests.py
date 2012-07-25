@@ -1,7 +1,7 @@
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 
-from eats.models import Entity, EntityRelationshipPropertyAssertion, ExistencePropertyAssertion
+from eats.models import Entity, EntityRelationshipPropertyAssertion, ExistencePropertyAssertion, NameCache, NameIndex, NamePropertyAssertion
 from eats.tests.models.model_test_case import ModelTestCase
 
 
@@ -88,7 +88,7 @@ class EntityTestCase (ModelTestCase):
         self.assertTrue(date1 in dates)
         self.assertTrue(date2 in dates)
         self.assertTrue(date3 not in dates)
-    
+
     def test_get_preferred_name (self):
         entity = self.tm.create_entity(self.authority)
         preferred_name = entity.get_preferred_name(
@@ -197,3 +197,22 @@ class EntityTestCase (ModelTestCase):
         entity.remove()
         self.assertEqual(Entity.objects.all().count(), 1)
         self.assertEqual(EntityRelationshipPropertyAssertion.objects.all().count(), 0)
+        entity2.remove()
+        # Test removal of an entity with a name, since names are
+        # referenced from other models.
+        entity = self.tm.create_entity(self.authority)
+        self.assertEqual(Entity.objects.all().count(), 1)
+        self.assertEqual(NameCache.objects.all().count(), 0)
+        self.assertEqual(NameIndex.objects.all().count(), 0)
+        self.assertEqual(NamePropertyAssertion.objects.all().count(), 0)
+        entity.create_name_property_assertion(
+            self.authority, self.name_type, self.language1, self.script1,
+            'Name', False)
+        self.assertEqual(NameCache.objects.all().count(), 1)
+        self.assertEqual(NameIndex.objects.all().count(), 1)
+        self.assertEqual(NamePropertyAssertion.objects.all().count(), 1)
+        entity.remove()
+        self.assertEqual(Entity.objects.all().count(), 0)
+        self.assertEqual(NameCache.objects.all().count(), 0)
+        self.assertEqual(NameIndex.objects.all().count(), 0)
+        self.assertEqual(NamePropertyAssertion.objects.all().count(), 0)
