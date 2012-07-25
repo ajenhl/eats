@@ -139,6 +139,7 @@ class Entity (Topic):
         authority.validate_components(name_type=name_type, language=language,
                                       script=script)
         name = self.eats_topic_map.create_topic(proxy=Name)
+        name.add_type(self.eats_topic_map.name_type)
         scope = [authority]
         if is_preferred:
             scope.append(self.eats_topic_map.is_preferred)

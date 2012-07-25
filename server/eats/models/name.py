@@ -8,10 +8,20 @@ from name_index import NameIndex
 from name_part import NamePart
 from name_type import NameType
 
+from base_manager import BaseManager
 from eats.lib.name_form import create_name_forms
 
 
+class NameManager (BaseManager):
+
+    def get_query_set (self):
+        return super(NameManager, self).get_query_set().filter(
+            types=self.eats_topic_map.name_type)
+
+
 class Name (Topic, NameElement):
+
+    objects = NameManager()
 
     class Meta:
         proxy = True
@@ -64,7 +74,7 @@ class Name (Topic, NameElement):
                 self.eats_topic_map.property_role_type)[0]
             self._assertion = property_role.get_parent(
                 proxy=NamePropertyAssertion)
-        return self._assertion       
+        return self._assertion
 
     def create_name_part (self, name_part_type, language, script, display_form,
                           order):
@@ -123,13 +133,13 @@ class Name (Topic, NameElement):
     def _delete_name_index_forms (self):
         """Deletes the indexed forms of this name."""
         self.indexed_name_forms.filter(name_part__isnull=True).delete()
-        
+
     @property
     def entity (self):
         """Returns the entity to which this name belongs.
 
         :rtype: `Entity`
-        
+
         """
         if not hasattr(self, '_entity'):
             from entity import Entity
@@ -170,7 +180,7 @@ class Name (Topic, NameElement):
         language_role = name_role.get_parent().get_roles(
             self.eats_topic_map.language_role_type)[0]
         return language_role
-        
+
     @property
     def name_type (self):
         """Returns the name type of this name.
@@ -189,7 +199,7 @@ class Name (Topic, NameElement):
 
         """
         self._get_name().set_type(name_type)
-    
+
     def remove (self):
         for name_part in NamePart.objects.filter_by_name(self):
             name_part.remove()
@@ -197,7 +207,7 @@ class Name (Topic, NameElement):
             association = role.get_parent()
             association.remove()
         super(Name, self).remove()
-        
+
     @property
     def _script_role (self):
         """Returns the script role of this name.
@@ -225,4 +235,3 @@ class Name (Topic, NameElement):
         """Updates the name cache for this name."""
         self._delete_name_cache()
         self._add_name_cache()
-

@@ -4,7 +4,7 @@ from django.db.models import Q
 
 from tmapi.models import Locator, TopicMap
 
-from eats.constants import ADMIN_NAME_TYPE_IRI, AUTHORITY_HAS_CALENDAR_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_DATE_PERIOD_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_DATE_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_ENTITY_RELATIONSHIP_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_ENTITY_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_LANGUAGE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_NAME_PART_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_NAME_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_SCRIPT_ASSOCIATION_TYPE_IRI, AUTHORITY_ROLE_TYPE_IRI, AUTHORITY_TYPE_IRI, CALENDAR_TYPE_IRI, DATE_CERTAINTY_TYPE_IRI, DATE_FULL_CERTAINTY_IRI, DATE_NO_CERTAINTY_IRI, DATE_PERIOD_ASSOCIATION_TYPE, DATE_PERIOD_ROLE_TYPE, DATE_PERIOD_TYPE_IRI, DATE_ROLE_TYPE_IRI, DATE_TYPE_IRI, DATE_TYPE_TYPE_IRI, DOMAIN_ENTITY_ROLE_TYPE_IRI, END_DATE_TYPE_IRI, END_TAQ_DATE_TYPE_IRI, END_TPQ_DATE_TYPE_IRI, ENTITY_RELATIONSHIP_ASSERTION_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_ROLE_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_ROLE_TYPE_IRI, ENTITY_TYPE_IRI, ENTITY_TYPE_ASSERTION_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, EXISTENCE_IRI, EXISTENCE_ASSERTION_TYPE_IRI, INFRASTRUCTURE_ROLE_TYPE_IRI, IS_IN_LANGUAGE_TYPE_IRI, IS_IN_SCRIPT_TYPE_IRI, IS_PREFERRED_IRI, LANGUAGE_CODE_TYPE_IRI, LANGUAGE_ROLE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_ASSERTION_TYPE_IRI, NAME_HAS_NAME_PART_ASSOCIATION_TYPE_IRI, NAME_PART_ORDER_TYPE_IRI, NAME_PART_ROLE_TYPE_IRI, NAME_PART_TYPE_IRI, NAME_PART_TYPE_ORDER_IN_LANGUAGE_TYPE_IRI, NAME_PART_TYPE_TYPE_IRI, NAME_ROLE_TYPE_IRI, NAME_TYPE_TYPE_IRI, NORMALISED_DATE_FORM_TYPE_IRI, NOTE_ASSERTION_TYPE_IRI, POINT_DATE_TYPE_IRI, POINT_TAQ_DATE_TYPE_IRI, POINT_TPQ_DATE_TYPE_IRI, PROPERTY_ROLE_TYPE_IRI, RANGE_ENTITY_ROLE_TYPE_IRI, RELATIONSHIP_NAME_TYPE_IRI, REVERSE_RELATIONSHIP_NAME_TYPE_IRI, SCRIPT_CODE_TYPE_IRI, SCRIPT_ROLE_TYPE_IRI, SCRIPT_SEPARATOR_TYPE_IRI, SCRIPT_TYPE_IRI, START_DATE_TYPE_IRI, START_TAQ_DATE_TYPE_IRI, START_TPQ_DATE_TYPE_IRI, SUBJECT_IDENTIFIER_ASSERTION_TYPE_IRI
+from eats.constants import ADMIN_NAME_TYPE_IRI, AUTHORITY_HAS_CALENDAR_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_DATE_PERIOD_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_DATE_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_ENTITY_RELATIONSHIP_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_ENTITY_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_LANGUAGE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_NAME_PART_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_NAME_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_SCRIPT_ASSOCIATION_TYPE_IRI, AUTHORITY_ROLE_TYPE_IRI, AUTHORITY_TYPE_IRI, CALENDAR_TYPE_IRI, DATE_CERTAINTY_TYPE_IRI, DATE_FULL_CERTAINTY_IRI, DATE_NO_CERTAINTY_IRI, DATE_PERIOD_ASSOCIATION_TYPE, DATE_PERIOD_ROLE_TYPE, DATE_PERIOD_TYPE_IRI, DATE_ROLE_TYPE_IRI, DATE_TYPE_IRI, DATE_TYPE_TYPE_IRI, DOMAIN_ENTITY_ROLE_TYPE_IRI, END_DATE_TYPE_IRI, END_TAQ_DATE_TYPE_IRI, END_TPQ_DATE_TYPE_IRI, ENTITY_RELATIONSHIP_ASSERTION_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_ROLE_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_ROLE_TYPE_IRI, ENTITY_TYPE_IRI, ENTITY_TYPE_ASSERTION_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, EXISTENCE_IRI, EXISTENCE_ASSERTION_TYPE_IRI, INFRASTRUCTURE_ROLE_TYPE_IRI, IS_IN_LANGUAGE_TYPE_IRI, IS_IN_SCRIPT_TYPE_IRI, IS_PREFERRED_IRI, LANGUAGE_CODE_TYPE_IRI, LANGUAGE_ROLE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_ASSERTION_TYPE_IRI, NAME_HAS_NAME_PART_ASSOCIATION_TYPE_IRI, NAME_PART_ORDER_TYPE_IRI, NAME_PART_ROLE_TYPE_IRI, NAME_PART_TYPE_IRI, NAME_PART_TYPE_ORDER_IN_LANGUAGE_TYPE_IRI, NAME_PART_TYPE_TYPE_IRI, NAME_ROLE_TYPE_IRI, NAME_TYPE_IRI, NAME_TYPE_TYPE_IRI, NORMALISED_DATE_FORM_TYPE_IRI, NOTE_ASSERTION_TYPE_IRI, POINT_DATE_TYPE_IRI, POINT_TAQ_DATE_TYPE_IRI, POINT_TPQ_DATE_TYPE_IRI, PROPERTY_ROLE_TYPE_IRI, RANGE_ENTITY_ROLE_TYPE_IRI, RELATIONSHIP_NAME_TYPE_IRI, REVERSE_RELATIONSHIP_NAME_TYPE_IRI, SCRIPT_CODE_TYPE_IRI, SCRIPT_ROLE_TYPE_IRI, SCRIPT_SEPARATOR_TYPE_IRI, SCRIPT_TYPE_IRI, START_DATE_TYPE_IRI, START_TAQ_DATE_TYPE_IRI, START_TPQ_DATE_TYPE_IRI, SUBJECT_IDENTIFIER_ASSERTION_TYPE_IRI
 from eats.lib.name_form import create_name_forms
 from authority import Authority
 from calendar import Calendar
@@ -29,7 +29,7 @@ class EATSTopicMap (TopicMap):
         LANGUAGE_TYPE_IRI: LANGUAGE_CODE_TYPE_IRI,
         SCRIPT_TYPE_IRI: SCRIPT_CODE_TYPE_IRI,
         }
-    
+
     class Meta:
         proxy = True
 
@@ -52,17 +52,17 @@ class EATSTopicMap (TopicMap):
     def authority_has_date_type_association_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 AUTHORITY_HAS_DATE_TYPE_ASSOCIATION_TYPE_IRI))
-    
+
     @property
     def authority_has_entity_relationship_type_association_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 AUTHORITY_HAS_ENTITY_RELATIONSHIP_TYPE_ASSOCIATION_TYPE_IRI))
-    
+
     @property
     def authority_has_entity_type_association_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 AUTHORITY_HAS_ENTITY_TYPE_ASSOCIATION_TYPE_IRI))
-    
+
     @property
     def authority_has_language_association_type (self):
         return self.create_topic_by_subject_identifier(Locator(
@@ -72,7 +72,7 @@ class EATSTopicMap (TopicMap):
     def authority_has_name_part_type_association_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 AUTHORITY_HAS_NAME_PART_TYPE_ASSOCIATION_TYPE_IRI))
-    
+
     @property
     def authority_has_name_type_association_type (self):
         return self.create_topic_by_subject_identifier(Locator(
@@ -87,17 +87,17 @@ class EATSTopicMap (TopicMap):
     def authority_role_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 AUTHORITY_ROLE_TYPE_IRI))
-    
+
     @property
     def authority_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 AUTHORITY_TYPE_IRI))
-    
+
     @property
     def calendar_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 CALENDAR_TYPE_IRI))
-    
+
     def create_authority (self, name):
         """Creates a new authority called `name`.
 
@@ -217,7 +217,7 @@ class EATSTopicMap (TopicMap):
         entity_relationship_type.create_name(
             reverse_name, name_type=self.reverse_relationship_name_type)
         return entity_relationship_type
-    
+
     def create_entity_type (self, name):
         """Creates a new entity type called `name`.
 
@@ -333,12 +333,12 @@ class EATSTopicMap (TopicMap):
         script.create_name(code, name_type=self.script_code_type)
         script.separator = separator
         return script
-    
+
     @property
     def date_certainty_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 DATE_CERTAINTY_TYPE_IRI))
-    
+
     @property
     def date_full_certainty (self):
         if not hasattr(self, '_date_full_certainty'):
@@ -364,7 +364,7 @@ class EATSTopicMap (TopicMap):
     def date_period_role_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 DATE_PERIOD_ROLE_TYPE))
-    
+
     @property
     def date_period_type (self):
         return self.create_topic_by_subject_identifier(Locator(
@@ -379,12 +379,12 @@ class EATSTopicMap (TopicMap):
     def date_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 DATE_TYPE_IRI))
-    
+
     @property
     def date_type_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 DATE_TYPE_TYPE_IRI))
-    
+
     @property
     def domain_entity_role_type (self):
         return self.create_topic_by_subject_identifier(Locator(
@@ -404,7 +404,7 @@ class EATSTopicMap (TopicMap):
     def end_tpq_date_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 END_TPQ_DATE_TYPE_IRI))
-    
+
     @property
     def entity_role_type (self):
         return self.create_topic_by_subject_identifier(Locator(
@@ -429,7 +429,7 @@ class EATSTopicMap (TopicMap):
     def entity_relationship_type_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 ENTITY_RELATIONSHIP_TYPE_TYPE_IRI))
-    
+
     @property
     def entity_type (self):
         return self.create_topic_by_subject_identifier(Locator(ENTITY_TYPE_IRI))
@@ -438,22 +438,22 @@ class EATSTopicMap (TopicMap):
     def entity_type_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 ENTITY_TYPE_TYPE_IRI))
-    
+
     @property
     def existence (self):
         """Returns the existence topic, that serves as the property
         topic for all existences.
 
         :rtype: `Topic`
-        
+
         """
         return self.create_topic_by_subject_identifier(Locator(EXISTENCE_IRI))
-    
+
     @property
     def existence_assertion_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 EXISTENCE_ASSERTION_TYPE_IRI))
-    
+
     def get_assertion_type (self, assertion):
         """Returns the specific class of `assertion`.
 
@@ -479,7 +479,7 @@ class EATSTopicMap (TopicMap):
     def infrastructure_role_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 INFRASTRUCTURE_ROLE_TYPE_IRI))
-    
+
     @property
     def is_in_language_type (self):
         return self.create_topic_by_subject_identifier(Locator(
@@ -505,7 +505,7 @@ class EATSTopicMap (TopicMap):
     def language_code_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 LANGUAGE_CODE_TYPE_IRI))
-    
+
     @property
     def language_role_type (self):
         return self.create_topic_by_subject_identifier(Locator(
@@ -515,7 +515,7 @@ class EATSTopicMap (TopicMap):
     def language_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 LANGUAGE_TYPE_IRI))
-    
+
     def lookup_entities (self, query):
         names = query.split()
         queries = []
@@ -543,7 +543,7 @@ class EATSTopicMap (TopicMap):
             else:
                 query = query | Q(indexed_names__form__istartswith=name_form)
         return query
-    
+
     @property
     def name_assertion_type (self):
         return self.create_topic_by_subject_identifier(Locator(
@@ -558,7 +558,7 @@ class EATSTopicMap (TopicMap):
     def name_part_order_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 NAME_PART_ORDER_TYPE_IRI))
-    
+
     @property
     def name_part_role_type (self):
         return self.create_topic_by_subject_identifier(Locator(
@@ -573,7 +573,7 @@ class EATSTopicMap (TopicMap):
     def name_part_type_order_in_language_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 NAME_PART_TYPE_ORDER_IN_LANGUAGE_TYPE_IRI))
-    
+
     @property
     def name_part_type_type (self):
         return self.create_topic_by_subject_identifier(Locator(
@@ -585,10 +585,15 @@ class EATSTopicMap (TopicMap):
                 NAME_ROLE_TYPE_IRI))
 
     @property
+    def name_type (self):
+        return self.create_topic_by_subject_identifier(Locator(
+                NAME_TYPE_IRI))
+
+    @property
     def name_type_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 NAME_TYPE_TYPE_IRI))
-    
+
     @property
     def normalised_date_form_type (self):
         return self.create_topic_by_subject_identifier(Locator(
@@ -613,7 +618,7 @@ class EATSTopicMap (TopicMap):
     def point_tpq_date_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 POINT_TPQ_DATE_TYPE_IRI))
-    
+
     @property
     def property_role_type (self):
         return self.create_topic_by_subject_identifier(Locator(
@@ -643,12 +648,12 @@ class EATSTopicMap (TopicMap):
     def script_separator_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 SCRIPT_SEPARATOR_TYPE_IRI))
-    
+
     @property
     def script_type (self):
         return self.create_topic_by_subject_identifier(Locator(
                 SCRIPT_TYPE_IRI))
-    
+
     @property
     def script_role_type (self):
         return self.create_topic_by_subject_identifier(Locator(
