@@ -1,7 +1,7 @@
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 
-from eats.models import Entity, EntityRelationshipPropertyAssertion, ExistencePropertyAssertion, NameCache, NameIndex, NamePropertyAssertion
+from eats.models import Entity, EntityRelationshipPropertyAssertion, ExistencePropertyAssertion, Name, NameCache, NameIndex, NamePropertyAssertion
 from eats.tests.models.model_test_case import ModelTestCase
 
 
@@ -202,17 +202,20 @@ class EntityTestCase (ModelTestCase):
         # referenced from other models.
         entity = self.tm.create_entity(self.authority)
         self.assertEqual(Entity.objects.all().count(), 1)
+        self.assertEqual(Name.objects.all().count(), 0)
         self.assertEqual(NameCache.objects.all().count(), 0)
         self.assertEqual(NameIndex.objects.all().count(), 0)
         self.assertEqual(NamePropertyAssertion.objects.all().count(), 0)
         entity.create_name_property_assertion(
             self.authority, self.name_type, self.language1, self.script1,
             'Name', False)
+        self.assertEqual(Name.objects.all().count(), 1)
         self.assertEqual(NameCache.objects.all().count(), 1)
         self.assertEqual(NameIndex.objects.all().count(), 1)
         self.assertEqual(NamePropertyAssertion.objects.all().count(), 1)
         entity.remove()
         self.assertEqual(Entity.objects.all().count(), 0)
+        self.assertEqual(Name.objects.all().count(), 0)
         self.assertEqual(NameCache.objects.all().count(), 0)
         self.assertEqual(NameIndex.objects.all().count(), 0)
         self.assertEqual(NamePropertyAssertion.objects.all().count(), 0)
