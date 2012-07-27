@@ -852,8 +852,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 </collection>''' % {'authority': authority.get_id(),
                     'entity_relationship_type': entity_relationship_type.get_id()}
         annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
-        entity1 = Entity.objects.all()[0]
-        entity2 = Entity.objects.all()[1]
+        entity1, entity2 = Entity.objects.all().order_by('id')
         assertion = entity1.get_entity_relationships()[0]
         self.assertEqual(assertion.authority, authority)
         self.assertEqual(assertion.entity_relationship_type,
