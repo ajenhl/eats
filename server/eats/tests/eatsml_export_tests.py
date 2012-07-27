@@ -30,7 +30,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         export = self.exporter.export_entities([])
         expected_xml = '<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/"/>'
         self._compare_XML(export, expected_xml)
-    
+
     def test_export_entity_existence (self):
         authority = self.create_authority('Test')
         entity = self.tm.create_entity()
@@ -174,9 +174,9 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
           <assembled_form>Miriam Clare Frost</assembled_form>
           <display_form></display_form>
           <name_parts>
-            <name_part name_part_type="name_part_type-%(family_name_part_type)d" language="language-%(language)d" script="script-%(script)d">Frost</name_part>
             <name_part name_part_type="name_part_type-%(given_name_part_type)d" language="language-%(language)d" script="script-%(script)d">Miriam</name_part>
             <name_part name_part_type="name_part_type-%(given_name_part_type)d" language="language-%(language)d" script="script-%(script)d">Clare</name_part>
+            <name_part name_part_type="name_part_type-%(family_name_part_type)d" language="language-%(language)d" script="script-%(script)d">Frost</name_part>
           </name_parts>
         </name>
       </names>
@@ -227,8 +227,8 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         <name_type ref="name_type-%(name_type)d"/>
       </name_types>
       <scripts>
-        <script ref="script-%(latin)d"/>
         <script ref="script-%(arabic)d"/>
+        <script ref="script-%(latin)d"/>
       </scripts>
     </authority>
   </authorities>
@@ -248,14 +248,14 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     </name_type>
   </name_types>
   <scripts>
-    <script xml:id="script-%(latin)d" eats_id="%(latin)d" user_preferred="true">
-      <name>Latin</name>
-      <code>Latn</code>
-      <separator> </separator>
-    </script>
     <script xml:id="script-%(arabic)d" eats_id="%(arabic)d">
       <name>Arabic</name>
       <code>Arab</code>
+      <separator> </separator>
+    </script>
+    <script xml:id="script-%(latin)d" eats_id="%(latin)d" user_preferred="true">
+      <name>Latin</name>
+      <code>Latn</code>
       <separator> </separator>
     </script>
   </scripts>
@@ -280,7 +280,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
        'name_type': name_type.get_id(), 'name1': name1.get_id(),
        'name2': name2.get_id(), 'url': entity.get_eats_subject_identifier()}
         self._compare_XML(export, expected_xml)
-        
+
     def test_export_entity_entity_relationship (self):
         authority = self.create_authority('Test')
         entity = self.tm.create_entity()
@@ -494,8 +494,8 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         <language ref="language-%(english)d"/>
       </languages>
       <name_part_types>
-        <name_part_type ref="name_part_type-%(given)d"/>
         <name_part_type ref="name_part_type-%(family)d"/>
+        <name_part_type ref="name_part_type-%(given)d"/>
       </name_part_types>
       <name_types>
         <name_type ref="name_type-%(regular)d"/>
@@ -574,11 +574,11 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
     </language>
   </languages>
   <name_part_types>
-    <name_part_type xml:id="name_part_type-%(given)d" eats_id="%(given)d">
-      <name>given</name>
-    </name_part_type>
     <name_part_type xml:id="name_part_type-%(family)d" eats_id="%(family)d">
       <name>family</name>
+    </name_part_type>
+    <name_part_type xml:id="name_part_type-%(given)d" eats_id="%(given)d">
+      <name>given</name>
     </name_part_type>
     <name_part_type xml:id="name_part_type-%(title)d" eats_id="%(title)d">
       <name>title</name>

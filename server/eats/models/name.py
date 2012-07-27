@@ -161,7 +161,7 @@ class Name (Topic, NameElement):
             name_part_type = name_part.name_part_type
             type_data = data.setdefault(name_part_type, [])
             type_data.append(name_part)
-        # Sort the name parts into their specified order.
+        # Sort the name parts into their specified order within type.
         for name_parts in data.values():
             name_parts.sort(key=attrgetter('order'))
         return data

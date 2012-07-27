@@ -35,7 +35,7 @@ class EATSMLExporter (EATSMLHandler):
 
         If `user` is specified, the preferred name of each entity is
         annotated.
-        
+
         :param entities: entities to export
         :type entities: `list` or `QuerySet` of `Entity`s
         :param user: optional user
@@ -72,7 +72,7 @@ class EATSMLExporter (EATSMLHandler):
         # exported (due to being referenced from another entity).
         for entity in self._entities_required:
             if entity not in entities:
-                self._export_entity(entity, entities_element, True)        
+                self._export_entity(entity, entities_element, True)
 
     def _export_entity (self, entity, parent, extra=False):
         """Exports `entity`.
@@ -135,7 +135,7 @@ class EATSMLExporter (EATSMLHandler):
           entity relationships
         :type parent: `Element`
 
-        """        
+        """
         assertion_element = etree.SubElement(parent, EATS +
                                              'entity_relationship')
         authority = assertion.authority
@@ -159,7 +159,7 @@ class EATSMLExporter (EATSMLHandler):
         else:
             self._entities_required.add(domain_entity)
         self._export_dates(assertion, assertion_element)
-        
+
     def _export_entity_type_property_assertions (self, entity, parent):
         """Exports the entity types of `entity`.
 
@@ -289,17 +289,32 @@ class EATSMLExporter (EATSMLHandler):
         display_form_element = etree.SubElement(name_element,
                                                 EATS + 'display_form')
         display_form_element.text = name.display_form
-        name_parts = name.get_name_parts()
-        if name_parts:
+        name_parts_data = name.get_name_parts()
+        name_part_types = []
+        if name_parts_data:
             name_parts_element = etree.SubElement(name_element,
                                                   EATS + 'name_parts')
-        for name_part_type, name_parts in name_parts.items():
-            name_part_type_id = name_part_type.get_id()
-            self._infrastructure_required['name_part_type'].add(name_part_type)
-            for name_part in name_parts:
-                self._export_name_part(name_part_type_id, name_part,
-                                       name_parts_element)
+            name_part_types = language.name_part_types
+        # To maintain correct order of name parts, export them in type
+        # order based on language, and then output any remaining in
+        # essentially random order.
+        for name_part_type in name_part_types:
+            name_parts = name_parts_data.pop(name_part_type, None)
+            if name_parts is not None:
+                self._export_name_parts(name_part_type, name_parts,
+                                        name_parts_element)
+        for name_part_type, name_parts in name_parts_data.items():
+            self._export_name_parts(name_part_type, name_parts,
+                                    name_parts_element)
         self._export_dates(assertion, name_element)
+
+    def _export_name_parts (self, name_part_type, name_parts,
+                            name_parts_element):
+        name_part_type_id = name_part_type.get_id()
+        self._infrastructure_required['name_part_type'].add(name_part_type)
+        for name_part in name_parts:
+            self._export_name_part(name_part_type_id, name_part,
+                                   name_parts_element)
 
     def _export_name_part (self, name_part_type_id, name_part, parent):
         """Exports `name_part`.
@@ -512,6 +527,8 @@ class EATSMLExporter (EATSMLHandler):
             name_part_types = NamePartType.objects.all()
             name_types = NameType.objects.all()
             scripts = Script.objects.all()
+        # Turn these lists of objects into sets so that they can be
+        # later intersected with another set of objects.
         self._infrastructure_required['authority'] = set(authorities)
         self._infrastructure_required['calendar'] = set(calendars)
         self._infrastructure_required['date_period'] = set(date_periods)
@@ -527,7 +544,7 @@ class EATSMLExporter (EATSMLHandler):
         tree = root.getroottree()
         self._validate(tree)
         return tree
-        
+
     def _export_infrastructure (self, parent):
         """Exports required infrastructure elements, appending them to
         `parent`.
@@ -538,6 +555,11 @@ class EATSMLExporter (EATSMLHandler):
         """
         authorities = self._infrastructure_required['authority']
         self._export_authorities(authorities, parent)
+        # Order each set of items by admin name.
+        for key, objects in self._infrastructure_required.items():
+            ordered_objects = list(objects)
+            ordered_objects.sort(key=lambda item: item.get_admin_name())
+            self._infrastructure_required[key] = ordered_objects
         calendars = self._infrastructure_required['calendar']
         self._export_calendars(calendars, parent)
         date_periods = self._infrastructure_required['date_period']
@@ -571,6 +593,8 @@ class EATSMLExporter (EATSMLHandler):
         :type parent: `Element`
 
         """
+        authorities = list(authorities)
+        authorities.sort(key=lambda item: item.get_admin_name())
         if authorities:
             authorities_element = etree.SubElement(parent, EATS + 'authorities')
         for authority in authorities:
@@ -654,6 +678,8 @@ class EATSMLExporter (EATSMLHandler):
         if items:
             container_element = etree.SubElement(parent, EATS +
                                                  container_element_name)
+            items = list(items)
+            items.sort(key=lambda item: item.get_admin_name())
         for item in items:
             element = etree.SubElement(container_element, EATS +
                                        element_name)
@@ -792,7 +818,7 @@ class EATSMLExporter (EATSMLHandler):
         reverse_name_element = etree.SubElement(relationship_type_element,
                                                 EATS + 'reverse_name')
         reverse_name_element.text = relationship_type.get_admin_reverse_name()
-            
+
     def _export_entity_types (self, entity_types, parent):
         """Exports `entity_types`, appending them to `parent`.
 
