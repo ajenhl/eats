@@ -362,7 +362,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
        'name_part_type': name_part_type.get_id(),
        'name_type': name_type.get_id(), 'script': script.get_id()}
         self._compare_XML(import_tree, expected_xml)
-        
+
     def test_import_authority (self):
         self.assertEqual(Authority.objects.all().count(), 0)
         import_xml = '''
@@ -392,9 +392,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 
     def test_import_calendar (self):
         authority = self.create_authority('Test')
-        self.assertEqual(len(Authority.objects.all()), 1)
-        self.assertEqual(len(Calendar.objects.all()), 0)
-        self.assertEqual(len(authority.get_calendars()), 0)
+        self.assertEqual(Authority.objects.count(), 1)
+        self.assertEqual(Calendar.objects.count(), 0)
+        self.assertEqual(authority.get_calendars().count(), 0)
         import_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
@@ -413,9 +413,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 </collection>
 ''' % {'authority': authority.get_id()}
         annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
-        self.assertEqual(len(Authority.objects.all()), 1)
-        self.assertEqual(len(Calendar.objects.all()), 1)
-        self.assertEqual(len(authority.get_calendars()), 0)
+        self.assertEqual(Authority.objects.count(), 1)
+        self.assertEqual(Calendar.objects.count(), 1)
+        self.assertEqual(authority.get_calendars().count(), 0)
         calendar = Calendar.objects.all()[0]
         # An import will not change an existing authority's references.
         self.assertFalse(calendar in authority.get_calendars())
@@ -433,9 +433,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 
     def test_import_date_period (self):
         authority = self.create_authority('Test')
-        self.assertEqual(len(Authority.objects.all()), 1)
-        self.assertEqual(len(DatePeriod.objects.all()), 0)
-        self.assertEqual(len(authority.get_date_periods()), 0)
+        self.assertEqual(Authority.objects.count(), 1)
+        self.assertEqual(DatePeriod.objects.count(), 0)
+        self.assertEqual(authority.get_date_periods().count(), 0)
         import_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
@@ -454,9 +454,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 </collection>
 ''' % {'authority': authority.get_id()}
         annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
-        self.assertEqual(len(Authority.objects.all()), 1)
-        self.assertEqual(len(DatePeriod.objects.all()), 1)
-        self.assertEqual(len(authority.get_date_periods()), 0)
+        self.assertEqual(Authority.objects.count(), 1)
+        self.assertEqual(DatePeriod.objects.count(), 1)
+        self.assertEqual(authority.get_date_periods().count(), 0)
         date_period = DatePeriod.objects.all()[0]
         # An import will not change an existing authority's references.
         self.assertFalse(date_period in authority.get_date_periods())
@@ -474,9 +474,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 
     def test_import_date_type (self):
         authority = self.create_authority('Test')
-        self.assertEqual(len(Authority.objects.all()), 1)
-        self.assertEqual(len(DateType.objects.all()), 0)
-        self.assertEqual(len(authority.get_date_types()), 0)
+        self.assertEqual(Authority.objects.count(), 1)
+        self.assertEqual(DateType.objects.count(), 0)
+        self.assertEqual(authority.get_date_types().count(), 0)
         import_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
@@ -495,9 +495,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 </collection>
 ''' % {'authority': authority.get_id()}
         annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
-        self.assertEqual(len(Authority.objects.all()), 1)
-        self.assertEqual(len(DateType.objects.all()), 1)
-        self.assertEqual(len(authority.get_date_types()), 0)
+        self.assertEqual(Authority.objects.count(), 1)
+        self.assertEqual(DateType.objects.count(), 1)
+        self.assertEqual(authority.get_date_types().count(), 0)
         date_type = DateType.objects.all()[0]
         # An import will not change an existing authority's references.
         self.assertFalse(date_type in authority.get_date_types())
@@ -515,9 +515,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 
     def test_import_entity_relationship_type (self):
         authority = self.create_authority('Test')
-        self.assertEqual(len(Authority.objects.all()), 1)
-        self.assertEqual(len(EntityRelationshipType.objects.all()), 0)
-        self.assertEqual(len(authority.get_entity_relationship_types()), 0)
+        self.assertEqual(Authority.objects.count(), 1)
+        self.assertEqual(EntityRelationshipType.objects.count(), 0)
+        self.assertEqual(authority.get_entity_relationship_types().count(), 0)
         import_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
@@ -537,9 +537,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 </collection>
 ''' % {'authority': authority.get_id()}
         annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
-        self.assertEqual(len(Authority.objects.all()), 1)
-        self.assertEqual(len(EntityRelationshipType.objects.all()), 1)
-        self.assertEqual(len(authority.get_entity_relationship_types()), 0)
+        self.assertEqual(Authority.objects.count(), 1)
+        self.assertEqual(EntityRelationshipType.objects.count(), 1)
+        self.assertEqual(authority.get_entity_relationship_types().count(), 0)
         entity_relationship_type = EntityRelationshipType.objects.all()[0]
         # An import will not change an existing authority's references.
         self.assertFalse(entity_relationship_type in
@@ -562,9 +562,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 
     def test_import_entity_type (self):
         authority = self.create_authority('Test')
-        self.assertEqual(len(Authority.objects.all()), 1)
-        self.assertEqual(len(EntityType.objects.all()), 0)
-        self.assertEqual(len(authority.get_entity_types()), 0)
+        self.assertEqual(Authority.objects.count(), 1)
+        self.assertEqual(EntityType.objects.count(), 0)
+        self.assertEqual(authority.get_entity_types().count(), 0)
         import_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
@@ -583,9 +583,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 </collection>
 ''' % {'authority': authority.get_id()}
         annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
-        self.assertEqual(len(Authority.objects.all()), 1)
-        self.assertEqual(len(EntityType.objects.all()), 1)
-        self.assertEqual(len(authority.get_entity_types()), 0)
+        self.assertEqual(Authority.objects.count(), 1)
+        self.assertEqual(EntityType.objects.count(), 1)
+        self.assertEqual(authority.get_entity_types().count(), 0)
         entity_type = EntityType.objects.all()[0]
         # An import will not change an existing authority's references.
         self.assertFalse(entity_type in authority.get_entity_types())
@@ -603,9 +603,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 
     def test_import_language (self):
         authority = self.create_authority('Test')
-        self.assertEqual(len(Authority.objects.all()), 1)
-        self.assertEqual(len(Language.objects.all()), 0)
-        self.assertEqual(len(authority.get_languages()), 0)
+        self.assertEqual(Authority.objects.count(), 1)
+        self.assertEqual(Language.objects.count(), 0)
+        self.assertEqual(authority.get_languages().count(), 0)
         import_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
@@ -625,9 +625,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 </collection>
 ''' % {'authority': authority.get_id()}
         annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
-        self.assertEqual(len(Authority.objects.all()), 1)
-        self.assertEqual(len(Language.objects.all()), 1)
-        self.assertEqual(len(authority.get_languages()), 0)
+        self.assertEqual(Authority.objects.count(), 1)
+        self.assertEqual(Language.objects.count(), 1)
+        self.assertEqual(authority.get_languages().count(), 0)
         language = Language.objects.all()[0]
         # An import will not change an existing authority's references.
         self.assertFalse(language in authority.get_languages())
@@ -645,13 +645,82 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 ''' % {'authority': authority.get_id(), 'language': language.get_id()}
         self._compare_XML(annotated_import, expected_xml)
 
+    def test_import_language_with_name_part_types (self):
+        self.assertEqual(Authority.objects.count(), 0)
+        self.assertEqual(Language.objects.count(), 0)
+        self.assertEqual(NamePartType.objects.count(), 0)
+        import_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-1">
+      <name>Test</name>
+      <languages>
+        <language ref="language-1"/>
+      </languages>
+    </authority>
+  </authorities>
+  <languages>
+    <language xml:id="language-1">
+      <name>English</name>
+      <code>en</code>
+      <name_part_types>
+        <name_part_type ref="name_part_type-1"/>
+      </name_part_types>
+    </language>
+  </languages>
+  <name_part_types>
+    <name_part_type xml:id="name_part_type-1">
+      <name>given</name>
+    </name_part_type>
+  </name_part_types>
+</collection>'''
+        annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
+        self.assertEqual(Authority.objects.count(), 1)
+        self.assertEqual(Language.objects.count(), 1)
+        self.assertEqual(NamePartType.objects.count(), 1)
+        authority = Authority.objects.all()[0]
+        language = Language.objects.all()[0]
+        name_part_type = NamePartType.objects.all()[0]
+        self.assertEqual(authority.get_languages().count(), 1)
+        self.assertTrue(language in authority.get_languages())
+        self.assertEqual(len(language.name_part_types), 1)
+        self.assertTrue(name_part_type in language.name_part_types)
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-1" eats_id="%(authority)d">
+      <name>Test</name>
+      <languages>
+        <language ref="language-1"/>
+      </languages>
+    </authority>
+  </authorities>
+  <languages>
+    <language xml:id="language-1" eats_id="%(language)d">
+      <name>English</name>
+      <code>en</code>
+      <name_part_types>
+        <name_part_type ref="name_part_type-1"/>
+      </name_part_types>
+    </language>
+  </languages>
+  <name_part_types>
+    <name_part_type xml:id="name_part_type-1" eats_id="%(name_part_type)d">
+      <name>given</name>
+    </name_part_type>
+  </name_part_types>
+</collection>''' % {'authority': authority.get_id(),
+                    'language': language.get_id(),
+                    'name_part_type': name_part_type.get_id()}
+        self._compare_XML(annotated_import, expected_xml)
+
     def test_import_name_part_type (self):
         authority = self.create_authority('Test')
         language = self.create_language('English', 'en')
-        self.assertEqual(len(Authority.objects.all()), 1)
-        self.assertEqual(len(Language.objects.all()), 1)
-        self.assertEqual(len(NamePartType.objects.all()), 0)
-        self.assertEqual(len(authority.get_name_part_types()), 0)
+        self.assertEqual(Authority.objects.count(), 1)
+        self.assertEqual(Language.objects.count(), 1)
+        self.assertEqual(NamePartType.objects.count(), 0)
+        self.assertEqual(authority.get_name_part_types().count(), 0)
         self.assertEqual(len(language.name_part_types), 0)
         import_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
@@ -680,11 +749,11 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 </collection>
 ''' % {'authority': authority.get_id(), 'language': language.get_id()}
         annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
-        self.assertEqual(len(Authority.objects.all()), 1)
-        self.assertEqual(len(Language.objects.all()), 1)
-        self.assertEqual(len(NamePartType.objects.all()), 1)
+        self.assertEqual(Authority.objects.count(), 1)
+        self.assertEqual(Language.objects.count(), 1)
+        self.assertEqual(NamePartType.objects.count(), 1)
         # An import will not change an existing authority's references.
-        self.assertEqual(len(authority.get_name_part_types()), 0)
+        self.assertEqual(authority.get_name_part_types().count(), 0)
         name_part_type = NamePartType.objects.all()[0]
         # An existing language can not have its associated name part
         # types changed by an import.
@@ -702,12 +771,12 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 ''' % {'authority': authority.get_id(), 'language': language.get_id(),
        'name_part_type': name_part_type.get_id()}
         self._compare_XML(annotated_import, expected_xml)
-        
+
     def test_import_name_type (self):
         authority = self.create_authority('Test')
-        self.assertEqual(len(Authority.objects.all()), 1)
-        self.assertEqual(len(NameType.objects.all()), 0)
-        self.assertEqual(len(authority.get_name_types()), 0)
+        self.assertEqual(Authority.objects.count(), 1)
+        self.assertEqual(NameType.objects.count(), 0)
+        self.assertEqual(authority.get_name_types().count(), 0)
         import_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
@@ -726,9 +795,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 </collection>
 ''' % {'authority': authority.get_id()}
         annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
-        self.assertEqual(len(Authority.objects.all()), 1)
-        self.assertEqual(len(NameType.objects.all()), 1)
-        self.assertEqual(len(authority.get_name_types()), 0)
+        self.assertEqual(Authority.objects.count(), 1)
+        self.assertEqual(NameType.objects.count(), 1)
+        self.assertEqual(authority.get_name_types().count(), 0)
         name_type = NameType.objects.all()[0]
         # An import will not change an existing authority's references.
         self.assertFalse(name_type in authority.get_name_types())
@@ -746,9 +815,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 
     def test_import_script (self):
         authority = self.create_authority('Test')
-        self.assertEqual(len(Authority.objects.all()), 1)
-        self.assertEqual(len(Script.objects.all()), 0)
-        self.assertEqual(len(authority.get_scripts()), 0)
+        self.assertEqual(Authority.objects.count(), 1)
+        self.assertEqual(Script.objects.count(), 0)
+        self.assertEqual(authority.get_scripts().count(), 0)
         import_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
@@ -769,9 +838,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 </collection>
 ''' % {'authority': authority.get_id()}
         annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
-        self.assertEqual(len(Authority.objects.all()), 1)
-        self.assertEqual(len(Script.objects.all()), 1)
-        self.assertEqual(len(authority.get_scripts()), 0)
+        self.assertEqual(Authority.objects.count(), 1)
+        self.assertEqual(Script.objects.count(), 1)
+        self.assertEqual(authority.get_scripts().count(), 0)
         script = Script.objects.all()[0]
         # An import will not change an existing authority's references.
         self.assertFalse(script in authority.get_scripts())
@@ -949,7 +1018,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
                     'entity_type_assertion': entity_type_assertion.get_id(),
                     'entity_url': entity.get_eats_subject_identifier()}
         self._compare_XML(annotated_import, expected_xml)
-        
+
     def test_import_new_entity_existence (self):
         authority = self.create_authority('Test')
         import_xml = '''
@@ -1228,4 +1297,4 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 </collection>''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
                     'assertion': assertion.get_id(),
                     'entity_url': entity.get_eats_subject_identifier()}
-        self._compare_XML(annotated_import, expected_xml)        
+        self._compare_XML(annotated_import, expected_xml)

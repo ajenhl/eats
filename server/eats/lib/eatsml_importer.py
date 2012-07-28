@@ -37,7 +37,7 @@ class EATSMLImporter (EATSMLHandler):
     associated with a language) are only imported if the containing
     element is new (ie, has no eats_id); otherwise, the XML is
     ignored.
-       
+
     Since an import may create database objects before encountering a
     fatal error (for example, an attempt to create an infrastructure
     object with the same name as an existing object), an import must
@@ -71,7 +71,7 @@ class EATSMLImporter (EATSMLHandler):
 
         Returns a tuple of two XML trees, the original document and
         the original document annotated with ids.
-        
+
         :param eatsml: XML of EATSML to import
         :type eatsml: `str`
         :param user: user performing the import
@@ -199,7 +199,7 @@ class EATSMLImporter (EATSMLHandler):
         # then having elements specified in the EATSML should raise an
         # error.
         objects = []
-        for element  in elements:
+        for element in elements:
             xml_id = element.get('ref')
             obj = self._xml_object_map[object_type][xml_id]
             objects.append(obj)
@@ -226,7 +226,7 @@ class EATSMLImporter (EATSMLHandler):
             else:
                 calendar = Calendar.objects.get_by_identifier(eats_id)
             self._add_mapping('calendar', xml_id, calendar)
-            
+
     def _import_date_periods (self, tree):
         """Imports date periods from XML `tree`.
 
@@ -334,8 +334,9 @@ class EATSMLImporter (EATSMLHandler):
                 name_part_types = []
                 for name_part_type_element in language_element.xpath(
                     'e:name_part_types/e:name_part_type', namespaces=NSMAP):
-                    xml_id = name_part_type_element.get('ref')
-                    name_part_type = self._xml_object_map['name_part_type'][xml_id]
+                    name_part_type_xml_id = name_part_type_element.get('ref')
+                    name_part_type = self._xml_object_map['name_part_type'][
+                        name_part_type_xml_id]
                     name_part_types.append(name_part_type)
                 if name_part_types:
                     language.name_part_types = name_part_types
@@ -456,7 +457,7 @@ class EATSMLImporter (EATSMLHandler):
                 assertion = entity.create_entity_type_property_assertion(
                     authority, entity_type)
                 element.set('eats_id', str(assertion.get_id()))
-            
+
     def _import_existence_assertions (self, entity, entity_element):
         """Imports existence assertions from `entity_element` into
         `entity`.
