@@ -9,6 +9,7 @@ class LookupsTestCase (TestCase, BaseTestCase):
 
     def setUp (self):
         super(LookupsTestCase, self).setUp()
+        self.reset_managers()
         self.tm = self.create_topic_map()
         self.authority = self.create_authority('Test')
         self.name_type = self.create_name_type('regular')
@@ -17,7 +18,7 @@ class LookupsTestCase (TestCase, BaseTestCase):
         self.authority.set_languages([self.language])
         self.authority.set_name_types([self.name_type])
         self.authority.set_scripts([self.script])
-    
+
     def test_entity_lookup_get_query (self):
         lookup = EntityLookup()
         self.assertEqual(Entity.objects.count(), 0)
@@ -62,4 +63,3 @@ class LookupsTestCase (TestCase, BaseTestCase):
         lookup = EntityLookup()
         entity = self.tm.create_entity(self.authority)
         self.assertEqual(lookup.get_item_id(entity), entity.get_id())
-

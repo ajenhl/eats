@@ -14,6 +14,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
 
     def setUp (self):
         super(EATSMLExportTestCase, self).setUp()
+        self.reset_managers()
         self.tm = self.create_topic_map()
         self.exporter = EATSMLExporter(self.tm)
 

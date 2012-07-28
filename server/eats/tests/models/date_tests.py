@@ -1,8 +1,8 @@
 from eats.exceptions import EATSValidationException
-from eats.tests.models.model_test_case import ModelTestCase
+from eats.tests.models.model_test_case import ModelTransactionTestCase
 
 
-class DateTestCase (ModelTestCase):
+class DateTestCase (ModelTransactionTestCase):
 
     def setUp (self):
         super(DateTestCase, self).setUp()
@@ -43,7 +43,7 @@ class DateTestCase (ModelTestCase):
                           date_data)
         self.assertEqual(len(assertion.get_dates()), 0,
                          'A date should not be created with invalid data')
-        
+
     def test_create_date (self):
         assertion = self.entity.create_existence_property_assertion(
             self.authority)
@@ -99,7 +99,7 @@ class DateTestCase (ModelTestCase):
             self.fail('Updating a date part\'s type to one not associated with the authority should raise an exception')
         except EATSValidationException:
             pass
-        
+
     def test_update_date (self):
         assertion = self.entity.create_existence_property_assertion(
             self.authority)
@@ -235,4 +235,3 @@ class DateTestCase (ModelTestCase):
         self.assertEqual(len(assertion.get_dates()), 1)
         self.assertTrue(date2 in assertion.get_dates())
         self.assertEqual(len(self.entity.get_existences()), 1)
-        

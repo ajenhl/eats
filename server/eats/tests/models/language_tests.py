@@ -1,9 +1,9 @@
 from tmapi.exceptions import TopicInUseException
 from eats.models import Language
-from eats.tests.models.model_test_case import ModelTestCase
+from eats.tests.models.model_test_case import ModelTransactionTestCase
 
 
-class LanguageTestCase (ModelTestCase):
+class LanguageTestCase (ModelTransactionTestCase):
 
     def test_language_admin_name (self):
         language = self.create_language('English', 'en')
@@ -12,7 +12,7 @@ class LanguageTestCase (ModelTestCase):
         self.assertEqual(language.get_admin_name(), 'French')
         language2 = self.create_language('Arabic', 'ar')
         self.assertRaises(Exception, language2.set_admin_name, 'French')
-    
+
     def test_language_code (self):
         language = self.create_language('English', 'en')
         self.assertEqual(language.get_code(), 'en')

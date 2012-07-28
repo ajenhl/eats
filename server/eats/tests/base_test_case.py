@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db import models
 
 from tmapi.models import TopicMapSystemFactory
 
@@ -16,25 +17,25 @@ class BaseTestCase (object):
 
     def create_date_period (self, name):
         return self.tm.create_date_period(name)
-    
+
     def create_date_type (self, name):
         return self.tm.create_date_type(name)
 
     def create_django_user (self, username, email, password):
         return User.objects.create_user(username, email, password)
-    
+
     def create_entity_relationship_type (self, name, reverse_name):
         return self.tm.create_entity_relationship_type(name, reverse_name)
-    
+
     def create_entity_type (self, name):
         return self.tm.create_entity_type(name)
-    
+
     def create_language (self, name, code):
         return self.tm.create_language(name, code)
 
     def create_name_part_type (self, name):
         return self.tm.create_name_part_type(name)
-    
+
     def create_name_type (self, name):
         return self.tm.create_name_type(name)
 
@@ -51,3 +52,15 @@ class BaseTestCase (object):
         eats_user = EATSUser(user=user)
         eats_user.save()
         return eats_user
+
+    def reset_managers (self):
+        """Resets the managers for the models used in the test.
+
+        This is necesary to avoid massive test failures when using the
+        PostgreSQL backend, since the manager caches an EATSTopicMap
+        that is then removed and replaced.
+
+        """
+        for model in models.get_models():
+            if hasattr(model.objects, '_eats_topic_map'):
+                delattr(model.objects, '_eats_topic_map')

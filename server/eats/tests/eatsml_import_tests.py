@@ -14,6 +14,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 
     def setUp (self):
         super(EATSMLImportTestCase, self).setUp()
+        self.reset_managers()
         self.tm = self.create_topic_map()
         self.importer = EATSMLImporter(self.tm)
         admin_user = self.create_django_user('admin', 'admin@example.org',

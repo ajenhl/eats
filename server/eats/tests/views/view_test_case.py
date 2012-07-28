@@ -6,7 +6,7 @@ from eats.tests.base_test_case import BaseTestCase
 class ViewTestCase (WebTest, BaseTestCase):
 
     def setUp (self):
-        # Create a topic map.
+        super(ViewTestCase, self).setUp()
+        self.reset_managers()
         self.tm = self.create_topic_map()
-        # Create an authority.
         self.authority = self.create_authority('Test')
