@@ -1,6 +1,5 @@
-import datetime
-
 from django.db import models
+from django.utils import timezone
 
 from eats_user import EATSUser
 
@@ -18,5 +17,5 @@ class EATSMLImport (models.Model):
 
     def save (self, *args, **kwargs):
         if not self.id:
-            self.import_date = datetime.datetime.today()
+            self.import_date = timezone.now()
         super(EATSMLImport, self).save(*args, **kwargs)
