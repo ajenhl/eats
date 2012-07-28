@@ -5,6 +5,7 @@ from django.db.models import Q
 from tmapi.models import Locator, TopicMap
 
 from eats.constants import ADMIN_NAME_TYPE_IRI, AUTHORITY_HAS_CALENDAR_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_DATE_PERIOD_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_DATE_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_ENTITY_RELATIONSHIP_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_ENTITY_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_LANGUAGE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_NAME_PART_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_NAME_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_SCRIPT_ASSOCIATION_TYPE_IRI, AUTHORITY_ROLE_TYPE_IRI, AUTHORITY_TYPE_IRI, CALENDAR_TYPE_IRI, DATE_CERTAINTY_TYPE_IRI, DATE_FULL_CERTAINTY_IRI, DATE_NO_CERTAINTY_IRI, DATE_PERIOD_ASSOCIATION_TYPE, DATE_PERIOD_ROLE_TYPE, DATE_PERIOD_TYPE_IRI, DATE_ROLE_TYPE_IRI, DATE_TYPE_IRI, DATE_TYPE_TYPE_IRI, DOMAIN_ENTITY_ROLE_TYPE_IRI, END_DATE_TYPE_IRI, END_TAQ_DATE_TYPE_IRI, END_TPQ_DATE_TYPE_IRI, ENTITY_RELATIONSHIP_ASSERTION_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_ROLE_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_ROLE_TYPE_IRI, ENTITY_TYPE_IRI, ENTITY_TYPE_ASSERTION_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, EXISTENCE_IRI, EXISTENCE_ASSERTION_TYPE_IRI, INFRASTRUCTURE_ROLE_TYPE_IRI, IS_IN_LANGUAGE_TYPE_IRI, IS_IN_SCRIPT_TYPE_IRI, IS_PREFERRED_IRI, LANGUAGE_CODE_TYPE_IRI, LANGUAGE_ROLE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_ASSERTION_TYPE_IRI, NAME_HAS_NAME_PART_ASSOCIATION_TYPE_IRI, NAME_PART_ORDER_TYPE_IRI, NAME_PART_ROLE_TYPE_IRI, NAME_PART_TYPE_IRI, NAME_PART_TYPE_ORDER_IN_LANGUAGE_TYPE_IRI, NAME_PART_TYPE_TYPE_IRI, NAME_ROLE_TYPE_IRI, NAME_TYPE_IRI, NAME_TYPE_TYPE_IRI, NORMALISED_DATE_FORM_TYPE_IRI, NOTE_ASSERTION_TYPE_IRI, POINT_DATE_TYPE_IRI, POINT_TAQ_DATE_TYPE_IRI, POINT_TPQ_DATE_TYPE_IRI, PROPERTY_ROLE_TYPE_IRI, RANGE_ENTITY_ROLE_TYPE_IRI, RELATIONSHIP_NAME_TYPE_IRI, REVERSE_RELATIONSHIP_NAME_TYPE_IRI, SCRIPT_CODE_TYPE_IRI, SCRIPT_ROLE_TYPE_IRI, SCRIPT_SEPARATOR_TYPE_IRI, SCRIPT_TYPE_IRI, START_DATE_TYPE_IRI, START_TAQ_DATE_TYPE_IRI, START_TPQ_DATE_TYPE_IRI, SUBJECT_IDENTIFIER_ASSERTION_TYPE_IRI
+from eats.exceptions import EATSException
 from eats.lib.name_form import create_name_forms
 from authority import Authority
 from calendar import Calendar
@@ -24,11 +25,6 @@ from script import Script
 
 
 class EATSTopicMap (TopicMap):
-
-    code_type_iris = {
-        LANGUAGE_TYPE_IRI: LANGUAGE_CODE_TYPE_IRI,
-        SCRIPT_TYPE_IRI: SCRIPT_CODE_TYPE_IRI,
-        }
 
     class Meta:
         proxy = True
@@ -108,8 +104,9 @@ class EATSTopicMap (TopicMap):
         """
         try:
             Authority.objects.get_by_admin_name(name)
-            # Raise a more specific exception with error message.
-            raise Exception
+            # Raise a more specific exception.
+            raise EATSException('An authority named "%s" already exists' %
+                                name)
         except Authority.DoesNotExist:
             authority = self.create_topic(proxy=Authority)
             authority.add_type(self.authority_type)
@@ -126,8 +123,8 @@ class EATSTopicMap (TopicMap):
         """
         try:
             Calendar.objects.get_by_admin_name(name)
-            # QAZ: Raise a more specific exception with error message.
-            raise Exception
+            # QAZ: Raise a more specific exception.
+            raise EATSException('A calendar named "%s" already exists' % name)
         except Calendar.DoesNotExist:
             pass
         calendar = self.create_topic(proxy=Calendar)
@@ -145,8 +142,9 @@ class EATSTopicMap (TopicMap):
         """
         try:
             DatePeriod.objects.get_by_admin_name(name)
-            # QAZ: Raise a more specific exception with error message.
-            raise Exception
+            # QAZ: Raise a more specific exception.
+            raise EATSException('A date period named "%s" already exists' %
+                                name)
         except DatePeriod.DoesNotExist:
             pass
         date_period = self.create_topic(proxy=DatePeriod)
@@ -164,8 +162,8 @@ class EATSTopicMap (TopicMap):
         """
         try:
             DateType.objects.get_by_admin_name(name)
-            # QAZ: Raise a more specific exception with error message.
-            raise Exception
+            # QAZ: Raise a more specific exception.
+            raise EATSException('A date type named "%s" already exists' % name)
         except DateType.DoesNotExist:
             pass
         date_type = self.create_topic(proxy=DateType)
@@ -205,8 +203,9 @@ class EATSTopicMap (TopicMap):
         """
         try:
             EntityRelationshipType.objects.get_by_admin_name(name, reverse_name)
-            # QAZ: Raise a more specific exception with error message.
-            raise Exception
+            # QAZ: Raise a more specific exception.
+            raise EATSException(
+                'An entity relationship type named "%s" already exists' % name)
         except EntityRelationshipType.DoesNotExist:
             pass
         entity_relationship_type = self.create_topic(
@@ -228,8 +227,9 @@ class EATSTopicMap (TopicMap):
         """
         try:
             EntityType.objects.get_by_admin_name(name)
-            # QAZ: Raise a more specific exception with error message.
-            raise Exception
+            # QAZ: Raise a more specific exception.
+            raise EATSException('An entity type named "%s" already exists' %
+                                name)
         except EntityType.DoesNotExist:
             pass
         entity_type = self.create_topic(proxy=EntityType)
@@ -249,14 +249,14 @@ class EATSTopicMap (TopicMap):
         """
         try:
             Language.objects.get_by_admin_name(name)
-            # QAZ: Raise a more specific exception with error message.
-            raise Exception
+            # QAZ: Raise a more specific exception.
+            raise EATSException('A language named "%s" already exists' % name)
         except Language.DoesNotExist:
             pass
         try:
             Language.objects.get_by_code(code)
-            # QAZ: Raise a more specific exception with error message.
-            raise Exception
+            # QAZ: Raise a more specific exception.
+            raise EATSException('A language coded "%s" already exists' % code)
         except Language.DoesNotExist:
             pass
         language = self.create_topic(proxy=Language)
@@ -275,8 +275,9 @@ class EATSTopicMap (TopicMap):
         """
         try:
             NamePartType.objects.get_by_admin_name(name)
-            # QAZ: Raise a more specific exception with error message.
-            raise Exception
+            # QAZ: Raise a more specific exception.
+            raise EATSException('A name part type named "%s" already exists' %
+                                name)
         except NamePartType.DoesNotExist:
             pass
         name_part_type = self.create_topic(proxy=NamePartType)
@@ -294,8 +295,8 @@ class EATSTopicMap (TopicMap):
         """
         try:
             NameType.objects.get_by_admin_name(name)
-            # QAZ: Raise a more specific exception with error message.
-            raise Exception
+            # QAZ: Raise a more specific exception.
+            raise EATSException('A name type named "%s" already exists' % name)
         except NameType.DoesNotExist:
             pass
         name_type = self.create_topic(proxy=NameType)
@@ -318,13 +319,13 @@ class EATSTopicMap (TopicMap):
         try:
             Script.objects.get_by_admin_name(name)
             # QAZ: Raise a more specific exception with error message.
-            raise Exception
+            raise EATSException('A script named "%s" already exists' % name)
         except Script.DoesNotExist:
             pass
         try:
             Script.objects.get_by_code(code)
             # QAZ: Raise a more specific exception with error message.
-            raise Exception
+            raise Exception('A script coded "%s" already exists' % code)
         except Script.DoesNotExist:
             pass
         script = self.create_topic(proxy=Script)
