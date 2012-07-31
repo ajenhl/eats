@@ -178,7 +178,7 @@ class EATSMLImporter (EATSMLHandler):
                 self._import_authority_infrastructure(
                     authority.set_scripts, 'script', script_elements)
             else:
-                authority = Authority.objects.get_by_identifier(eats_id)
+                authority = self._get_by_identifier(Authority, eats_id)
             self._add_mapping('authority', xml_id, authority)
 
     def _import_authority_infrastructure (self, setter, object_type,
@@ -224,7 +224,7 @@ class EATSMLImporter (EATSMLHandler):
                 eats_id = calendar.get_id()
                 calendar_element.set('eats_id', str(eats_id))
             else:
-                calendar = Calendar.objects.get_by_identifier(eats_id)
+                calendar = self._get_by_identifier(Calendar, eats_id)
             self._add_mapping('calendar', xml_id, calendar)
 
     def _import_date_periods (self, tree):
@@ -245,7 +245,7 @@ class EATSMLImporter (EATSMLHandler):
                 eats_id = date_period.get_id()
                 date_period_element.set('eats_id', str(eats_id))
             else:
-                date_period = DatePeriod.objects.get_by_identifier(eats_id)
+                date_period = self._get_by_identifier(DatePeriod, eats_id)
             self._add_mapping('date_period', xml_id, date_period)
 
     def _import_date_types (self, tree):
@@ -266,7 +266,7 @@ class EATSMLImporter (EATSMLHandler):
                 eats_id = date_type.get_id()
                 date_type_element.set('eats_id', str(eats_id))
             else:
-                date_type = DateType.objects.get_by_identifier(eats_id)
+                date_type = self._get_by_identifier(DateType, eats_id)
             self._add_mapping('date_type', xml_id, date_type)
 
     def _import_entity_relationship_types (self, tree):
@@ -288,7 +288,8 @@ class EATSMLImporter (EATSMLHandler):
                 eats_id = entity_relationship_type.get_id()
                 element.set('eats_id', str(eats_id))
             else:
-                entity_relationship_type = EntityRelationshipType.objects.get_by_identifier(eats_id)
+                entity_relationship_type = self._get_by_identifier(
+                    EntityRelationshipType, eats_id)
             self._add_mapping('entity_relationship_type', xml_id,
                               entity_relationship_type)
 
@@ -310,7 +311,7 @@ class EATSMLImporter (EATSMLHandler):
                 eats_id = entity_type.get_id()
                 entity_type_element.set('eats_id', str(eats_id))
             else:
-                entity_type = EntityType.objects.get_by_identifier(eats_id)
+                entity_type = self._get_by_identifier(EntityType, eats_id)
             self._add_mapping('entity_type', xml_id, entity_type)
 
     def _import_languages (self, tree):
@@ -341,7 +342,7 @@ class EATSMLImporter (EATSMLHandler):
                 if name_part_types:
                     language.name_part_types = name_part_types
             else:
-                language = Language.objects.get_by_identifier(eats_id)
+                language = self._get_by_identifier(Language, eats_id)
             self._add_mapping('language', xml_id, language)
 
     def _import_name_part_types (self, tree):
@@ -363,7 +364,7 @@ class EATSMLImporter (EATSMLHandler):
                 eats_id = name_part_type.get_id()
                 name_part_type_element.set('eats_id', str(eats_id))
             else:
-                name_part_type = NamePartType.objects.get_by_identifier(eats_id)
+                name_part_type = self._get_by_identifier(NamePartType, eats_id)
             self._add_mapping('name_part_type', xml_id, name_part_type)
 
     def _import_name_types (self, tree):
@@ -384,7 +385,7 @@ class EATSMLImporter (EATSMLHandler):
                 eats_id = name_type.get_id()
                 name_type_element.set('eats_id', str(eats_id))
             else:
-                name_type = NameType.objects.get_by_identifier(eats_id)
+                name_type = self._get_by_identifier(NameType, eats_id)
             self._add_mapping('name_type', xml_id, name_type)
 
     def _import_scripts (self, tree):
@@ -407,7 +408,7 @@ class EATSMLImporter (EATSMLHandler):
                 eats_id = script.get_id()
                 script_element.set('eats_id', str(eats_id))
             else:
-                script = Script.objects.get_by_identifier(eats_id)
+                script = self._get_by_identifier(Script, eats_id)
             self._add_mapping('script', xml_id, script)
 
     def _import_entities (self, tree):
@@ -642,6 +643,16 @@ class EATSMLImporter (EATSMLHandler):
         """
         xml_id = element.get(attribute_name)
         return self._xml_object_map[object_type][xml_id]
+
+    @staticmethod
+    def _get_by_identifier (model, eats_id):
+        try:
+            item = model.objects.get_by_identifier(eats_id)
+        except model.DoesNotExist:
+            message = '%s with EATS ID "%s" does not exist' % \
+                (model._meta.verbose_name.title(), eats_id)
+            raise EATSMLException(message)
+        return item
 
     @staticmethod
     def _get_element_id (element):

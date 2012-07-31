@@ -861,7 +861,29 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 ''' % {'authority': authority.get_id(), 'script': script.get_id()}
         self._compare_XML(annotated_import, expected_xml)
 
-    def test_import_illformed_xml (self):
+    def test_import_xml_bad_eats_id (self):
+        self.assertEqual(Authority.objects.count(), 0)
+        # Due to pruning, the import XML must include a reference to
+        # the authority.
+        import_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-1" eats_id="1">
+      <name>Test</name>
+    </authority>
+  </authorities>
+  <entities>
+    <entity xml:id="entity-1">
+      <existences>
+        <existence authority="authority-1"/>
+      </existences>
+    </entity>
+  </entities>
+</collection>'''
+        self.assertRaises(EATSMLException, self.importer.import_xml, import_xml,
+                          self.admin)
+
+    def test_import_invalid_xml_1 (self):
         import_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
@@ -873,7 +895,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
         self.assertRaises(EATSMLException, self.importer.import_xml, import_xml,
                           self.admin)
 
-    def test_import_invalid_xml (self):
+    def test_import_invalid_xml_2 (self):
         import_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
