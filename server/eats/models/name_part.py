@@ -28,7 +28,7 @@ class NamePartManager (BaseManager):
 class NamePart (Topic, NameElement):
 
     objects = NamePartManager()
-    
+
     class Meta:
         proxy = True
         app_label = 'eats'
@@ -50,7 +50,7 @@ class NamePart (Topic, NameElement):
     def _delete_name_index_forms (self):
         """Deletes the indexed forms of this name."""
         self.indexed_name_part_forms.all().delete()
-        
+
     @property
     def _language_role (self):
         """Returns the language role for this name.
@@ -76,13 +76,14 @@ class NamePart (Topic, NameElement):
         if not hasattr(self, '_name'):
             from name import Name
             name_part_role = self.get_roles_played(
-                self.eats_topic_map.name_part_role_type)[0]
+                self.eats_topic_map.name_part_role_type,
+                self.eats_topic_map.name_has_name_part_association_type)[0]
             association = name_part_role.get_parent()
             name_role = association.get_roles(
                 self.eats_topic_map.name_role_type)[0]
             self._name = name_role.get_player(proxy=Name)
         return self._name
-        
+
     @property
     def name_part_type (self):
         """Returns the name part type of this name.
@@ -145,7 +146,7 @@ class NamePart (Topic, NameElement):
             association.remove()
         name.update_name_cache()
         super(NamePart, self).remove()
-        
+
     @property
     def _script_role (self):
         """Returns the script role of this name.
