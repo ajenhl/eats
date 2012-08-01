@@ -29,6 +29,8 @@ urlpatterns += patterns(
         name='export-eatsml-base'),
     url(r'^export/eatsml/entities/$', 'export_eatsml_entities',
         name='export-eatsml-entities'),
+    url(r'^export/eatsml/full/$', 'export_eatsml_full',
+        name='export_eatsml_full'),
     url(r'^import/$', 'import_eatsml', name='import-eatsml'),
     url(r'^import/(?P<import_id>\d+)/$', 'display_eatsml_import',
         name='display-eatsml-import'),

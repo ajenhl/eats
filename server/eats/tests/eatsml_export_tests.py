@@ -727,3 +727,63 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
        'arabic': arabic.get_id(), 'calendar': calendar.get_id(),
        'date_period': date_period.get_id(), 'date_type': date_type.get_id()}
         self._compare_XML(export, expected_xml)
+
+    def test_export_full (self):
+        authority = self.create_authority('Test')
+        language = self.create_language('English', 'en')
+        calendar = self.create_calendar('Gregorian')
+        entity = self.tm.create_entity(authority)
+        existence = entity.get_existences()[0]
+        export = self.exporter.export_full()
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-%(authority)d" eats_id="%(authority)d">
+      <name>Test</name>
+    </authority>
+  </authorities>
+  <calendars>
+    <calendar xml:id="calendar-%(calendar)d" eats_id="%(calendar)d">
+      <name>Gregorian</name>
+    </calendar>
+  </calendars>
+  <languages>
+    <language xml:id="language-%(language)d" eats_id="%(language)d">
+      <name>English</name>
+      <code>en</code>
+    </language>
+  </languages>
+  <entities>
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d" url="%(url)s">
+      <existences>
+        <existence authority="authority-%(authority)d" eats_id="%(existence)d"/>
+      </existences>
+    </entity>
+  </entities>
+</collection>
+''' % {'authority': authority.get_id(), 'calendar': calendar.get_id(),
+       'language': language.get_id(), 'entity': entity.get_id(),
+       'existence': existence.get_id(),
+       'url': entity.get_eats_subject_identifier()}
+        self._compare_XML(export, expected_xml)
+
+    def test_export_full_no_entities (self):
+        authority = self.create_authority('Test')
+        language = self.create_language('English', 'en')
+        export = self.exporter.export_full()
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-%(authority)d" eats_id="%(authority)d">
+      <name>Test</name>
+    </authority>
+  </authorities>
+  <languages>
+    <language xml:id="language-%(language)d" eats_id="%(language)d">
+      <name>English</name>
+      <code>en</code>
+    </language>
+  </languages>
+</collection>
+''' % {'authority': authority.get_id(), 'language': language.get_id()}
+        self._compare_XML(export, expected_xml)

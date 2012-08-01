@@ -2,7 +2,7 @@ from lxml import etree
 
 from eats.constants import EATS, EATS_NAMESPACE, XML
 from eats.lib.eatsml_handler import EATSMLHandler
-from eats.models import Authority, Calendar, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
+from eats.models import Authority, Calendar, DatePeriod, DateType, Entity, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
 
 
 NSMAP = {None: EATS_NAMESPACE}
@@ -29,6 +29,33 @@ class EATSMLExporter (EATSMLHandler):
         self._user_authority = None
         self._user_language = None
         self._user_script = None
+
+    def export_full (self):
+        """Returns an XML tree of all EATS data (infrastructure and
+        entities) exported into EATSML."""
+        root = etree.Element(EATS + 'collection', nsmap=NSMAP)
+        entities = Entity.objects.all()
+        if entities:
+            self._export_entities(Entity.objects.all(), root)
+        self._infrastructure_required['authority'] = set(
+            Authority.objects.all())
+        self._infrastructure_required['calendar'] = set(Calendar.objects.all())
+        self._infrastructure_required['date_period'] = set(
+            DatePeriod.objects.all())
+        self._infrastructure_required['date_type'] = set(DateType.objects.all())
+        self._infrastructure_required['entity_relationship_type'] = \
+            set(EntityRelationshipType.objects.all())
+        self._infrastructure_required['entity_type'] = set(
+            EntityType.objects.all())
+        self._infrastructure_required['language'] = set(Language.objects.all())
+        self._infrastructure_required['name_part_type'] = set(
+            NamePartType.objects.all())
+        self._infrastructure_required['name_type'] = set(NameType.objects.all())
+        self._infrastructure_required['script'] = set(Script.objects.all())
+        self._export_infrastructure(root)
+        tree = root.getroottree()
+        self._validate(tree)
+        return tree
 
     def export_entities (self, entities, user=None):
         """Returns an XML tree of `entities` exported into EATSML.
