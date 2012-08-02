@@ -5,7 +5,7 @@ from lxml import etree
 from eats.constants import EATS_NAMESPACE, XML
 from eats.exceptions import EATSMLException
 from eats.lib.eatsml_handler import EATSMLHandler
-from eats.models import Authority, Calendar, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
+from eats.models import Authority, Calendar, DatePeriod, DateType, Entity, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
 
 
 NSMAP = {'e': EATS_NAMESPACE}
@@ -428,6 +428,8 @@ class EATSMLImporter (EATSMLHandler):
                 entity_element.set('eats_id', str(entity.get_id()))
                 url = entity.get_eats_subject_identifier().to_external_form()
                 entity_element.set('url', url)
+            else:
+                entity = self._get_by_identifier(Entity, eats_id)
             self._add_mapping('entity', xml_id, entity)
             self._import_entity_type_assertions(entity, entity_element)
             self._import_existence_assertions(entity, entity_element)

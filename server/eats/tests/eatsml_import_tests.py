@@ -908,6 +908,34 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
         self.assertRaises(EATSMLException, self.importer.import_xml, import_xml,
                           self.admin)
 
+    def test_import_existing_entity (self):
+        authority1 = self.create_authority('Test')
+        authority2 = self.create_authority('Test 2')
+        entity = self.tm.create_entity(authority1)
+        self.assertEqual(entity.get_existences().count(), 1)
+        import_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-1" eats_id="%(authority1)d">
+      <name>Test</name>
+    </authority>
+    <authority xml:id="authority-2" eats_id="%(authority2)d">
+      <name>Test 2</name>
+    </authority>
+  </authorities>
+  <entities>
+    <entity xml:id="entity-1" eats_id="%(entity)d">
+      <existences>
+        <existence authority="authority-2"/>
+      </existences>
+    </entity>
+  </entities>
+</collection>
+''' % {'authority1': authority1.get_id(), 'authority2': authority2.get_id(),
+       'entity': entity.get_id()}
+        self.importer.import_xml(import_xml, self.admin)[1]
+        self.assertEqual(entity.get_existences().count(), 2)
+
     def test_import_new_entity_entity_relationship (self):
         authority = self.create_authority('Test')
         entity_relationship_type = self.create_entity_relationship_type(
