@@ -53,6 +53,11 @@ class BaseTestCase (object):
         eats_user.save()
         return eats_user
 
+    def get_models (self):
+        if not hasattr(self, '_models'):
+            self._models = models.get_models(models.get_app('eats'))
+        return self._models
+
     def reset_managers (self):
         """Resets the managers for the models used in the test.
 
@@ -61,6 +66,6 @@ class BaseTestCase (object):
         that is then removed and replaced.
 
         """
-        for model in models.get_models():
+        for model in self.get_models():
             if hasattr(model.objects, '_eats_topic_map'):
                 delattr(model.objects, '_eats_topic_map')
