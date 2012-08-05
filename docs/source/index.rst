@@ -15,17 +15,12 @@ entity is all in one place.
 EATS also comes with client tools for automatically looking up
 entities by name and adding TEI markup.
 
-Contents:
+Contents
+--------
 
 .. toctree::
    :maxdepth: 2
 
    installation
+   start
    eatsml
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
