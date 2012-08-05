@@ -9,3 +9,8 @@ that means information about the same entity is all in one place.
 
 EATS also comes with client tools for automatically looking up
 entities by name and adding TEI markup to those names.
+
+Documentation
+-------------
+
+http://eats.readthedocs.org/en/latest/
