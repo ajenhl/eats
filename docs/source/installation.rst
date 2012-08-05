@@ -22,7 +22,7 @@ The URL for the `Topic Map`_ that underpins EATS must be set in the
 Django project settings as EATS_TOPIC_MAP.
 
 .. _Django: https://www.djangoproject.com/
-.. _django-tmapi: http://trac.assembla.com/django-tmapi/
+.. _django-tmapi: https://github.com/ajenhl/django-tmapi
 .. _django-selectable: https://bitbucket.org/mlavin/django-selectable
 .. _lxml: http://lxml.de/
 .. _django-webtest: https://bitbucket.org/kmike/django-webtest/
