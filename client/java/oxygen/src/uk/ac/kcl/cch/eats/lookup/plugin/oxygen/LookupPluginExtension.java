@@ -26,86 +26,102 @@ import uk.ac.kcl.cch.eats.lookup.TEIName;
  * @author jnorrish jamie.norrish@kcl.ac.uk
  * 
  */
-public class LookupPluginExtension extends DefaultHandler implements SelectionPluginExtension {
+public class LookupPluginExtension extends DefaultHandler implements
+		SelectionPluginExtension {
 
-    private Hashtable<String, String> nsHash = null;
+	private Hashtable<String, String> nsHash = null;
 
-    /**
-     * 
-     * @see ro.sync.exml.plugin.selection.SelectionPluginExtension#process(ro.sync.exml.plugin.selection.SelectionPluginContext)
-     */
-    @Override
-    public SelectionPluginResult process(SelectionPluginContext context) {
+	/**
+	 * 
+	 * @see ro.sync.exml.plugin.selection.SelectionPluginExtension#process(ro.sync.exml.plugin.selection.SelectionPluginContext)
+	 */
+	@Override
+	public SelectionPluginResult process(SelectionPluginContext context) {
 
-        String jarPath = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
-        jarPath = jarPath.substring(0, jarPath.lastIndexOf("/"));
-        
-        String xsltPath = jarPath + "/xslt";
+		String jarPath = getClass().getProtectionDomain().getCodeSource()
+				.getLocation().getPath();
+		jarPath = jarPath.substring(0, jarPath.lastIndexOf("/"));
 
-        LookupPreferencesController lookupPreferencesController = LookupPreferencesController
-                .getInstance(context.getFrame());
+		String xsltPath = jarPath + "/xslt";
 
-        nsHash = new Hashtable<String, String>();
+		LookupPreferencesController lookupPreferencesController = 
+				LookupPreferencesController.getInstance(context.getFrame());
 
-        try {
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            factory.setNamespaceAware(true);
+		nsHash = new Hashtable<String, String>();
 
-            SAXParser parser = factory.newSAXParser();
-            parser.parse(context.getDocumentURL().openStream(), this);
+		// From oXygen support:
+		// This is necessary because the method is called from the AWT thread
+		// when the action is invoked by the user so we have to switch the 
+		// class loader to the one which was used to load the extension and
+		// which should use the other Saxon library
+		ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		Thread.currentThread().setContextClassLoader(
+				LookupPluginExtension.this.getClass().getClassLoader());
 
-            if (!lookupPreferencesController.isPreferencesSet()) {
-                lookupPreferencesController.showDialog();
+		try {
+			SAXParserFactory factory = SAXParserFactory.newInstance();
+			factory.setNamespaceAware(true);
 
-                if (!lookupPreferencesController.isPreferencesSet()) {
-                    return null;
-                }
-            }
+			SAXParser parser = factory.newSAXParser();
+			parser.parse(context.getDocumentURL().openStream(), this);
 
-            TEIName teiName = new TEIName(context.getSelection(), nsHash, xsltPath);
+			if (!lookupPreferencesController.isPreferencesSet()) {
+				lookupPreferencesController.showDialog();
 
-            LookupController lookupController = LookupPlugin.getLookupController(
-                    context.getFrame(), lookupPreferencesController);
+				if (!lookupPreferencesController.isPreferencesSet()) {
+					return null;
+				}
+			}
 
-            lookupController.showView(teiName.getNameString(), "person");
+			TEIName teiName = new TEIName(context.getSelection(), nsHash,
+					xsltPath);
 
-            String key = lookupController.getKey();
+			LookupController lookupController = LookupPlugin
+					.getLookupController(context.getFrame(),
+							lookupPreferencesController);
 
-            if (key != null && key.length() > 0) {
-                teiName.setKey(key);
+			lookupController.showView(teiName.getNameString(), "person");
 
-                String type = lookupController.getType();
+			String key = lookupController.getKey();
 
-                if (type != null && type.length() > 0) {
-                    teiName.setType(type);
-                }
+			if (key != null && key.length() > 0) {
+				teiName.setKey(key);
 
-                return new SelectionPluginResultImpl(teiName.getXmlName());
-            }
+				String type = lookupController.getType();
 
-            return new SelectionPluginResultImpl(context.getSelection());
-        } catch (Exception e) {
-            lookupPreferencesController.setPreferencesSet(false);
+				if (type != null && type.length() > 0) {
+					teiName.setType(type);
+				}
 
-            e.printStackTrace();
+				return new SelectionPluginResultImpl(teiName.getXmlName());
+			}
 
-            JOptionPane.showMessageDialog(context.getFrame(), e.getMessage(), "Exception",
-                    JOptionPane.ERROR_MESSAGE);
-        }
+			return new SelectionPluginResultImpl(context.getSelection());
+		} catch (Exception e) {
+			lookupPreferencesController.setPreferencesSet(false);
 
-        return null;
+			e.printStackTrace();
 
-    }
+			JOptionPane.showMessageDialog(context.getFrame(), e.getMessage(),
+					"Exception", JOptionPane.ERROR_MESSAGE);
+		} finally {
+			Thread.currentThread().setContextClassLoader(cl);
+		}
 
-    /**
-     * Collects all the namespaces in the current XML document.
-     * 
-     * @see org.xml.sax.helpers.DefaultHandler#startPrefixMapping(java.lang.String,
-     *      java.lang.String)
-     */
-    @Override
-    public void startPrefixMapping(String prefix, String uri) throws SAXException {
-        nsHash.put(uri, prefix);
-    }
+		return null;
+
+	}
+
+	/**
+	 * Collects all the namespaces in the current XML document.
+	 * 
+	 * @see org.xml.sax.helpers.DefaultHandler#startPrefixMapping(java.lang.String,
+	 *      java.lang.String)
+	 */
+	@Override
+	public void startPrefixMapping(String prefix, String uri)
+			throws SAXException {
+		nsHash.put(uri, prefix);
+	}
 
 }
