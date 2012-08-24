@@ -1,4 +1,5 @@
 from django.contrib.sites.models import Site
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -67,7 +68,15 @@ def search (request, topic_map):
     user_preferences = {}
     if form.is_valid():
         name = form.cleaned_data['name']
-        results = topic_map.lookup_entities(name)
+        results_list = topic_map.lookup_entities(name)
+        paginator = Paginator(results_list, 10)
+        page = request.GET.get('page')
+        try:
+            results = paginator.page(page)
+        except PageNotAnInteger:
+            results = paginator.page(1)
+        except EmptyPage:
+            results = paginator.page(paginator.num_pages)
         user_preferences = get_user_preferences(request)
     context_data = {'search_form': form, 'search_results': results}
     context_data['user_is_editor'] = user_is_editor(request.user)
@@ -86,4 +95,3 @@ def search_eatsml (request, topic_map):
     tree = EATSMLExporter(topic_map).export_entities(entities, user=user)
     xml = etree.tostring(tree, encoding='utf-8', pretty_print=True)
     return HttpResponse(xml, mimetype='text/xml')
-    

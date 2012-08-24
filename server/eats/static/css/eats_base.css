@@ -1,6 +1,6 @@
 /* Global page layout */
 
-body { margin: 0 2em 0 4em; }
+body { margin: 0 2em 2em 4em; }
 
 nav {
    clear: right;
@@ -24,10 +24,12 @@ td p { margin-top: 0; }
 
 #search-results { margin: 0 8em 0 4em; }
 
+.pagination { text-align: center; }
+
 /* Individual entity search results */
 
 .entity-search-result { margin-bottom: 2em; }
-.entity-search-result h1 { 
+.entity-search-result h1 {
    font-size: larger;
    border-bottom: thin solid black;
    margin-bottom: 0;
@@ -36,7 +38,7 @@ td p { margin-top: 0; }
 .entity-search-result table { padding: 0; }
 .entity-search-result th { text-align: left; }
 .entity-search-result ul { margin: 0; padding: 0 }
-.entity-search-result li { 
+.entity-search-result li {
    display: inline;
    padding-right: 3em;
 }
