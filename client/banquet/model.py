@@ -1127,6 +1127,8 @@ class MainModel (Model):
             if data[name_part_type]:
                 name.create_name_part(self.__name_part_types[name_part_type],
                                       data[name_part_type])
+        if data['note']:
+            entity.create_note(authority=authority, note=data['note'])
         message_name = data['display_form']
         if not message_name:
             message_name = ' '.join([data['given_name'], data['family_name']]).strip()

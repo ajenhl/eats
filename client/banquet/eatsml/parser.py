@@ -36,6 +36,7 @@ _get_name_types = etree.XPath('e:name_types/e:name_type',
 _get_names = etree.XPath('e:names/e:name', namespaces=XPATH_NSMAP)
 _get_names_element = etree.XPath('e:names', namespaces=XPATH_NSMAP)
 _get_notes = etree.XPath('e:notes/e:note', namespaces=XPATH_NSMAP)
+_get_notes_element = etree.XPath('e:notes', namespaces=XPATH_NSMAP)
 _get_preferred_entity_types = etree.XPath('/e:collection/e:entity_types/e:entity_type[@xml:id=id($current)/e:entity_types/e:entity_type[@authority=$authority]/@entity_type]',
     namespaces=XPATH_NSMAP)
 _get_preferred_name = etree.XPath('e:names/e:name[@user_preferred="true"]',
@@ -84,6 +85,9 @@ class EATSMLElementLookup (etree.PythonElementClassLookup):
         elif tag == EATSML + 'script':
             if element.getparent().getparent().tag == EATSML + 'collection':
                 _class = Script
+        elif tag == EATSML + 'note' and \
+                element.getparent().tag == EATSML + 'notes':
+            _class = NotePropertyAssertion
         return _class
 
     def _is_infrastructure (self, element):
@@ -277,7 +281,7 @@ class Authority (NamedElement, UserPreferredElement):
         languages = [self._get_referenced_element(language_ref) for
                      language_ref in language_refs]
         return languages
-    
+
     def get_name_types (self):
         """Returns the name types associated with this authority.
 
@@ -410,7 +414,7 @@ class Entity (EATSMLElementBase):
         :param is_preferred: whether the name is preferred
         :type is_preferred: `bool`
         :rtype: `NamePropertyAssertion`
-        
+
         """
         names = self._get_or_create_element(_get_names_element,
                                             EATSML + 'names')
@@ -422,10 +426,18 @@ class Entity (EATSMLElementBase):
         assertion.display_form = display_form
         assertion.is_preferred = is_preferred
         return assertion
-        
+
+    def create_note (self, authority, note):
+        notes = self._get_or_create_element(_get_notes_element,
+                                            EATSML + 'notes')
+        assertion = etree.SubElement(notes, EATSML + 'note')
+        assertion.authority = authority
+        assertion.note = note
+        return assertion
+
     def get_entity_types (self):
         return _get_entity_types(self, current=self.get(XML + 'id'))
-        
+
     def get_existence_dates (self):
         return _get_existence_dates(self)
 
@@ -447,7 +459,7 @@ class Entity (EATSMLElementBase):
         authority_id = authority.get(XML + 'id')
         return _get_preferred_entity_types(self, authority=authority_id,
                                            current=self.get(XML + 'id'))
-    
+
     def get_preferred_name (self):
         return _get_preferred_name(self)[0]
 
@@ -483,7 +495,7 @@ class EntityRelationship (EATSMLElementBase):
 
 
 class EntityRelationshipType (NamedElement):
-    
+
     @property
     def reverse_name (self):
         return _get_reverse_name(self)[0].text
@@ -566,7 +578,7 @@ class NamePropertyAssertion (NameElement, PropertyAssertion):
         EATSML + 'assembled_form': 0,
         EATSML + 'display_form': 1,
         EATSML + 'name_parts': 2}
-    
+
     @property
     def assembled_form (self):
         """Returns this name's assembled form.
@@ -606,7 +618,7 @@ class NamePropertyAssertion (NameElement, PropertyAssertion):
         element = self._get_or_create_element(_get_display_form_element,
                                               EATSML + 'display_form')
         element.text = display_form.decode('utf-8')
-    
+
     def get_name_part (self, name_part_type):
         """Returns the combined display form of all name parts of
         `name_part_type` in this name.
@@ -648,7 +660,7 @@ class NamePropertyAssertion (NameElement, PropertyAssertion):
         else:
             value = 'false'
         self.set('is_preferred', value)
-    
+
     @property
     def name_type (self):
         """Returns the type of this name.
@@ -669,6 +681,28 @@ class NamePropertyAssertion (NameElement, PropertyAssertion):
         """
         name_type_id = name_type.get(XML + 'id')
         self.set('name_type', name_type_id)
+
+
+class NotePropertyAssertion (PropertyAssertion):
+
+    @property
+    def note (self):
+        """Returns the text of this note.
+
+        :rtype: `str`
+
+        """
+        return self.text
+
+    @note.setter
+    def note (self, text):
+        """Sets the text of this note.
+
+        :param note: note text to set
+        :type note: `str`
+
+        """
+        self.text = text.decode('utf-8')
 
 
 class NameType (NamedElement):
@@ -696,7 +730,7 @@ def get_element_index (parent, indices, full_index, possible_index):
     This functions recurses, and assumes that on the first call,
     `possible_index` is the highest meaningful value - the recursion
     operates on a reduced value each call.
-    
+
     :param parent: parent element
     :type parent: `etree.ElementBase`
     :param indices: dictionary of child elements and their indices
@@ -708,7 +742,7 @@ def get_element_index (parent, indices, full_index, possible_index):
       correct index within `parent`'s children
     :type possible_index: `int`
     :rtype: `int`
-    
+
     """
     if possible_index == -1:
         index = 0

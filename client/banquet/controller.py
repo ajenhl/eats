@@ -1255,9 +1255,9 @@ class MainController (Controller):
         if notes:
             wrapper = TextWrapper(initial_indent='    ',
                                   subsequent_indent='    ', width=50)
-            note_texts = [wrapper.fill(note.text) for note in notes]
+            note_texts = [wrapper.fill(note.note) for note in notes]
             note_text = '\n\n'.join(note_texts)
-        return note_text            
+        return note_text
 
     def __get_entity_relationship_text (self, entity):
         """Return a string of the text form of `entity`'s relationships.
@@ -1317,6 +1317,7 @@ class MainController (Controller):
         if data['display_form'] or data['terms_of_address'] or \
                 data['given_name'] or data['family_name']:
             data['name'] = ''
+        data['note'] = self.view['note_entry'].get_text()
         return data
 
     def __get_combobox_value (self, combobox, column):
