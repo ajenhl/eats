@@ -93,7 +93,7 @@ class MainController (Controller):
         self.name_type_filter.set_visible_func(self.__filter_name_types)
         self.__setup_lookup_combobox(self.view['name_type_combobox'],
                                      self.name_type_filter)
-        
+
     def __setup_lookup_combobox (self, view, model):
         """Connect combobox view to model.
 
@@ -155,7 +155,7 @@ class MainController (Controller):
         if authority == type_authority:
             visibility = True
         return visibility
-        
+
     def __setup_lookup_result_treeview (self):
         tv = self.view['lookup_treeview']
         tv.set_model(self.model.resultlist_sort)
@@ -207,7 +207,7 @@ class MainController (Controller):
         self.key_markup_filter.set_visible_func(self.__filter_markup_tree)
         self.selection_markup_filter = self.model.selection_markup_tree.filter_new()
         self.selection_markup_filter.set_visible_func(self.__filter_markup_tree)
-        
+
     def __setup_name_treeview (self):
         """Configure the gtk.TreeView showing name markup with name
         strings as the top level items."""
@@ -235,7 +235,7 @@ class MainController (Controller):
         treeview = self.view['selection_treeview']
         treeview.set_model(self.selection_markup_filter)
         self.__setup_markup_treeview(treeview)
-        
+
     def __setup_markup_treeview (self, treeview):
         name_cell = gtk.CellRendererText()
         name_col = gtk.TreeViewColumn('Data', name_cell)
@@ -327,8 +327,8 @@ class MainController (Controller):
             if isinstance(row_object, Name):
                 filter_text = gobject.markup_escape_text(filter_text)
                 visibility = row_object.matches_filter(filter_text)
-        return visibility        
-        
+        return visibility
+
     def __set_file_filters (self):
         """Add file filters to the open file dialog, since only XML
         files are relevant."""
@@ -415,8 +415,8 @@ class MainController (Controller):
         else:
             message = '%d matching entities were found.' % count
         self.view['lookup_statusbar'].push(context_id, message)
-    
-        
+
+
     #############################################
     #
     # Observable properties.
@@ -520,7 +520,7 @@ class MainController (Controller):
 
     def on_file_open_dialog_file_activated (self, *args):
         self.on_file_open_dialog_open_button_clicked()
-        
+
     def on_file_open_dialog_cancel_button_clicked (self, *args):
         self.view['file_open_dialog'].hide()
         self.view['file_open_dialog'].unselect_all()
@@ -599,7 +599,7 @@ class MainController (Controller):
             self.model.key_selections(key, entity_type)
             self.__close_lookup_window()
         return True
-    
+
     def on_error_dialog_response (self, dialog, *args):
         dialog.hide()
 
@@ -642,7 +642,7 @@ class MainController (Controller):
         model, file_iter = selection.get_selected()
         xml_file = model.get_value(file_iter, FILE_OBJECT_COLUMN)
         self.model.save_file(xml_file)
-        
+
     def on_filelist_remove_menu_item_activate (self, *args):
         selection = self.view['filelist_treeview'].get_selection()
         file_iter = selection.get_selected()[1]
@@ -731,7 +731,7 @@ class MainController (Controller):
                 model_iter = filter.convert_iter_to_child_iter(selected_iter)
                 self.__synchronise_selections(model, model_iter)
         return False
-        
+
     def on_remove_markup_menu_item_activate (self, *args):
         """Remove the name markup from the selected name."""
         self.__remove_markup()
@@ -750,7 +750,7 @@ class MainController (Controller):
 
     def on_lookup_window_create_button_clicked (self, *args):
         self.__create_new_entity()
-        
+
     def on_save_menu_item_activate (self, *args):
         """Save all of the currently open files."""
         self.model.save_files()
@@ -761,7 +761,7 @@ class MainController (Controller):
         self.key_markup_filter.refilter()
 
     def on_filter_entry_icon_press (self, widget, *args):
-        self.view['filter_entry'].set_text('')        
+        self.view['filter_entry'].set_text('')
 
     def on_authority_combobox_changed (self, combobox):
         self.entity_type_filter.refilter()
@@ -818,11 +818,11 @@ class MainController (Controller):
 
     def on_preferences_menu_item_activate (self, *args):
         self.view['preferences_dialog'].show()
-            
+
     def on_preferences_dialog_delete_event (self, *args):
         self.view['preferences_dialog'].hide()
         return True
-            
+
     def on_preferences_dialog_close_button_clicked (self, *args):
         self.view['preferences_dialog'].hide()
 
@@ -849,7 +849,7 @@ class MainController (Controller):
                               EATS_SERVER_HTTP_USERNAME_CONFIG_OPTION,
                               widget.get_text())
         self.view['login_to_server_button'].set_sensitive(True)
-        
+
     def on_http_password_entry_changed (self, widget, *args):
         self.model.config.set(EATS_SERVER_CONFIG_SECTION,
                               EATS_SERVER_HTTP_PASSWORD_CONFIG_OPTION,
@@ -942,7 +942,7 @@ class MainController (Controller):
         """Thaw the name markup treeviews."""
         for treeview, model in self.__treeviews.items():
             self.__thaw_treeview(treeview, model)
-        
+
     def __thaw_treeview (self, treeview, model):
         """Thaw `treeview` after adding many rows to it.
 
@@ -1064,13 +1064,13 @@ class MainController (Controller):
         parent_iter = model.iter_parent(child_iter)
         parent_object = model.get_value(parent_iter,
                                         NAME_OBJECT_COLUMN)
-        return parent_object        
-            
+        return parent_object
+
     def __set_related_selection (self, model, model_iter, treeview, filter):
         """Set the selection in treeview to the row pointed to by iter.
 
         Arguments:
-        
+
         - `model`: `gtk.TreeStore` that will be selected from
         - `model_iter`: `gtk.TreeIter` of selected row
         - `treeview`: `gtk.TreeView` that will hold the new selection
@@ -1163,7 +1163,7 @@ class MainController (Controller):
         """Set the name part entry fields as appropriate for `name`.
 
         Arguments:
-        
+
         - `name`: string
 
         """
@@ -1187,7 +1187,7 @@ class MainController (Controller):
                  if part]
         name = ' '.join(parts)
         return name.strip()
-        
+
     def __select_matching_entity_type (self, model, path, iter, entity_type):
         """Select the item in model at path in the entity type
         combobox if it matches entity_type.
@@ -1214,6 +1214,7 @@ class MainController (Controller):
         self.view['family_name_entry'].set_text('')
         self.view['terms_of_address_entry'].set_text('')
         self.view['entity_type_combobox'].set_active(-1)
+        self.view['note_entry'].set_text('')
         # Re-enable the editing commands, if appropriate.
         model, selected_iter = self.__get_current_selection()
         self.__set_editing_sensitivity(selected_iter)
