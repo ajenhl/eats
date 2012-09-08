@@ -1,7 +1,10 @@
 from eats.constants import FORWARD_RELATIONSHIP_MARKER, \
     REVERSE_RELATIONSHIP_MARKER
-from eats.forms.edit import EntityRelationshipFormSet, EntityTypeFormSet, ExistenceFormSet, NameFormSet, NoteFormSet, SubjectIdentifierFormSet, create_choice_list
-from eats.models import EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
+from eats.forms.edit import EntityRelationshipFormSet, EntityTypeFormSet, \
+    ExistenceFormSet, NameFormSet, NoteFormSet, SubjectIdentifierFormSet, \
+    create_choice_list
+from eats.models import EntityRelationshipType, EntityType, Language, \
+    NamePartType, NameType, Script
 
 
 class PropertyAssertions (object):
@@ -16,7 +19,7 @@ class PropertyAssertions (object):
     @property
     def editable (self):
         return self._editable
-    
+
     @property
     def non_editable (self):
         return self._non_editable
@@ -27,7 +30,7 @@ class PropertyAssertions (object):
                     'authority': self.authority}
         defaults.update(formset_data)
         return formset_class(**defaults)
-    
+
     def get_editable (self, scoped, authority):
         """Returns `scoped` split into two lists, of editable and
         non-editable elements.
@@ -40,13 +43,14 @@ class PropertyAssertions (object):
         :param authority: editable authority
         :type authorities: `Authority`
         :rtype: two-tuple of lists
-        
+
         """
         authority_id = authority.get_id()
         editable = []
         non_editable = []
         for element in scoped:
-            scope_authority_id = element.get_scope()[0].get_id()
+            scope_authority_id = element.get_scope().filter(
+                types=self.topic_map.authority_type)[0].get_id()
             if scope_authority_id != authority_id:
                 non_editable.append(element)
             else:
