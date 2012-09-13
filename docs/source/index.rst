@@ -15,6 +15,11 @@ entity is all in one place.
 EATS also comes with client tools for automatically looking up
 entities by name and adding TEI markup.
 
+A couple of papers, based on an old version of EATS but still largely
+applicable, are: `An introduction to EATS`_ and `Topic Maps and Entity
+Authority Records: an Effective Cyber Infrastructure for Digital
+Humanities`_.
+
 Contents
 --------
 
@@ -24,3 +29,7 @@ Contents
    installation
    start
    eatsml
+
+
+.. _An introduction to EATS: http://researcharchive.vuw.ac.nz/handle/10063/220
+.. _Topic Maps and Entity Authority Records\: an Effective Cyber Infrastructure for Digital Humanities: http://researcharchive.vuw.ac.nz/handle/10063/336
