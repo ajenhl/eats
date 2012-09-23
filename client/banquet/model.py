@@ -937,10 +937,8 @@ class MainModel (Model):
         url = self.__dispatcher.get_edit_url(entity)
         return url
 
-    def get_context_urls (self, entity):
-        """Return a list of full URLs for the context page for entity.
-
-        The context uses an AuthorityRecord's ID.
+    def get_context_url (self, entity):
+        """Return the URL for the context page for entity.
 
         Arguments:
 
@@ -949,12 +947,7 @@ class MainModel (Model):
         """
         context_url = self.config.get(TOOLS_CONFIG_SECTION,
                                       CONTEXT_TOOL_URL_CONFIG_OPTION)
-        urls = []
-        records = entity.get_default_authority_records()
-        for record in records:
-            url = context_url % record.system_id
-            urls.append(url)
-        return urls
+        return context_url % entity.url
 
     def select_all (self):
         """Select all `NameInstance` objects."""
@@ -1173,6 +1166,4 @@ class MainModel (Model):
         - `entity`: entity element
 
         """
-        urls = self.get_context_urls(entity)
-        for url in urls:
-            webbrowser.open(url)
+        webbrowser.open(self.get_context_url(entity))
