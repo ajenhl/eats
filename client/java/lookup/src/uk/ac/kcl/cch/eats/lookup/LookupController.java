@@ -719,7 +719,6 @@ public class LookupController implements ActionListener, DocumentListener,
 						sb.append(" ");
 					}
 					data[ENTITY_TYPE_COLUMN] = sb.toString().trim();
-					// data[ENTITY_TYPE_COLUMN] = etList.get(0).getName();
 				}
 
 				model.addRow(data);
