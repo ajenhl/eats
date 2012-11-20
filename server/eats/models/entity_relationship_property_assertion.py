@@ -7,6 +7,7 @@ from eats.exceptions import EATSValidationException
 
 from base_manager import BaseManager
 from entity_relationship_cache import EntityRelationshipCache
+from entity_relationship_type import EntityRelationshipType
 from property_assertion import PropertyAssertion
 
 
@@ -72,18 +73,39 @@ class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
     @property
     def domain_entity (self):
         """Returns the domain entity in this asserted relationship."""
-        return self._cached_relationship.domain_entity
+        try:
+            domain_entity = self._cached_relationship.domain_entity
+        except EntityRelationshipCache.DoesNotExist:
+            from entity import Entity
+            domain_role = self.get_roles(
+                self.eats_topic_map.domain_entity_role_type)[0]
+            domain_entity = domain_role.get_player(proxy=Entity)
+        return domain_entity
 
     @property
     def entity_relationship_type (self):
         """Returns the entity relationship type for this asserted
         relationship."""
-        return self._cached_relationship.relationship_type
+        try:
+            entity_relationship_type = self._cached_relationship.relationship_type
+        except EntityRelationshipCache.DoesNotExist:
+            role = self.get_roles(
+                self.eats_topic_map.entity_relationship_type_role_type)[0]
+            entity_relationship_type = role.get_player(
+                proxy=EntityRelationshipType)
+        return entity_relationship_type
 
     @property
     def range_entity (self):
         """Returns the range entity in this asserted relationship."""
-        return self._cached_relationship.range_entity
+        try:
+            range_entity = self._cached_relationship.range_entity
+        except EntityRelationshipCache.DoesNotExist:
+            from entity import Entity
+            range_role = self.get_roles(
+                self.eats_topic_map.range_entity_role_type)[0]
+            range_entity = range_role.get_player(proxy=Entity)
+        return range_entity
 
     def get_relationship_type_forward_name(self):
         """Returns the forward name for this asserted relationship."""
