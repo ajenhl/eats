@@ -20,11 +20,8 @@ class EntityRelationshipPropertyAssertionManager (BaseManager):
             roles__player=entity_relationship_type)
 
     def filter_by_entity (self, entity):
-        domain_role_type = self.eats_topic_map.domain_entity_role_type
-        range_role_type = self.eats_topic_map.range_entity_role_type
-        return self.filter(
-            Q(roles__type=domain_role_type) | Q(roles__type=range_role_type),
-            roles__player=entity).distinct()
+        return self.filter(Q(cached_relationship__domain_entity=entity) |
+                           Q(cached_relationship__range_entity=entity))
 
     def get_query_set (self):
         assertion_type = self.eats_topic_map.entity_relationship_assertion_type
@@ -55,6 +52,19 @@ class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
             reverse_relationship_name=reverse_name)
         cached_relationship.save()
         self._cached_erpa = cached_relationship
+
+    @property
+    def authority (self):
+        """Returns the authority of this property assertion.
+
+        :rtype: `Topic`
+
+        """
+        try:
+            authority = self._cached_relationship.authority
+        except EntityRelationshipCache.DoesNotExist:
+            authority = super(EntityRelationshipPropertyAssertion, self).authority
+        return authority
 
     @property
     def _cached_relationship (self):
