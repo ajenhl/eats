@@ -8,6 +8,7 @@ class PropertyAssertionsTestCase (TestCase, BaseTestCase):
 
     def setUp (self):
         super(PropertyAssertionsTestCase, self).setUp()
+        self.reset_managers()
         self.tm = self.create_topic_map()
         self.authority1 = self.create_authority('Test 1')
         self.authority2 = self.create_authority('Test 2')
