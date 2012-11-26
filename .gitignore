@@ -2,5 +2,6 @@
 *.classpath
 *.project
 *.pyc
+.DS_Store
 client/java/*/bin
 client/java/*/build
