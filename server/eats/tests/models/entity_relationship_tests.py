@@ -1,5 +1,5 @@
 from eats.exceptions import EATSValidationException
-from eats.models import Entity
+from eats.models import Entity, EntityRelationshipCache
 from eats.tests.models.model_test_case import ModelTestCase
 
 
@@ -16,7 +16,7 @@ class EntityRelationshipTestCase (ModelTestCase):
             'is born in', 'is place of birth of')
         self.authority.set_entity_relationship_types(
             [self.entity_relationship_type, self.entity_relationship_type2])
-    
+
     def test_create_entity_relationship_property_assertion (self):
         self.assertEqual(0, len(self.entity.get_entity_relationships()))
         self.assertEqual(0, len(self.entity2.get_entity_relationships()))
@@ -114,3 +114,43 @@ class EntityRelationshipTestCase (ModelTestCase):
             'is related to', 'is related to')
         self.assertRaises(EATSValidationException, assertion.update,
             entity_relationship_type, self.entity, self.entity2)
+
+    def test_relationship_cache(self):
+        cache = EntityRelationshipCache.objects.filter(domain_entity=self.entity)
+        self.assertEqual(0, cache.count())
+
+        assertion = self.entity.create_entity_relationship_property_assertion(
+            self.authority, self.entity_relationship_type, self.entity,
+            self.entity2)
+        cache = EntityRelationshipCache.objects.filter(domain_entity=self.entity)
+        self.assertEqual(1, cache.count())
+        self.assertEqual(self.entity, cache[0].domain_entity)
+        self.assertEqual(self.entity2, cache[0].range_entity)
+        self.assertEqual(self.entity_relationship_type,
+                         cache[0].relationship_type)
+
+        cache = EntityRelationshipCache.objects.filter(range_entity=self.entity2)
+        self.assertEqual(1, cache.count())
+        self.assertEqual(self.entity, cache[0].domain_entity)
+        self.assertEqual(self.entity2, cache[0].range_entity)
+        self.assertEqual(self.entity_relationship_type,
+                         cache[0].relationship_type)
+
+        assertion.update(self.entity_relationship_type2, self.entity,
+                         self.entity3)
+        cache = EntityRelationshipCache.objects.filter(domain_entity=self.entity)
+        self.assertEqual(1, cache.count())
+        self.assertEqual(self.entity, cache[0].domain_entity)
+        self.assertEqual(self.entity3, cache[0].range_entity)
+        self.assertEqual(self.entity_relationship_type2,
+                         cache[0].relationship_type)
+
+        assertion2 = self.entity.create_entity_relationship_property_assertion(
+            self.authority, self.entity_relationship_type, self.entity,
+            self.entity2)
+        cache = EntityRelationshipCache.objects.filter(domain_entity=self.entity)
+        self.assertEqual(2, cache.count())
+
+        assertion2.remove()
+        cache = EntityRelationshipCache.objects.filter(domain_entity=self.entity)
+        self.assertEqual(1, cache.count())
