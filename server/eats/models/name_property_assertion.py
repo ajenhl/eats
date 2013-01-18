@@ -19,7 +19,7 @@ class NamePropertyAssertionManager (BaseManager):
         :param name_type: name type to filter on
         :type name_type: `NameType`
         :rtype: `QuerySet`
-        
+
         """
         return self.filter(scope=authority).filter(
             roles__type=self.eats_topic_map.property_role_type,
@@ -32,15 +32,15 @@ class NamePropertyAssertionManager (BaseManager):
         language_role = self.eats_topic_map.language_role_type
         name_languages = Q(
             roles__type=property_role,
-            roles__player__role_players__type=name_role,
-            roles__player__role_players__association__roles__type=language_role,
-            roles__player__role_players__association__roles__player=language)
+            roles__player__roles__type=name_role,
+            roles__player__roles__association__roles__type=language_role,
+            roles__player__roles__association__roles__player=language)
         name_part_languages = Q(
             roles__type=property_role,
-            roles__player__role_players__type=name_role,
-            roles__player__role_players__association__roles__type=name_part_role,
-            roles__player__role_players__association__roles__player__role_players__association__roles__type=language_role,
-            roles__player__role_players__association__roles__player__role_players__association__roles__player=language)
+            roles__player__roles__type=name_role,
+            roles__player__roles__association__roles__type=name_part_role,
+            roles__player__roles__association__roles__player__roles__association__roles__type=language_role,
+            roles__player__roles__association__roles__player__roles__association__roles__player=language)
         return self.filter(scope=authority).filter(
             name_languages | name_part_languages)
 
@@ -49,9 +49,9 @@ class NamePropertyAssertionManager (BaseManager):
         name_part_role = self.eats_topic_map.name_part_role_type
         return self.filter(scope=authority).filter(
             roles__type=self.eats_topic_map.property_role_type,
-            roles__player__role_players__type=name_role,
-            roles__player__role_players__association__roles__type=name_part_role,
-            roles__player__role_players__association__roles__player__names__type=name_part_type)
+            roles__player__roles__type=name_role,
+            roles__player__roles__association__roles__type=name_part_role,
+            roles__player__roles__association__roles__player__names__type=name_part_type)
 
     def filter_by_authority_script (self, authority, script):
         property_role = self.eats_topic_map.property_role_type
@@ -60,15 +60,15 @@ class NamePropertyAssertionManager (BaseManager):
         script_role = self.eats_topic_map.script_role_type
         name_scripts = Q(
             roles__type=property_role,
-            roles__player__role_players__type=name_role,
-            roles__player__role_players__association__roles__type=script_role,
-            roles__player__role_players__association__roles__player=script)
+            roles__player__roles__type=name_role,
+            roles__player__roles__association__roles__type=script_role,
+            roles__player__roles__association__roles__player=script)
         name_part_scripts = Q(
             roles__type=property_role,
-            roles__player__role_players__type=name_role,
-            roles__player__role_players__association__roles__type=name_part_role,
-            roles__player__role_players__association__roles__player__role_players__association__roles__type=script_role,
-            roles__player__role_players__association__roles__player__role_players__association__roles__player=script)
+            roles__player__roles__type=name_role,
+            roles__player__roles__association__roles__type=name_part_role,
+            roles__player__roles__association__roles__player__roles__association__roles__type=script_role,
+            roles__player__roles__association__roles__player__roles__association__roles__player=script)
         return self.filter(scope=authority).filter(
             name_scripts | name_part_scripts)
 
@@ -94,7 +94,7 @@ class NamePropertyAssertionManager (BaseManager):
         :param script: preferred script of the name
         :type script: `Script`
         :rtype: `NamePropertyAssertion` or None
-        
+
         """
         entity_names = NameCache.objects.filter(entity=entity)
         if not entity_names.count():
@@ -124,7 +124,7 @@ class NamePropertyAssertionManager (BaseManager):
             return names[0].assertion
         except IndexError:
             raise self.model.DoesNotExist
-    
+
     def get_query_set (self):
         assertion_type = self.eats_topic_map.name_assertion_type
         qs = super(NamePropertyAssertionManager, self).get_query_set()
@@ -134,7 +134,7 @@ class NamePropertyAssertionManager (BaseManager):
 class NamePropertyAssertion (Association, PropertyAssertion):
 
     objects = NamePropertyAssertionManager()
-    
+
     class Meta:
         proxy = True
         app_label = 'eats'
@@ -142,7 +142,7 @@ class NamePropertyAssertion (Association, PropertyAssertion):
     @property
     def is_preferred (self):
         return super(NamePropertyAssertion, self).is_preferred
-        
+
     @is_preferred.setter
     def is_preferred (self, is_preferred):
         """Sets whether this property assertion is preferred."""
@@ -153,7 +153,7 @@ class NamePropertyAssertion (Association, PropertyAssertion):
         cached_name = self.cached_name.all()[0]
         cached_name.is_preferred = is_preferred
         cached_name.save()
-    
+
     @property
     def name (self):
         """Returns the name being asserted."""
@@ -167,7 +167,7 @@ class NamePropertyAssertion (Association, PropertyAssertion):
         """Deletes this property assertion."""
         self.name.remove()
         super(NamePropertyAssertion, self).remove()
-        
+
     def set_players (self, entity, name):
         """Sets the entity and name involved in this property assertion.
 
@@ -185,7 +185,7 @@ class NamePropertyAssertion (Association, PropertyAssertion):
         self.create_role(self.eats_topic_map.entity_role_type, entity)
         self._entity = entity
         name._entity = entity
-        
+
     def update (self, name_type, language, script, display_form, is_preferred):
         """Updates this property assertion, and its associated name.
 

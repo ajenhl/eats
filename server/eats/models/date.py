@@ -9,8 +9,8 @@ class DateManager (BaseManager):
 
     def filter_by_authority_calendar (self, authority, calendar):
         return self.filter(
-            role_players__type=self.eats_topic_map.date_role_type,
-            role_players__association__scope=authority).filter(
+            roles__type=self.eats_topic_map.date_role_type,
+            roles__association__scope=authority).filter(
             names__scope=calendar)
 
     def filter_by_authority_date_period (self, authority, date_period):
@@ -18,17 +18,17 @@ class DateManager (BaseManager):
         date_period_association_type = self.eats_topic_map.date_period_association_type
         date_period_role_type = self.eats_topic_map.date_period_role_type
         return self.filter(
-            role_players__type=date_role_type,
-            role_players__association__scope=authority).filter(
-            role_players__type=date_role_type,
-            role_players__association__type=date_period_association_type,
-            role_players__association__roles__type=date_period_role_type,
-            role_players__association__roles__player=date_period)
+            roles__type=date_role_type,
+            roles__association__scope=authority).filter(
+            roles__type=date_role_type,
+            roles__association__type=date_period_association_type,
+            roles__association__roles__type=date_period_role_type,
+            roles__association__roles__player=date_period)
 
     def filter_by_authority_date_type (self, authority, date_type):
         return self.filter(
-            role_players__type=self.eats_topic_map.date_role_type,
-            role_players__association__scope=authority).filter(
+            roles__type=self.eats_topic_map.date_role_type,
+            roles__association__scope=authority).filter(
             names__scope=date_type)
 
     def filter_by_entity_existences (self, entity):
@@ -36,10 +36,10 @@ class DateManager (BaseManager):
         entity_role_type = self.eats_topic_map.entity_role_type
         existence_assertion_type = self.eats_topic_map.existence_assertion_type
         return self.filter(
-            role_players__type=date_role_type,
-            role_players__association__type=existence_assertion_type,
-            role_players__association__roles__type=entity_role_type,
-            role_players__association__roles__player=entity)
+            roles__type=date_role_type,
+            roles__association__type=existence_assertion_type,
+            roles__association__roles__type=entity_role_type,
+            roles__association__roles__player=entity)
 
     def get_query_set (self):
         return super(DateManager, self).get_query_set().filter(
@@ -52,7 +52,7 @@ class Date (Topic):
 
     date_part_names = ('start', 'start_taq', 'start_tpq', 'end', 'end_taq',
                        'end_tpq', 'point', 'point_taq', 'point_tpq')
-    
+
     class Meta:
         proxy = True
         app_label = 'eats'
@@ -137,7 +137,7 @@ class Date (Topic):
             from eats_topic_map import EATSTopicMap
             self._eats_topic_map = self.get_topic_map(proxy=EATSTopicMap)
         return self._eats_topic_map
-        
+
     @property
     def end (self):
         """Returns the end date part.
@@ -147,7 +147,7 @@ class Date (Topic):
         """
         return self._cache_date_part(
             '_end', self.eats_topic_map.end_date_type)
-        
+
     @property
     def end_taq (self):
         """Returns the terminus ante quem end date part.
@@ -157,7 +157,7 @@ class Date (Topic):
         """
         return self._cache_date_part(
             '_end_taq', self.eats_topic_map.end_taq_date_type)
-        
+
     @property
     def end_tpq (self):
         """Returns the terminus post quem end date part.
@@ -179,13 +179,13 @@ class Date (Topic):
         for date_part in self.date_part_names:
             data.update(getattr(self, date_part).get_form_data(date_part))
         return data
-    
+
     @property
     def period (self):
         """Returns the period (span) of this date.
 
         :rtype: `Topic`
-        
+
         """
         return self.period_association.get_roles(
             self.eats_topic_map.date_period_role_type)[0].get_player(
@@ -222,7 +222,7 @@ class Date (Topic):
                 self.eats_topic_map.date_period_association_type)[0]
             self._period_association = date_role.get_parent()
         return self._period_association
-        
+
     @property
     def point (self):
         """Returns the point date part.
@@ -232,7 +232,7 @@ class Date (Topic):
         """
         return self._cache_date_part(
             '_point', self.eats_topic_map.point_date_type)
-        
+
     @property
     def point_taq (self):
         """Returns the terminus ante quem point date part.
@@ -242,7 +242,7 @@ class Date (Topic):
         """
         return self._cache_date_part(
             '_point_taq', self.eats_topic_map.point_taq_date_type)
-        
+
     @property
     def point_tpq (self):
         """Returns the terminus post quem point date part.
@@ -276,7 +276,7 @@ class Date (Topic):
         for role in self.get_roles_played(self.eats_topic_map.date_role_type):
             role.remove()
         super(Date, self).remove()
-    
+
     @property
     def start (self):
         """Returns the start date part.
@@ -286,7 +286,7 @@ class Date (Topic):
         """
         return self._cache_date_part(
             '_start', self.eats_topic_map.start_date_type)
-        
+
     @property
     def start_taq (self):
         """Returns the terminus ante quem start date part.
@@ -296,7 +296,7 @@ class Date (Topic):
         """
         return self._cache_date_part(
             '_start_taq', self.eats_topic_map.start_taq_date_type)
-        
+
     @property
     def start_tpq (self):
         """Returns the terminus post quem start date part.

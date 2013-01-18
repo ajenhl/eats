@@ -7,10 +7,10 @@ class InfrastructureManager (BaseManager):
         infrastructure_role_type = self.eats_topic_map.infrastructure_role_type
         authority_role_type = self.eats_topic_map.authority_role_type
         return self.filter(
-            role_players__type=infrastructure_role_type,
-            role_players__association__type=association_type,
-            role_players__association__roles__type=authority_role_type,
-            role_players__association__roles__player=authority)
+            roles__type=infrastructure_role_type,
+            roles__association__type=association_type,
+            roles__association__roles__type=authority_role_type,
+            roles__association__roles__player=authority)
 
     def get_by_admin_name (self, name):
         for model_object in self.all():

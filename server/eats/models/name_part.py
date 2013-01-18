@@ -15,10 +15,10 @@ class NamePartManager (BaseManager):
         name_role_type = self.eats_topic_map.name_role_type
         name_part_role_type = self.eats_topic_map.name_part_role_type
         return self.filter(
-            role_players__type=name_part_role_type,
-            role_players__association__type=association_type,
-            role_players__association__roles__type=name_role_type,
-            role_players__association__roles__player=name)
+            roles__type=name_part_role_type,
+            roles__association__type=association_type,
+            roles__association__roles__type=name_role_type,
+            roles__association__roles__player=name)
 
     def get_query_set (self):
         return super(NamePartManager, self).get_query_set().filter(
