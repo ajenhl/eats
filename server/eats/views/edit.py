@@ -17,7 +17,7 @@ from eats.lib.user import get_user_preferences, user_is_editor
 from eats.lib.views import get_topic_or_404
 from eats.decorators import add_topic_map
 from eats.forms.edit import CreateEntityForm, create_choice_list, CurrentAuthorityForm, DateForm, EATSMLImportForm
-from eats.models import Authority, Calendar, DatePeriod, DateType, EATSMLImport, Entity
+from eats.models import Authority, Calendar, DatePeriod, DateType, EATSMLImport, Entity, EntityType
 
 
 @user_passes_test(user_is_editor)
@@ -226,8 +226,7 @@ def date_change (request, topic_map, entity_id, assertion_id, date_id):
 def export_eatsml_base (request, topic_map):
     tree = EATSMLExporter(topic_map).export_infrastructure(
         user=request.user.eats_user)
-    xml = etree.tostring(tree, encoding='utf-8', pretty_print=True)
-    return HttpResponse(xml, mimetype='text/xml')
+    return serialise_tree(tree)
 
 @user_passes_test(user_is_editor)
 @add_topic_map
@@ -235,14 +234,24 @@ def export_eatsml_entities (request, topic_map):
     """Exports all entities in EATSML."""
     entities = Entity.objects.all()
     tree = EATSMLExporter(topic_map).export_entities(entities)
-    xml = etree.tostring(tree, encoding='utf-8', pretty_print=True)
-    return HttpResponse(xml, mimetype='text/xml')
+    return serialise_tree(tree)
+
+@user_passes_test(user_is_editor)
+@add_topic_map
+def export_eatsml_entities_by_entity_type (request, topic_map, entity_type_id):
+    entity_type = get_topic_or_404(EntityType, entity_type_id)
+    entities = Entity.objects.filter_by_entity_type(entity_type)
+    tree = EATSMLExporter(topic_map).export_entities(entities)
+    return serialise_tree(tree)
 
 @user_passes_test(user_is_editor)
 @add_topic_map
 def export_eatsml_full (request, topic_map):
     """Exports all EATS data in EATSML."""
     tree = EATSMLExporter(topic_map).export_full()
+    return serialise_tree(tree)
+
+def serialise_tree (tree):
     xml = etree.tostring(tree, encoding='utf-8', pretty_print=True)
     return HttpResponse(xml, mimetype='text/xml')
 

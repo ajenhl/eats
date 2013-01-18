@@ -166,6 +166,44 @@ class EntityTestCase (ModelTestCase):
             self.authority, self.language1, self.script1)
         self.assertEqual(name5, preferred_name)
 
+    def test_manager_filter_by_entity_type (self):
+        self.assertEqual(Entity.objects.all().count(), 0)
+        entity_type_1 = self.create_entity_type('person')
+        entity_type_2 = self.create_entity_type('place')
+        self.authority.set_entity_types([entity_type_1, entity_type_2])
+        self.assertEqual(Entity.objects.filter_by_entity_type(
+                entity_type_1.id).count(), 0)
+        self.assertEqual(Entity.objects.filter_by_entity_type(
+                entity_type_2.id).count(), 0)
+        entity = self.tm.create_entity(self.authority)
+        self.assertEqual(Entity.objects.all().count(), 1)
+        self.assertEqual(Entity.objects.filter_by_entity_type(
+                entity_type_1.id).count(), 0)
+        self.assertEqual(Entity.objects.filter_by_entity_type(
+                entity_type_2.id).count(), 0)
+        assertion1 = entity.create_entity_type_property_assertion(
+            self.authority, entity_type_1)
+        self.assertEqual(Entity.objects.filter_by_entity_type(
+                entity_type_1.id).count(), 1)
+        self.assertEqual(Entity.objects.filter_by_entity_type(
+                entity_type_2.id).count(), 0)
+        assertion2 = entity.create_entity_type_property_assertion(
+            self.authority, entity_type_2)
+        self.assertEqual(Entity.objects.filter_by_entity_type(
+                entity_type_1.id).count(), 1)
+        self.assertEqual(Entity.objects.filter_by_entity_type(
+                entity_type_2.id).count(), 1)
+        assertion1.remove()
+        self.assertEqual(Entity.objects.filter_by_entity_type(
+                entity_type_1.id).count(), 0)
+        self.assertEqual(Entity.objects.filter_by_entity_type(
+                entity_type_2.id).count(), 1)
+        assertion2.remove()
+        self.assertEqual(Entity.objects.filter_by_entity_type(
+                entity_type_1.id).count(), 0)
+        self.assertEqual(Entity.objects.filter_by_entity_type(
+                entity_type_2.id).count(), 0)
+
     def test_remove (self):
         self.assertEqual(Entity.objects.all().count(), 0)
         self.assertEqual(ExistencePropertyAssertion.objects.all().count(), 0)

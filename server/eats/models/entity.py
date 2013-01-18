@@ -42,6 +42,14 @@ class EntityManager (BaseManager):
                                    occurrences__scope=authority)
         return entities.exclude(id=entity.id)
 
+    def filter_by_entity_type (self, entity_type):
+        assertion_type = self.eats_topic_map.entity_type_assertion_type
+        role_type = self.eats_topic_map.property_role_type
+        return self.filter(
+            roles__association__type=assertion_type,
+            roles__association__roles__type=role_type,
+            roles__association__roles__player=entity_type)
+
     def get_query_set (self):
         return super(EntityManager, self).get_query_set().filter(
             types=self.eats_topic_map.entity_type)
@@ -50,7 +58,7 @@ class EntityManager (BaseManager):
 class Entity (Topic):
 
     objects = EntityManager()
-    
+
     class Meta:
         proxy = True
         app_label = 'eats'
@@ -82,7 +90,7 @@ class Entity (Topic):
             scope=[authority], proxy=EntityRelationshipPropertyAssertion)
         assertion.set_players(domain_entity, range_entity, relationship_type)
         return assertion
-        
+
     def create_entity_type_property_assertion (self, authority, entity_type):
         """Creates a new entity type property assertion asserted by
         `authority`.
@@ -199,7 +207,7 @@ class Entity (Topic):
             self.eats_topic_map.subject_identifier_assertion_type,
             subject_identifier, scope=[authority],
             proxy=SubjectIdentifierPropertyAssertion)
-    
+
     @property
     def eats_topic_map (self):
         if not hasattr(self, '_eats_topic_map'):
@@ -248,7 +256,7 @@ class Entity (Topic):
         """
         return Entity.objects.filter_by_duplicate_subject_identifiers(
             self, subject_identifier, authority)
-    
+
     def get_eats_names (self, exclude=None):
         """Returns this entity's name property assertions.
 
@@ -286,7 +294,7 @@ class Entity (Topic):
         """
         return EntityRelationshipPropertyAssertion.objects.filter_by_entity(
             self)
-    
+
     def get_entity_types (self):
         """Returns this entity's entity type property assertions.
 
@@ -300,10 +308,10 @@ class Entity (Topic):
         property assertions.
 
         :rtype: `QuerySet` of `Date`s
-        
+
         """
         return Date.objects.filter_by_entity_existences(self)
-    
+
     def get_existences (self):
         """Returns this entity's existence property assertions.
 
@@ -327,7 +335,7 @@ class Entity (Topic):
         The name that best fits first the script (completely
         unreadable names are bad), then the authority, then the
         language, is returned.
-        
+
         :param authority: preferred authority to assert the name
         :type authority: `Authority`
         :param language: preferred language of the name
@@ -335,7 +343,7 @@ class Entity (Topic):
         :param script: preferred script of the name
         :type script: `Script`
         :rtype: `NamePropertyAssertion`
-        
+
         """
         try:
             return NamePropertyAssertion.objects.get_preferred(
