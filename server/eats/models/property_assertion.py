@@ -1,5 +1,3 @@
-from django.db import transaction
-
 from authority import Authority
 from date import Date
 
@@ -17,32 +15,35 @@ class PropertyAssertion (object):
             types=self.eats_topic_map.authority_type)[0]
         return Authority.objects.get_by_identifier(topic.get_id())
 
-    @transaction.commit_on_success
     def create_date (self, data):
         """Creates a new date associated with this property assertion."""
         date = self.eats_topic_map.create_topic(proxy=Date)
-        date.add_type(self.eats_topic_map.date_type)
-        date.create_date_parts()
-        self.create_role(self.eats_topic_map.date_role_type, date)
-        date.period = data['date_period']
-        for prefix in ('start', 'start_taq', 'start_tpq', 'end', 'end_taq',
-                       'end_tpq', 'point', 'point_taq', 'point_tpq'):
-            if data.get(prefix):
-                part = getattr(date, prefix)
-                part.set_value(data[prefix])
-                part.calendar = data[prefix + '_calendar']
-                part.certainty = data[prefix + '_certainty']
-                part.set_normalised_value(data[prefix + '_normalised'])
-                part.date_type = data[prefix + '_type']
+        try:
+            date.add_type(self.eats_topic_map.date_type)
+            date.create_date_parts()
+            self.create_role(self.eats_topic_map.date_role_type, date)
+            date.period = data['date_period']
+            for prefix in ('start', 'start_taq', 'start_tpq', 'end', 'end_taq',
+                           'end_tpq', 'point', 'point_taq', 'point_tpq'):
+                if data.get(prefix):
+                    part = getattr(date, prefix)
+                    part.set_value(data[prefix])
+                    part.calendar = data[prefix + '_calendar']
+                    part.certainty = data[prefix + '_certainty']
+                    part.set_normalised_value(data[prefix + '_normalised'])
+                    part.date_type = data[prefix + '_type']
+        except:
+            date.remove()
+            raise
         return date
-        
+
     @property
     def eats_topic_map (self):
         if not hasattr(self, '_eats_topic_map'):
             from eats_topic_map import EATSTopicMap
             self._eats_topic_map = self.get_topic_map(proxy=EATSTopicMap)
         return self._eats_topic_map
-        
+
     @property
     def entity (self):
         """Returns the entity making this property assertion."""
@@ -69,7 +70,7 @@ class PropertyAssertion (object):
         if date.property_assertion != self:
             return None
         return date
-    
+
     def get_dates (self):
         """Returns a list of dates associated with this property assertion.
 
@@ -96,10 +97,10 @@ class PropertyAssertion (object):
             self.add_theme(self.eats_topic_map.is_preferred)
         else:
             self.remove_theme(self.eats_topic_map.is_preferred)
-    
+
     def set_players (self, entity, property):
         raise NotImplementedError
-        
+
     def update (self, *args):
         """Updates this property assertion with the new data.
 
