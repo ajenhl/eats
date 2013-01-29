@@ -257,3 +257,14 @@ class EntityTestCase (ModelTestCase):
         self.assertEqual(NameCache.objects.all().count(), 0)
         self.assertEqual(NameIndex.objects.all().count(), 0)
         self.assertEqual(NamePropertyAssertion.objects.all().count(), 0)
+
+    def test_traverse_to_entity (self):
+        entity_relationship_type = self.create_entity_relationship_type(
+            'is child of', 'is parent of')
+        self.authority.set_entity_relationship_types([entity_relationship_type])
+        entity1 = self.tm.create_entity(self.authority)
+        entity2 = self.tm.create_entity(self.authority)
+        assertion = entity1.create_entity_relationship_property_assertion(
+            self.authority, entity_relationship_type, entity1, entity2)
+        self.assertEqual(entity1.get_assertion(assertion.get_id()), assertion)
+        self.assertEqual(entity2.get_assertion(assertion.get_id()), assertion)

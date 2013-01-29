@@ -235,7 +235,13 @@ class Entity (Topic):
                 assertion = assertion_type.objects.get_by_identifier(
                     assertion_id)
                 # Check that this assertion is associated with the entity.
-                if assertion.entity != self:
+                if assertion_type == EntityRelationshipPropertyAssertion:
+                    # Entity relationships do not have an entity, but
+                    # rather a domain entity and range entity.
+                    if assertion.domain_entity != self and \
+                            assertion.range_entity != self:
+                        assertion = None
+                elif assertion.entity != self:
                     assertion = None
         return assertion
 
