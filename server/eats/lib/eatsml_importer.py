@@ -270,7 +270,7 @@ class EATSMLImporter (EATSMLHandler):
             self._add_mapping('date_type', xml_id, date_type)
 
     def _import_entity_relationship_types (self, tree):
-        """Imports date types from XML `tree`.
+        """Imports entity relationship types from XML `tree`.
 
         :param tree: XML tree of EATSML to import
         :type tree: `ElementTree`
@@ -460,6 +460,7 @@ class EATSMLImporter (EATSMLHandler):
                 assertion = entity.create_entity_type_property_assertion(
                     authority, entity_type)
                 element.set('eats_id', str(assertion.get_id()))
+                self._import_dates(element, assertion)
 
     def _import_existence_assertions (self, entity, entity_element):
         """Imports existence assertions from `entity_element` into
@@ -481,6 +482,7 @@ class EATSMLImporter (EATSMLHandler):
                 assertion = entity.create_existence_property_assertion(
                     authority)
                 element.set('eats_id', str(assertion.get_id()))
+                self._import_dates(element, assertion)
 
     def _import_name_assertions (self, entity, entity_element):
         """Imports name assertions from `entity_element` into
@@ -510,6 +512,7 @@ class EATSMLImporter (EATSMLHandler):
                     is_preferred)
                 element.set('eats_id', str(assertion.get_id()))
                 self._import_name_parts(assertion.name, element)
+                self._import_dates(element, assertion)
 
     def _import_name_parts (self, name, name_element):
         """Imports name parts from `name_element` into `name`.
@@ -610,10 +613,44 @@ class EATSMLImporter (EATSMLHandler):
                 element, 'entity_relationship_type', 'entity_relationship_type')
             range_entity = self._get_mapped_object(element, 'range_entity',
                                                    'entity')
-            relationship = entity.create_entity_relationship_property_assertion(
+            assertion = entity.create_entity_relationship_property_assertion(
                 authority, entity_relationship_type, domain_entity,
                 range_entity)
-            element.set('eats_id', str(relationship.get_id()))
+            element.set('eats_id', str(assertion.get_id()))
+            self._import_dates(element, assertion)
+
+    def _import_dates (self, assertion_element, assertion):
+        """Imports any dates associated with `assertion_element`,
+        assigning them to `assertion`.
+
+        :param assertion_element: XML element representing a property
+          assertion
+        :type assertion_element: `Element`
+        :param assertion: Django property assertion object
+        :type assertion: `Association`
+
+        """
+        for date_element in assertion_element.xpath('e:dates/e:date',
+                                                    namespaces=NSMAP):
+            date_period = self._get_mapped_object(date_element, 'date_period',
+                                                  'date_period')
+            data = {'date_period': date_period}
+            date_part_elements = date_element.xpath('e:date_parts/e:date_part',
+                                                    namespaces=NSMAP)
+            for element in date_part_elements:
+                date_part_type = element.get('type')
+                data[date_part_type] = self._get_text(element, 'e:raw')
+                data[date_part_type + '_calendar'] = self._get_mapped_object(
+                    element, 'calendar', 'calendar')
+                certainty = self._topic_map.date_no_certainty
+                if element.get('certainty') == 'full':
+                    certainty = self._topic_map.date_full_certainty
+                data[date_part_type + '_certainty'] = certainty
+                data[date_part_type + '_normalised'] = self._get_text(
+                    element, 'e:normalised')
+                data[date_part_type + '_type'] = self._get_mapped_object(
+                    element, 'date_type', 'date_type')
+            assertion.create_date(data)
 
     def _add_mapping (self, object_type, xml_id, obj):
         """Adds a mapping between `xml_id` and `obj` within the

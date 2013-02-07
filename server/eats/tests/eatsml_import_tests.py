@@ -1349,3 +1349,166 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
                     'assertion': assertion.get_id(),
                     'entity_url': entity.get_eats_subject_identifier()}
         self._compare_XML(annotated_import, expected_xml)
+
+    def test_import_date (self):
+        authority = self.create_authority('Test')
+        calendar1 = self.create_calendar('Julian')
+        calendar2 = self.create_calendar('Gregorian')
+        date_period = self.create_date_period('lifespan')
+        date_type1 = self.create_date_type('exact')
+        date_type2 = self.create_date_type('circa')
+        authority.set_calendars([calendar1, calendar2])
+        authority.set_date_periods([date_period])
+        authority.set_date_types([date_type1, date_type2])
+        import_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-1" eats_id="%(authority)d">
+      <name>Test</name>
+      <calendars>
+        <calendar ref="calendar-1"/>
+        <calendar ref="calendar-2"/>
+      </calendars>
+      <date_periods>
+        <date_period ref="date_period-1"/>
+      </date_periods>
+      <date_types>
+        <date_type ref="date_type-1"/>
+        <date_type ref="date_type-2"/>
+      </date_types>
+    </authority>
+  </authorities>
+  <calendars>
+    <calendar xml:id="calendar-1" eats_id="%(calendar1)d">
+      <name>Julian</name>
+    </calendar>
+    <calendar xml:id="calendar-2" eats_id="%(calendar2)d">
+      <name>Gregorian</name>
+    </calendar>
+  </calendars>
+  <date_periods>
+    <date_period xml:id="date_period-1" eats_id="%(date_period)d">
+      <name>lifespan</name>
+    </date_period>
+  </date_periods>
+  <date_types>
+    <date_type xml:id="date_type-1" eats_id="%(date_type1)d">
+      <name>exact</name>
+    </date_type>
+    <date_type xml:id="date_type-2" eats_id="%(date_type2)d">
+      <name>circa</name>
+    </date_type>
+  </date_types>
+  <entities>
+    <entity xml:id="entity-1">
+      <existences>
+        <existence authority="authority-1">
+          <dates>
+            <date date_period="date_period-1">
+              <assembled_form></assembled_form>
+              <date_parts>
+                <date_part calendar="calendar-1" certainty="full"
+                           date_type="date_type-1" type="start">
+                  <raw>1 January 2000</raw>
+                  <normalised>2000-01-01</normalised>
+                </date_part>
+                <date_part calendar="calendar-2" certainty="none"
+                           date_type="date_type-2" type="end">
+                  <raw>21 March 2010</raw>
+                  <normalised>2010-03-21</normalised>
+                </date_part>
+              </date_parts>
+            </date>
+          </dates>
+        </existence>
+      </existences>
+    </entity>
+  </entities>
+</collection>''' % {
+            'authority': authority.get_id(), 'calendar1': calendar1.get_id(),
+            'calendar2': calendar2.get_id(),
+            'date_period': date_period.get_id(),
+            'date_type1': date_type1.get_id(),
+            'date_type2': date_type2.get_id()}
+        annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
+        entity = Entity.objects.all()[0]
+        existence = entity.get_existences()[0]
+        date = existence.get_dates()[0]
+        self.assertEqual(existence.authority, authority)
+        self.assertEqual(date.assembled_form,
+                         u'1 January 2000 \N{EN DASH} 21 March 2010?')
+        self.assertEqual(date.period, date_period)
+        start = date.start
+        end = date.end
+        self.assertEqual(start.calendar, calendar1)
+        self.assertEqual(start.certainty, self.tm.date_full_certainty)
+        self.assertEqual(start.date_type, date_type1)
+        self.assertEqual(start.get_normalised_value(), '2000-01-01')
+        self.assertEqual(start.get_value(), '1 January 2000')
+        self.assertEqual(end.calendar, calendar2)
+        self.assertEqual(end.certainty, self.tm.date_no_certainty)
+        self.assertEqual(end.date_type, date_type2)
+        self.assertEqual(end.get_normalised_value(), '2010-03-21')
+        self.assertEqual(end.get_value(), '21 March 2010')
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-1" eats_id="%(authority)d">
+      <name>Test</name>
+    </authority>
+  </authorities>
+  <calendars>
+    <calendar xml:id="calendar-1" eats_id="%(calendar1)d">
+      <name>Julian</name>
+    </calendar>
+    <calendar xml:id="calendar-2" eats_id="%(calendar2)d">
+      <name>Gregorian</name>
+    </calendar>
+  </calendars>
+  <date_periods>
+    <date_period xml:id="date_period-1" eats_id="%(date_period)d">
+      <name>lifespan</name>
+    </date_period>
+  </date_periods>
+  <date_types>
+    <date_type xml:id="date_type-1" eats_id="%(date_type1)d">
+      <name>exact</name>
+    </date_type>
+    <date_type xml:id="date_type-2" eats_id="%(date_type2)d">
+      <name>circa</name>
+    </date_type>
+  </date_types>
+  <entities>
+    <entity xml:id="entity-1" eats_id="%(entity)d" url="%(entity_url)s">
+      <existences>
+        <existence authority="authority-1" eats_id="%(existence)d">
+          <dates>
+            <date date_period="date_period-1">
+              <assembled_form></assembled_form>
+              <date_parts>
+                <date_part calendar="calendar-1" certainty="full"
+                           date_type="date_type-1" type="start">
+                  <raw>1 January 2000</raw>
+                  <normalised>2000-01-01</normalised>
+                </date_part>
+                <date_part calendar="calendar-2" certainty="none"
+                           date_type="date_type-2" type="end">
+                  <raw>21 March 2010</raw>
+                  <normalised>2010-03-21</normalised>
+                </date_part>
+              </date_parts>
+            </date>
+          </dates>
+        </existence>
+      </existences>
+    </entity>
+  </entities>
+</collection>''' % {
+            'authority': authority.get_id(), 'calendar1': calendar1.get_id(),
+            'calendar2': calendar2.get_id(),
+            'date_period': date_period.get_id(),
+            'date_type1': date_type1.get_id(),
+            'date_type2': date_type2.get_id(), 'entity': entity.get_id(),
+            'existence': existence.get_id(),
+            'entity_url': entity.get_eats_subject_identifier()}
+        self._compare_XML(annotated_import, expected_xml)
