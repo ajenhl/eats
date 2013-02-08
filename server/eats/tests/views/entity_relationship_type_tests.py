@@ -6,7 +6,7 @@ from eats.tests.views.view_test_case import ViewTestCase
 
 class EntityRelationshipTypeViewsTestCase (ViewTestCase):
 
-    def test_entity_type_list (self):
+    def test_entity_relationship_type_list (self):
         url = reverse('entityrelationshiptype-list')
         response = self.app.get(url)
         self.assertEqual(response.context['opts'], EntityRelationshipType._meta)
@@ -20,7 +20,7 @@ class EntityRelationshipTypeViewsTestCase (ViewTestCase):
         url = reverse('entityrelationshiptype-add')
         response = self.app.get(url)
         self.assertEqual(response.context['opts'], EntityRelationshipType._meta)
-        
+
     def test_entity_relationship_type_add_post_redirects (self):
         self.assertEqual(EntityRelationshipType.objects.count(), 0)
         url = reverse('entityrelationshiptype-add')
@@ -70,7 +70,7 @@ class EntityRelationshipTypeViewsTestCase (ViewTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(EntityRelationshipType.objects.count(), 1)
         self.assertTrue(er_type in EntityRelationshipType.objects.all())
-        
+
     def test_entity_relationship_type_change_illegal_get (self):
         url = reverse('entityrelationshiptype-change', kwargs={'topic_id': 0})
         self.app.get(url, status=404)
@@ -96,4 +96,3 @@ class EntityRelationshipTypeViewsTestCase (ViewTestCase):
         self.assertRedirects(response, reverse('entityrelationshiptype-list'))
         self.assertEqual(EntityRelationshipType.objects.count(), 1)
         self.assertEqual(er_type.get_admin_name(), 'Forward2 / Reverse2')
-
