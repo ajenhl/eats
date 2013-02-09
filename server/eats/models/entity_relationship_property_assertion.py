@@ -39,7 +39,7 @@ class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
         app_label = 'eats'
 
     def _add_relationship_cache(self, relationship_type, domain_entity,
-                                range_entity):
+                                range_entity, certainty):
         """Adds this relationship to the relationships cache."""
         forward_name = relationship_type.get_admin_forward_name()
         reverse_name = relationship_type.get_admin_reverse_name()
@@ -49,7 +49,8 @@ class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
             range_entity=range_entity,
             relationship_type=relationship_type,
             forward_relationship_name=forward_name,
-            reverse_relationship_name=reverse_name)
+            reverse_relationship_name=reverse_name,
+            certainty=certainty)
         cached_relationship.save()
         self._cached_erpa = cached_relationship
 
@@ -143,18 +144,18 @@ class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
         self.create_role(self.eats_topic_map.entity_relationship_type_role_type,
                          relationship_type)
         self.update_relationship_cache(relationship_type, domain_entity,
-                                       range_entity)
+                                       range_entity, self.certainty)
 
     def update_relationship_cache(self, relationship_type, domain_entity,
-                                  range_entity):
+                                  range_entity, certainty):
        """Updates the relationship cache for this relationship."""
        self._delete_relationship_cache()
        self._add_relationship_cache(relationship_type, domain_entity,
-                                    range_entity)
+                                    range_entity, certainty)
 
     @transaction.commit_on_success
     def update (self, relationship_type, domain_entity,
-                range_entity):
+                range_entity, certainty):
         """Updates this property assertion.
 
         :param relationship_type: type of the relationship
@@ -163,6 +164,8 @@ class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
         :type domain_entity: `Entity`
         :param range_entity: the range entity
         :type range_entity: `Entity`
+        :param certainty: the certainty
+        :type certainty: `Topic`
 
         """
         if domain_entity not in (self.domain_entity, self.range_entity) \
@@ -183,5 +186,6 @@ class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
             range_role = self.get_roles(
                 self.eats_topic_map.range_entity_role_type)[0]
             range_role.set_player(range_entity)
+        self.certainty = certainty
         self.update_relationship_cache(relationship_type, domain_entity,
-                                       range_entity)
+                                       range_entity, certainty)

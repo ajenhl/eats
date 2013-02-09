@@ -20,7 +20,8 @@ def home (request):
     return render_to_response('eats/display/home.html', context_data,
                               context_instance=RequestContext(request))
 
-def entity_view (request, entity_id):
+@add_topic_map
+def entity_view (request, topic_map, entity_id):
     try:
         entity = Entity.objects.get_by_identifier(entity_id)
     except Entity.DoesNotExist:
@@ -48,7 +49,10 @@ def entity_view (request, entity_id):
                     'preferred_script': preferred_script,
                     'existence_dates': existence_dates,
                     'entity_type_pas': entity_type_pas, 'name_pas': name_pas,
-                    'note_pas': note_pas, 'relationship_pas': relationship_pas,
+                    'note_pas': note_pas,
+                    'property_assertion_full_certainty':
+                        topic_map.property_assertion_full_certainty,
+                    'relationship_pas': relationship_pas,
                     'subject_identifier_pas': subject_identifier_pas,
                     'site': Site.objects.get_current()}
     return render_to_response('eats/display/entity.html', context_data,
@@ -82,7 +86,10 @@ def search (request, topic_map):
         except EmptyPage:
             results = paginator.page(paginator.num_pages)
         user_preferences = get_user_preferences(request)
-    context_data = {'search_form': form, 'search_results': results}
+    context_data = {
+        'property_assertion_full_certainty': \
+            topic_map.property_assertion_full_certainty,
+        'search_form': form, 'search_results': results}
     context_data['user_is_editor'] = user_is_editor(request.user)
     context_data.update(user_preferences)
     return render_to_response('eats/display/search.html', context_data,

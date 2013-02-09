@@ -491,7 +491,11 @@ class EntityRelationship (EATSMLElementBase):
             other_entity = self._get_element_by_id(domain_entity_id)
             relationship = relationship_type.reverse_name
         other_entity_name = other_entity.get_preferred_name().assembled_form
-        return '%s %s' % (relationship, other_entity_name)
+        if self.get('certainty') == 'none':
+            certainty = ' (uncertain)'
+        else:
+            certainty = ''
+        return '%s %s%s' % (relationship, other_entity_name, certainty)
 
 
 class EntityRelationshipType (NamedElement):

@@ -167,6 +167,12 @@ class EATSMLExporter (EATSMLHandler):
                                              'entity_relationship')
         authority = assertion.authority
         assertion_element.set('authority', 'authority-%d' % authority.get_id())
+        certainty = assertion.certainty
+        if certainty == self._topic_map.property_assertion_full_certainty:
+            certainty_value = 'full'
+        else:
+            certainty_value = 'none'
+        assertion_element.set('certainty', certainty_value)
         assertion_element.set('eats_id', str(assertion.get_id()))
         relationship_type = assertion.entity_relationship_type
         assertion_element.set(

@@ -64,7 +64,8 @@ class Entity (Topic):
         app_label = 'eats'
 
     def create_entity_relationship_property_assertion (
-        self, authority, relationship_type, domain_entity, range_entity):
+        self, authority, relationship_type, domain_entity, range_entity,
+        certainty):
         """Creates a new entity relationship property assertion
         asserted by `authority`.
 
@@ -78,6 +79,8 @@ class Entity (Topic):
         :param range_entity: entity playing the range role in the
           relationship
         :type range_entity: `Entity`
+        :param certainty: the certainty to be set
+        :type certainty: `Topic`
         :rtype: `EntityRelationshipPropertyAssertion`
 
         """
@@ -87,7 +90,8 @@ class Entity (Topic):
             entity_relationship_type=relationship_type)
         assertion = self.eats_topic_map.create_association(
             self.eats_topic_map.entity_relationship_assertion_type,
-            scope=[authority], proxy=EntityRelationshipPropertyAssertion)
+            scope=[authority, certainty],
+            proxy=EntityRelationshipPropertyAssertion)
         assertion.set_players(domain_entity, range_entity, relationship_type)
         return assertion
 

@@ -9,7 +9,8 @@ from eats.constants import UNNAMED_ENTITY_NAME
 register = template.Library()
 
 
-@register.inclusion_tag('eats/display/duplicate_subject_identifiers.html', takes_context=True)
+@register.inclusion_tag('eats/display/duplicate_subject_identifiers.html',
+                        takes_context=True)
 def display_duplicate_subject_identifiers (context, entity, subject_identifier,
                                            authority=None):
     duplicate_entities = entity.get_duplicate_subject_identifiers(
@@ -45,10 +46,12 @@ def display_entity_relationship_property_assertion (context, entity,
     domain_entity = entity_relationship.domain_entity
     range_entity = entity_relationship.range_entity
     if entity == domain_entity:
-        relationship_type_name = entity_relationship.get_relationship_type_forward_name()
+        relationship_type_name = \
+            entity_relationship.get_relationship_type_forward_name()
         other_entity = range_entity
     else:
-        relationship_type_name = entity_relationship.get_relationship_type_reverse_name()
+        relationship_type_name = \
+            entity_relationship.get_relationship_type_reverse_name()
         other_entity = domain_entity
     try:
         other_entity_name_form = other_entity.get_preferred_name(
@@ -58,7 +61,12 @@ def display_entity_relationship_property_assertion (context, entity,
     except AttributeError:
         other_entity_name_form = UNNAMED_ENTITY_NAME
     other_entity_id = other_entity.get_id()
-    return {'other_entity_id': other_entity_id,
+    if entity_relationship.certainty == \
+            context['property_assertion_full_certainty']:
+        certainty = ''
+    else:
+        certainty = ' (uncertain)'
+    return {'certainty': certainty, 'other_entity_id': other_entity_id,
             'other_entity_name_form': other_entity_name_form,
             'relationship_type_name': relationship_type_name}
 
@@ -100,7 +108,9 @@ def display_entity_search_result (context, entity):
             'preferred_authority': preferred_authority,
             'preferred_language': preferred_language,
             'preferred_name_form': preferred_name_form,
-            'preferred_script': preferred_script}
+            'preferred_script': preferred_script,
+            'property_assertion_full_certainty':
+                context['property_assertion_full_certainty']}
 
 @register.inclusion_tag('eats/display/name_metadata.html')
 def display_name_metadata (name):

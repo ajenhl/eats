@@ -25,7 +25,7 @@ class AuthorityManager (InfrastructureManager):
 class Authority (Topic, Infrastructure):
 
     objects = AuthorityManager()
-    
+
     class Meta:
         proxy = True
         app_label = 'eats'
@@ -53,7 +53,7 @@ class Authority (Topic, Infrastructure):
 
         """
         return self.editors.all()
-    
+
     def get_entity_types (self):
         return EntityType.objects.filter_by_authority(self)
 
@@ -65,7 +65,7 @@ class Authority (Topic, Infrastructure):
 
     def get_name_part_types (self):
         return NamePartType.objects.filter_by_authority(self)
-    
+
     def get_name_types (self):
         return NameType.objects.filter_by_authority(self)
 
@@ -110,7 +110,7 @@ class Authority (Topic, Infrastructure):
 
     def set_editors (self, editors):
         self.editors = editors
-        
+
     def set_entity_relationship_types (self, entity_relationship_types):
         """Sets the entity relationship types available to this
         authority to `entity_relationship_types`.
@@ -124,7 +124,7 @@ class Authority (Topic, Infrastructure):
         self._set_infrastructure_elements(
             self.get_entity_relationship_types(), entity_relationship_types,
             association_type, 'entity_relationship_type')
-        
+
     def set_entity_types (self, entity_types):
         """Sets the entity types available to this authority to
         `entity_types`.
@@ -184,7 +184,7 @@ class Authority (Topic, Infrastructure):
         association_type = self.eats_topic_map.authority_has_script_association_type
         self._set_infrastructure_elements(
             self.get_scripts(), scripts, association_type, 'script')
-        
+
     def _set_infrastructure_elements (self, old_elements, new_elements,
                                       association_type, element_name):
         """Sets the infrastructure elements available to this authority.
@@ -300,5 +300,3 @@ class Authority (Topic, Infrastructure):
         from eats.models import NamePropertyAssertion
         return NamePropertyAssertion.objects.filter_by_authority_script(
             self, element).count()
-                                                                        
-        

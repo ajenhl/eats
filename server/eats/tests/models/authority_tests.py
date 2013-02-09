@@ -195,19 +195,21 @@ class AuthorityTestCase (ModelTestCase):
             'is born in', 'is place of birth of')
         self.authority.set_entity_relationship_types([type1])
         assertion = entity1.create_entity_relationship_property_assertion(
-            self.authority, type1, entity1, entity2)
+            self.authority, type1, entity1, entity2,
+            self.tm.property_assertion_full_certainty)
         self.assertRaises(EATSValidationException,
                           self.authority.set_entity_relationship_types, [])
         self.assertTrue(type1 in self.authority.get_entity_relationship_types())
         self.authority.set_entity_relationship_types([type1, type2])
         self.assertRaises(EATSValidationException,
                           self.authority.set_entity_relationship_types, [type2])
-        assertion.update(type2, entity1, entity2)
+        assertion.update(type2, entity1, entity2,
+                         self.tm.property_assertion_no_certainty)
         self.authority.set_entity_relationship_types([type2])
         self.assertEqual(self.authority.get_entity_relationship_types().count(),
                          1)
         self.assertTrue(type2 in self.authority.get_entity_relationship_types())
-        
+
     def test_get_languages (self):
         self.assertEqual(0, len(self.authority.get_languages()))
         language1 = self.create_language('English', 'en')
@@ -317,7 +319,7 @@ class AuthorityTestCase (ModelTestCase):
         self.authority.set_name_part_types([name_part_type2])
         self.assertEqual(self.authority.get_name_part_types().count(), 1)
         self.assertTrue(name_part_type2 in self.authority.get_name_part_types())
-        
+
     def test_get_name_types (self):
         self.assertEqual(0, len(self.authority.get_name_types()))
         name_type1 = self.create_name_type('regular')

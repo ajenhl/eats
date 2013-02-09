@@ -36,7 +36,7 @@ class EntityChangeViewTestCase (ViewTestCase):
     def test_non_existent_entity (self):
         url = reverse('entity-change', kwargs={'entity_id': 0})
         self.app.get(url, status=404, user='user')
-    
+
     def test_empty_entity (self):
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
@@ -70,6 +70,7 @@ class EntityChangeViewTestCase (ViewTestCase):
         form['entity_relationships-0-relationship_type'] = \
             str(rel_type.get_id()) + FORWARD_RELATIONSHIP_MARKER
         form['entity_relationships-0-related_entity_1'] = entity2.get_id()
+        form['entity_relationships-0-certainty'] = True
         response = form.submit('_save').follow()
         self.assertEqual(response.request.url[len(response.request.host_url):],
                          url)
@@ -88,6 +89,9 @@ class EntityChangeViewTestCase (ViewTestCase):
         self.assertEqual(form_data['related_entity'], entity2.get_id())
         self.assertEqual(form_data['related_entity'],
                          assertion.range_entity.get_id())
+        self.assertEqual(form_data['certainty'], True)
+        self.assertEqual(assertion.certainty,
+                         self.tm.property_assertion_full_certainty)
         # Test adding another entity relationship and deleting the
         # existing one.
         rel_type2 = self.create_entity_relationship_type(
@@ -99,6 +103,7 @@ class EntityChangeViewTestCase (ViewTestCase):
         form['entity_relationships-1-relationship_type'] = \
             str(rel_type2.get_id()) + REVERSE_RELATIONSHIP_MARKER
         form['entity_relationships-1-related_entity_1'] = entity3.get_id()
+        form['entity_relationships-1-certainty'] = False
         response = form.submit('_save').follow()
         self.assertEqual(response.request.url[len(response.request.host_url):],
                          url)
@@ -117,11 +122,15 @@ class EntityChangeViewTestCase (ViewTestCase):
         self.assertEqual(form_data['related_entity'], entity3.get_id())
         self.assertEqual(form_data['related_entity'],
                          assertion.domain_entity.get_id())
+        self.assertEqual(form_data['certainty'], False)
+        self.assertEqual(assertion.certainty,
+                         self.tm.property_assertion_no_certainty)
         # Test updating an existing entity relationship.
         form = self.app.get(url, user='user').forms['entity-change-form']
         form['entity_relationships-0-relationship_type'] = \
             str(rel_type.get_id()) + FORWARD_RELATIONSHIP_MARKER
         form['entity_relationships-0-related_entity_1'] = entity2.get_id()
+        form['entity_relationships-0-certainty'] = True
         response = form.submit('_save').follow()
         self.assertEqual(response.request.url[len(response.request.host_url):],
                          url)
@@ -140,6 +149,9 @@ class EntityChangeViewTestCase (ViewTestCase):
         self.assertEqual(form_data['related_entity'], entity2.get_id())
         self.assertEqual(form_data['related_entity'],
                          assertion.range_entity.get_id())
+        self.assertEqual(form_data['certainty'], True)
+        self.assertEqual(assertion.certainty,
+                         self.tm.property_assertion_full_certainty)
 
     def test_post_entity_types (self):
         entity = self.tm.create_entity(self.authority)
@@ -204,7 +216,7 @@ class EntityChangeViewTestCase (ViewTestCase):
         response = form.submit('_save').follow()
         self.assertEqual(response.request.url[len(response.request.host_url):],
                          url)
-            
+
     def test_post_names (self):
         entity = self.tm.create_entity(self.authority)
         name_type = self.create_name_type('regular')

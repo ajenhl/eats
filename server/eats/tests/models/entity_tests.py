@@ -230,7 +230,8 @@ class EntityTestCase (ModelTestCase):
         self.authority.set_entity_relationship_types(
             [entity_relationship_type])
         entity.create_entity_relationship_property_assertion(
-            self.authority, entity_relationship_type, entity, entity2)
+            self.authority, entity_relationship_type, entity, entity2,
+            self.tm.property_assertion_full_certainty)
         self.assertEqual(EntityRelationshipPropertyAssertion.objects.all().count(), 1)
         entity.remove()
         self.assertEqual(Entity.objects.all().count(), 1)
@@ -265,6 +266,7 @@ class EntityTestCase (ModelTestCase):
         entity1 = self.tm.create_entity(self.authority)
         entity2 = self.tm.create_entity(self.authority)
         assertion = entity1.create_entity_relationship_property_assertion(
-            self.authority, entity_relationship_type, entity1, entity2)
+            self.authority, entity_relationship_type, entity1, entity2,
+            self.tm.property_assertion_full_certainty)
         self.assertEqual(entity1.get_assertion(assertion.get_id()), assertion)
         self.assertEqual(entity2.get_assertion(assertion.get_id()), assertion)

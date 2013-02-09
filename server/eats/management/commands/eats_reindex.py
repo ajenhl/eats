@@ -17,5 +17,6 @@ class Command (BaseCommand):
 
         print('Generating entity relationship cache.')
         for a in EntityRelationshipPropertyAssertion.objects.all().iterator():
-            a.update_relationship_cache(a.entity_relationship_type,
-                                        a.domain_entity, a.range_entity)
+            a.update_relationship_cache(
+                a.entity_relationship_type, a.domain_entity, a.range_entity,
+                a.certainty)

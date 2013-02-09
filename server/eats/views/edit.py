@@ -112,6 +112,8 @@ def entity_change (request, topic_map, entity_id):
     context_data['entity_relationship_non_editable'] = entity_relationships.non_editable
     context_data['subject_identifier_formset'] = subject_identifiers_formset
     context_data['subject_identifier_non_editable'] = subject_identifiers.non_editable
+    context_data['property_assertion_full_certainty'] = \
+        topic_map.property_assertion_full_certainty
     user_preferences = get_user_preferences(request)
     context_data.update(user_preferences)
     preferred_name_assertion = entity.get_preferred_name(

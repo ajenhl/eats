@@ -65,7 +65,7 @@ class DatePart (Name):
         """Returns the certainty for this date part.
 
         :rtype: `Topic`
-        
+
         """
         if getattr(self, '_certainty', None) is None:
             for theme in self.scoping_topics:
@@ -99,7 +99,7 @@ class DatePart (Name):
         """
         from date import Date
         return self.get_parent(proxy=Date)
-        
+
     @property
     def date_type (self):
         """Returns the type for this date part.
@@ -132,7 +132,7 @@ class DatePart (Name):
         self.add_theme(date_type)
         self._date_type = date_type
         self._scoping_topics = None
-        
+
     @property
     def eats_topic_map (self):
         if not hasattr(self, '_eats_topic_map'):

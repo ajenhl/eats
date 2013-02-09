@@ -960,12 +960,12 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   <entities>
     <entity xml:id="entity-1">
       <entity_relationships>
-        <entity_relationship authority="authority-1" domain_entity="entity-1" entity_relationship_type="entity_relationship_type-1" range_entity="entity-2"/>
+        <entity_relationship authority="authority-1" certainty="full" domain_entity="entity-1" entity_relationship_type="entity_relationship_type-1" range_entity="entity-2"/>
       </entity_relationships>
     </entity>
     <entity xml:id="entity-2">
       <entity_relationships>
-        <entity_relationship authority="authority-1" domain_entity="entity-1" entity_relationship_type="entity_relationship_type-1" range_entity="entity-2"/>
+        <entity_relationship authority="authority-1" certainty="full" domain_entity="entity-1" entity_relationship_type="entity_relationship_type-1" range_entity="entity-2"/>
       </entity_relationships>
     </entity>
   </entities>
@@ -979,6 +979,8 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
                          entity_relationship_type)
         self.assertEqual(assertion.domain_entity, entity1)
         self.assertEqual(assertion.range_entity, entity2)
+        self.assertEqual(assertion.certainty,
+                         self.tm.property_assertion_full_certainty)
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
@@ -995,12 +997,12 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   <entities>
     <entity xml:id="entity-1" eats_id="%(entity1)d" url="%(entity1_url)s">
       <entity_relationships>
-        <entity_relationship authority="authority-1" domain_entity="entity-1" eats_id="%(assertion)d" entity_relationship_type="entity_relationship_type-1" range_entity="entity-2"/>
+        <entity_relationship authority="authority-1" certainty="full" domain_entity="entity-1" eats_id="%(assertion)d" entity_relationship_type="entity_relationship_type-1" range_entity="entity-2"/>
       </entity_relationships>
     </entity>
     <entity xml:id="entity-2" eats_id="%(entity2)d" url="%(entity2_url)s">
       <entity_relationships>
-        <entity_relationship authority="authority-1" domain_entity="entity-1" entity_relationship_type="entity_relationship_type-1" range_entity="entity-2"/>
+        <entity_relationship authority="authority-1" certainty="full" domain_entity="entity-1" entity_relationship_type="entity_relationship_type-1" range_entity="entity-2"/>
       </entity_relationships>
     </entity>
   </entities>

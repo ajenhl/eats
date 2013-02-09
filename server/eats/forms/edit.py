@@ -393,6 +393,7 @@ class EntityRelationshipForm (PropertyAssertionForm):
     relationship_type = forms.ChoiceField(choices=[])
     related_entity = selectable.AutoCompleteSelectField(
         lookup_class=EntityLookup)
+    certainty = forms.BooleanField(required=False)
 
     def __init__ (self, *args, **kwargs):
         relationship_type_choices = kwargs.pop('relationship_type_choices')
@@ -409,6 +410,12 @@ class EntityRelationshipForm (PropertyAssertionForm):
             related_entity = assertion.domain_entity
         data['relationship_type'] = relationship_id + direction_marker
         data['related_entity'] = related_entity.get_id()
+        if assertion.certainty == \
+                self.topic_map.property_assertion_full_certainty:
+            certainty = True
+        else:
+            certainty = False
+        data['certainty'] = certainty
         return data
 
     def save (self):
@@ -425,13 +432,19 @@ class EntityRelationshipForm (PropertyAssertionForm):
         elif direction == REVERSE_RELATIONSHIP_MARKER:
             domain_entity = related_entity
             range_entity = self.entity
+        if self.cleaned_data['certainty']:
+            certainty = self.topic_map.property_assertion_full_certainty
+        else:
+            certainty = self.topic_map.property_assertion_no_certainty
         if self.instance is None:
             # Create a new assertion.
             self.entity.create_entity_relationship_property_assertion(
-                self.authority, relationship_type, domain_entity, range_entity)
+                self.authority, relationship_type, domain_entity, range_entity,
+                certainty)
         else:
             # Update an existing assertion.
-            self.instance.update(relationship_type, domain_entity, range_entity)
+            self.instance.update(relationship_type, domain_entity, range_entity,
+                                 certainty)
 
 
 class EntityTypeForm (PropertyAssertionForm):

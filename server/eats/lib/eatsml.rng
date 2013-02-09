@@ -31,7 +31,7 @@
             <optional>
               <ref name="user_preferred_attribute"/>
             </optional>
-	    <ref name="name"/>
+            <ref name="name"/>
             <optional>
               <element name="calendars">
                 <oneOrMore>
@@ -415,6 +415,7 @@
         <oneOrMore>
           <element name="entity_relationship">
             <ref name="authority_attribute"/>
+            <attribute name="certainty"/>
             <attribute name="domain_entity">
               <data type="IDREF"/>
             </attribute>

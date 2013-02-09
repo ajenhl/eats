@@ -15,6 +15,37 @@ class PropertyAssertion (object):
             types=self.eats_topic_map.authority_type)[0]
         return Authority.objects.get_by_identifier(topic.get_id())
 
+    @property
+    def certainty (self):
+        """Returns the certainty for this property assertion.
+
+        :rtype: `Topic`
+
+        """
+        if getattr(self, '_certainty', None) is None:
+            for theme in self.scoping_topics:
+                if self.eats_topic_map.property_assertion_certainty_type in \
+                        theme.get_types():
+                    self._certainty = theme
+                    break
+            else:
+                self._certainty = None
+        return self._certainty
+
+    @certainty.setter
+    def certainty (self, certainty):
+        """Sets the certainty for this property assertion.
+
+        :param certainty: the certainty to be set
+        :type certainty: `Topic`
+
+        """
+        if self.certainty is not None:
+            self.remove_theme(self.certainty)
+        self.add_theme(certainty)
+        self._certainty = certainty
+        self._scoping_topics = None
+
     def create_date (self, data):
         """Creates a new date associated with this property assertion."""
         date = self.eats_topic_map.create_topic(proxy=Date)
@@ -97,6 +128,12 @@ class PropertyAssertion (object):
             self.add_theme(self.eats_topic_map.is_preferred)
         else:
             self.remove_theme(self.eats_topic_map.is_preferred)
+
+    @property
+    def scoping_topics (self):
+        if getattr(self, '_scoping_topics', None) is None:
+            self._scoping_topics = self.get_scope()
+        return self._scoping_topics
 
     def set_players (self, entity, property):
         raise NotImplementedError

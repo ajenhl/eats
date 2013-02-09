@@ -613,9 +613,12 @@ class EATSMLImporter (EATSMLHandler):
                 element, 'entity_relationship_type', 'entity_relationship_type')
             range_entity = self._get_mapped_object(element, 'range_entity',
                                                    'entity')
+            certainty = self._topic_map.property_assertion_no_certainty
+            if element.get('certainty') == 'full':
+                certainty = self._topic_map.property_assertion_full_certainty
             assertion = entity.create_entity_relationship_property_assertion(
                 authority, entity_relationship_type, domain_entity,
-                range_entity)
+                range_entity, certainty)
             element.set('eats_id', str(assertion.get_id()))
             self._import_dates(element, assertion)
 

@@ -60,7 +60,7 @@ class DateAddViewTestCase (ViewTestCase):
         response = self.app.get(url, user='user')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'eats/edit/date_add.html')
-        
+
     def test_valid_post_request_continue (self):
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]

@@ -72,6 +72,12 @@ NOTE_ASSERTION_TYPE_IRI = EATS_BASE_IRI + 'note/'
 POINT_DATE_TYPE_IRI = EATS_BASE_IRI + 'point_date/'
 POINT_TAQ_DATE_TYPE_IRI = EATS_BASE_IRI + 'point_terminus_ante_quem_date/'
 POINT_TPQ_DATE_TYPE_IRI = EATS_BASE_IRI + 'point_terminus_post_quem_date/'
+PROPERTY_ASSERTION_CERTAINTY_TYPE_IRI = EATS_BASE_IRI + \
+    'property_assertion_certainty/'
+PROPERTY_ASSERTION_FULL_CERTAINTY_IRI = EATS_BASE_IRI + \
+    'property_assertion_certain/'
+PROPERTY_ASSERTION_NO_CERTAINTY_IRI = EATS_BASE_IRI + \
+    'property_assertion_uncertain/'
 PROPERTY_ROLE_TYPE_IRI = EATS_BASE_IRI + 'property_role/'
 RANGE_ENTITY_ROLE_TYPE_IRI = EATS_BASE_IRI + 'range_entity_role/'
 RELATIONSHIP_NAME_TYPE_IRI = EATS_BASE_IRI + 'relationship_name/'

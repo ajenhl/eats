@@ -22,13 +22,15 @@ class EntityRelationshipTestCase (ModelTestCase):
         self.assertEqual(0, len(self.entity2.get_entity_relationships()))
         assertion = self.entity.create_entity_relationship_property_assertion(
             self.authority, self.entity_relationship_type, self.entity,
-            self.entity2)
+            self.entity2, self.tm.property_assertion_full_certainty)
         self.assertEqual(1, len(self.entity.get_entity_relationships()))
         self.assertEqual(1, len(self.entity2.get_entity_relationships()))
         self.assertEqual(assertion.domain_entity, self.entity)
         self.assertEqual(assertion.range_entity, self.entity2)
         self.assertEqual(assertion.entity_relationship_type,
                          self.entity_relationship_type)
+        self.assertEqual(assertion.certainty,
+                         self.tm.property_assertion_full_certainty)
         fetched_assertion = self.entity.get_entity_relationships()[0]
         self.assertEqual(assertion, fetched_assertion)
 
@@ -39,7 +41,7 @@ class EntityRelationshipTestCase (ModelTestCase):
             EATSValidationException,
             self.entity.create_entity_relationship_property_assertion,
             self.authority, self.entity_relationship_type, self.entity2,
-            self.entity2)
+            self.entity2, self.tm.property_assertion_no_certainty)
         # The entity relationship type must be associated with the
         # authority making the assertion.
         entity_relationship_type = self.create_entity_relationship_type(
@@ -47,7 +49,8 @@ class EntityRelationshipTestCase (ModelTestCase):
         self.assertRaises(
             EATSValidationException,
             self.entity.create_entity_relationship_property_assertion,
-            self.authority, entity_relationship_type, self.entity, self.entity2)
+            self.authority, entity_relationship_type, self.entity, self.entity2,
+            self.tm.property_assertion_no_certainty)
 
     def test_delete_entity_relationship_property_assertion (self):
         # Test that both forward and reverse relationships are picked
@@ -58,13 +61,13 @@ class EntityRelationshipTestCase (ModelTestCase):
         self.assertEqual(0, len(self.entity3.get_entity_relationships()))
         assertion1 = self.entity.create_entity_relationship_property_assertion(
             self.authority, self.entity_relationship_type, self.entity,
-            self.entity2)
+            self.entity2, self.tm.property_assertion_no_certainty)
         self.assertEqual(1, len(self.entity.get_entity_relationships()))
         self.assertEqual(1, len(self.entity2.get_entity_relationships()))
         self.assertEqual(0, len(self.entity3.get_entity_relationships()))
         assertion2 = self.entity.create_entity_relationship_property_assertion(
             self.authority, self.entity_relationship_type2, self.entity,
-            self.entity3)
+            self.entity3, self.tm.property_assertion_full_certainty)
         self.assertEqual(2, len(self.entity.get_entity_relationships()))
         self.assertEqual(1, len(self.entity2.get_entity_relationships()))
         self.assertEqual(1, len(self.entity3.get_entity_relationships()))
@@ -82,7 +85,7 @@ class EntityRelationshipTestCase (ModelTestCase):
     def test_update_entity_relationship_property_assertion (self):
         assertion = self.entity.create_entity_relationship_property_assertion(
             self.authority, self.entity_relationship_type, self.entity,
-            self.entity2)
+            self.entity2, self.tm.property_assertion_full_certainty)
         self.assertEqual(1, len(self.entity.get_entity_relationships()))
         self.assertEqual(1, len(self.entity2.get_entity_relationships()))
         self.assertEqual(0, len(self.entity3.get_entity_relationships()))
@@ -90,8 +93,10 @@ class EntityRelationshipTestCase (ModelTestCase):
         self.assertEqual(assertion.range_entity, self.entity2)
         self.assertEqual(assertion.entity_relationship_type,
                          self.entity_relationship_type)
+        self.assertEqual(assertion.certainty,
+                         self.tm.property_assertion_full_certainty)
         assertion.update(self.entity_relationship_type2, self.entity3,
-                         self.entity)
+                         self.entity, self.tm.property_assertion_no_certainty)
         self.assertEqual(1, len(self.entity.get_entity_relationships()))
         self.assertEqual(0, len(self.entity2.get_entity_relationships()))
         self.assertEqual(1, len(self.entity3.get_entity_relationships()))
@@ -99,58 +104,73 @@ class EntityRelationshipTestCase (ModelTestCase):
         self.assertEqual(assertion.range_entity, self.entity)
         self.assertEqual(assertion.entity_relationship_type,
                          self.entity_relationship_type2)
+        self.assertEqual(assertion.certainty,
+                         self.tm.property_assertion_no_certainty)
 
     def test_illegal_update_entity_relationship_property_assertion (self):
         assertion = self.entity.create_entity_relationship_property_assertion(
             self.authority, self.entity_relationship_type, self.entity,
-            self.entity2)
+            self.entity2, self.tm.property_assertion_full_certainty)
         entity4 = self.tm.create_entity(self.authority)
         self.assertRaises(EATSValidationException, assertion.update,
                           self.entity_relationship_type2, self.entity3,
-                          entity4)
+                          entity4, self.tm.property_assertion_full_certainty)
         # The entity relationship type must be associated with the
         # authority making the assertion.
         entity_relationship_type = self.create_entity_relationship_type(
             'is related to', 'is related to')
         self.assertRaises(EATSValidationException, assertion.update,
-            entity_relationship_type, self.entity, self.entity2)
+                          entity_relationship_type, self.entity, self.entity2,
+                          self.tm.property_assertion_full_certainty)
 
     def test_relationship_cache(self):
-        cache = EntityRelationshipCache.objects.filter(domain_entity=self.entity)
+        cache = EntityRelationshipCache.objects.filter(
+            domain_entity=self.entity)
         self.assertEqual(0, cache.count())
 
         assertion = self.entity.create_entity_relationship_property_assertion(
             self.authority, self.entity_relationship_type, self.entity,
-            self.entity2)
-        cache = EntityRelationshipCache.objects.filter(domain_entity=self.entity)
+            self.entity2, self.tm.property_assertion_full_certainty)
+        cache = EntityRelationshipCache.objects.filter(
+            domain_entity=self.entity)
         self.assertEqual(1, cache.count())
         self.assertEqual(self.entity, cache[0].domain_entity)
         self.assertEqual(self.entity2, cache[0].range_entity)
         self.assertEqual(self.entity_relationship_type,
                          cache[0].relationship_type)
+        self.assertEqual(self.tm.property_assertion_full_certainty,
+                         cache[0].certainty)
 
-        cache = EntityRelationshipCache.objects.filter(range_entity=self.entity2)
+        cache = EntityRelationshipCache.objects.filter(
+            range_entity=self.entity2)
         self.assertEqual(1, cache.count())
         self.assertEqual(self.entity, cache[0].domain_entity)
         self.assertEqual(self.entity2, cache[0].range_entity)
         self.assertEqual(self.entity_relationship_type,
                          cache[0].relationship_type)
+        self.assertEqual(self.tm.property_assertion_full_certainty,
+                         cache[0].certainty)
 
         assertion.update(self.entity_relationship_type2, self.entity,
-                         self.entity3)
-        cache = EntityRelationshipCache.objects.filter(domain_entity=self.entity)
+                         self.entity3, self.tm.property_assertion_no_certainty)
+        cache = EntityRelationshipCache.objects.filter(
+            domain_entity=self.entity)
         self.assertEqual(1, cache.count())
         self.assertEqual(self.entity, cache[0].domain_entity)
         self.assertEqual(self.entity3, cache[0].range_entity)
         self.assertEqual(self.entity_relationship_type2,
                          cache[0].relationship_type)
+        self.assertEqual(self.tm.property_assertion_no_certainty,
+                         cache[0].certainty)
 
         assertion2 = self.entity.create_entity_relationship_property_assertion(
             self.authority, self.entity_relationship_type, self.entity,
-            self.entity2)
-        cache = EntityRelationshipCache.objects.filter(domain_entity=self.entity)
+            self.entity2, self.tm.property_assertion_full_certainty)
+        cache = EntityRelationshipCache.objects.filter(
+            domain_entity=self.entity)
         self.assertEqual(2, cache.count())
 
         assertion2.remove()
-        cache = EntityRelationshipCache.objects.filter(domain_entity=self.entity)
+        cache = EntityRelationshipCache.objects.filter(
+            domain_entity=self.entity)
         self.assertEqual(1, cache.count())

@@ -276,6 +276,7 @@ $(document).ready(function() {
           <th scope="col">Delete?</th>
           <th scope="col">Relationship</th>
           <th scope="col">Related entity</th>
+          <th scope="col">Certain?</th>
           <th scope="col">Dates</th>
         </tr>
       </thead>
@@ -293,6 +294,12 @@ $(document).ready(function() {
             <div>{{ form.related_entity }} {% if form.instance %}[<a href="{% url entity-view form.related_entity.value %}">view record</a>]{% endif %}</div>
             {% if form.errors.related_entity %}
             <div class="errors">{{ form.errors.related_entity }}</div>
+            {% endif %}
+          </td>
+          <td>
+            <div>{{ form.certainty }}</div>
+            {% if form.errors.certainty %}
+            <div class="errors">{{ form.errors.certainty }}</div>
             {% endif %}
           </td>
           <td>{% if form.instance %}{% with dates=form.instance.get_dates %}{% if dates %}<ul>

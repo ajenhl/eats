@@ -290,7 +290,8 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         authority.set_entity_relationship_types([relationship_type])
         other = self.tm.create_entity()
         assertion = entity.create_entity_relationship_property_assertion(
-            authority, relationship_type, entity, other)
+            authority, relationship_type, entity, other,
+            self.tm.property_assertion_full_certainty)
         export = self.exporter.export_entities([entity])
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
@@ -311,7 +312,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
   <entities>
     <entity xml:id="entity-%(entity)d" eats_id="%(entity)d" url="%(entity_url)s">
       <entity_relationships>
-        <entity_relationship authority="authority-%(authority)d" eats_id="%(assertion)d" entity_relationship_type="entity_relationship_type-%(relationship_type)d" domain_entity="entity-%(entity)d" range_entity="entity-%(other)d"/>
+        <entity_relationship authority="authority-%(authority)d" certainty="full" eats_id="%(assertion)d" entity_relationship_type="entity_relationship_type-%(relationship_type)d" domain_entity="entity-%(entity)d" range_entity="entity-%(other)d"/>
       </entity_relationships>
     </entity>
     <entity xml:id="entity-%(other)d" eats_id="%(other)d" related_entity="true" url="%(other_url)s"></entity>
