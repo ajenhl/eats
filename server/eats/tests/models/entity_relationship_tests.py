@@ -138,8 +138,6 @@ class EntityRelationshipTestCase (ModelTestCase):
         self.assertEqual(self.entity2, cache[0].range_entity)
         self.assertEqual(self.entity_relationship_type,
                          cache[0].relationship_type)
-        self.assertEqual(self.tm.property_assertion_full_certainty,
-                         cache[0].certainty)
 
         cache = EntityRelationshipCache.objects.filter(
             range_entity=self.entity2)
@@ -148,8 +146,6 @@ class EntityRelationshipTestCase (ModelTestCase):
         self.assertEqual(self.entity2, cache[0].range_entity)
         self.assertEqual(self.entity_relationship_type,
                          cache[0].relationship_type)
-        self.assertEqual(self.tm.property_assertion_full_certainty,
-                         cache[0].certainty)
 
         assertion.update(self.entity_relationship_type2, self.entity,
                          self.entity3, self.tm.property_assertion_no_certainty)
@@ -160,8 +156,6 @@ class EntityRelationshipTestCase (ModelTestCase):
         self.assertEqual(self.entity3, cache[0].range_entity)
         self.assertEqual(self.entity_relationship_type2,
                          cache[0].relationship_type)
-        self.assertEqual(self.tm.property_assertion_no_certainty,
-                         cache[0].certainty)
 
         assertion2 = self.entity.create_entity_relationship_property_assertion(
             self.authority, self.entity_relationship_type, self.entity,

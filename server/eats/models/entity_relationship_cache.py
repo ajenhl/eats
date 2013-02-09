@@ -1,7 +1,5 @@
 from django.db import models
 
-from tmapi.models import Topic
-
 
 class EntityRelationshipCache(models.Model):
     """Model providing a "cache" of entity relationships, shortcutting the
@@ -20,7 +18,6 @@ class EntityRelationshipCache(models.Model):
                                      related_name='range_relationships')
     relationship_type = models.ForeignKey('EntityRelationshipType',
                                           related_name='cached_relationships')
-    certainty = models.ForeignKey(Topic)
     forward_relationship_name = models.TextField()
     reverse_relationship_name = models.TextField()
 

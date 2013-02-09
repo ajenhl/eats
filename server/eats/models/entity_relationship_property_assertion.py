@@ -39,7 +39,7 @@ class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
         app_label = 'eats'
 
     def _add_relationship_cache(self, relationship_type, domain_entity,
-                                range_entity, certainty):
+                                range_entity):
         """Adds this relationship to the relationships cache."""
         forward_name = relationship_type.get_admin_forward_name()
         reverse_name = relationship_type.get_admin_reverse_name()
@@ -49,8 +49,7 @@ class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
             range_entity=range_entity,
             relationship_type=relationship_type,
             forward_relationship_name=forward_name,
-            reverse_relationship_name=reverse_name,
-            certainty=certainty)
+            reverse_relationship_name=reverse_name)
         cached_relationship.save()
         self._cached_erpa = cached_relationship
 
@@ -144,14 +143,14 @@ class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
         self.create_role(self.eats_topic_map.entity_relationship_type_role_type,
                          relationship_type)
         self.update_relationship_cache(relationship_type, domain_entity,
-                                       range_entity, self.certainty)
+                                       range_entity)
 
     def update_relationship_cache(self, relationship_type, domain_entity,
-                                  range_entity, certainty):
+                                  range_entity):
        """Updates the relationship cache for this relationship."""
        self._delete_relationship_cache()
        self._add_relationship_cache(relationship_type, domain_entity,
-                                    range_entity, certainty)
+                                    range_entity)
 
     @transaction.commit_on_success
     def update (self, relationship_type, domain_entity,
@@ -188,4 +187,4 @@ class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
             range_role.set_player(range_entity)
         self.certainty = certainty
         self.update_relationship_cache(relationship_type, domain_entity,
-                                       range_entity, certainty)
+                                       range_entity)
