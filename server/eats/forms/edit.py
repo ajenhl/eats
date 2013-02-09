@@ -4,7 +4,7 @@ from django.forms.formsets import formset_factory, BaseFormSet
 import selectable.forms as selectable
 
 from eats.constants import FORWARD_RELATIONSHIP_MARKER, \
-    REVERSE_RELATIONSHIP_MARKER
+    REVERSE_RELATIONSHIP_MARKER, UNNAMED_ENTITY_NAME
 from eats.lookups import EntityLookup
 from eats.models import Calendar, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NamePart, NamePartType, NameType, Script
 
@@ -42,7 +42,7 @@ class PropertyAssertionFormSet (BaseFormSet):
         if not hasattr(self, '_object_dict'):
             self._object_dict = dict([(o.get_id(), o) for o in self.instances])
         return self._object_dict.get(id)
-    
+
     def initial_form_count (self):
         """Returns the number of forms that are required in this FormSet."""
         if not self.data:
@@ -57,10 +57,10 @@ class PropertyAssertionFormSet (BaseFormSet):
 
     def save_new (self, form):
         return form.save()
-    
+
     def save_existing (self, form, assertion):
         return form.save()
-    
+
     def save_existing_assertions (self):
         if not self.instances:
             return []
@@ -84,7 +84,7 @@ class PropertyAssertionFormSet (BaseFormSet):
             if self.can_delete and self._should_delete_form(form):
                 continue
             self.new_objects.append(self.save_new(form))
-        return self.new_objects            
+        return self.new_objects
 
 
 class ExistenceAssertionFormSet (PropertyAssertionFormSet):
@@ -169,7 +169,7 @@ class NameAssertionFormSet (PropertyAssertionFormSet):
                 forms_valid = False
             if not form.name_part_formset.is_valid():
                 forms_valid = False
-        return forms_valid and not bool(self.non_form_errors())            
+        return forms_valid and not bool(self.non_form_errors())
 
     def save_existing_assertions (self):
         if not self.instances:
@@ -197,7 +197,7 @@ class NameAssertionFormSet (PropertyAssertionFormSet):
             assertion = self.save_new(form)
             self.new_objects.append(assertion)
             form.name_part_formset.save(assertion)
-        return self.new_objects            
+        return self.new_objects
 
 
 class NoteAssertionFormSet (PropertyAssertionFormSet):
@@ -255,7 +255,7 @@ class NamePartInlineFormSet (BaseFormSet):
             self._object_dict = dict([(o[0].get_id(), o)
                                       for o in self.instances])
         return self._object_dict.get(id)
-    
+
     def initial_form_count (self):
         """Returns the number of forms that are required in this FormSet."""
         if not self.data:
@@ -338,7 +338,7 @@ class PropertyAssertionForm (forms.Form):
 
         """
         return {'assertion': assertion.get_id()}
-        
+
     def _get_construct (self, name, proxy):
         """Returns the construct specified by `name`.
 
@@ -353,15 +353,15 @@ class PropertyAssertionForm (forms.Form):
         """
         identifier = self.cleaned_data[name]
         return proxy.objects.get_by_identifier(identifier)
-        
+
     def delete (self):
         """Deletes the assertion."""
         self.instance.remove()
 
     def save (self):
         raise NotImplementedError
-        
-        
+
+
 class ExistenceForm (PropertyAssertionForm):
 
     authority = forms.ChoiceField(choices=[])
@@ -378,7 +378,7 @@ class ExistenceForm (PropertyAssertionForm):
         data = super(ExistenceForm, self)._assertion_to_dict(assertion)
         data['authority'] = assertion.authority.get_id()
         return data
-        
+
     def save (self):
         if self.instance is None:
             # Create a new assertion.
@@ -410,7 +410,7 @@ class EntityRelationshipForm (PropertyAssertionForm):
         data['relationship_type'] = relationship_id + direction_marker
         data['related_entity'] = related_entity.get_id()
         return data
-        
+
     def save (self):
         relationship_type_id = self.cleaned_data['relationship_type']
         relationship_type = EntityRelationshipType.objects.get_by_identifier(
@@ -447,7 +447,7 @@ class EntityTypeForm (PropertyAssertionForm):
         data = super(EntityTypeForm, self)._assertion_to_dict(assertion)
         data['entity_type'] = assertion.entity_type.get_id()
         return data
-        
+
     def save (self):
         entity_type = self._get_construct('entity_type', EntityType)
         if self.instance is None:
@@ -491,7 +491,7 @@ class NameForm (PropertyAssertionForm):
         # QAZ: Add check that we don't have a name part to add,
         # without this form either representing an existing name
         # instance or being valid to create one.
-        return cleaned_data        
+        return cleaned_data
 
     def save (self):
         name_type = self._get_construct('name_type', NameType)
@@ -520,7 +520,7 @@ class NoteForm (PropertyAssertionForm):
         data = super(NoteForm, self)._assertion_to_dict(assertion)
         data['note'] = assertion.note
         return data
-    
+
     def save (self):
         note = self.cleaned_data['note']
         if self.instance is None:
@@ -551,12 +551,12 @@ class SubjectIdentifierForm (PropertyAssertionForm):
                 try:
                     name_form = name.name.assembled_form
                 except AttributeError:
-                    name_form = '[unnamed entity]'
+                    name_form = UNNAMED_ENTITY_NAME
                 names.append(name_form)
             raise forms.ValidationError(
                 'This URL is also used by this authority to identify %s; either the URL is incorrect or these entities should be merged.' % (', '.join(names)))
         return subject_identifier
-    
+
     def save (self):
         subject_identifier = self.cleaned_data['subject_identifier']
         if self.instance is None:
@@ -622,7 +622,7 @@ class NamePartForm (forms.Form):
         """Deletes the name parts in this form."""
         for name_part in self.instance[1]:
             name_part.remove()
-            
+
     def _name_part_to_dict (self, name_parts):
         """Returns a dictionary containing the data in `name_parts`
         suitable for passing as a Form's `initial` keyword argument.
@@ -858,7 +858,7 @@ class DateForm (forms.Form):
                 else:
                     data[certainty_attr] = self.topic_map.date_no_certainty
         return data
-        
+
     def save (self, assertion=None):
         data = self._objectify_data(self.cleaned_data)
         date = self.instance
@@ -870,7 +870,7 @@ class DateForm (forms.Form):
             date.update(data)
         return date.get_id()
 
-        
+
 ExistenceFormSet = formset_factory(ExistenceForm, can_delete=True,
                                    formset=ExistenceAssertionFormSet)
 EntityRelationshipFormSet = formset_factory(

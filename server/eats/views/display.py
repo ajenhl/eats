@@ -6,6 +6,7 @@ from django.template import RequestContext
 
 from lxml import etree
 
+from eats.constants import UNNAMED_ENTITY_NAME
 from eats.decorators import add_topic_map
 from eats.forms.display import EntitySearchForm
 from eats.lib.eatsml_exporter import EATSMLExporter
@@ -28,9 +29,12 @@ def entity_view (request, entity_id):
     preferred_authority = user_preferences['preferred_authority']
     preferred_language = user_preferences['preferred_language']
     preferred_script = user_preferences['preferred_script']
-    preferred_name = entity.get_preferred_name(
-        authority=preferred_authority, language=preferred_language,
-        script=preferred_script).name
+    try:
+        preferred_name_form = entity.get_preferred_name(
+            authority=preferred_authority, language=preferred_language,
+            script=preferred_script).name.assembled_form
+    except AttributeError:
+        preferred_name_form = UNNAMED_ENTITY_NAME
     existence_dates = entity.get_existence_dates()
     entity_type_pas = entity.get_entity_types()
     name_pas = entity.get_eats_names()
@@ -40,7 +44,7 @@ def entity_view (request, entity_id):
     context_data = {'entity': entity,
                     'preferred_authority': preferred_authority,
                     'preferred_language': preferred_language,
-                    'preferred_name': preferred_name,
+                    'preferred_name_form': preferred_name_form,
                     'preferred_script': preferred_script,
                     'existence_dates': existence_dates,
                     'entity_type_pas': entity_type_pas, 'name_pas': name_pas,

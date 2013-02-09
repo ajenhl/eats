@@ -10,6 +10,7 @@ from django.template import RequestContext
 
 from lxml import etree
 
+from eats.constants import UNNAMED_ENTITY_NAME
 from eats.lib.eatsml_exporter import EATSMLExporter
 from eats.lib.eatsml_importer import EATSMLImporter
 from eats.lib.property_assertions import EntityRelationshipPropertyAssertions, EntityTypePropertyAssertions, ExistencePropertyAssertions, NamePropertyAssertions, NotePropertyAssertions, SubjectIdentifierPropertyAssertions
@@ -120,7 +121,7 @@ def entity_change (request, topic_map, entity_id):
     if preferred_name_assertion:
         context_data['preferred_name'] = preferred_name_assertion.name.assembled_form
     else:
-        context_data['preferred_name'] = '[unnamed entity]'
+        context_data['preferred_name'] = UNNAMED_ENTITY_NAME
     return render_to_response('eats/edit/entity_change.html', context_data,
                               context_instance=RequestContext(request))
 

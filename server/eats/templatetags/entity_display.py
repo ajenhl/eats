@@ -3,6 +3,8 @@ preferences."""
 
 from django import template
 
+from eats.constants import UNNAMED_ENTITY_NAME
+
 
 register = template.Library()
 
@@ -22,7 +24,7 @@ def display_duplicate_subject_identifiers (context, entity, subject_identifier,
         try:
             preferred_name_form = preferred_name.name.assembled_form
         except AttributeError:
-            preferred_name_form = '[unnamed entity]'
+            preferred_name_form = UNNAMED_ENTITY_NAME
         duplicate_entity_data[duplicate_entity.get_id()] = preferred_name_form
     return {'duplicate_entity_data': duplicate_entity_data}
 
@@ -48,13 +50,16 @@ def display_entity_relationship_property_assertion (context, entity,
     else:
         relationship_type_name = entity_relationship.get_relationship_type_reverse_name()
         other_entity = domain_entity
-    other_entity_name = other_entity.get_preferred_name(
-        authority=context['preferred_authority'],
-        language=context['preferred_language'],
-        script=context['preferred_script'])
+    try:
+        other_entity_name_form = other_entity.get_preferred_name(
+            authority=context['preferred_authority'],
+            language=context['preferred_language'],
+            script=context['preferred_script']).name.assembled_form
+    except AttributeError:
+        other_entity_name_form = UNNAMED_ENTITY_NAME
     other_entity_id = other_entity.get_id()
     return {'other_entity_id': other_entity_id,
-            'other_entity_name': other_entity_name.name,
+            'other_entity_name_form': other_entity_name_form,
             'relationship_type_name': relationship_type_name}
 
 @register.inclusion_tag('eats/display/entity_search_result.html',
@@ -73,6 +78,10 @@ def display_entity_search_result (context, entity):
     preferred_name = entity.get_preferred_name(
         preferred_authority, preferred_language, preferred_script)
     other_names = entity.get_eats_names(exclude=preferred_name)
+    try:
+        preferred_name_form = preferred_name.name.assembled_form
+    except AttributeError:
+        preferred_name_form = UNNAMED_ENTITY_NAME
     other_name_values = set()
     for name in other_names:
         other_name_values.add(name.name.assembled_form)
@@ -90,7 +99,7 @@ def display_entity_search_result (context, entity):
             'other_names': other_name_values,
             'preferred_authority': preferred_authority,
             'preferred_language': preferred_language,
-            'preferred_name': preferred_name.name.assembled_form,
+            'preferred_name_form': preferred_name_form,
             'preferred_script': preferred_script}
 
 @register.inclusion_tag('eats/display/name_metadata.html')
