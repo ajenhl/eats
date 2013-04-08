@@ -19,18 +19,18 @@ class EntityLookup (LookupBase):
         return item.get_id()
 
     def get_item_label (self, item):
-        try:
-            name_assertion = item.get_eats_names()[0]
+        name_assertion = item.get_preferred_name(None, None, None)
+        if name_assertion:
             label = name_assertion.name.assembled_form
-        except IndexError:
+        else:
             label = UNNAMED_ENTITY_NAME
         return label
 
     def get_item_value (self, item):
-        try:
-            name_assertion = item.get_eats_names()[0]
+        name_assertion = item.get_preferred_name(None, None, None)
+        if name_assertion:
             label = name_assertion.name.assembled_form
-        except IndexError:
+        else:
             label = UNNAMED_ENTITY_NAME
         return label
 
