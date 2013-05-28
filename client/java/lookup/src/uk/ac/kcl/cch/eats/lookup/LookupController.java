@@ -712,7 +712,13 @@ public class LookupController implements ActionListener, DocumentListener,
 				List<EntityType> etList = EatsMlUtils.getAuthorityEntityTypes(entity, authority);
 
 				if (etList != null) {
-					data[ENTITY_TYPE_COLUMN] = etList.get(0).getName();
+					// there may be more than one entity type, so display each of them
+					StringBuilder sb = new StringBuilder();
+					for (EntityType et : etList) {
+						sb.append(et.getName());
+						sb.append(" ");
+					}
+					data[ENTITY_TYPE_COLUMN] = sb.toString().trim();
 				}
 
 				model.addRow(data);
