@@ -5,3 +5,4 @@
 client/java/*/bin
 client/java/*/build
 client/java/*/dist
+docs/build
