@@ -291,7 +291,7 @@ $(document).ready(function() {
             {% endif %}
           </td>
           <td>
-            <div>{{ form.related_entity }} {% if form.instance %}[<a href="{% url entity-view form.related_entity.value %}">view record</a>]{% endif %}</div>
+            <div>{{ form.related_entity }} {% if form.instance %}[<a href="{% url 'entity-view' form.related_entity.value %}">view record</a>]{% endif %}</div>
             {% if form.errors.related_entity %}
             <div class="errors">{{ form.errors.related_entity }}</div>
             {% endif %}

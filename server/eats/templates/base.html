@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>{% block title %}{% endblock title %}</title>
+    {% block metadata %}{% endblock metadata %}
+    {% block style %}{% endblock style %}
+    {% block js %}{% endblock js %}
+  </head>
+  <body>
+    {% block header %}
+    {% endblock header %}
+    <div id="search" style="float: right; width: 20em">
+      <form method="get" action="{% url 'search' %}">
+        <div><input type="text" name="name" value="" id="id_name" />
+        <input type="submit" name="search" value="Search"/>
+        </div>
+      </form>
+    </div>
+    <div id="content">
+      {% block content %}
+      {% endblock content %}
+    </div>
+  </body>
+</html>

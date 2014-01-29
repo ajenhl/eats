@@ -9,9 +9,7 @@ applications, `django-tmapi`_ and `django-selectable`_, and the Python
 XML library `lxml`_. It also uses `django-webtest`_ for its view
 tests.
 
-EATS works with Django versions 1.4 and later (the only issue with
-Django 1.3 is with pagination, and requires a single line change in
-``views/display.py``).
+EATS works with Django versions 1.5 and later.
 
 Project settings
 ----------------

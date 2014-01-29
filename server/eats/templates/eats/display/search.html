@@ -7,9 +7,8 @@
 <h1>Search entities</h1>
 
 <form method="get" action="">
-  <div>{{ search_form.name }}
-  <input type="submit" name="search" value="Search"/>
-  </div>
+{{ search_form.as_p }}
+<input type="submit" name="search" value="Search"/>
 </form>
 
 {% if search_results %}
@@ -42,7 +41,7 @@
 {% endif %}
 
 {% if user_is_editor %}
-<p><a href="{% url entity-add %}">Create a new entity.</a></p>
+<p><a href="{% url 'entity-add' %}">Create a new entity.</a></p>
 {% endif %}
 
 {% endblock eats_content %}

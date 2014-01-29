@@ -1,7 +1,7 @@
 {% if duplicate_entity_data %}
 <ul>
   {% for duplicate_entity_id, preferred_name in duplicate_entity_data.items %}
-  <li><a href="{% url entity-view duplicate_entity_id %}">{{ preferred_name }}</a> has the same subject identifier and may be a duplicate</li>
+  <li><a href="{% url 'entity-view' duplicate_entity_id %}">{{ preferred_name }}</a> has the same subject identifier and may be a duplicate</li>
   {% endfor %}
 </ul>
 {% endif %}
