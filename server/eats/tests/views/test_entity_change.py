@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse
 
 from eats.constants import FORWARD_RELATIONSHIP_MARKER, \
     REVERSE_RELATIONSHIP_MARKER
+from eats.models import Name, NamePart
 from eats.tests.views.view_test_case import ViewTestCase
 
 
@@ -313,6 +314,34 @@ class EntityChangeViewTestCase (ViewTestCase):
         self.assertEqual(form_data['display_form'], 'Isaac Fuller')
         self.assertEqual(form_data['display_form'], name.display_form)
         self.assertEqual(form_data['is_preferred'], assertion.is_preferred)
+
+    def test_post_name_parts (self):
+        entity = self.tm.create_entity(self.authority)
+        name_type = self.create_name_type('regular')
+        language = self.create_language('English', 'en')
+        script = self.create_script('Latin', 'Latn', ' ')
+        name_part_type = self.create_name_part_type('given')
+        self.authority.set_name_types([name_type])
+        self.authority.set_languages([language])
+        self.authority.set_scripts([script])
+        self.authority.set_name_part_types([name_part_type])
+        self.assertEqual(Name.objects.count(), 0)
+        self.assertEqual(NamePart.objects.count(), 0)
+        # Not specifying a name part type should cause the creation of
+        # both the name and name part to fail.
+        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['names-0-name_type'] = name_type.get_id()
+        form['names-0-language'] = language.get_id()
+        form['names-0-script'] = script.get_id()
+        form['names-0-name_parts-0-name_part_display_form-0'] = 'Carl'
+        form.submit('_save')
+        self.assertEqual(Name.objects.count(), 0)
+        self.assertEqual(NamePart.objects.count(), 0)
+        form['names-0-name_parts-0-name_part_type'] = name_part_type.get_id()
+        form.submit('_save')
+        self.assertEqual(Name.objects.count(), 1)
+        self.assertEqual(NamePart.objects.count(), 1)
 
     def test_post_notes (self):
         entity = self.tm.create_entity(self.authority)

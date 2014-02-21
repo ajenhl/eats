@@ -153,20 +153,22 @@ class NameAssertionFormSet (PropertyAssertionFormSet):
         return form
 
     def is_valid (self):
-        """Returns True if form.errors is empty for every form in
-        self.forms and if each form's name part formset is valid."""
+        """Returns True if every form in self.forms is valid and if each
+        form's name part formset is valid."""
         if not self.is_bound:
             return False
         forms_valid = True
         for i in range(0, self.total_form_count()):
             form = self.forms[i]
+            # is_valid is called now so that cleaned_data exists when
+            # checked in _should_delete_form.
+            is_valid = form.is_valid()
             if self.can_delete:
                 if self._should_delete_form(form):
                     # This form is going to be deleted so any of its errors
                     # should not cause the entire formset to be invalid.
                     continue
-            if bool(self.errors[i]):
-                forms_valid = False
+            forms_valid &= is_valid
             if not form.name_part_formset.is_valid():
                 forms_valid = False
         return forms_valid and not bool(self.non_form_errors())

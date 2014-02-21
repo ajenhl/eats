@@ -234,10 +234,15 @@ $(document).ready(function() {
               {% for part_form in form.name_part_formset %}
               <tr>
                 <td>{% if part_form.instance %}{{ part_form.DELETE }}{% endif %}</td>
-                <td>{{ part_form.name_part_type }}</td>
+                <td>{{ part_form.name_part_type }}
+                {% if part_form.errors.name_part_type %}
+                <div class="errors">{{ part_form.errors.name_part_type }}</div>
+                {% endif %}
+                </td>
                 {% for id, display_form, language, script in part_form.name_part_fieldsets %}
                 <td>{{ id }}{{ display_form }}<span class="npls-toggle">+</span><div class="npls-toggled">Language: {{ language }}<br/>Script: {{ script }}</div></td>
                 {% endfor %}
+                <td class="errors">{{ part_form.non_field_errors }}</td>
               </tr>
               {% endfor %}
             </table>
