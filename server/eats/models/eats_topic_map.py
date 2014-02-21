@@ -540,7 +540,7 @@ class EATSTopicMap (TopicMap):
         return self.create_topic_by_subject_identifier(Locator(
                 LANGUAGE_TYPE_IRI), '_language_type')
 
-    def lookup_entities (self, query):
+    def lookup_entities (self, query, entity_type=None):
         names = query.split()
         queries = []
         for name in names:
@@ -548,7 +548,11 @@ class EATSTopicMap (TopicMap):
             queries.append(query)
         sets = []
         for query in queries:
-            sets.append(set(Entity.objects.filter(query)))
+            if entity_type:
+                results = Entity.objects.filter_by_entity_type(entity_type)
+            else:
+                results = Entity.objects.all()
+            sets.append(set(results.filter(query)))
         if len(sets) == 0:
             intersected_set = set()
         else:

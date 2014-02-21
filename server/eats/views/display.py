@@ -11,7 +11,7 @@ from eats.decorators import add_topic_map
 from eats.forms.display import EntitySearchForm
 from eats.lib.eatsml_exporter import EATSMLExporter
 from eats.lib.user import get_user_preferences, user_is_editor
-from eats.models import Entity
+from eats.models import Entity, EntityType
 
 
 def home (request):
@@ -71,12 +71,18 @@ def entity_eatsml_view (request, topic_map, entity_id):
 @add_topic_map
 def search (request, topic_map):
     form_data = request.GET or None
-    form = EntitySearchForm(data=form_data)
+    entity_types = EntityType.objects.all()
+    form = EntitySearchForm(topic_map, data=form_data,
+                            entity_types=entity_types)
     results = []
     user_preferences = {}
     if form.is_valid():
         name = form.cleaned_data['name']
-        results_list = topic_map.lookup_entities(name)
+        entity_type_id = form.cleaned_data['entity_type']
+        entity_type = None
+        if entity_type_id:
+            entity_type = EntityType.objects.get_by_identifier(entity_type_id)
+        results_list = topic_map.lookup_entities(name, entity_type)
         paginator = Paginator(results_list, 10)
         page = request.GET.get('page')
         try:

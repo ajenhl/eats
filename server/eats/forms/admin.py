@@ -1,7 +1,7 @@
 from django import forms
 
 from eats.models import Calendar, DatePeriod, DateType, EATSUser, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
-from eats.views.edit import create_choice_list
+from eats.forms.edit import create_choice_list
 
 
 class AdminForm (forms.Form):
