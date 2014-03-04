@@ -1,0 +1,47 @@
+{% extends "eats/edit/base.html" %}
+
+{% block eats_style %}{{ block.super }}
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/themes/ui-lightness/jquery-ui.css" type="text/css" media="screen"/>
+{{ form.media.css }}
+{% endblock eats_style %}
+
+{% block eats_js %}{{ block.super }}
+<script type="application/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
+<script type="application/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/jquery-ui.min.js"></script>
+{{ form.media.js }}
+<script type="application/javascript">
+/* Prevent autoescaping of text in autocomplete. Code from http://www.arctickiwi.com/blog/jquery-autocomplete-labels-escape-html-tags */
+$[ "ui" ][ "autocomplete" ].prototype["_renderItem"] = function( ul, item) {
+return $( "<li></li>" )
+  .data( "item.autocomplete", item )
+  .append( $( "<a></a>" ).html( item.label ) )
+  .appendTo( ul );
+};
+</script>
+{% endblock eats_js %}
+
+{% block eats_content %}
+<h1>Merge entities</h1>
+
+<p>Select an entity to merge into the current entity. All of the
+property assertions of the selected entity are added to the current
+entity.</p>
+
+{% if unauthorised %}
+<p class="error">The entity you tried to merge has property assertions
+by an authority that you are not an editor for, and therefore no merging
+has been done.</p>
+{% endif %}
+
+<form action="" id="entity-merge-form" method="post">
+  {% csrf_token %}
+  <table>
+    {{ form }}
+    <tr>
+      <td></td>
+      <td><input type="submit" value="Merge" /></td>
+    </tr>
+  </table>
+</form>
+
+{% endblock eats_content %}

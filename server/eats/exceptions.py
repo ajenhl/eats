@@ -19,11 +19,22 @@ class EATSImportException (EATSException):
     pass
 
 
+class EATSMergedIdentifierException (EATSException):
+
+    """Exception raised when an entity identifier that no longer exists
+    due to merging is used.
+
+    """
+
+    def __init__ (self, new_id):
+        self.new_id = new_id
+
+
 class EATSMLException (EATSException):
 
     """Exception raised when there is a problem with an EATSML
     document."""
-    
+
     pass
 
 

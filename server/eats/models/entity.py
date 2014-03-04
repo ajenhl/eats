@@ -1,6 +1,9 @@
+from django.core.urlresolvers import NoReverseMatch
+
 from tmapi.models import Association, Topic
 
-from eats.exceptions import EATSValidationException
+from eats.exceptions import EATSMergedIdentifierException, \
+    EATSValidationException
 
 from base_manager import BaseManager
 from date import Date
@@ -49,6 +52,40 @@ class EntityManager (BaseManager):
             roles__association__type=assertion_type,
             roles__association__roles__type=role_type,
             roles__association__roles__player=entity_type)
+
+    def get_by_identifier (self, identifier):
+        # This method actually retrieves by Subject Identifier (based
+        # on the identifier) and raises an exception if the entity's
+        # identifier does not match that used in that derived Subject
+        # Identifier. This is to allow for redirecting to the correct
+        # URL in the case where an entity has been merged with
+        # another, and the identifier supplied is that of the merged
+        # entity.
+        if identifier is None:
+            raise Entity.DoesNotExist
+        try:
+            entity_si = self.eats_topic_map.get_entity_subject_identifier(
+                identifier)
+        except NoReverseMatch:
+            # If the supplied identifier does not fit the required
+            # format as defined in the URL conf.
+            raise Entity.DoesNotExist
+        topic = self.eats_topic_map.get_topic_by_subject_identifier(entity_si)
+        if topic is None:
+            raise Entity.DoesNotExist
+        # get_topic_by_subject_identifier returns a tmapi.Topic. It
+        # needs to be checked whether this is an Entity, and if so to
+        # return the corresponding Entity object. Unfortunately,
+        # without bypassing the TMAPI API, this requires more database
+        # lookups.
+        topic_id = topic.get_id()
+        entity = super(EntityManager, self).get_by_identifier(topic_id)
+        if topic_id != int(identifier):
+            # Raise an exception, giving the 'correct' identifier for
+            # the entity. This allows for, eg, redirecting to the
+            # correct page for viewing/editing a merged entity.
+            raise EATSMergedIdentifierException(topic_id)
+        return entity
 
     def get_query_set (self):
         return super(EntityManager, self).get_query_set().filter(
@@ -281,20 +318,33 @@ class Entity (Topic):
         return names
 
     def get_eats_subject_identifier (self):
-        """Returns this entity's EATS subject identifier.
+        """Returns this entity's subject identifier (not a property assertion,
+        but the Topic's SI) that is formed from its id.
 
-        This is not a subject identifier property assertion, but
-        rather the EATS system's own SID for this entity.
-
-        :rtype: `Locator`
+        :rtype: `tmapi.SubjectIdentifier`
 
         """
-        # QAZ: Raise an exception if there is not a single SID.
-        #
-        # QAZ: Due to overridden get_subject_identifiers() method,
-        # access the subject identifiers directly - not nice to expose
-        # the DB layer in this way.
-        return self.subject_identifiers.all()[0]
+        locator_url = unicode(self.eats_topic_map.get_entity_subject_identifier(
+            self.get_id()))
+        # Check that this SI is actually associated with the entity.
+        eats_si = None
+        for si in self.get_subject_identifiers():
+            if si.get_reference() != locator_url:
+                continue
+            eats_si = si
+            break
+        if eats_si is None:
+            raise Exception
+        return eats_si
+
+    def get_eats_subject_identifiers (self):
+
+        """Returns this entity's subject identifier property assertions.
+
+        :rtype: `QuerySet` of `SubjectIdentifierPropertyAssertion`s
+
+        """
+        return SubjectIdentifierPropertyAssertion.objects.filter_by_entity(self)
 
     def get_entity_relationships (self):
         """Returns this entity's relationships to other entities.
@@ -361,19 +411,26 @@ class Entity (Topic):
         except NamePropertyAssertion.DoesNotExist:
             return None
 
-    def get_subject_identifiers (self):
-        """Returns this entity's subject identifier property assertions.
-
-        :rtype: `QuerySet` of `SubjectIdentifierPropertyAssertion`s
-
-        """
-        return SubjectIdentifierPropertyAssertion.objects.filter_by_entity(self)
+    def merge_in (self, other):
+        # Due to the caching involved in entity relationships, it is
+        # unfortunately necessary to move them manually before using
+        # the TMAPI merge functionality.
+        for er in other.get_entity_relationships():
+            domain_entity = er.domain_entity
+            if domain_entity == other:
+                domain_entity = self
+            range_entity = er.range_entity
+            if range_entity == other:
+                range_entity = self
+            er.update(er.entity_relationship_type, domain_entity, range_entity,
+                      er.certainty)
+        super(Entity, self).merge_in(other)
 
     def remove (self):
         """Removes this entity from the EATS Topic Map."""
         assertion_getters = [self.get_eats_names, self.get_entity_relationships,
                              self.get_entity_types, self.get_existences,
-                             self.get_subject_identifiers, self.get_notes]
+                             self.get_eats_subject_identifiers, self.get_notes]
         for assertion_getter in assertion_getters:
             for assertion in assertion_getter():
                 assertion.remove()

@@ -412,7 +412,7 @@ class EATSMLExporter (EATSMLHandler):
         :type parent: `Element`
 
         """
-        subject_identifiers = entity.get_subject_identifiers()
+        subject_identifiers = entity.get_eats_subject_identifiers()
         if subject_identifiers:
             subject_identifiers_element = etree.SubElement(
                 parent, EATS + 'subject_identifiers')

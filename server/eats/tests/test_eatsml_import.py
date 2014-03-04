@@ -365,7 +365,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
         self._compare_XML(import_tree, expected_xml)
 
     def test_import_authority (self):
-        self.assertEqual(Authority.objects.all().count(), 0)
+        self.assertEqual(Authority.objects.count(), 0)
         import_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
@@ -376,7 +376,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 </collection>
 '''
         annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
-        self.assertEqual(Authority.objects.all().count(), 1)
+        self.assertEqual(Authority.objects.count(), 1)
         authority = Authority.objects.all()[0]
         authority_name = authority.get_admin_name()
         self.assertEqual(authority_name, 'Test')
@@ -1329,7 +1329,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 </collection>''' % {'authority': authority.get_id()}
         annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
         entity = Entity.objects.all()[0]
-        assertion = entity.get_subject_identifiers()[0]
+        assertion = entity.get_eats_subject_identifiers()[0]
         self.assertEqual(assertion.subject_identifier,
                          'http://www.example.org/test/')
         self.assertEqual(assertion.authority, authority)

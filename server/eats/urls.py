@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 
 from eats.models import Authority, Calendar, DatePeriod, DateType, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
 
@@ -22,6 +22,8 @@ urlpatterns += patterns(
         name='entity-change'),
     url(r'^entity/(?P<entity_id>\d+)/delete/$', 'entity_delete',
         name='entity-delete'),
+    url(r'^entity/(?P<entity_id>\d+)/merge/$', 'entity_merge',
+        name='entity-merge'),
     url(r'^entity/(?P<entity_id>\d+)/edit/(?P<assertion_id>\d+)/date/add/$',
         'date_add', name='date-add'),
     url(r'^entity/(?P<entity_id>\d+)/edit/(?P<assertion_id>\d+)/date/(?P<date_id>\d+)/$', 'date_change', name='date-change'),

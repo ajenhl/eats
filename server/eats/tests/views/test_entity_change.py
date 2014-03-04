@@ -408,7 +408,7 @@ class EntityChangeViewTestCase (ViewTestCase):
         self.assertEqual(formset.initial_form_count(), 1,
                          'Expected one pre-filled subject identifier form')
         self.assertEqual(entity.get_subject_identifiers().count(), 1)
-        assertion = entity.get_subject_identifiers()[0]
+        assertion = entity.get_eats_subject_identifiers()[0]
         form_data = formset.initial_forms[0].initial
         self.assertEqual(form_data['assertion'], assertion.get_id())
         self.assertEqual(assertion.authority.get_id(), self.authority_id)
@@ -428,8 +428,8 @@ class EntityChangeViewTestCase (ViewTestCase):
         formset = response.context['subject_identifier_formset']
         self.assertEqual(formset.initial_form_count(), 1,
                          'Expected one pre-filled subject_identifier form')
-        self.assertEqual(entity.get_subject_identifiers().count(), 1)
-        assertion = entity.get_subject_identifiers()[0]
+        self.assertEqual(entity.get_eats_subject_identifiers().count(), 1)
+        assertion = entity.get_eats_subject_identifiers()[0]
         form_data = formset.initial_forms[0].initial
         self.assertEqual(form_data['assertion'], assertion.get_id())
         self.assertEqual(self.authority_id, assertion.authority.get_id())
@@ -447,8 +447,8 @@ class EntityChangeViewTestCase (ViewTestCase):
         formset = response.context['subject_identifier_formset']
         self.assertEqual(formset.initial_form_count(), 1,
                          'Expected one pre-filled subject_identifier form')
-        self.assertEqual(entity.get_subject_identifiers().count(), 1)
-        assertion = entity.get_subject_identifiers()[0]
+        self.assertEqual(entity.get_eats_subject_identifiers().count(), 1)
+        assertion = entity.get_eats_subject_identifiers()[0]
         form_data = formset.initial_forms[0].initial
         self.assertEqual(form_data['assertion'], assertion.get_id())
         self.assertEqual(self.authority_id, assertion.authority.get_id())
@@ -459,7 +459,7 @@ class EntityChangeViewTestCase (ViewTestCase):
 
     def test_post_subject_identifiers_illegal (self):
         entity1 = self.tm.create_entity(self.authority)
-        self.assertEqual(entity1.get_subject_identifiers().count(), 0)
+        self.assertEqual(entity1.get_eats_subject_identifiers().count(), 0)
         url = reverse('entity-change', kwargs={'entity_id': entity1.get_id()})
         form = self.app.get(url, user='user').forms['entity-change-form']
         form['subject_identifiers-0-subject_identifier'] = \
@@ -468,7 +468,7 @@ class EntityChangeViewTestCase (ViewTestCase):
             'http://www.example.org/test'
         response = form.submit('_save')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(entity1.get_subject_identifiers().count(), 0)
+        self.assertEqual(entity1.get_eats_subject_identifiers().count(), 0)
         entity2 = self.tm.create_entity(self.authority)
         entity2.create_subject_identifier_property_assertion(
             self.authority, 'http://www.example.org/test')
@@ -477,4 +477,4 @@ class EntityChangeViewTestCase (ViewTestCase):
             'http://www.example.org/test'
         response = form.submit('_save')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(entity1.get_subject_identifiers().count(), 0)
+        self.assertEqual(entity1.get_eats_subject_identifiers().count(), 0)

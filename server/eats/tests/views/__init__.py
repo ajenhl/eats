@@ -10,6 +10,7 @@ from test_entity_add import *
 from test_entity_change import *
 from test_entity_display import *
 from test_entity_delete import *
+from test_entity_merge import *
 from test_entity_relationship_type import *
 from test_entity_type import *
 from test_language import *

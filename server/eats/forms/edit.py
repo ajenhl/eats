@@ -910,6 +910,12 @@ class EATSMLImportForm (forms.Form):
     description = forms.CharField(max_length=200)
 
 
+class EntityMergeForm (forms.Form):
+
+    merge_entity = selectable.AutoCompleteSelectField(
+        lookup_class=EntityLookup)
+
+
 def create_choice_list (topic_map, queryset, default=False):
     """Return a list of 2-tuples created from the items in
     `queryset`.

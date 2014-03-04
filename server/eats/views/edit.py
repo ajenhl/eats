@@ -3,21 +3,22 @@ import StringIO
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
 from django.db import transaction
-from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.http import HttpResponse, Http404
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
-from django.shortcuts import get_object_or_404, render_to_response
+from django.shortcuts import get_object_or_404, redirect, render_to_response
 from django.template import RequestContext
 
 from lxml import etree
 
 from eats.constants import UNNAMED_ENTITY_NAME
+from eats.exceptions import EATSMergedIdentifierException
 from eats.lib.eatsml_exporter import EATSMLExporter
 from eats.lib.eatsml_importer import EATSMLImporter
 from eats.lib.property_assertions import EntityRelationshipPropertyAssertions, EntityTypePropertyAssertions, ExistencePropertyAssertions, NamePropertyAssertions, NotePropertyAssertions, SubjectIdentifierPropertyAssertions
 from eats.lib.user import get_user_preferences, user_is_editor
 from eats.lib.views import get_topic_or_404
 from eats.decorators import add_topic_map
-from eats.forms.edit import CreateEntityForm, create_choice_list, CurrentAuthorityForm, DateForm, EATSMLImportForm
+from eats.forms.edit import CreateEntityForm, create_choice_list, CurrentAuthorityForm, DateForm, EATSMLImportForm, EntityMergeForm
 from eats.models import Authority, Calendar, DatePeriod, DateType, EATSMLImport, Entity, EntityType
 
 
@@ -36,7 +37,7 @@ def entity_add (request, topic_map):
             entity = topic_map.create_entity(authority)
             redirect_url = reverse('entity-change',
                                    kwargs={'entity_id': entity.get_id()})
-            return HttpResponseRedirect(redirect_url)
+            return redirect(redirect_url)
     else:
         form = CreateEntityForm(topic_map, authorities)
     context_data = {'form': form}
@@ -46,7 +47,10 @@ def entity_add (request, topic_map):
 @user_passes_test(user_is_editor)
 @add_topic_map
 def entity_change (request, topic_map, entity_id):
-    entity = get_topic_or_404(Entity, entity_id)
+    try:
+        entity = get_topic_or_404(Entity, entity_id)
+    except EATSMergedIdentifierException, e:
+        return redirect('entity-change', entity_id=e.new_id, permanent=True)
     editor = request.user.eats_user
     context_data = {'entity': entity}
     authority = editor.get_current_authority()
@@ -84,7 +88,7 @@ def entity_change (request, topic_map, entity_id):
                     'current_authority']
                 authority = Authority.objects.get_by_identifier(authority_id)
                 editor.set_current_authority(authority)
-                return HttpResponseRedirect(redirect_url)
+                return redirect(redirect_url)
         else:
             formsets = (existences_formset, entity_types_formset,
                         names_formset, notes_formset,
@@ -98,7 +102,7 @@ def entity_change (request, topic_map, entity_id):
             if is_valid:
                 for formset in formsets:
                     formset.save()
-                return HttpResponseRedirect(redirect_url)
+                return redirect(redirect_url)
     context_data['current_authority_form'] = current_authority_form
     context_data['existence_non_editable'] = existences.non_editable
     context_data['existence_formset'] = existences_formset
@@ -130,11 +134,14 @@ def entity_change (request, topic_map, entity_id):
 @user_passes_test(user_is_editor)
 @add_topic_map
 def entity_delete (request, topic_map, entity_id):
-    entity = get_topic_or_404(Entity, entity_id)
+    try:
+        entity = get_topic_or_404(Entity, entity_id)
+    except EATSMergedIdentifierException, e:
+        return redirect('entity-delete', entity_id=e.new_id, permanent=True)
     editable_authorities = request.user.eats_user.editable_authorities.all()
     assertion_getters = [entity.get_eats_names, entity.get_entity_relationships,
                          entity.get_entity_types, entity.get_existences,
-                         entity.get_subject_identifiers, entity.get_notes]
+                         entity.get_eats_subject_identifiers, entity.get_notes]
     can_delete = True
     for assertion_getter in assertion_getters:
         for assertion in assertion_getter():
@@ -142,9 +149,42 @@ def entity_delete (request, topic_map, entity_id):
                 can_delete = False
     if request.method == 'POST' and can_delete:
         entity.remove()
-        return HttpResponseRedirect(reverse('search'))
+        return redirect(reverse('search'))
     context_data = {'can_delete': can_delete}
     return render_to_response('eats/edit/entity_delete.html', context_data,
+                              context_instance=RequestContext(request))
+
+@user_passes_test(user_is_editor)
+@add_topic_map
+def entity_merge (request, topic_map, entity_id):
+    try:
+        entity = get_topic_or_404(Entity, entity_id)
+    except EATSMergedIdentifierException, e:
+        return redirect('entity-merge', entity_id=e.new_id, permanent=True)
+    context_data = {}
+    if request.method == 'POST':
+        form = EntityMergeForm(request.POST)
+        if form.is_valid():
+            merge_entity = form.cleaned_data['merge_entity']
+            editable_authorities = request.user.eats_user.editable_authorities.all()
+            assertion_getters = ['get_eats_names', 'get_entity_relationships',
+                                 'get_entity_types', 'get_existences',
+                                 'get_eats_subject_identifiers', 'get_notes']
+            can_merge = True
+            for assertion_getter in assertion_getters:
+                for assertion in getattr(merge_entity, assertion_getter)():
+                    if assertion.authority not in editable_authorities:
+                        can_merge = False
+            if can_merge:
+                entity.merge_in(merge_entity)
+                return redirect(
+                    reverse('entity-change', kwargs={'entity_id': entity_id}))
+            else:
+                context_data['unauthorised'] = True
+    else:
+        form = EntityMergeForm()
+    context_data['form'] = form
+    return render_to_response('eats/edit/entity_merge.html', context_data,
                               context_instance=RequestContext(request))
 
 @user_passes_test(user_is_editor)
@@ -175,7 +215,7 @@ def date_add (request, topic_map, entity_id, assertion_id):
             else:
                 redirect_ids = {'entity_id': entity_id}
                 redirect_url = reverse('entity-change', kwargs=redirect_ids)
-            return HttpResponseRedirect(redirect_url)
+            return redirect(redirect_url)
     else:
         form = DateForm(topic_map, calendar_choices, date_period_choices,
                         date_type_choices)
@@ -209,14 +249,14 @@ def date_change (request, topic_map, entity_id, assertion_id, date_id):
         redirect_url = reverse('entity-change', kwargs=redirect_ids)
         if '_delete' in form.data:
             form.delete()
-            return HttpResponseRedirect(redirect_url)
+            return redirect(redirect_url)
         if form.is_valid():
             date_id = form.save()
             if '_continue' in form.data:
                 redirect_ids['assertion_id'] = assertion_id
                 redirect_ids['date_id'] = date_id
                 redirect_url = reverse('date-change', kwargs=redirect_ids)
-            return HttpResponseRedirect(redirect_url)
+            return redirect(redirect_url)
     else:
         form = DateForm(topic_map, calendar_choices, date_period_choices,
                         date_type_choices, instance=date)
@@ -256,7 +296,7 @@ def export_eatsml_full (request, topic_map):
 
 def serialise_tree (tree):
     xml = etree.tostring(tree, encoding='utf-8', pretty_print=True)
-    return HttpResponse(xml, mimetype='text/xml')
+    return HttpResponse(xml, content_type='text/xml')
 
 @user_passes_test(user_is_editor)
 @add_topic_map
@@ -298,7 +338,7 @@ def import_eatsml (request, topic_map):
             eatsml_import.save()
             redirect_url = reverse('display-eatsml-import',
                                    kwargs={'import_id': eatsml_import.id})
-            return HttpResponseRedirect(redirect_url)
+            return redirect(redirect_url)
     else:
         form = EATSMLImportForm()
     import_list = EATSMLImport.objects.values('id', 'importer__user__username',
@@ -327,9 +367,9 @@ def display_eatsml_import (request, import_id):
 @user_passes_test(user_is_editor)
 def display_eatsml_import_raw (request, import_id):
     eatsml_import = get_object_or_404(EATSMLImport, pk=import_id)
-    return HttpResponse(eatsml_import.raw_xml, mimetype='text/xml')
+    return HttpResponse(eatsml_import.raw_xml, content_type='text/xml')
 
 @user_passes_test(user_is_editor)
 def display_eatsml_import_annotated (request, import_id):
     eatsml_import = get_object_or_404(EATSMLImport, pk=import_id)
-    return HttpResponse(eatsml_import.annotated_xml, mimetype='text/xml')
+    return HttpResponse(eatsml_import.annotated_xml, content_type='text/xml')

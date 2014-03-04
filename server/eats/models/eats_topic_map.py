@@ -192,9 +192,8 @@ class EATSTopicMap (TopicMap):
 
         """
         entity = self.create_topic(proxy=Entity)
-        view_url = reverse('entity-view', kwargs={'entity_id': entity.get_id()})
-        url = 'http://%s%s' % (Site.objects.get_current().domain, view_url)
-        entity.add_subject_identifier(Locator(url))
+        entity_si = self.get_entity_subject_identifier(entity.get_id())
+        entity.add_subject_identifier(entity_si)
         entity.add_type(self.entity_type)
         if authority is not None:
             entity.create_existence_property_assertion(authority)
@@ -498,6 +497,11 @@ class EATSTopicMap (TopicMap):
         else:
             assertion_class = None
         return assertion_class
+
+    def get_entity_subject_identifier (self, entity_id):
+        view_url = reverse('entity-view', kwargs={'entity_id': entity_id})
+        url = 'http://%s%s' % (Site.objects.get_current().domain, view_url)
+        return Locator(url)
 
     @property
     def infrastructure_role_type (self):

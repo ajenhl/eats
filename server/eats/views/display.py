@@ -1,16 +1,18 @@
 from django.contrib.sites.models import Site
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import HttpResponse, Http404
-from django.shortcuts import render_to_response
+from django.http import HttpResponse
+from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 
 from lxml import etree
 
 from eats.constants import UNNAMED_ENTITY_NAME
 from eats.decorators import add_topic_map
+from eats.exceptions import EATSMergedIdentifierException
 from eats.forms.display import EntitySearchForm
 from eats.lib.eatsml_exporter import EATSMLExporter
 from eats.lib.user import get_user_preferences, user_is_editor
+from eats.lib.views import get_topic_or_404
 from eats.models import Entity, EntityType
 
 
@@ -23,9 +25,9 @@ def home (request):
 @add_topic_map
 def entity_view (request, topic_map, entity_id):
     try:
-        entity = Entity.objects.get_by_identifier(entity_id)
-    except Entity.DoesNotExist:
-        raise Http404
+        entity = get_topic_or_404(Entity, entity_id)
+    except EATSMergedIdentifierException, e:
+        return redirect('entity-view', entity_id=e.new_id, permanent=True)
     user_preferences = get_user_preferences(request)
     preferred_authority = user_preferences['preferred_authority']
     preferred_language = user_preferences['preferred_language']
@@ -41,7 +43,7 @@ def entity_view (request, topic_map, entity_id):
     name_pas = entity.get_eats_names()
     relationship_pas = entity.get_entity_relationships()
     note_pas = entity.get_notes()
-    subject_identifier_pas = entity.get_subject_identifiers()
+    subject_identifier_pas = entity.get_eats_subject_identifiers()
     context_data = {'entity': entity,
                     'preferred_authority': preferred_authority,
                     'preferred_language': preferred_language,
@@ -61,12 +63,12 @@ def entity_view (request, topic_map, entity_id):
 @add_topic_map
 def entity_eatsml_view (request, topic_map, entity_id):
     try:
-        entity = Entity.objects.get_by_identifier(entity_id)
-    except Entity.DoesNotExist:
-        raise Http404
+        entity = get_topic_or_404(Entity, entity_id)
+    except EATSMergedIdentifierException, e:
+        return redirect('entity-eatsml-view', entity_id=e.new_id, permanent=True)
     tree = EATSMLExporter(topic_map).export_entities([entity])
     xml = etree.tostring(tree, encoding='utf-8', pretty_print=True)
-    return HttpResponse(xml, mimetype='text/xml')
+    return HttpResponse(xml, content_type='text/xml')
 
 @add_topic_map
 def search (request, topic_map):
@@ -111,4 +113,4 @@ def search_eatsml (request, topic_map):
         user = None
     tree = EATSMLExporter(topic_map).export_entities(entities, user=user)
     xml = etree.tostring(tree, encoding='utf-8', pretty_print=True)
-    return HttpResponse(xml, mimetype='text/xml')
+    return HttpResponse(xml, content_type='text/xml')

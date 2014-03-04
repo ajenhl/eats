@@ -167,5 +167,5 @@ class SubjectIdentifierPropertyAssertions (PropertyAssertions):
         return self._create_formset(SubjectIdentifierFormSet, data)
 
     def categorise_assertions (self):
-        assertions = self.entity.get_subject_identifiers()
+        assertions = self.entity.get_eats_subject_identifiers()
         return self.get_editable(assertions, self.authority)
