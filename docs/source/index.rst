@@ -29,6 +29,8 @@ Contents
    installation
    start
    eatsml
+   clients
+   merging
 
 
 .. _An introduction to EATS: http://researcharchive.vuw.ac.nz/handle/10063/220
