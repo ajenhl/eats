@@ -54,6 +54,6 @@ attributes added.
 
 The import process automatically prunes the EATSML of any material
 that is neither to be added, nor referenced by data that is to be
-added. Therefore, the EATSML that is display for an import may not
+added. Therefore, the EATSML that is displayed for an import may not
 exactly match the EATSML that was actually sent to the server. This is
 done to make it easier to see what is added in an import.
