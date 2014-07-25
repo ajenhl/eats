@@ -65,6 +65,5 @@
       {% endif %}
     </tbody>
   </table>
-  <p><a href="{% url 'entity-view' entity.get_id %}">View</a> or <a href="{% url entity-change entity.get_id %}">Edit</a></p>
+  <p><a href="{% url 'entity-view' entity.get_id %}">View</a> or <a href="{% url 'entity-change' entity.get_id %}">Edit</a></p>
 </div>
-
