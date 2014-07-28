@@ -36,7 +36,9 @@ class EATSMLExporter (EATSMLHandler):
         root = etree.Element(EATS + 'collection', nsmap=NSMAP)
         entities = Entity.objects.all()
         if entities:
-            self._export_entities(Entity.objects.all(), root)
+            self._export_entities(entities, root)
+        # All infrastructure must be exported, not just that which is
+        # required by the existing entities.
         self._infrastructure_required['authority'] = set(
             Authority.objects.all())
         self._infrastructure_required['calendar'] = set(Calendar.objects.all())
