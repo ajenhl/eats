@@ -128,7 +128,10 @@ class Name (Topic, NameElement):
 
     def _delete_name_cache (self):
         """Deletes the cache for this name."""
-        self.cached_name.all().delete()
+        try:
+            self.cached_name.delete()
+        except NameCache.DoesNotExist:
+            pass
 
     def _delete_name_index_forms (self):
         """Deletes the indexed forms of this name."""
