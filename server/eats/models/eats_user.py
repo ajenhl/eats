@@ -6,8 +6,8 @@ from base_manager import BaseManager
 
 class EditorManager (BaseManager):
 
-    def get_query_set (self):
-        return super(EditorManager, self).get_query_set().filter(
+    def get_queryset (self):
+        return super(EditorManager, self).get_queryset().filter(
             editable_authorities__isnull=False)
 
 
@@ -27,7 +27,7 @@ class EATSUser (models.Model):
 
     objects = models.Manager()
     editors = EditorManager()
-    
+
     class Meta:
         app_label = 'eats'
 
@@ -38,7 +38,7 @@ class EATSUser (models.Model):
 
         """
         return self.authority
-        
+
     def get_current_authority (self):
         # QAZ: Direct access to self.current_authority bypasses this
         # logic, which may lead to incorrect results. Implementing the

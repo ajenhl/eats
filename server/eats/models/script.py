@@ -17,16 +17,16 @@ class ScriptManager (InfrastructureManager):
                 return script
         else:
             raise self.model.DoesNotExist
-    
-    def get_query_set (self):
-        return super(ScriptManager, self).get_query_set().filter(
+
+    def get_queryset (self):
+        return super(ScriptManager, self).get_queryset().filter(
             types=self.eats_topic_map.script_type)
 
 
 class Script (Topic, Infrastructure):
 
     objects = ScriptManager()
-    
+
     class Meta:
         proxy = True
         app_label = 'eats'

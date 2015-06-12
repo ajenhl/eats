@@ -23,10 +23,10 @@ class EntityRelationshipPropertyAssertionManager (BaseManager):
         return self.filter(Q(cached_relationship__domain_entity=entity) |
                            Q(cached_relationship__range_entity=entity))
 
-    def get_query_set (self):
+    def get_queryset (self):
         assertion_type = self.eats_topic_map.entity_relationship_assertion_type
         qs = super(EntityRelationshipPropertyAssertionManager,
-                   self).get_query_set()
+                   self).get_queryset()
         return qs.filter(type=assertion_type)
 
 

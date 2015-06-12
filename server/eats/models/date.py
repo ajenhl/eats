@@ -41,8 +41,8 @@ class DateManager (BaseManager):
             roles__association__roles__type=entity_role_type,
             roles__association__roles__player=entity)
 
-    def get_query_set (self):
-        return super(DateManager, self).get_query_set().filter(
+    def get_queryset (self):
+        return super(DateManager, self).get_queryset().filter(
             types=self.eats_topic_map.date_type)
 
 

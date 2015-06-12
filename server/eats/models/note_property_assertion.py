@@ -8,17 +8,17 @@ class NotePropertyAssertionManager (BaseManager):
 
     def filter_by_entity (self, entity):
         return self.filter(topic=entity)
-    
-    def get_query_set (self):
+
+    def get_queryset (self):
         assertion_type = self.eats_topic_map.note_assertion_type
-        qs = super(NotePropertyAssertionManager, self).get_query_set()
+        qs = super(NotePropertyAssertionManager, self).get_queryset()
         return qs.filter(type=assertion_type)
 
 
 class NotePropertyAssertion (Occurrence, PropertyAssertion):
 
     objects = NotePropertyAssertionManager()
-    
+
     class Meta:
         proxy = True
         app_label = 'eats'
@@ -33,7 +33,7 @@ class NotePropertyAssertion (Occurrence, PropertyAssertion):
             from entity import Entity
             self._entity = self.get_parent(proxy=Entity)
         return self._entity
-        
+
     @property
     def note (self):
         """Returns the textual content of the asserted note.
@@ -42,7 +42,7 @@ class NotePropertyAssertion (Occurrence, PropertyAssertion):
 
         """
         return self.get_value()
-        
+
     def update (self, note):
         """Updates this property assertion.
 

@@ -14,8 +14,8 @@ from eats.lib.name_form import create_name_forms
 
 class NameManager (BaseManager):
 
-    def get_query_set (self):
-        return super(NameManager, self).get_query_set().filter(
+    def get_queryset (self):
+        return super(NameManager, self).get_queryset().filter(
             types=self.eats_topic_map.name_type)
 
 

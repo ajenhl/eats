@@ -10,17 +10,17 @@ class ExistencePropertyAssertionManager (BaseManager):
         entity_role_type = self.eats_topic_map.entity_role_type
         return self.filter(roles__type=entity_role_type,
                            roles__player=entity)
-    
-    def get_query_set (self):
+
+    def get_queryset (self):
         assertion_type = self.eats_topic_map.existence_assertion_type
-        qs = super(ExistencePropertyAssertionManager, self).get_query_set()
+        qs = super(ExistencePropertyAssertionManager, self).get_queryset()
         return qs.filter(type=assertion_type)
 
 
 class ExistencePropertyAssertion (Association, PropertyAssertion):
 
     objects = ExistencePropertyAssertionManager()
-    
+
     class Meta:
         proxy = True
         app_label = 'eats'

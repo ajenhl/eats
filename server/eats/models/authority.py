@@ -17,8 +17,8 @@ from script import Script
 
 class AuthorityManager (InfrastructureManager):
 
-    def get_query_set (self):
-        return super(AuthorityManager, self).get_query_set().filter(
+    def get_queryset (self):
+        return super(AuthorityManager, self).get_queryset().filter(
             types=self.eats_topic_map.authority_type)
 
 

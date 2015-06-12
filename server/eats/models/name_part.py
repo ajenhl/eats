@@ -20,8 +20,8 @@ class NamePartManager (BaseManager):
             roles__association__roles__type=name_role_type,
             roles__association__roles__player=name)
 
-    def get_query_set (self):
-        return super(NamePartManager, self).get_query_set().filter(
+    def get_queryset (self):
+        return super(NamePartManager, self).get_queryset().filter(
             types=self.eats_topic_map.name_part_type)
 
 

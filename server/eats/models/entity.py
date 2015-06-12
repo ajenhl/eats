@@ -87,8 +87,8 @@ class EntityManager (BaseManager):
             raise EATSMergedIdentifierException(topic_id)
         return entity
 
-    def get_query_set (self):
-        return super(EntityManager, self).get_query_set().filter(
+    def get_queryset (self):
+        return super(EntityManager, self).get_queryset().filter(
             types=self.eats_topic_map.entity_type)
 
 

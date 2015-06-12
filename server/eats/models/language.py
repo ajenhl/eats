@@ -21,16 +21,16 @@ class LanguageManager (InfrastructureManager):
                 return language
         else:
             raise self.model.DoesNotExist
-    
-    def get_query_set (self):
-        return super(LanguageManager, self).get_query_set().filter(
+
+    def get_queryset (self):
+        return super(LanguageManager, self).get_queryset().filter(
             types=self.eats_topic_map.language_type)
 
 
 class Language (Topic, Infrastructure):
 
     objects = LanguageManager()
-    
+
     class Meta:
         proxy = True
         app_label = 'eats'

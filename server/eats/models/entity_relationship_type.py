@@ -19,16 +19,16 @@ class EntityRelationshipTypeManager (InfrastructureManager):
                 return ert
         else:
             raise self.model.DoesNotExist
-    
-    def get_query_set (self):
-        return super(EntityRelationshipTypeManager, self).get_query_set().filter(
+
+    def get_queryset (self):
+        return super(EntityRelationshipTypeManager, self).get_queryset().filter(
             types=self.eats_topic_map.entity_relationship_type_type)
 
 
 class EntityRelationshipType (Topic, Infrastructure):
 
     objects = EntityRelationshipTypeManager()
-    
+
     class Meta:
         proxy = True
         app_label = 'eats'
@@ -36,7 +36,7 @@ class EntityRelationshipType (Topic, Infrastructure):
     def get_admin_forward_name (self):
         name = self.get_names(self.eats_topic_map.relationship_name_type)[0]
         return name.get_value()
-        
+
     def get_admin_name (self):
         forward = self.get_names(self.eats_topic_map.relationship_name_type)[0]
         reverse = self.get_names(

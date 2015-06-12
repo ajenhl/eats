@@ -125,9 +125,9 @@ class NamePropertyAssertionManager (BaseManager):
         except IndexError:
             raise self.model.DoesNotExist
 
-    def get_query_set (self):
+    def get_queryset (self):
         assertion_type = self.eats_topic_map.name_assertion_type
-        qs = super(NamePropertyAssertionManager, self).get_query_set()
+        qs = super(NamePropertyAssertionManager, self).get_queryset()
         return qs.filter(type=assertion_type)
 
 

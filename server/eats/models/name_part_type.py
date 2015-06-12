@@ -11,8 +11,8 @@ class NamePartTypeManager (InfrastructureManager):
         return super(NamePartTypeManager, self).filter_by_authority(
             authority, association_type)
 
-    def get_query_set (self):
-        return super(NamePartTypeManager, self).get_query_set().filter(
+    def get_queryset (self):
+        return super(NamePartTypeManager, self).get_queryset().filter(
             types=self.eats_topic_map.name_part_type_type)
 
 
@@ -23,4 +23,3 @@ class NamePartType (Topic, Infrastructure):
     class Meta:
         proxy = True
         app_label = 'eats'
-                                                                    

@@ -8,17 +8,17 @@ class SubjectIdentifierPropertyAssertionManager (BaseManager):
 
     def filter_by_entity (self, entity):
         return self.filter(topic=entity)
-    
-    def get_query_set (self):
+
+    def get_queryset (self):
         assertion_type = self.eats_topic_map.subject_identifier_assertion_type
-        qs = super(SubjectIdentifierPropertyAssertionManager, self).get_query_set()
+        qs = super(SubjectIdentifierPropertyAssertionManager, self).get_queryset()
         return qs.filter(type=assertion_type)
 
 
 class SubjectIdentifierPropertyAssertion (Occurrence, PropertyAssertion):
 
     objects = SubjectIdentifierPropertyAssertionManager()
-    
+
     class Meta:
         proxy = True
         app_label = 'eats'
@@ -33,7 +33,7 @@ class SubjectIdentifierPropertyAssertion (Occurrence, PropertyAssertion):
             from entity import Entity
             self._entity = self.get_parent(proxy=Entity)
         return self._entity
-        
+
     @property
     def subject_identifier (self):
         """Returns the textual content of the asserted subject_identifier.
@@ -42,7 +42,7 @@ class SubjectIdentifierPropertyAssertion (Occurrence, PropertyAssertion):
 
         """
         return self.get_value()
-        
+
     def update (self, subject_identifier):
         """Updates this property assertion.
 

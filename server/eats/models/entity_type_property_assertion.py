@@ -11,21 +11,21 @@ class EntityTypePropertyAssertionManager (BaseManager):
         return self.filter(scope=authority).filter(
             roles__type=self.eats_topic_map.property_role_type,
             roles__player=entity_type)
-    
+
     def filter_by_entity (self, entity):
         return self.filter(roles__type=self.eats_topic_map.entity_role_type,
                            roles__player=entity)
 
-    def get_query_set (self):
+    def get_queryset (self):
         assertion_type = self.eats_topic_map.entity_type_assertion_type
-        qs = super(EntityTypePropertyAssertionManager, self).get_query_set()
+        qs = super(EntityTypePropertyAssertionManager, self).get_queryset()
         return qs.filter(type=assertion_type)
 
 
 class EntityTypePropertyAssertion (Association, PropertyAssertion):
 
     objects = EntityTypePropertyAssertionManager()
-    
+
     class Meta:
         proxy = True
         app_label = 'eats'
@@ -35,7 +35,7 @@ class EntityTypePropertyAssertion (Association, PropertyAssertion):
         """Returns the entity type being asserted.
 
         :rtype: `EntityType`
-        
+
         """
         if not hasattr(self, '_entity_type'):
             property_role = self.get_roles(
