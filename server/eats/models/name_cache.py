@@ -19,7 +19,7 @@ class NameCache (models.Model):
     name = models.OneToOneField('Name', related_name='cached_name')
     authority = models.ForeignKey('Authority')
     form = models.CharField(max_length=800)
-    is_preferred = models.BooleanField()
+    is_preferred = models.BooleanField(default=False)
     language = models.ForeignKey('Language')
     script = models.ForeignKey('Script')
 
