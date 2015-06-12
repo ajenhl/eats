@@ -315,18 +315,16 @@ def import_eatsml (request, topic_map):
             # file, straightaway the whole value is retrieved and
             # passed to the importer.
             eatsml = eatsml_file.getvalue()
-            with transaction.commit_manually():
-                try:
+            try:
+                with transaction.atomic():
                     import_tree, annotated_tree = EATSMLImporter(
                         topic_map).import_xml(eatsml, user)
-                    transaction.commit()
-                except Exception, e:
-                    transaction.rollback()
-                    response = render_to_response(
-                        '500.html', {'message': e},
-                        context_instance=RequestContext(request))
-                    response.status_code = 500
-                    return response
+            except Exception, e:
+                response = render_to_response(
+                    '500.html', {'message': e},
+                    context_instance=RequestContext(request))
+                response.status_code = 500
+                return response
             description = form.cleaned_data['description']
             imported_xml = etree.tostring(import_tree, encoding='utf-8',
                                           pretty_print=True)

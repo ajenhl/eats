@@ -152,7 +152,7 @@ class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
        self._add_relationship_cache(relationship_type, domain_entity,
                                     range_entity)
 
-    @transaction.commit_on_success
+    @transaction.atomic
     def update (self, relationship_type, domain_entity,
                 range_entity, certainty):
         """Updates this property assertion.

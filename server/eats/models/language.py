@@ -80,7 +80,7 @@ class Language (Topic, Infrastructure):
         for occurrence in existing.values():
             occurrence.remove()
 
-    @transaction.commit_manually
+    @transaction.atomic
     def remove (self):
         """Deletes this language.
 
@@ -90,16 +90,10 @@ class Language (Topic, Infrastructure):
         """
         index = self.eats_topic_map.get_index(ScopedIndex)
         index.open()
-        try:
-            for occurrence in index.get_occurrences(self).filter(
+        for occurrence in index.get_occurrences(self).filter(
                 type=self.eats_topic_map.name_part_type_order_in_language_type):
-                occurrence.remove()
-            super(Language, self).remove()
-        except:
-            transaction.rollback()
-            raise
-        else:
-            transaction.commit()
+            occurrence.remove()
+        super(Language, self).remove()
 
     def set_code (self, code):
         if code == self.get_code():
