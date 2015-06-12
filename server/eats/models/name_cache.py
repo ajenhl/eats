@@ -14,9 +14,9 @@ class NameCache (models.Model):
     """
 
     entity = models.ForeignKey('Entity', related_name='cached_names')
-    assertion = models.ForeignKey('NamePropertyAssertion',
-                                  related_name='cached_name', unique=True)
-    name = models.ForeignKey('Name', related_name='cached_name', unique=True)
+    assertion = models.OneToOneField('NamePropertyAssertion',
+                                     related_name='cached_name')
+    name = models.OneToOneField('Name', related_name='cached_name')
     authority = models.ForeignKey('Authority')
     form = models.CharField(max_length=800)
     is_preferred = models.BooleanField()
