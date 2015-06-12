@@ -131,7 +131,7 @@ def get_form_class (model):
     return form_class
 
 def get_redirect_url (form, opts, topic):
-    object_type = opts.module_name
+    object_type = opts.model_name
     if '_addanother' in form.data:
         redirect_url = reverse(object_type + '-add')
     elif '_continue' in form.data:

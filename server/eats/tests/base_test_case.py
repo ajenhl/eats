@@ -1,6 +1,6 @@
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.db import models
 
 from tmapi.models import TopicMapSystemFactory
 
@@ -56,7 +56,8 @@ class BaseTestCase (object):
     def get_managers (self):
         if not hasattr(self, '_managers'):
             self._managers = []
-            for model in models.get_models(models.get_app('eats')):
+            eats_app = apps.get_app_config('eats')
+            for model in eats_app.models.values():
                 manager = model.objects
                 if hasattr(manager, '_eats_topic_map'):
                     self._managers.append(manager)
