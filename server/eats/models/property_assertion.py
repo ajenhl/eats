@@ -23,9 +23,9 @@ class PropertyAssertion (object):
 
         """
         if getattr(self, '_certainty', None) is None:
+            certainty_type = self.eats_topic_map.property_assertion_certainty_type
             for theme in self.scoping_topics:
-                if self.eats_topic_map.property_assertion_certainty_type in \
-                        theme.get_types():
+                if certainty_type in theme.get_types():
                     self._certainty = theme
                     break
             else:

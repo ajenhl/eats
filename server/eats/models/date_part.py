@@ -35,8 +35,9 @@ class DatePart (Name):
 
         """
         if getattr(self, '_calendar', None) is None:
+            calendar_type = self.eats_topic_map.calendar_type
             for theme in self.scoping_topics:
-                if self.eats_topic_map.calendar_type in theme.get_types():
+                if calendar_type in theme.get_types():
                     self._calendar = Calendar.objects.get_by_identifier(
                         theme.get_id())
                     break
@@ -68,8 +69,9 @@ class DatePart (Name):
 
         """
         if getattr(self, '_certainty', None) is None:
+            certainty_type = self.eats_topic_map.date_certainty_type
             for theme in self.scoping_topics:
-                if self.eats_topic_map.date_certainty_type in theme.get_types():
+                if certainty_type in theme.get_types():
                     self._certainty = theme
                     break
             else:
@@ -108,8 +110,9 @@ class DatePart (Name):
 
         """
         if getattr(self, '_date_type', None) is None:
+            date_type_type = self.eats_topic_map.date_type_type
             for theme in self.scoping_topics:
-                if self.eats_topic_map.date_type_type in theme.get_types():
+                if date_type_type in theme.get_types():
                     self._date_type = DateType.objects.get_by_identifier(
                         theme.get_id())
                     break
@@ -161,7 +164,7 @@ class DatePart (Name):
             data[prefix+'_calendar'] = self.calendar.get_id()
             data[prefix+'_certainty'] = certainty
         return data
-    
+
     def get_normalised_value (self):
         """Returns the value of the normalised form of this date part.
 
@@ -186,7 +189,7 @@ class DatePart (Name):
             else:
                 self._normalised = variants[0]
         return self._normalised
-    
+
     @property
     def scoping_topics (self):
         if getattr(self, '_scoping_topics', None) is None:
