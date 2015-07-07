@@ -4,7 +4,6 @@ __docformat__ = 'restructuredtext'
 
 import cookielib
 from copy import deepcopy
-from os.path import abspath, dirname, join
 from StringIO import StringIO
 import sys
 import urllib
@@ -12,6 +11,7 @@ import urllib2
 import urlparse
 
 from lxml import etree
+import lxml.html
 
 from MultipartPostHandler import MultipartPostHandler
 import parser
@@ -36,7 +36,7 @@ class Dispatcher (object):
         'base_document': 'export/eatsml/base/',
         'import': 'import/',
         'lookup_name': 'search/eatsml/?%s'}
-    
+
     def __init__ (self, base_url, username, password, http_username=None,
                   http_password=None):
         self.__base_url = base_url
@@ -89,8 +89,8 @@ class Dispatcher (object):
         url = urlparse.urljoin(self.base_url, self.__urls['base_document'])
         handle = urllib2.urlopen(url)
         login_url = handle.geturl()
-        xml_tree = etree.parse(handle, parser.parser)
-        login = xml_tree.getroot()
+        html_tree = lxml.html.parse(handle)
+        login = html_tree.getroot()
         try:
             self.__csrf_token = login.xpath('//*[@name = "csrfmiddlewaretoken"][1]/@value')[0]
         except IndexError:
@@ -105,7 +105,7 @@ class Dispatcher (object):
         if handle.geturl() == login_url:
             # A successful login redirects to a different page.
             raise Exception('Failed to authenticate to EATS server')
-    
+
     def get_base_document (self):
         """Return an `eatsml.Document` instance containing only the
         infrastructural elements."""
