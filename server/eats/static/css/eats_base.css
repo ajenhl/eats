@@ -1,14 +1,5 @@
 /* Global page layout */
 
-body { margin: 0 2em 2em 4em; }
-
-nav {
-   clear: right;
-   float: right;
-   width: 15em;
-   margin: 4em 2em 2em 3em;
-}
-
 /* Forms */
 
 fieldset { margin-bottom: 2em; }

@@ -7,44 +7,7 @@
 {{ entity_relationship_formset.media.css }}
 {% endblock eats_style %}
 {% block eats_js %}{{ block.super }}
-<script type="application/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
-<script type="application/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/jquery-ui.min.js"></script>
 {{ entity_relationship_formset.media.js }}
-<script type="application/javascript">
-/* Prevent autoescaping of text in autocomplete. Code from http://www.arctickiwi.com/blog/jquery-autocomplete-labels-escape-html-tags */
-$[ "ui" ][ "autocomplete" ].prototype["_renderItem"] = function( ul, item) {
-return $( "<li></li>" ) 
-  .data( "item.autocomplete", item )
-  .append( $( "<a></a>" ).html( item.label ) )
-  .appendTo( ul );
-};
-</script>
-<script type="application/javascript">
-$(document).ready(function() {
-  $('.npls-toggled').hide();
-  $('.npls-toggle').click(function() {
-    if ($(this).text() == '+') {
-      $(this).text('−');
-    } else {
-      $(this).text('+');
-    }
-    $(this).next('.npls-toggled').toggle();
-  });
-});
-</script>
-<script type="application/javascript">
-  $(document).ready(function() {
-    $('.name-part-section').hide();
-    $('.name-part-section-toggle').click(function() {
-      if ($(this).text() == '+') {
-        $(this).text('−');
-      } else {
-        $(this).text('+');
-      }
-      $(this).closest('tr').next('.name-part-section').toggle();
-    });
-  });
-</script>
 {% endblock eats_js %}
 
 {% block eats_content %}
@@ -55,7 +18,7 @@ $(document).ready(function() {
   {% csrf_token %}
 
   <div>
-    {{ current_authority_form.current_authority.label_tag }}:
+    {{ current_authority_form.current_authority.label_tag }}
     {{ current_authority_form.current_authority }}
     <input name="_change_authority" type="submit" value="Change authority"/>
   </div>
@@ -446,3 +409,41 @@ $(document).ready(function() {
 
 </article>
 {% endblock eats_content %}
+
+{% block eats_end_js %}
+<script type="application/javascript">
+/* Prevent autoescaping of text in autocomplete. Code from http://www.arctickiwi.com/blog/jquery-autocomplete-labels-escape-html-tags */
+$[ "ui" ][ "autocomplete" ].prototype["_renderItem"] = function( ul, item) {
+return $( "<li></li>" ) 
+  .data( "item.autocomplete", item )
+  .append( $( "<a></a>" ).html( item.label ) )
+  .appendTo( ul );
+};
+</script>
+<script type="application/javascript">
+$(document).ready(function() {
+  $('.npls-toggled').hide();
+  $('.npls-toggle').click(function() {
+    if ($(this).text() == '+') {
+      $(this).text('−');
+    } else {
+      $(this).text('+');
+    }
+    $(this).next('.npls-toggled').toggle();
+  });
+});
+</script>
+<script type="application/javascript">
+  $(document).ready(function() {
+    $('.name-part-section').hide();
+    $('.name-part-section-toggle').click(function() {
+      if ($(this).text() == '+') {
+        $(this).text('−');
+      } else {
+        $(this).text('+');
+      }
+      $(this).closest('tr').next('.name-part-section').toggle();
+    });
+  });
+</script>
+{% endblock eats_end_js %}

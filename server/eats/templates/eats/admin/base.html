@@ -1,6 +1,7 @@
 {% extends "eats/base.html" %}
+{% load staticfiles %}
 
 {% block eats_title %}{{ block.super }}Administration{% endblock eats_title %}
 {% block eats_style %}{{ block.super }}
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/eats_admin_base.css"/>
+<link rel="stylesheet" type="text/css" href="{% static 'css/eats_admin_base.css' %}"/>
 {% endblock %}

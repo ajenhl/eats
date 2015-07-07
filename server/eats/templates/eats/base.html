@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load staticfiles %}
 
 {% comment %}
 This is the base HTML template for the entire EATS application. It is
@@ -25,7 +26,7 @@ block names, they only need to be changed in this template.
 
 {% block style %}{{ block.super }}
 {% block eats_style %}
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/eats_base.css"/>
+<link rel="stylesheet" type="text/css" href="{% static 'css/eats_base.css' %}"/>
 {% endblock eats_style %}
 {% endblock style %}
 
@@ -39,6 +40,11 @@ block names, they only need to be changed in this template.
 {% endblock eats_search %}
 
 {% block eats_content %}
-
 {% endblock eats_content %}
 {% endblock content %}
+
+{% block end_js %}
+{{ block.super }}
+{% block eats_end_js %}
+{% endblock eats_end_js %}
+{% endblock end_js %}
