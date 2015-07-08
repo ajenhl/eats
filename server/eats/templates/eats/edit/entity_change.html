@@ -410,6 +410,7 @@
 {% endblock eats_content %}
 
 {% block eats_end_js %}
+{{ block.super }}
 <script type="application/javascript">
 $(document).ready(function() {
   $('.npls-toggled').hide();
