@@ -56,7 +56,8 @@ def entity_view (request, topic_map, entity_id):
                         topic_map.property_assertion_full_certainty,
                     'relationship_pas': relationship_pas,
                     'subject_identifier_pas': subject_identifier_pas,
-                    'site': Site.objects.get_current()}
+                    'site': Site.objects.get_current(),
+                    'user_is_editor': user_is_editor(request.user)}
     return render_to_response('eats/display/entity.html', context_data,
                               context_instance=RequestContext(request))
 
@@ -97,8 +98,8 @@ def search (request, topic_map):
     context_data = {
         'property_assertion_full_certainty': \
             topic_map.property_assertion_full_certainty,
-        'search_form': form, 'search_results': results}
-    context_data['user_is_editor'] = user_is_editor(request.user)
+        'search_form': form, 'search_results': results,
+        'user_is_editor': user_is_editor(request.user)}
     context_data.update(user_preferences)
     return render_to_response('eats/display/search.html', context_data,
                               context_instance=RequestContext(request))

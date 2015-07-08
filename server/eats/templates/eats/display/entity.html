@@ -7,6 +7,8 @@
 <article class="entity-display">
   <h1>{{ preferred_name_form }}</h1>
 
+  {% if user_is_editor %}<p>[<a href="{% url 'entity-change' entity.get_id %}">Edit</a>]</p>{% endif %}
+
   {% if existence_dates %}
   <section>
     <h1>Dates</h1>
