@@ -3,7 +3,6 @@
 
 {% block eats_title %}{{ block.super }} entity {{ preferred_name }}{% endblock %}
 {% block eats_style %}{{ block.super }}
-<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/themes/ui-lightness/jquery-ui.css" type="text/css" media="screen"/>
 {{ entity_relationship_formset.media.css }}
 {% endblock eats_style %}
 {% block eats_js %}{{ block.super }}
@@ -411,15 +410,6 @@
 {% endblock eats_content %}
 
 {% block eats_end_js %}
-<script type="application/javascript">
-/* Prevent autoescaping of text in autocomplete. Code from http://www.arctickiwi.com/blog/jquery-autocomplete-labels-escape-html-tags */
-$[ "ui" ][ "autocomplete" ].prototype["_renderItem"] = function( ul, item) {
-return $( "<li></li>" ) 
-  .data( "item.autocomplete", item )
-  .append( $( "<a></a>" ).html( item.label ) )
-  .appendTo( ul );
-};
-</script>
 <script type="application/javascript">
 $(document).ready(function() {
   $('.npls-toggled').hide();
