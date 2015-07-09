@@ -46,9 +46,9 @@
           <td>{% if form.instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
           <td>{{ form.authority }}</td>
           <td>{% if form.instance %}{% with dates=form.instance.get_dates %}{% if dates %}<ul>
-          {% for date in dates %}<li><a href="{{ form.assertion.value }}/date/{{ date.get_id }}/">{{ date.assembled_form }}</a></li>{% endfor %}
+          {% for date in dates %}<li><a href="{% url 'date-change' entity_id form.assertion.value date.get_id %}">{{ date.assembled_form }}</a></li>{% endfor %}
           </ul>{% endif %}{% endwith %}
-          <p><a href="{{ form.assertion.value }}/date/add/">Add a date</a></p>{% endif %}</td>
+          <p><a href="{% url 'date-add' entity_id form.assertion.value %}">Add a date</a></p>{% endif %}</td>
           <td class="errors">{% if form.errors %}<ul>
           {% for error in form.errors.values %}
           <li>{{ error }}</li>
@@ -96,9 +96,9 @@
             {% endif %}
           </td>
           <td>{% if form.instance %}{% with dates=form.instance.get_dates %}{% if dates %}<ul>
-          {% for date in dates %}<li><a href="{{ form.assertion.value }}/date/{{ date.get_id }}/">{{ date.assembled_form }}</a></li>{% endfor %}
+          {% for date in dates %}<li><a href="{% url 'date-change' entity_id form.assertion.value date.get_id %}">{{ date.assembled_form }}</a></li>{% endfor %}
           </ul>{% endif %}{% endwith %}
-          <p><a href="{{ form.assertion.value }}/date/add/">Add a date</a></p>{% endif %}</td>
+          <p><a href="{% url 'date-add' entity_id form.assertion.value %}">Add a date</a></p>{% endif %}</td>
           <td class="errors">{{ form.non_field_errors }}</td>
         </tr>
         {% endfor %}
@@ -184,9 +184,9 @@
             {% endif %}
           </td>
           <td>{% if form.instance %}{% with dates=form.instance.get_dates %}{% if dates %}<ul>
-          {% for date in dates %}<li><a href="{{ form.assertion.value }}/date/{{ date.get_id }}/">{{ date.assembled_form }}</a></li>{% endfor %}
+          {% for date in dates %}<li><a href="{% url 'date-change' entity_id form.assertion.value date.get_id %}">{{ date.assembled_form }}</a></li>{% endfor %}
           </ul>{% endif %}{% endwith %}
-          <p><a href="{{ form.assertion.value }}/date/add/">Add a date</a></p>{% endif %}</td>
+          <p><a href="{% url 'date-add' entity_id form.assertion.value %}">Add a date</a></p>{% endif %}</td>
           <td class="errors">{{ form.non_field_errors }}{{ form.name_part_formset.management_form }}</td>
         </tr>
         <tr class="{{ assertion_row }} name-part-section">
@@ -270,9 +270,9 @@
             {% endif %}
           </td>
           <td>{% if form.instance %}{% with dates=form.instance.get_dates %}{% if dates %}<ul>
-          {% for date in dates %}<li><a href="{{ form.assertion.value }}/date/{{ date.get_id }}/">{{ date.assembled_form }}</a></li>{% endfor %}
+          {% for date in dates %}<li><a href="{% url 'date-change' entity_id form.assertion.value date.get_id %}">{{ date.assembled_form }}</a></li>{% endfor %}
           </ul>{% endif %}{% endwith %}
-          <p><a href="{{ form.assertion.value }}/date/add/">Add a date</a></p>{% endif %}</td>
+          <p><a href="{% url 'date-add' entity_id form.assertion.value %}">Add a date</a></p>{% endif %}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -401,10 +401,10 @@
   </div>
 </form>
 
-<p>It may be possible for you to <a href="../merge/">merge this entity
+<p>It may be possible for you to <a href="{% url 'entity-merge' entity_id %}">merge this entity
   with another</a>.</p>
 
-<p>It may be possible for you to <a href="../delete/">delete this entity</a>.</p>
+<p>It may be possible for you to <a href="{% url 'entity-delete' entity_id %}">delete this entity</a>.</p>
 
 </article>
 {% endblock eats_content %}

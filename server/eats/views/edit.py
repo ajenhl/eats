@@ -103,6 +103,7 @@ def entity_change (request, topic_map, entity_id):
                 for formset in formsets:
                     formset.save()
                 return redirect(redirect_url)
+    context_data['entity_id'] = entity_id
     context_data['current_authority_form'] = current_authority_form
     context_data['existence_non_editable'] = existences.non_editable
     context_data['existence_formset'] = existences_formset
