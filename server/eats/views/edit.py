@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.http import HttpResponse, Http404
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
-from django.shortcuts import get_object_or_404, redirect, render_to_response
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template import RequestContext
 
 from lxml import etree
@@ -41,8 +41,7 @@ def entity_add (request, topic_map):
     else:
         form = CreateEntityForm(topic_map, authorities)
     context_data = {'form': form}
-    return render_to_response('eats/edit/entity_add.html', context_data,
-                              context_instance=RequestContext(request))
+    return render(request, 'eats/edit/entity_add.html', context_data)
 
 @user_passes_test(user_is_editor)
 @add_topic_map
@@ -129,8 +128,7 @@ def entity_change (request, topic_map, entity_id):
         context_data['preferred_name'] = preferred_name_assertion.name.assembled_form
     else:
         context_data['preferred_name'] = UNNAMED_ENTITY_NAME
-    return render_to_response('eats/edit/entity_change.html', context_data,
-                              context_instance=RequestContext(request))
+    return render(request, 'eats/edit/entity_change.html', context_data)
 
 @user_passes_test(user_is_editor)
 @add_topic_map
@@ -152,8 +150,7 @@ def entity_delete (request, topic_map, entity_id):
         entity.remove()
         return redirect(reverse('search'))
     context_data = {'can_delete': can_delete}
-    return render_to_response('eats/edit/entity_delete.html', context_data,
-                              context_instance=RequestContext(request))
+    return render(request, 'eats/edit/entity_delete.html', context_data)
 
 @user_passes_test(user_is_editor)
 @add_topic_map
@@ -185,8 +182,7 @@ def entity_merge (request, topic_map, entity_id):
     else:
         form = EntityMergeForm()
     context_data['form'] = form
-    return render_to_response('eats/edit/entity_merge.html', context_data,
-                              context_instance=RequestContext(request))
+    return render(request, 'eats/edit/entity_merge.html', context_data)
 
 @user_passes_test(user_is_editor)
 @add_topic_map
@@ -221,8 +217,7 @@ def date_add (request, topic_map, entity_id, assertion_id):
         form = DateForm(topic_map, calendar_choices, date_period_choices,
                         date_type_choices)
     context_data = {'form': form}
-    return render_to_response('eats/edit/date_add.html', context_data,
-                              context_instance=RequestContext(request))
+    return render(request, 'eats/edit/date_add.html', context_data)
 
 @user_passes_test(user_is_editor)
 @add_topic_map
@@ -262,8 +257,7 @@ def date_change (request, topic_map, entity_id, assertion_id, date_id):
         form = DateForm(topic_map, calendar_choices, date_period_choices,
                         date_type_choices, instance=date)
     context_data = {'form': form}
-    return render_to_response('eats/edit/date_change.html', context_data,
-                              context_instance=RequestContext(request))
+    return render(request, 'eats/edit/date_change.html', context_data)
 
 @user_passes_test(user_is_editor)
 @add_topic_map
@@ -321,7 +315,7 @@ def import_eatsml (request, topic_map):
                     import_tree, annotated_tree = EATSMLImporter(
                         topic_map).import_xml(eatsml, user)
             except Exception, e:
-                response = render_to_response(
+                response = render(request, 
                     '500.html', {'message': e},
                     context_instance=RequestContext(request))
                 response.status_code = 500
@@ -352,16 +346,13 @@ def import_eatsml (request, topic_map):
     except (EmptyPage, InvalidPage):
         imports = paginator.page(paginator.num_pages)
     context_data = {'form': form, 'imports': imports}
-    return render_to_response('eats/edit/eatsml_import.html', context_data,
-                              context_instance=RequestContext(request))
+    return render(request, 'eats/edit/eatsml_import.html', context_data)
 
 @user_passes_test(user_is_editor)
 def display_eatsml_import (request, import_id):
     eatsml_import = get_object_or_404(EATSMLImport, pk=import_id)
     context_data = {'import': eatsml_import}
-    return render_to_response(
-        'eats/edit/eatsml_import_display.html', context_data,
-        context_instance=RequestContext(request))
+    return render(request, 'eats/edit/eatsml_import_display.html', context_data)
 
 @user_passes_test(user_is_editor)
 def display_eatsml_import_raw (request, import_id):

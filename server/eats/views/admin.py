@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, Http404
-from django.shortcuts import redirect, render_to_response
+from django.shortcuts import redirect, render
 from django.template import RequestContext
 
 from tmapi.exceptions import TopicMapExistsException
@@ -12,8 +12,13 @@ from tmapi.models import TopicMap, TopicMapSystemFactory
 
 from eats.decorators import add_topic_map
 from eats.lib.views import get_topic_or_404
-from eats.models import Authority, Calendar, DatePeriod, DateType, EATSUser, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
-from eats.forms.admin import AuthorityForm, CalendarForm, DatePeriodForm, DateTypeForm, EntityRelationshipForm, EntityTypeForm, LanguageForm, NamePartTypeForm, NameTypeForm, ScriptForm
+from eats.models import (Authority, Calendar, DatePeriod, DateType, EATSUser,
+                         EntityRelationshipType, EntityType, Language,
+                         NamePartType, NameType, Script)
+from eats.forms.admin import (AuthorityForm, CalendarForm, DatePeriodForm,
+                              DateTypeForm, EntityRelationshipForm,
+                              EntityTypeForm, LanguageForm, NamePartTypeForm,
+                              NameTypeForm, ScriptForm)
 
 
 def administration_panel (request):
@@ -30,8 +35,7 @@ def administration_panel (request):
         context_data['tm_status'] = 'no_tm'
     if tm is not None:
         context_data['has_tm'] = True
-    return render_to_response('eats/admin/panel.html', context_data,
-                              context_instance=RequestContext(request))
+    return render(request, 'eats/admin/panel.html', context_data)
 
 def create_topic_map (request):
     """Creates the topic map to be used by the EATS application, and
@@ -52,7 +56,7 @@ def create_topic_map (request):
         status = 'exists'
     except:
         status = 'failed'
-    redirect_url = urljoin(reverse('administration-panel'), '?tm_create=' + 
+    redirect_url = urljoin(reverse('administration-panel'), '?tm_create=' +
                            status)
     return HttpResponseRedirect(redirect_url)
 
@@ -60,8 +64,7 @@ def create_topic_map (request):
 def topic_list (request, topic_map, model):
     topics = model.objects.all()
     context_data = {'opts': model._meta, 'topics': topics}
-    return render_to_response('eats/admin/topic_list.html', context_data,
-                              context_instance=RequestContext(request))
+    return render(request, 'eats/admin/topic_list.html', context_data)
 
 @add_topic_map
 def topic_add (request, topic_map, model):
@@ -76,8 +79,7 @@ def topic_add (request, topic_map, model):
     else:
         form = form_class(topic_map, model)
     context_data = {'form': form, 'opts': opts}
-    return render_to_response('eats/admin/topic_add.html', context_data,
-                              context_instance=RequestContext(request))
+    return render(request, 'eats/admin/topic_add.html', context_data)
 
 @add_topic_map
 def topic_change (request, topic_map, topic_id, model):
@@ -93,8 +95,7 @@ def topic_change (request, topic_map, topic_id, model):
     else:
         form = form_class(topic_map, model, instance=topic)
     context_data = {'form': form, 'opts': opts, 'name': topic.get_admin_name()}
-    return render_to_response('eats/admin/topic_change.html', context_data,
-                              context_instance=RequestContext(request))
+    return render(request, 'eats/admin/topic_change.html', context_data)
 
 @add_topic_map
 def topic_delete (request, topic_map, topic_id, model):
@@ -145,8 +146,7 @@ def user_list (request):
     eats_users = EATSUser.objects.all()
     django_users = User.objects.filter(eats_user__isnull=True)
     context_data = {'eats_users': eats_users, 'django_users': django_users}
-    return render_to_response('eats/admin/user_list.html', context_data,
-                              context_instance=RequestContext(request))
+    return render(request, 'eats/admin/user_list.html', context_data)
 
 def user_change (request, eats_user_id):
     # This is a ridiculous workaround Django failing the
@@ -171,8 +171,7 @@ def user_change (request, eats_user_id):
     else:
         form = EATSUserForm(instance=eats_user)
     context_data = {'form': form, 'user': eats_user.user}
-    return render_to_response('eats/admin/user_change.html', context_data,
-                              context_instance=RequestContext(request))
+    return render(request, 'eats/admin/user_change.html', context_data)
 
 def user_activate (request):
     """Creates an EATS user for the POSTed Django user ID."""

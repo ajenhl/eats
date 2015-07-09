@@ -1,7 +1,7 @@
 from django.contrib.sites.models import Site
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse
-from django.shortcuts import redirect, render_to_response
+from django.shortcuts import redirect, render
 from django.template import RequestContext
 
 from lxml import etree
@@ -19,8 +19,7 @@ from eats.models import Entity, EntityType
 def home (request):
     context_data = {}
     context_data['user_is_editor'] = user_is_editor(request.user)
-    return render_to_response('eats/display/home.html', context_data,
-                              context_instance=RequestContext(request))
+    return render(request, 'eats/display/home.html', context_data)
 
 @add_topic_map
 def entity_view (request, topic_map, entity_id):
@@ -58,8 +57,7 @@ def entity_view (request, topic_map, entity_id):
                     'subject_identifier_pas': subject_identifier_pas,
                     'site': Site.objects.get_current(),
                     'user_is_editor': user_is_editor(request.user)}
-    return render_to_response('eats/display/entity.html', context_data,
-                              context_instance=RequestContext(request))
+    return render(request, 'eats/display/entity.html', context_data)
 
 @add_topic_map
 def entity_eatsml_view (request, topic_map, entity_id):
@@ -101,8 +99,7 @@ def search (request, topic_map):
         'search_form': form, 'search_results': results,
         'user_is_editor': user_is_editor(request.user)}
     context_data.update(user_preferences)
-    return render_to_response('eats/display/search.html', context_data,
-                              context_instance=RequestContext(request))
+    return render(request, 'eats/display/search.html', context_data)
 
 @add_topic_map
 def search_eatsml (request, topic_map):
