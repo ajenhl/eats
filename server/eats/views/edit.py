@@ -6,7 +6,6 @@ from django.db import transaction
 from django.http import HttpResponse, Http404
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.shortcuts import get_object_or_404, redirect, render
-from django.template import RequestContext
 
 from lxml import etree
 
@@ -315,9 +314,7 @@ def import_eatsml (request, topic_map):
                     import_tree, annotated_tree = EATSMLImporter(
                         topic_map).import_xml(eatsml, user)
             except Exception, e:
-                response = render(request, 
-                    '500.html', {'message': e},
-                    context_instance=RequestContext(request))
+                response = render(request, '500.html', {'message': e})
                 response.status_code = 500
                 return response
             description = form.cleaned_data['description']

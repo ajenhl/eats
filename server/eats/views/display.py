@@ -2,7 +2,6 @@ from django.contrib.sites.models import Site
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
-from django.template import RequestContext
 
 from lxml import etree
 
