@@ -50,7 +50,7 @@ def entity_change (request, topic_map, entity_id):
     except EATSMergedIdentifierException, e:
         return redirect('entity-change', entity_id=e.new_id, permanent=True)
     editor = request.user.eats_user
-    context_data = {'entity': entity}
+    context_data = {'entity': entity, 'is_valid': True}
     authority = editor.get_current_authority()
     editable_authorities = editor.editable_authorities.all()
     authority_data = {'current_authority': authority.get_id()}
@@ -96,6 +96,7 @@ def entity_change (request, topic_map, entity_id):
             for formset in formsets:
                 is_valid = formset.is_valid()
                 if not is_valid:
+                    context_data['is_valid'] = False
                     break
             if is_valid:
                 for formset in formsets:

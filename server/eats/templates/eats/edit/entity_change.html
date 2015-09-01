@@ -13,6 +13,11 @@
 <article class="entity-display">
 <h1>Edit entity {{ preferred_name }}</h1>
 
+{% if not is_valid %}
+<p class="errors">There are problems in the form which must be
+corrected before it will save.</p>
+{% endif %}
+
 <form action="" method="post">
   {% csrf_token %}
 
