@@ -1,29 +1,10 @@
-#entity-change-form table {
-   border-collapse: collapse;
-}
-
-#entity-change-form th, #entity-change-form td {
-   text-align: left;
-   padding: 0 2em 0.5em 0;
-}
-#entity-change-form table.name-parts th,
-#entity-change-form table.name-parts td {
-   padding-bottom: 0;
-}
 #entity-change-form td ul {
    margin: 0;
    padding: 0;
    list-style-type: none;
 }
-#entity-change-form a:link, #entity-change-form a:visited {
-   text-decoration: none;
-   color: #5B80B2; }
-#entity-change-form a:hover { color: #003366; }
 .errors { color: red; }
 .npls-toggle, .name-part-section-toggle {
    color: #5B80B2;
    cursor: pointer;
-}
-#entity-change-form .assertion-row1 {
-   background-color: #EDF3FE;
 }

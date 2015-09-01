@@ -1,16 +1,5 @@
 /* Global page layout */
 
-/* Forms */
-
-fieldset { margin-bottom: 2em; }
-legend { font-size: larger; }
-
-/* Tables */
-
-th, td { vertical-align: top; }
-th[scope="row"] { text-align: left; }
-td p { margin-top: 0; }
-
 /* Entity search */
 
 #search-results { margin: 0 8em 0 4em; }

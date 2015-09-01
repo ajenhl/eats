@@ -143,14 +143,13 @@
       </thead>
       <tbody class="eats-editable-pa">
         {% for form in name_formset %}
-        {% cycle 'assertion-row1' 'assertion-row2' as assertion_row silent %}
         {% if form.instance %}
-        <tr class="{{ assertion_row }}">
+        <tr>
           <td></td>
           <td colspan="8">{{ form.instance.name.assembled_form }}</td>
         </tr>
         {% endif %}
-        <tr class="{{ assertion_row }}">
+        <tr>
           <td>{% if form.instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
           <td><span class="name-part-section-toggle">+</span></td>
           <td>
@@ -189,7 +188,7 @@
           <p><a href="{% url 'date-add' entity_id form.assertion.value %}">Add a date</a></p>{% endif %}</td>
           <td class="errors">{{ form.non_field_errors }}{{ form.name_part_formset.management_form }}</td>
         </tr>
-        <tr class="{{ assertion_row }} name-part-section">
+        <tr class="name-part-section">
           <td></td>
           <td colspan="8">
             <table class="name-parts">
