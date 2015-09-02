@@ -934,6 +934,7 @@ def create_choice_list (topic_map, queryset, default=False):
     # based on the user's preferences.
     choices = [(unicode(item.get_id()), item.get_admin_name())
                for item in queryset]
+    choices.sort(key=lambda x: x[1])
     if not (len(queryset) == 1 and default):
         choices = [('', '----------')] + choices
     return choices
