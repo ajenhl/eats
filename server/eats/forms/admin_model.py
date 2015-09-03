@@ -15,4 +15,4 @@ class EATSUserForm (forms.ModelForm):
 
     class Meta:
         model = EATSUser
-        exclude = ('editable_authorities', 'current_authority')
+        exclude = ('editable_authorities', 'current_authority', 'user')
