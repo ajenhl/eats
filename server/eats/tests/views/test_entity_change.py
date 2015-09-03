@@ -60,6 +60,15 @@ class EntityChangeViewTestCase (ViewTestCase):
             self.assertEqual(response.context[formset].initial_form_count(), 0,
                              'Expected no %ss' % formset)
 
+    def test_post_redirect_add (self):
+        entity = self.tm.create_entity(self.authority)
+        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        response = form.submit('_save_add').follow()
+        add_url = reverse('entity-add')
+        self.assertEqual(response.request.url[len(response.request.host_url):],
+                         add_url)
+
     def test_post_entity_relationships (self):
         entity = self.tm.create_entity(self.authority)
         entity2 = self.tm.create_entity(self.authority)

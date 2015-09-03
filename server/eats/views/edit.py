@@ -101,6 +101,8 @@ def entity_change (request, topic_map, entity_id):
             if is_valid:
                 for formset in formsets:
                     formset.save()
+                if '_save_add' in request.POST:
+                    redirect_url = reverse('entity-add')
                 return redirect(redirect_url)
     context_data['entity_id'] = entity_id
     context_data['current_authority_form'] = current_authority_form
