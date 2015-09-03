@@ -19,7 +19,7 @@
 
     <form action="" id="entity-delete-form" method="post">
       {% csrf_token %}
-      <input type="submit" value="Delete" name="_delete"/>
+      <input class="button" type="submit" value="Delete" name="_delete"/>
     </form>
   </div>
   {% else %}
@@ -28,4 +28,3 @@
 
 </article>
 {% endblock eats_content %}
-

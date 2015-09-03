@@ -14,11 +14,11 @@
 <h2>Unactivated users</h2>
 
 {% if django_users %}
-<p>The following users exist, but are not set up as EATS users.</p>
+<p>The following users exist, but are not set up as EATS users:</p>
 
 <ul>
   {% for user in django_users %}
-  <li><form action="{% url 'user-activate' %}" method="post">{{ user }} {% csrf_token %}<input name="user_id" type="hidden" value="{{ user.pk }}" /><input type="submit" value="Activate" /></form></li>
+  <li><form action="{% url 'user-activate' %}" method="post">{{ user }} {% csrf_token %}<input name="user_id" type="hidden" value="{{ user.pk }}" /><input class="button tiny" type="submit" value="Activate" /></form></li>
   {% endfor %}
 </ul>
 </form>
