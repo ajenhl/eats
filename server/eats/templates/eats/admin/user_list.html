@@ -16,12 +16,9 @@
 {% if django_users %}
 <p>The following users exist, but are not set up as EATS users.</p>
 
-<form action="activate/" method="post">
-{% csrf_token %}
-
 <ul>
   {% for user in django_users %}
-  <li>{{ user }} <input name="user_id" type="hidden" value="{{ user.pk }}" /><input type="submit" value="Activate" /></li>
+  <li><form action="{% url 'user-activate' %}" method="post">{{ user }} {% csrf_token %}<input name="user_id" type="hidden" value="{{ user.pk }}" /><input type="submit" value="Activate" /></form></li>
   {% endfor %}
 </ul>
 </form>
