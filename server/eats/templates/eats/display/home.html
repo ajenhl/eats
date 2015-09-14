@@ -6,9 +6,9 @@
 <nav>
   <h1>Useful links</h1>
   <ul>
-    <li>Statistics</li>
+    <li><a href="{% url 'statistics' %}">Statistics</a></li>
     {% if user_is_editor %}
-    <li><a href="administer/">Administer EATS</a></li>
+    <li><a href="{% url 'administration-panel' %}">Administer EATS</a></li>
     {% endif %}
   </ul>
 </nav>

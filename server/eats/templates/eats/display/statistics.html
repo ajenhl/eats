@@ -1,0 +1,60 @@
+{% extends "eats/display/base.html" %}
+
+{% block eats_title %}{{ block.super }} Statistics{% endblock eats_title %}
+
+{% block eats_style %}{{ block.super }}
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+{% endblock eats_style %}
+
+{% block eats_js %}{{ block.super }}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+{% endblock %}
+
+{% block eats_content %}
+<section>
+  <h1>Statistics</h1>
+
+  <p>Number of entities: {{ number_entities }}</p>
+
+  <h2>Entity types</h2>
+
+  <div>
+    <p style="text-align: center; margin-bottom: 0;">Number of entities by entity type and authority</p>
+    <div id="entity_types_by_authority_chart" style="height: 200px;"></div>
+  </div>
+
+  <h2>Entity relationships</h2>
+
+  <div>
+    <p style="text-align: center; margin-bottom: 0;">Number of entities by relationship type and authority</p>
+    <div id="entity_relationships_by_authority_chart" style="height: 200px;"></div>
+  </div>
+{% endblock eats_content %}
+
+{% block eats_end_js %}{{ block.super }}
+<script>
+  var authorityList = [{% for authority in authorities %}"{{ authority }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
+
+  new Morris.Bar({
+    element: "entity_types_by_authority_chart",
+    data: [{% for entity_type, data in entity_type_stats.items %}
+    { entity_type: "{{ entity_type }}", {% for authority, count in data.items %}"{{ authority }}": {{ count }}{% if not forloop.last %}, {% endif %}{% endfor %}}{% if not forloop.last %}, {% endif %}{% endfor %}],
+    xkey: 'entity_type',
+    ykeys: authorityList,
+    labels: authorityList,
+    hideHover: false,
+  });
+
+  new Morris.Bar({
+    element: "entity_relationships_by_authority_chart",
+    data: [{% for relationship_type, data in entity_relationship_stats.items %}
+    { relationship_type: "{{ relationship_type }}", {% for authority, count in data.items %}"{{ authority }}": {{ count }}{% if not forloops.last %}, {% endif %}{% endfor %}}{% if not forloop.last %}, {% endif %}{% endfor %}],
+    xkey: 'relationship_type',
+    ykeys: authorityList,
+    labels: authorityList,
+    hideHover: false,
+  });
+</script>
+{% endblock eats_end_js %}

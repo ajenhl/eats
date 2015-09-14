@@ -12,6 +12,7 @@ urlpatterns = patterns(
         name='entity-eatsml-view'),
     url(r'^search/$', 'search', name='search'),
     url(r'^search/eatsml/$', 'search_eatsml', name='search-eatsml'),
+    url(r'^statistics/$', 'statistics', name='statistics'),
     )
 
 # Editing.
