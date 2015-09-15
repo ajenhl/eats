@@ -4,7 +4,7 @@ try:
 except ImportError:
     from datetime import datetime
 
-from eats_user import EATSUser
+from .eats_user import EATSUser
 
 
 class EATSMLImport (models.Model):

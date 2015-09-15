@@ -135,7 +135,7 @@ class NameAssertionFormSet (PropertyAssertionFormSet):
         try:
             instance = self.instances[i]
             instances = [[name_part_type, name_parts] for name_part_type,
-                         name_parts in instance.name.get_name_parts().items()]
+                         name_parts in list(instance.name.get_name_parts().items())]
             # QAZ: It would be nice to order these instances by the
             # name part type order associated with the language of
             # this name.
@@ -215,7 +215,7 @@ class SubjectIdentifierAssertionFormSet (PropertyAssertionFormSet):
             # the formset are unique.
             subject_identifier_values = []
             for form_data in self.cleaned_data:
-                for field, value in form_data.items():
+                for field, value in list(form_data.items()):
                     if field == 'subject_identifier' and value:
                         subject_identifier_values.append(value)
             if len(subject_identifier_values) != len(set(
@@ -661,7 +661,7 @@ class NamePartForm (forms.Form):
 
     def _objectify_data (self, base_data):
         data = {}
-        for name, value in base_data.items():
+        for name, value in list(base_data.items()):
             if not value:
                 data[name] = value
             elif name.startswith('name_part_display_form'):
@@ -932,7 +932,7 @@ def create_choice_list (topic_map, queryset, default=False):
     """
     # QAZ: need a function for getting the most appropriate name,
     # based on the user's preferences.
-    choices = [(unicode(item.get_id()), item.get_admin_name())
+    choices = [(str(item.get_id()), item.get_admin_name())
                for item in queryset]
     choices.sort(key=lambda x: x[1])
     if not (len(queryset) == 1 and default):

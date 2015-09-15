@@ -1,25 +1,23 @@
-# -*- coding: utf-8 -*-
-
 import re
 import unicodedata
 
 
 ABBREVIATIONS = {'en': ((' and ', ' & '),)}
-ASCII_SUBSTITUTIONS = ((u'Æ', u'AE'), (u'æ', u'ae'), (u'Œ', u'OE'),
-                       (u'œ', u'oe'), (u'ß', u'ss'), (u'ſ', u's'),
-                       (u'ʻ', "'"), (u'“', u'"'), (u'”', u'"'), (u'‘', u"'"),
-                       (u'’', u"'"),)
-MACRON_PATTERN = re.compile(u'([aeiou])\N{COMBINING MACRON}', re.UNICODE)
+ASCII_SUBSTITUTIONS = (('Æ', 'AE'), ('æ', 'ae'), ('Œ', 'OE'),
+                       ('œ', 'oe'), ('ß', 'ss'), ('ſ', 's'),
+                       ('ʻ', "'"), ('“', '"'), ('”', '"'), ('‘', "'"),
+                       ('’', "'"),)
+MACRON_PATTERN = re.compile('([aeiou])\N{COMBINING MACRON}', re.UNICODE)
 
 
 def abbreviate_name (name, language_code):
     """Returns `name` with full elements abbreviated.
 
     :param name: name to be converted
-    :type name: Unicode string
+    :type name: `str`
     :param language_code: ISO language code for `name`
     :type language_code: `str`
-    :rtype: Unicode string
+    :rtype: `str`
 
     """
     for full, abbreviated in ABBREVIATIONS.get(language_code, ()):
@@ -30,12 +28,12 @@ def asciify_name (name):
     """Returns `name` converted to ASCII.
 
     :param name: name to be converted
-    :type name: Unicode string
-    :rtype: Unicode string
+    :type name: `str`
+    :rtype: `str`
 
     """
     substituted_form = substitute_ascii(name)
-    ascii_form = unicode(substituted_form.encode('ascii', 'ignore'))
+    ascii_form = substituted_form.encode('ascii', 'ignore').decode()
     return ascii_form
 
 def create_name_forms (name, language_code=None, script_code=None):
@@ -68,8 +66,8 @@ def substitute_ascii (name):
     equivalents.
 
     :param name: name to be converted
-    :type name: Unicode string
-    :rtype: Unicode string
+    :type name: `str`
+    :rtype: `str`
 
     """
     for original, substitute in ASCII_SUBSTITUTIONS:
@@ -80,8 +78,8 @@ def unpunctuate_name (name):
     """Returns `name` with punctuation removed.
 
     :param name: name to be converted
-    :type name: Unicode string
-    :rtype: Unicode string
+    :type name: `str`
+    :rtype: `str`
 
     """
     # QAZ: This does not work well in some cases, such as "On Self
@@ -92,4 +90,4 @@ def unpunctuate_name (name):
         # Punctuation categories start with 'P'.
         if category[0] != 'P':
             char_array.append(character)
-    return u''.join(char_array)
+    return ''.join(char_array)

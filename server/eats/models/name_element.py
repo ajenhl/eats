@@ -1,5 +1,5 @@
-from language import Language
-from script import Script
+from .language import Language
+from .script import Script
 
 
 class NameElement (object):
@@ -10,7 +10,7 @@ class NameElement (object):
     def display_form (self):
         """Returns the display form of this name.
 
-        :rtype: unicode string
+        :rtype: `str`
 
         """
         return self._get_name().get_value()
@@ -23,7 +23,7 @@ class NameElement (object):
         the name index.
 
         :param value: value of the name
-        :type value: unicode string
+        :type value: `str`
 
         """
         self._get_name().set_value(value)
@@ -31,7 +31,7 @@ class NameElement (object):
     @property
     def eats_topic_map (self):
         if not hasattr(self, '_eats_topic_map'):
-            from eats_topic_map import EATSTopicMap
+            from .eats_topic_map import EATSTopicMap
             self._eats_topic_map = self.get_topic_map(proxy=EATSTopicMap)
         return self._eats_topic_map
 
@@ -72,7 +72,7 @@ class NameElement (object):
 
         """
         raise NotImplemented
-        
+
     @property
     def script (self):
         """Returns the script of this name.

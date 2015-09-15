@@ -27,12 +27,12 @@ class NamePartTestCase (ModelTestCase):
         self.assertEqual(len(self.name.get_name_parts()), 0)
         name_part = self.name.create_name_part(
             self.name_part_type1, self.language, self.script, 'Sam', 1)
-        self.assertEqual(len(self.name.get_name_parts().keys()), 1)
-        self.assertEqual(self.name.get_name_parts().keys()[0],
+        self.assertEqual(len(list(self.name.get_name_parts().keys())), 1)
+        self.assertEqual(list(self.name.get_name_parts().keys())[0],
                          self.name_part_type1)
-        self.assertEqual(len(self.name.get_name_parts().values()), 1)
-        self.assertEqual(len(self.name.get_name_parts().values()[0]), 1)
-        self.assertEqual(self.name.get_name_parts().values()[0][0], name_part)
+        self.assertEqual(len(list(self.name.get_name_parts().values())), 1)
+        self.assertEqual(len(list(self.name.get_name_parts().values())[0]), 1)
+        self.assertEqual(list(self.name.get_name_parts().values())[0][0], name_part)
 
     def test_delete_name_part (self):
         self.assertEqual(len(self.name.get_name_parts()), 0)

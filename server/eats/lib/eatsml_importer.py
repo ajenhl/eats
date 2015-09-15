@@ -86,7 +86,7 @@ class EATSMLImporter (EATSMLHandler):
         parser = etree.XMLParser(remove_blank_text=True)
         try:
             import_tree = etree.XML(eatsml, parser).getroottree()
-        except etree.XMLSyntaxError, e:
+        except etree.XMLSyntaxError as e:
             message = 'EATSML is not well-formed: %s' % str(e)
             raise EATSMLException(message)
         self._validate(import_tree)

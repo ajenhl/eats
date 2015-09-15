@@ -1,7 +1,7 @@
 from tmapi.models import Locator, Occurrence
 
-from base_manager import BaseManager
-from property_assertion import PropertyAssertion
+from .base_manager import BaseManager
+from .property_assertion import PropertyAssertion
 
 
 class SubjectIdentifierPropertyAssertionManager (BaseManager):
@@ -30,7 +30,7 @@ class SubjectIdentifierPropertyAssertion (Occurrence, PropertyAssertion):
 
         """
         if not hasattr(self, '_entity'):
-            from entity import Entity
+            from .entity import Entity
             self._entity = self.get_parent(proxy=Entity)
         return self._entity
 
@@ -38,7 +38,7 @@ class SubjectIdentifierPropertyAssertion (Occurrence, PropertyAssertion):
     def subject_identifier (self):
         """Returns the textual content of the asserted subject_identifier.
 
-        :rtype: unicode string
+        :rtype: `str`
 
         """
         return self.get_value()
@@ -47,7 +47,7 @@ class SubjectIdentifierPropertyAssertion (Occurrence, PropertyAssertion):
         """Updates this property assertion.
 
         :param subject_identifier: subject_identifier URL
-        :type subject_identifier: unicode string URL
+        :type subject_identifier: `str`
 
         """
         if self.get_value() != subject_identifier:

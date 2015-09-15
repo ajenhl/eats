@@ -1,7 +1,7 @@
 from tmapi.models import Occurrence
 
-from base_manager import BaseManager
-from property_assertion import PropertyAssertion
+from .base_manager import BaseManager
+from .property_assertion import PropertyAssertion
 
 
 class NotePropertyAssertionManager (BaseManager):
@@ -30,7 +30,7 @@ class NotePropertyAssertion (Occurrence, PropertyAssertion):
 
         """
         if not hasattr(self, '_entity'):
-            from entity import Entity
+            from .entity import Entity
             self._entity = self.get_parent(proxy=Entity)
         return self._entity
 
@@ -38,7 +38,7 @@ class NotePropertyAssertion (Occurrence, PropertyAssertion):
     def note (self):
         """Returns the textual content of the asserted note.
 
-        :rtype: unicode string
+        :rtype: `str`
 
         """
         return self.get_value()
@@ -47,7 +47,7 @@ class NotePropertyAssertion (Occurrence, PropertyAssertion):
         """Updates this property assertion.
 
         :param note: note text
-        :type note: unicode string
+        :type note: `str`
 
         """
         if self.get_value() != note:

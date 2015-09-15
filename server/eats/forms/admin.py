@@ -257,7 +257,7 @@ class LanguageForm (AdminForm):
         # Enforce uniqueness among the values of all the name part
         # type fields.
         name_part_type_values = []
-        for field, value in self.cleaned_data.items():
+        for field, value in list(self.cleaned_data.items()):
             if field.startswith(self.npt_base_name) and value:
                 name_part_type_values.append(value)
         if len(name_part_type_values) != len(set(name_part_type_values)):
@@ -302,11 +302,11 @@ class LanguageForm (AdminForm):
     def _objectify_data (self, base_data):
         data = {}
         index = len(self.npt_base_name)
-        for name, value in base_data.items():
+        for name, value in list(base_data.items()):
             if name.startswith(self.npt_base_name) and value:
                 order = int(name[index:])
                 data[order] = NamePartType.objects.get_by_identifier(value)
-        keys = data.keys()
+        keys = list(data.keys())
         keys.sort()
         name_part_types = []
         for key in keys:

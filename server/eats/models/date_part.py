@@ -1,7 +1,7 @@
 from tmapi.models import Name
 
-from calendar import Calendar
-from date_type import DateType
+from .calendar import Calendar
+from .date_type import DateType
 
 
 class DatePart (Name):
@@ -99,7 +99,7 @@ class DatePart (Name):
         :rtype: `Date`
 
         """
-        from date import Date
+        from .date import Date
         return self.get_parent(proxy=Date)
 
     @property
@@ -139,7 +139,7 @@ class DatePart (Name):
     @property
     def eats_topic_map (self):
         if not hasattr(self, '_eats_topic_map'):
-            from eats_topic_map import EATSTopicMap
+            from .eats_topic_map import EATSTopicMap
             self._eats_topic_map = self.get_topic_map(proxy=EATSTopicMap)
         return self._eats_topic_map
 

@@ -1,7 +1,7 @@
 from tmapi.models import Association
 
-from base_manager import BaseManager
-from property_assertion import PropertyAssertion
+from .base_manager import BaseManager
+from .property_assertion import PropertyAssertion
 
 
 class ExistencePropertyAssertionManager (BaseManager):

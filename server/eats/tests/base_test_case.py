@@ -57,7 +57,7 @@ class BaseTestCase (object):
         if not hasattr(self, '_managers'):
             self._managers = []
             eats_app = apps.get_app_config('eats')
-            for model in eats_app.models.values():
+            for model in list(eats_app.models.values()):
                 manager = model.objects
                 if hasattr(manager, '_eats_topic_map'):
                     self._managers.append(manager)

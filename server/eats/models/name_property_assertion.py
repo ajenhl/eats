@@ -2,10 +2,10 @@ from django.db.models import Q
 
 from tmapi.models import Association
 
-from base_manager import BaseManager
-from name import Name
-from name_cache import NameCache
-from property_assertion import PropertyAssertion
+from .base_manager import BaseManager
+from .name import Name
+from .name_cache import NameCache
+from .property_assertion import PropertyAssertion
 
 
 class NamePropertyAssertionManager (BaseManager):
@@ -196,7 +196,7 @@ class NamePropertyAssertion (Association, PropertyAssertion):
         :param script: script of the name
         :type script: `Topic`
         :param display_form: display form of the name
-        :type display_form: unicode string
+        :type display_form: `str`
         :param is_preferred: if the name is a preferred form
         :type is_preferred: `Boolean`
 

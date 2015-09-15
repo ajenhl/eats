@@ -5,15 +5,15 @@ from tmapi.models import Association, Topic
 from eats.exceptions import EATSMergedIdentifierException, \
     EATSValidationException
 
-from base_manager import BaseManager
-from date import Date
-from entity_relationship_property_assertion import EntityRelationshipPropertyAssertion
-from entity_type_property_assertion import EntityTypePropertyAssertion
-from existence_property_assertion import ExistencePropertyAssertion
-from name import Name
-from name_property_assertion import NamePropertyAssertion
-from note_property_assertion import NotePropertyAssertion
-from subject_identifier_property_assertion import SubjectIdentifierPropertyAssertion
+from .base_manager import BaseManager
+from .date import Date
+from .entity_relationship_property_assertion import EntityRelationshipPropertyAssertion
+from .entity_type_property_assertion import EntityTypePropertyAssertion
+from .existence_property_assertion import ExistencePropertyAssertion
+from .name import Name
+from .name_property_assertion import NamePropertyAssertion
+from .note_property_assertion import NotePropertyAssertion
+from .subject_identifier_property_assertion import SubjectIdentifierPropertyAssertion
 
 
 class EntityManager (BaseManager):
@@ -29,7 +29,7 @@ class EntityManager (BaseManager):
         :param entity: entity to exclude from the results
         :type entity: `Entity`
         :param subject_identifier: the subject identifier to find
-        :type subject_identifier: unicode string URL
+        :type subject_identifier: `str`
         :param authority: authority to restrict search
         :type authority: `Authority` or None
         :rtype: `QuerySet` of `Entity`s
@@ -179,7 +179,7 @@ class Entity (Topic):
         :param script" script of the name
         :type script: `Script`
         :param display_form: display form of the name
-        :type display_form: unicode string
+        :type display_form: `str`
         :param is_preferred: if the name is a preferred form
         :type is_preferred: `Boolean`
         :rtype: `NamePropertyAssertion`
@@ -222,7 +222,7 @@ class Entity (Topic):
         :param authority: authority asserting the property
         :type authority: `Authority`
         :param note: text of note
-        :type note: unicode string
+        :type note: `str`
         :rtype: `NotePropertyAssertion`
 
         """
@@ -240,7 +240,7 @@ class Entity (Topic):
         :param authority: authority asserting the property
         :type authority: `Authority`
         :param subject_identifier: the subject identifier URL
-        :type subject_identifier: unicode string URL
+        :type subject_identifier: `str`
         :rtype: `SubjectIdentifierPropertyAssertion`
 
         """
@@ -252,7 +252,7 @@ class Entity (Topic):
     @property
     def eats_topic_map (self):
         if not hasattr(self, '_eats_topic_map'):
-            from eats_topic_map import EATSTopicMap
+            from .eats_topic_map import EATSTopicMap
             self._eats_topic_map = self.get_topic_map(proxy=EATSTopicMap)
         return self._eats_topic_map
 
@@ -295,7 +295,7 @@ class Entity (Topic):
         `subject_identifier` asserted by `authority` are returned.
 
         :param subject_identifier: the subject identifier to find
-        :type subject_identifier: unicode string URL
+        :type subject_identifier: `str`
         :param authority: optional authority to restrict search
         :type authority: `Authority`
         :rtype: `QuerySet` of `Entity`s
@@ -324,7 +324,7 @@ class Entity (Topic):
         :rtype: `tmapi.SubjectIdentifier`
 
         """
-        locator_url = unicode(self.eats_topic_map.get_entity_subject_identifier(
+        locator_url = str(self.eats_topic_map.get_entity_subject_identifier(
             self.get_id()))
         # Check that this SI is actually associated with the entity.
         eats_si = None

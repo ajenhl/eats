@@ -1,8 +1,8 @@
 from tmapi.models import Association
 
-from base_manager import BaseManager
-from entity_type import EntityType
-from property_assertion import PropertyAssertion
+from .base_manager import BaseManager
+from .entity_type import EntityType
+from .property_assertion import PropertyAssertion
 
 
 class EntityTypePropertyAssertionManager (BaseManager):

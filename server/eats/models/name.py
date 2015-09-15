@@ -2,13 +2,13 @@ from operator import attrgetter
 
 from tmapi.models import Topic
 
-from name_cache import NameCache
-from name_element import NameElement
-from name_index import NameIndex
-from name_part import NamePart
-from name_type import NameType
+from .name_cache import NameCache
+from .name_element import NameElement
+from .name_index import NameIndex
+from .name_part import NamePart
+from .name_type import NameType
 
-from base_manager import BaseManager
+from .base_manager import BaseManager
 from eats.lib.name_form import create_name_forms
 
 
@@ -69,7 +69,7 @@ class Name (Topic, NameElement):
     @property
     def assertion (self):
         if not hasattr(self, '_assertion'):
-            from name_property_assertion import NamePropertyAssertion
+            from .name_property_assertion import NamePropertyAssertion
             property_role = self.get_roles_played(
                 self.eats_topic_map.property_role_type)[0]
             self._assertion = property_role.get_parent(
@@ -87,7 +87,7 @@ class Name (Topic, NameElement):
         :param script: script of the name part
         :type script: `Script` or None
         :param display_form: form of the name part
-        :type display_form: unicode string
+        :type display_form: `str`
         :param order: order of name part
         :type order: integer
         :rtype: `NamePart`
@@ -145,7 +145,7 @@ class Name (Topic, NameElement):
 
         """
         if not hasattr(self, '_entity'):
-            from entity import Entity
+            from .entity import Entity
             entity_role = self.assertion.get_roles(
                 self.eats_topic_map.entity_role_type)[0]
             self._entity = entity_role.get_player(proxy=Entity)
@@ -165,7 +165,7 @@ class Name (Topic, NameElement):
             type_data = data.setdefault(name_part_type, [])
             type_data.append(name_part)
         # Sort the name parts into their specified order within type.
-        for name_parts in data.values():
+        for name_parts in list(data.values()):
             name_parts.sort(key=attrgetter('order'))
         return data
 

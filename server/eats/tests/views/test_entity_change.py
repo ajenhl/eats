@@ -274,7 +274,7 @@ class EntityChangeViewTestCase (ViewTestCase):
         form['names-1-name_type'] = name_type2.get_id()
         form['names-1-language'] = language2.get_id()
         form['names-1-script'] = script2.get_id()
-        form['names-1-display_form'] = u'पद्म'
+        form['names-1-display_form'] = 'पद्म'
         form['names-1-is_preferred'] = False
         response = form.submit('_save').follow()
         self.assertEqual(response.request.url[len(response.request.host_url):],
@@ -293,7 +293,7 @@ class EntityChangeViewTestCase (ViewTestCase):
         self.assertEqual(form_data['language'], name.language.get_id())
         self.assertEqual(form_data['script'], script2.get_id())
         self.assertEqual(form_data['script'], name.script.get_id())
-        self.assertEqual(form_data['display_form'], u'पद्म')
+        self.assertEqual(form_data['display_form'], 'पद्म')
         self.assertEqual(form_data['display_form'], name.display_form)
         self.assertEqual(form_data['is_preferred'], assertion.is_preferred)
         # Test updating an existing name.

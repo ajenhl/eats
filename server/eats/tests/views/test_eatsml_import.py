@@ -13,7 +13,7 @@ class EATSMLImportViewTestCase (ViewTestCase):
         self.editor = self.create_user(user)
         self.editor.editable_authorities = [self.authority]
         self.url = reverse('import-eatsml')
-    
+
     def test_authentication (self):
         """Tests that only an editor can see the import page."""
         login_url = settings.LOGIN_URL + '?next=' + self.url
@@ -37,7 +37,7 @@ class EATSMLImportViewTestCase (ViewTestCase):
     def test_post_valid (self):
         self.assertEqual(EATSMLImport.objects.count(), 0)
         description = 'New import'
-        import_xml = '''
+        import_xml = b'''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
     <authority xml:id="authority-1">
@@ -62,7 +62,7 @@ class EATSMLImportViewTestCase (ViewTestCase):
     def test_post_invalid (self):
         self.assertEqual(EATSMLImport.objects.count(), 0)
         description = 'New import'
-        import_xml = '''
+        import_xml = b'''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
     <!-- Missing @xml:id -->

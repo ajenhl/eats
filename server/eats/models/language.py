@@ -3,9 +3,9 @@ from django.db import transaction
 from tmapi.indices import ScopedIndex
 from tmapi.models import Topic
 
-from infrastructure import Infrastructure
-from infrastructure_manager import InfrastructureManager
-from name_part_type import NamePartType
+from .infrastructure import Infrastructure
+from .infrastructure_manager import InfrastructureManager
+from .name_part_type import NamePartType
 
 
 class LanguageManager (InfrastructureManager):
@@ -77,7 +77,7 @@ class Language (Topic, Infrastructure):
                 name_part_type.create_occurrence(
                     self.eats_topic_map.name_part_type_order_in_language_type,
                     index, scope=[self])
-        for occurrence in existing.values():
+        for occurrence in list(existing.values()):
             occurrence.remove()
 
     @transaction.atomic

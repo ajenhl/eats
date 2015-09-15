@@ -1,7 +1,7 @@
 from tmapi.models import Topic
 
-from infrastructure import Infrastructure
-from infrastructure_manager import InfrastructureManager
+from .infrastructure import Infrastructure
+from .infrastructure_manager import InfrastructureManager
 
 
 class CalendarManager (InfrastructureManager):

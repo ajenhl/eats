@@ -85,7 +85,7 @@ class EntityRelationshipPropertyAssertions (PropertyAssertions):
     def formset (self):
         relationship_type_choices = []
         for relationship_type in EntityRelationshipType.objects.filter_by_authority(self.authority):
-            id = unicode(relationship_type.get_id())
+            id = str(relationship_type.get_id())
             name = relationship_type.get_names(
                 self.topic_map.relationship_name_type)[0].get_value()
             reverse_name = relationship_type.get_names(

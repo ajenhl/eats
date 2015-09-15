@@ -2,17 +2,17 @@ from tmapi.models import Topic
 
 from eats.exceptions import EATSValidationException
 
-from infrastructure_manager import InfrastructureManager
-from calendar import Calendar
-from date_period import DatePeriod
-from date_type import DateType
-from entity_relationship_type import EntityRelationshipType
-from entity_type import EntityType
-from infrastructure import Infrastructure
-from language import Language
-from name_part_type import NamePartType
-from name_type import NameType
-from script import Script
+from .infrastructure_manager import InfrastructureManager
+from .calendar import Calendar
+from .date_period import DatePeriod
+from .date_type import DateType
+from .entity_relationship_type import EntityRelationshipType
+from .entity_type import EntityType
+from .infrastructure import Infrastructure
+from .language import Language
+from .name_part_type import NamePartType
+from .name_type import NameType
+from .script import Script
 
 
 class AuthorityManager (InfrastructureManager):

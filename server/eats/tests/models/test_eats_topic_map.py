@@ -178,14 +178,14 @@ class EATSTopicMapTestCase (ModelTestCase):
         entity1 = self.tm.create_entity(self.authority)
         entity1.create_name_property_assertion(
             self.authority, name_type, language, script,
-            u'Māori')
-        self.assertEqual(self.tm.lookup_entities(u'Māori'), [entity1])
+            'Māori')
+        self.assertEqual(self.tm.lookup_entities('Māori'), [entity1])
         self.assertEqual(self.tm.lookup_entities('Maori'), [entity1])
         self.assertEqual(self.tm.lookup_entities('Maaori'), [entity1])
         entity2 = self.tm.create_entity(self.authority)
         entity2.create_name_property_assertion(
-            self.authority, name_type, language, script, u'Maori')
-        self.assertEqual(set(self.tm.lookup_entities(u'Māori')),
+            self.authority, name_type, language, script, 'Maori')
+        self.assertEqual(set(self.tm.lookup_entities('Māori')),
                          set([entity1, entity2]))
         self.assertEqual(set(self.tm.lookup_entities('Maori')),
                          set([entity1, entity2]))

@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 
-from base_manager import BaseManager
+from .base_manager import BaseManager
 
 
 class EditorManager (BaseManager):

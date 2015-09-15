@@ -1,7 +1,7 @@
 from tmapi.models import Topic
 
-from infrastructure import Infrastructure
-from infrastructure_manager import InfrastructureManager
+from .infrastructure import Infrastructure
+from .infrastructure_manager import InfrastructureManager
 
 
 class ScriptManager (InfrastructureManager):
@@ -39,7 +39,7 @@ class Script (Topic, Infrastructure):
     def separator (self):
         """Returns the this script's separator, to be used between name parts.
 
-        :rtype: unicode string
+        :rtype: `str`
 
         """
         separator = ''
@@ -56,7 +56,7 @@ class Script (Topic, Infrastructure):
         """Sets this script's separator, to be used between name parts.
 
         :param separator: separator
-        :type separator: unicode string
+        :type separator: `str`
 
         """
         occurrence_type = self.eats_topic_map.script_separator_type

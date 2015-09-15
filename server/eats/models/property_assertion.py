@@ -1,5 +1,5 @@
-from authority import Authority
-from date import Date
+from .authority import Authority
+from .date import Date
 
 
 class PropertyAssertion (object):
@@ -71,7 +71,7 @@ class PropertyAssertion (object):
     @property
     def eats_topic_map (self):
         if not hasattr(self, '_eats_topic_map'):
-            from eats_topic_map import EATSTopicMap
+            from .eats_topic_map import EATSTopicMap
             self._eats_topic_map = self.get_topic_map(proxy=EATSTopicMap)
         return self._eats_topic_map
 
@@ -79,7 +79,7 @@ class PropertyAssertion (object):
     def entity (self):
         """Returns the entity making this property assertion."""
         if not hasattr(self, '_entity'):
-            from entity import Entity
+            from .entity import Entity
             role = self.get_roles(self.eats_topic_map.entity_role_type)[0]
             self._entity = role.get_player(proxy=Entity)
         return self._entity

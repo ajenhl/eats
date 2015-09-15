@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from StringIO import StringIO
+from io import BytesIO
 
 from lxml import etree
 
@@ -20,9 +20,9 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
 
     def _compare_XML (self, export, expected_xml):
         parser = etree.XMLParser(remove_blank_text=True)
-        actual = StringIO()
+        actual = BytesIO()
         export.write_c14n(actual)
-        expected = StringIO()
+        expected = BytesIO()
         root = etree.XML(expected_xml, parser)
         root.getroottree().write_c14n(expected)
         self.assertEqual(actual.getvalue(), expected.getvalue())
@@ -206,7 +206,7 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
         name1 = entity.create_name_property_assertion(authority, name_type,
                                                       english, latin, 'Gerald')
         name2 = entity.create_name_property_assertion(
-            authority, name_type, french, arabic, u'عبّاس', False)
+            authority, name_type, french, arabic, 'عبّاس', False)
         django_user = self.create_django_user('test', 'test@example.org',
                                               'password')
         user = self.create_user(django_user)

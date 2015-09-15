@@ -27,7 +27,7 @@ class LookupsTestCase (TestCase, BaseTestCase):
         entity1 = self.tm.create_entity(self.authority)
         entity1.create_name_property_assertion(
             self.authority, self.name_type, self.language, self.script,
-            u'Johann Sebastian Bach')
+            'Johann Sebastian Bach')
         self.assertEqual(Entity.objects.count(), 1)
         results = lookup.get_query(None, 'Bac')
         self.assertEqual(len(results), 1)
@@ -38,7 +38,7 @@ class LookupsTestCase (TestCase, BaseTestCase):
         entity2 = self.tm.create_entity(self.authority)
         entity2.create_name_property_assertion(
             self.authority, self.name_type, self.language, self.script,
-            u'John Stuart Mill')
+            'John Stuart Mill')
         results = lookup.get_query(None, 'Bac')
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0], entity1)

@@ -7,21 +7,21 @@ from tmapi.models import Locator, TopicMap
 from eats.constants import ADMIN_NAME_TYPE_IRI, AUTHORITY_HAS_CALENDAR_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_DATE_PERIOD_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_DATE_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_ENTITY_RELATIONSHIP_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_ENTITY_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_LANGUAGE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_NAME_PART_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_NAME_TYPE_ASSOCIATION_TYPE_IRI, AUTHORITY_HAS_SCRIPT_ASSOCIATION_TYPE_IRI, AUTHORITY_ROLE_TYPE_IRI, AUTHORITY_TYPE_IRI, CALENDAR_TYPE_IRI, DATE_CERTAINTY_TYPE_IRI, DATE_FULL_CERTAINTY_IRI, DATE_NO_CERTAINTY_IRI, DATE_PERIOD_ASSOCIATION_TYPE, DATE_PERIOD_ROLE_TYPE, DATE_PERIOD_TYPE_IRI, DATE_ROLE_TYPE_IRI, DATE_TYPE_IRI, DATE_TYPE_TYPE_IRI, DOMAIN_ENTITY_ROLE_TYPE_IRI, END_DATE_TYPE_IRI, END_TAQ_DATE_TYPE_IRI, END_TPQ_DATE_TYPE_IRI, ENTITY_RELATIONSHIP_ASSERTION_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_ROLE_TYPE_IRI, ENTITY_RELATIONSHIP_TYPE_TYPE_IRI, ENTITY_ROLE_TYPE_IRI, ENTITY_TYPE_IRI, ENTITY_TYPE_ASSERTION_TYPE_IRI, ENTITY_TYPE_TYPE_IRI, EXISTENCE_IRI, EXISTENCE_ASSERTION_TYPE_IRI, INFRASTRUCTURE_ROLE_TYPE_IRI, IS_IN_LANGUAGE_TYPE_IRI, IS_IN_SCRIPT_TYPE_IRI, IS_PREFERRED_IRI, LANGUAGE_CODE_TYPE_IRI, LANGUAGE_ROLE_TYPE_IRI, LANGUAGE_TYPE_IRI, NAME_ASSERTION_TYPE_IRI, NAME_HAS_NAME_PART_ASSOCIATION_TYPE_IRI, NAME_PART_ORDER_TYPE_IRI, NAME_PART_ROLE_TYPE_IRI, NAME_PART_TYPE_IRI, NAME_PART_TYPE_ORDER_IN_LANGUAGE_TYPE_IRI, NAME_PART_TYPE_TYPE_IRI, NAME_ROLE_TYPE_IRI, NAME_TYPE_IRI, NAME_TYPE_TYPE_IRI, NORMALISED_DATE_FORM_TYPE_IRI, NOTE_ASSERTION_TYPE_IRI, POINT_DATE_TYPE_IRI, POINT_TAQ_DATE_TYPE_IRI, POINT_TPQ_DATE_TYPE_IRI, PROPERTY_ASSERTION_CERTAINTY_TYPE_IRI, PROPERTY_ASSERTION_FULL_CERTAINTY_IRI, PROPERTY_ASSERTION_NO_CERTAINTY_IRI, PROPERTY_ROLE_TYPE_IRI, RANGE_ENTITY_ROLE_TYPE_IRI, RELATIONSHIP_NAME_TYPE_IRI, REVERSE_RELATIONSHIP_NAME_TYPE_IRI, SCRIPT_CODE_TYPE_IRI, SCRIPT_ROLE_TYPE_IRI, SCRIPT_SEPARATOR_TYPE_IRI, SCRIPT_TYPE_IRI, START_DATE_TYPE_IRI, START_TAQ_DATE_TYPE_IRI, START_TPQ_DATE_TYPE_IRI, SUBJECT_IDENTIFIER_ASSERTION_TYPE_IRI
 from eats.exceptions import EATSException
 from eats.lib.name_form import create_name_forms
-from authority import Authority
-from calendar import Calendar
-from date_period import DatePeriod
-from date_type import DateType
-from entity import Entity
-from entity_relationship_property_assertion import EntityRelationshipPropertyAssertion
-from entity_relationship_type import EntityRelationshipType
-from entity_type import EntityType
-from entity_type_property_assertion import EntityTypePropertyAssertion
-from existence_property_assertion import ExistencePropertyAssertion
-from language import Language
-from name_part_type import NamePartType
-from name_property_assertion import NamePropertyAssertion
-from name_type import NameType
-from script import Script
+from .authority import Authority
+from .calendar import Calendar
+from .date_period import DatePeriod
+from .date_type import DateType
+from .entity import Entity
+from .entity_relationship_property_assertion import EntityRelationshipPropertyAssertion
+from .entity_relationship_type import EntityRelationshipType
+from .entity_type import EntityType
+from .entity_type_property_assertion import EntityTypePropertyAssertion
+from .existence_property_assertion import ExistencePropertyAssertion
+from .language import Language
+from .name_part_type import NamePartType
+from .name_property_assertion import NamePropertyAssertion
+from .name_type import NameType
+from .script import Script
 
 
 class EATSTopicMap (TopicMap):
@@ -107,7 +107,7 @@ class EATSTopicMap (TopicMap):
         """Creates a new authority called `name`.
 
         :param name: name of the new authority
-        :type name: unicode string
+        :type name: `str`
         :rtype: `Authority`
 
         """
@@ -126,7 +126,7 @@ class EATSTopicMap (TopicMap):
         """Creates a new calendar called `name`.
 
         :param name: name of the new calendar
-        :type name: unicode string
+        :type name: `str`
         :rtype: `Calendar`
 
         """
@@ -145,7 +145,7 @@ class EATSTopicMap (TopicMap):
         """Creates a new date period called `name`.
 
         :param name: name of the new date period
-        :type name: unicode string
+        :type name: `str`
         :rtype: `DatePeriod`
 
         """
@@ -165,7 +165,7 @@ class EATSTopicMap (TopicMap):
         """Creates a new date type called `name`.
 
         :param name: name of the new date type
-        :type name: unicode string
+        :type name: `str`
         :rtype: `DateType`
 
         """
@@ -203,9 +203,9 @@ class EATSTopicMap (TopicMap):
         """Creates a new entity relationship type.
 
         :param name: forward name of the new entity relationship type
-        :type name: unicode string
+        :type name: `str`
         :param reverse_name: reverse name of the new entity relationship type
-        :type reverse_name: unicode string
+        :type reverse_name: `str`
         :rtype: `EntityRelationshipType`
 
         """
@@ -229,7 +229,7 @@ class EATSTopicMap (TopicMap):
         """Creates a new entity type called `name`.
 
         :param name: name of the new entity type
-        :type name: unicode string
+        :type name: `str`
         :rtype: `EntityType`
 
         """
@@ -249,7 +249,7 @@ class EATSTopicMap (TopicMap):
         """Creates a new language called `name`, with ISO code `code`.
 
         :param name: name of the new language
-        :type name: unicode string
+        :type name: `str`
         :param code: ISO code of the new language
         :type code: string
         :rtype: `Language`
@@ -277,7 +277,7 @@ class EATSTopicMap (TopicMap):
         """Creates a new name part type called `name`.
 
         :param name: name of the new name part type
-        :type name: unicode string
+        :type name: `str`
         :rtype: `NamePartType`
 
         """
@@ -297,7 +297,7 @@ class EATSTopicMap (TopicMap):
         """Creates a new name type called `name`.
 
         :param name: name of the new name type
-        :type name: unicode string
+        :type name: `str`
         :rtype: `NameType`
 
         """
@@ -316,11 +316,11 @@ class EATSTopicMap (TopicMap):
         """Creates a new script called `name`, with ISO code `code`.
 
         :param name: name of the new script
-        :type name: unicode string
+        :type name: `str`
         :param code: ISO code of the new script
         :type code: string
         :param separator: separator to be used between name parts
-        :type separator: unicode string
+        :type separator: `str`
         :rtype: `Script`
 
         """
@@ -548,7 +548,7 @@ class EATSTopicMap (TopicMap):
         names = query.split()
         queries = []
         for name in names:
-            query = self._create_lookup_query(unicode(name))
+            query = self._create_lookup_query(str(name))
             queries.append(query)
         sets = []
         for query in queries:
@@ -568,7 +568,7 @@ class EATSTopicMap (TopicMap):
 
     def _create_lookup_query (self, name):
         query = None
-        name_forms = create_name_forms(unicode(name))
+        name_forms = create_name_forms(str(name))
         for name_form in name_forms:
             if query is None:
                 query = Q(indexed_names__form__istartswith=name_form)

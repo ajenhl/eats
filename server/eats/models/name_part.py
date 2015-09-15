@@ -1,9 +1,9 @@
 from tmapi.models import Topic
 
-from base_manager import BaseManager
-from name_element import NameElement
-from name_index import NameIndex
-from name_part_type import NamePartType
+from .base_manager import BaseManager
+from .name_element import NameElement
+from .name_index import NameIndex
+from .name_part_type import NamePartType
 
 from eats.lib.name_form import create_name_forms
 
@@ -74,7 +74,7 @@ class NamePart (Topic, NameElement):
 
         """
         if not hasattr(self, '_name'):
-            from name import Name
+            from .name import Name
             name_part_role = self.get_roles_played(
                 self.eats_topic_map.name_part_role_type,
                 self.eats_topic_map.name_has_name_part_association_type)[0]

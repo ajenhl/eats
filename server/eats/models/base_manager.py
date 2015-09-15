@@ -7,7 +7,7 @@ class BaseManager (models.Manager):
     @property
     def eats_topic_map (self):
         if not hasattr(self, '_eats_topic_map'):
-            from eats_topic_map import EATSTopicMap
+            from .eats_topic_map import EATSTopicMap
             self._eats_topic_map = EATSTopicMap.objects.get(
                 iri=settings.EATS_TOPIC_MAP)
         return self._eats_topic_map

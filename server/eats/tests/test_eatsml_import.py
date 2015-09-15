@@ -1,4 +1,4 @@
-from StringIO import StringIO
+from io import BytesIO
 
 from lxml import etree
 
@@ -23,9 +23,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 
     def _compare_XML (self, import_tree, expected_xml):
         parser = etree.XMLParser(remove_blank_text=True)
-        actual = StringIO()
+        actual = BytesIO()
         import_tree.write_c14n(actual)
-        expected = StringIO()
+        expected = BytesIO()
         root = etree.XML(expected_xml, parser)
         root.getroottree().write_c14n(expected)
         self.assertEqual(actual.getvalue(), expected.getvalue())
@@ -1438,7 +1438,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
         date = existence.get_dates()[0]
         self.assertEqual(existence.authority, authority)
         self.assertEqual(date.assembled_form,
-                         u'1 January 2000 \N{EN DASH} 21 March 2010?')
+                         '1 January 2000 \N{EN DASH} 21 March 2010?')
         self.assertEqual(date.period, date_period)
         start = date.start
         end = date.end

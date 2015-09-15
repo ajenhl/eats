@@ -1,4 +1,4 @@
-from base_manager import BaseManager
+from .base_manager import BaseManager
 
 
 class InfrastructureManager (BaseManager):

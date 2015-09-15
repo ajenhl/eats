@@ -1,8 +1,8 @@
 from tmapi.models import Topic
 
-from base_manager import BaseManager
-from date_part import DatePart
-from date_period import DatePeriod
+from .base_manager import BaseManager
+from .date_part import DatePart
+from .date_period import DatePeriod
 
 
 class DateManager (BaseManager):
@@ -76,7 +76,7 @@ class Date (Topic):
             end_tpq = self.end_tpq.assembled_form
             end_date = self._assemble_segment(end, end_tpq, end_taq)
             if start_date or end_date:
-                form = u'%s \N{EN DASH} %s' % (start_date, end_date)
+                form = '%s \N{EN DASH} %s' % (start_date, end_date)
         return form.strip()
 
     def _assemble_segment (self, date, tpq, taq):
@@ -134,7 +134,7 @@ class Date (Topic):
     @property
     def eats_topic_map (self):
         if not hasattr(self, '_eats_topic_map'):
-            from eats_topic_map import EATSTopicMap
+            from .eats_topic_map import EATSTopicMap
             self._eats_topic_map = self.get_topic_map(proxy=EATSTopicMap)
         return self._eats_topic_map
 

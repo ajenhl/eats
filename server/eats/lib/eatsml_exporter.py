@@ -338,7 +338,7 @@ class EATSMLExporter (EATSMLHandler):
             if name_parts is not None:
                 self._export_name_parts(name_part_type, name_parts,
                                         name_parts_element)
-        for name_part_type, name_parts in name_parts_data.items():
+        for name_part_type, name_parts in list(name_parts_data.items()):
             self._export_name_parts(name_part_type, name_parts,
                                     name_parts_element)
         self._export_dates(assertion, name_element)
@@ -591,7 +591,7 @@ class EATSMLExporter (EATSMLHandler):
         authorities = self._infrastructure_required['authority']
         self._export_authorities(authorities, parent)
         # Order each set of items by admin name.
-        for key, objects in self._infrastructure_required.items():
+        for key, objects in list(self._infrastructure_required.items()):
             ordered_objects = list(objects)
             ordered_objects.sort(key=lambda item: item.get_admin_name())
             self._infrastructure_required[key] = ordered_objects

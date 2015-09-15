@@ -5,10 +5,10 @@ from tmapi.models import Association
 
 from eats.exceptions import EATSValidationException
 
-from base_manager import BaseManager
-from entity_relationship_cache import EntityRelationshipCache
-from entity_relationship_type import EntityRelationshipType
-from property_assertion import PropertyAssertion
+from .base_manager import BaseManager
+from .entity_relationship_cache import EntityRelationshipCache
+from .entity_relationship_type import EntityRelationshipType
+from .property_assertion import PropertyAssertion
 
 
 class EntityRelationshipPropertyAssertionManager (BaseManager):
@@ -86,7 +86,7 @@ class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
         try:
             domain_entity = self._cached_relationship.domain_entity
         except EntityRelationshipCache.DoesNotExist:
-            from entity import Entity
+            from .entity import Entity
             domain_role = self.get_roles(
                 self.eats_topic_map.domain_entity_role_type)[0]
             domain_entity = domain_role.get_player(proxy=Entity)
@@ -111,7 +111,7 @@ class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
         try:
             range_entity = self._cached_relationship.range_entity
         except EntityRelationshipCache.DoesNotExist:
-            from entity import Entity
+            from .entity import Entity
             range_role = self.get_roles(
                 self.eats_topic_map.range_entity_role_type)[0]
             range_entity = range_role.get_player(proxy=Entity)

@@ -1,4 +1,4 @@
-import StringIO
+import io
 
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
@@ -47,7 +47,7 @@ def entity_add (request, topic_map):
 def entity_change (request, topic_map, entity_id):
     try:
         entity = get_topic_or_404(Entity, entity_id)
-    except EATSMergedIdentifierException, e:
+    except EATSMergedIdentifierException as e:
         return redirect('entity-change', entity_id=e.new_id, permanent=True)
     editor = request.user.eats_user
     context_data = {'entity': entity, 'is_valid': True}
@@ -137,7 +137,7 @@ def entity_change (request, topic_map, entity_id):
 def entity_delete (request, topic_map, entity_id):
     try:
         entity = get_topic_or_404(Entity, entity_id)
-    except EATSMergedIdentifierException, e:
+    except EATSMergedIdentifierException as e:
         return redirect('entity-delete', entity_id=e.new_id, permanent=True)
     editable_authorities = request.user.eats_user.editable_authorities.all()
     assertion_getters = [entity.get_eats_names, entity.get_entity_relationships,
@@ -159,7 +159,7 @@ def entity_delete (request, topic_map, entity_id):
 def entity_merge (request, topic_map, entity_id):
     try:
         entity = get_topic_or_404(Entity, entity_id)
-    except EATSMergedIdentifierException, e:
+    except EATSMergedIdentifierException as e:
         return redirect('entity-merge', entity_id=e.new_id, permanent=True)
     context_data = {}
     if request.method == 'POST':
@@ -303,7 +303,7 @@ def import_eatsml (request, topic_map):
         form = EATSMLImportForm(request.POST, request.FILES)
         user = request.user.eats_user
         if form.is_valid():
-            eatsml_file = StringIO.StringIO()
+            eatsml_file = io.BytesIO()
             for chunk in request.FILES['import_file'].chunks():
                 eatsml_file.write(chunk)
             eatsml_file.seek(0)
@@ -316,7 +316,7 @@ def import_eatsml (request, topic_map):
                 with transaction.atomic():
                     import_tree, annotated_tree = EATSMLImporter(
                         topic_map).import_xml(eatsml, user)
-            except Exception, e:
+            except Exception as e:
                 response = render(request, '500.html', {'message': e})
                 response.status_code = 500
                 return response
