@@ -1,13 +1,15 @@
 from django import forms
 
-from eats.models import Calendar, DatePeriod, DateType, EATSUser, EntityRelationshipType, EntityType, Language, NamePartType, NameType, Script
+from eats.models import (Calendar, DatePeriod, DateType, EATSUser,
+                         EntityRelationshipType, EntityType, Language,
+                         NamePartType, NameType, Script)
 from eats.forms.edit import create_choice_list
 
 
 class AdminForm (forms.Form):
 
     name = forms.CharField(max_length=100)
-    
+
     def __init__ (self, topic_map, model, data=None, instance=None, **kwargs):
         """Initialise the form.
 
@@ -24,8 +26,7 @@ class AdminForm (forms.Form):
             object_data = {}
         else:
             object_data = self._topic_to_dict(instance)
-        super(AdminForm, self).__init__(initial=object_data, data=data,
-                                        **kwargs)
+        super().__init__(initial=object_data, data=data, **kwargs)
 
     def clean_name (self):
         name = self.cleaned_data['name']
@@ -67,8 +68,8 @@ class AuthorityForm (AdminForm):
     editors = forms.MultipleChoiceField(choices=[], required=False)
 
     def __init__ (self, topic_map, model, data=None, instance=None, **kwargs):
-        super(AuthorityForm, self).__init__(topic_map, model, data=data,
-                                            instance=instance, **kwargs)
+        super().__init__(topic_map, model, data=data, instance=instance,
+                         **kwargs)
         self.fields['calendars'].choices = create_choice_list(
             topic_map, Calendar.objects.all())[1:]
         self.fields['date_periods'].choices = create_choice_list(
@@ -87,7 +88,8 @@ class AuthorityForm (AdminForm):
             topic_map, NamePartType.objects.all())[1:]
         self.fields['scripts'].choices = create_choice_list(
             topic_map, Script.objects.all())[1:]
-        self.fields['editors'].choices = [(editor.user.pk, editor.user.username) for editor in EATSUser.objects.all()]
+        self.fields['editors'].choices = [(editor.user.pk, editor.user.username)
+                                          for editor in EATSUser.objects.all()]
 
     def _objectify_data (self, base_data):
         # It would be nice to handle this process of converting
@@ -97,42 +99,23 @@ class AuthorityForm (AdminForm):
         # the object relies on the authority and user preferences,
         # which aren't passed in to the field, this doesn't seem
         # possible, and so it is handled here.
-        data = {'calendars': [], 'date_periods': [], 'date_types': [],
-                'editors': [], 'entity_relationship_types': [],
-                'entity_types': [], 'languages': [], 'name_types': [],
-                'name_part_types': [], 'scripts': []}
-        for calendar_id in base_data['calendars']:
-            data['calendars'].append(Calendar.objects.get_by_identifier(
-                    calendar_id))
-        for date_period_id in base_data['date_periods']:
-            data['date_periods'].append(DatePeriod.objects.get_by_identifier(
-                    date_period_id))
-        for date_type_id in base_data['date_types']:
-            data['date_types'].append(DateType.objects.get_by_identifier(
-                    date_type_id))
-        for entity_relationship_type_id in base_data['entity_relationship_types']:
-            data['entity_relationship_types'].append(
-                EntityRelationshipType.objects.get_by_identifier(
-                    entity_relationship_type_id))
-        for entity_type_id in base_data['entity_types']:
-            data['entity_types'].append(EntityType.objects.get_by_identifier(
-                    entity_type_id))
-        for language_id in base_data['languages']:
-            data['languages'].append(Language.objects.get_by_identifier(
-                    language_id))
-        for name_type_id in base_data['name_types']:
-            data['name_types'].append(NameType.objects.get_by_identifier(
-                    name_type_id))
-        for name_part_type_id in base_data['name_part_types']:
-            data['name_part_types'].append(
-                NamePartType.objects.get_by_identifier(name_part_type_id))
-        for script_id in base_data['scripts']:
-            data['scripts'].append(Script.objects.get_by_identifier(
-                    script_id))
-        for editor_id in base_data['editors']:
-            data['editors'].append(EATSUser.objects.get(pk=editor_id))
+        data = {}
+        data_map = {'calendars': Calendar,
+                    'date_periods': DatePeriod,
+                    'date_types': DateType,
+                    'entity_relationship_types': EntityRelationshipType,
+                    'entity_types': EntityType,
+                    'languages': Language,
+                    'name_part_types': NamePartType,
+                    'name_types': NameType,
+                    'scripts': Script}
+        for data_type, model in data_map.items():
+            data[data_type] = [model.objects.get_by_identifier(topic_id) for
+                               topic_id in base_data[data_type]]
+        data['editors'] = [EATSUser.objects.get(pk=editor_id) for editor_id in
+                           base_data['editors']]
         return data
-    
+
     def save (self):
         name = self.cleaned_data['name']
         data = self._objectify_data(self.cleaned_data)
@@ -155,7 +138,7 @@ class AuthorityForm (AdminForm):
         return authority
 
     def _topic_to_dict (self, topic):
-        data = super(AuthorityForm, self)._topic_to_dict(topic)
+        data = super()._topic_to_dict(topic)
         data['calendars'] = [calendar.get_id() for calendar in
                              topic.get_calendars()]
         data['date_periods'] = [date_period.get_id() for date_period in
@@ -181,19 +164,19 @@ class AuthorityForm (AdminForm):
 class CalendarForm (AdminForm):
 
     def save (self):
-        return super(CalendarForm, self).save(self.topic_map.create_calendar)
+        return super().save(self.topic_map.create_calendar)
 
 
 class DatePeriodForm (AdminForm):
 
     def save (self):
-        return super(DatePeriodForm, self).save(self.topic_map.create_date_period)
+        return super().save(self.topic_map.create_date_period)
 
 
 class DateTypeForm (AdminForm):
 
     def save (self):
-        return super(DateTypeForm, self).save(self.topic_map.create_date_type)
+        return super().save(self.topic_map.create_date_type)
 
 
 class EntityRelationshipForm (AdminForm):
@@ -216,7 +199,7 @@ class EntityRelationshipForm (AdminForm):
             except self.model.DoesNotExist:
                 pass
         return self.cleaned_data
-    
+
     def clean_name (self):
         return self.cleaned_data['name']
 
@@ -239,16 +222,16 @@ class EntityRelationshipForm (AdminForm):
 class EntityTypeForm (AdminForm):
 
     def save (self):
-        return super(EntityTypeForm, self).save(
+        return super().save(
             self.topic_map.create_entity_type)
-    
+
 
 class LanguageForm (AdminForm):
 
     code = forms.CharField(max_length=3)
 
     def __init__ (self, topic_map, model, data=None, instance=None, **kwargs):
-        super(LanguageForm, self).__init__(topic_map, model, data, instance,
+        super().__init__(topic_map, model, data, instance,
                                            **kwargs)
         self.npt_base_name = 'name_part_type-'
         self._create_form_fields(data, self.initial)
@@ -327,7 +310,7 @@ class LanguageForm (AdminForm):
         return language
 
     def _topic_to_dict (self, topic):
-        data = super(LanguageForm, self)._topic_to_dict(topic)
+        data = super()._topic_to_dict(topic)
         data['code'] = topic.get_code()
         name_part_types = topic.name_part_types
         for i in range(len(name_part_types)):
@@ -339,15 +322,15 @@ class LanguageForm (AdminForm):
 class NamePartTypeForm (AdminForm):
 
     def save (self):
-        return super(NamePartTypeForm, self).save(
+        return super().save(
             self.topic_map.create_name_part_type)
 
 
 class NameTypeForm (AdminForm):
 
     def save (self):
-        return super(NameTypeForm, self).save(self.topic_map.create_name_type)
-    
+        return super().save(self.topic_map.create_name_type)
+
 
 class ScriptForm (AdminForm):
 
@@ -380,7 +363,7 @@ class ScriptForm (AdminForm):
         return script
 
     def _topic_to_dict (self, topic):
-        data = super(ScriptForm, self)._topic_to_dict(topic)
+        data = super()._topic_to_dict(topic)
         data['code'] = topic.get_code()
         data['separator'] = topic.separator
         return data
