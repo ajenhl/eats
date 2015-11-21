@@ -1,8 +1,12 @@
 from django.conf import settings
-from django.db import models
+
+if 'django_cache_manager' in settings.INSTALLED_APPS:
+    from django_cache_manager.cache_manager import CacheManager as Manager
+else:
+    from django.db.models import Manager
 
 
-class BaseManager (models.Manager):
+class BaseManager (Manager):
 
     @property
     def eats_topic_map (self):
