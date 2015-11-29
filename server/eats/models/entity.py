@@ -216,19 +216,25 @@ class Entity (Topic):
         name.update_name_index()
         return assertion
 
-    def create_note_property_assertion (self, authority, note):
+    def create_note_property_assertion (self, authority, note,
+                                        is_internal=False):
         """Creates a note property assertion asserted by `authority`.
 
         :param authority: authority asserting the property
         :type authority: `Authority`
         :param note: text of note
         :type note: `str`
+        :param is_internal: if the note is for internal use only
+        :type is_internal: `bool`
         :rtype: `NotePropertyAssertion`
 
         """
+        scope = [authority]
+        if is_internal:
+            scope.append(self.eats_topic_map.is_note_internal)
         assertion = self.create_occurrence(
             self.eats_topic_map.note_assertion_type, note,
-            scope=[authority], proxy=NotePropertyAssertion)
+            scope=scope, proxy=NotePropertyAssertion)
         return assertion
 
     def create_subject_identifier_property_assertion (self, authority,

@@ -10,10 +10,11 @@ class NoteTestCase (ModelTestCase):
     def test_create_note_property_assertion (self):
         self.assertEqual(0, self.entity.get_notes().count())
         assertion = self.entity.create_note_property_assertion(
-            self.authority, 'Test')
+            self.authority, 'Test', True)
         self.assertEqual(1, self.entity.get_notes().count())
         self.assertEqual(self.authority, assertion.authority)
         self.assertEqual(assertion.note, 'Test')
+        self.assertEqual(assertion.is_internal, True)
         fetched_assertion = self.entity.get_notes()[0]
         self.assertEqual(assertion, fetched_assertion)
 
@@ -32,8 +33,10 @@ class NoteTestCase (ModelTestCase):
 
     def test_update_note_property_assertion (self):
         assertion = self.entity.create_note_property_assertion(
-            self.authority, 'Test')
+            self.authority, 'Test', True)
         self.assertEqual(self.authority, assertion.authority)
         self.assertEqual(assertion.note, 'Test')
-        assertion.update('Test2')
+        self.assertEqual(assertion.is_internal, True)
+        assertion.update('Test2', False)
         self.assertEqual(assertion.note, 'Test2')
+        self.assertEqual(assertion.is_internal, False)

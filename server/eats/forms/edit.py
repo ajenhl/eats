@@ -530,20 +530,24 @@ class NameForm (PropertyAssertionForm):
 class NoteForm (PropertyAssertionForm):
 
     note = forms.CharField(widget=forms.Textarea(attrs={'rows': 5}))
+    is_internal = forms.BooleanField(required=False)
 
     def _assertion_to_dict (self, assertion):
         data = super(NoteForm, self)._assertion_to_dict(assertion)
         data['note'] = assertion.note
+        data['is_internal'] = assertion.is_internal
         return data
 
     def save (self):
         note = self.cleaned_data['note']
+        is_internal = self.cleaned_data['is_internal']
         if self.instance is None:
             # Create a new assertion.
-            self.entity.create_note_property_assertion(self.authority, note)
+            self.entity.create_note_property_assertion(self.authority, note,
+                                                       is_internal)
         else:
             # Update an existing assertion.
-            self.instance.update(note)
+            self.instance.update(note, is_internal)
 
 
 class SubjectIdentifierForm (PropertyAssertionForm):

@@ -340,7 +340,28 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
   <entities>
     <entity xml:id="entity-%(entity)d" eats_id="%(entity)d" url="%(url)s">
       <notes>
-        <note authority="authority-%(authority)d" eats_id="%(note)d">A note.</note>
+        <note authority="authority-%(authority)d" eats_id="%(note)d" is_internal="false">A note.</note>
+      </notes>
+    </entity>
+  </entities>
+</collection>
+''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
+       'note': note.get_id(), 'url': entity.get_eats_subject_identifier()}
+        self._compare_XML(export, expected_xml)
+        # Use a different value of is_internal.
+        note.update('A note.', True)
+        export = self.exporter.export_entities([entity])
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-%(authority)d" eats_id="%(authority)d">
+      <name>Test</name>
+    </authority>
+  </authorities>
+  <entities>
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d" url="%(url)s">
+      <notes>
+        <note authority="authority-%(authority)d" eats_id="%(note)d" is_internal="true">A note.</note>
       </notes>
     </entity>
   </entities>

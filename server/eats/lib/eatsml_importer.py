@@ -551,8 +551,9 @@ class EATSMLImporter (EATSMLHandler):
                 authority = self._get_mapped_object(element, 'authority',
                                                     'authority')
                 note = self._get_text(element, '.')
+                is_internal = self._get_boolean(element.get('is_internal'))
                 assertion = entity.create_note_property_assertion(
-                    authority, note)
+                    authority, note, is_internal)
                 element.set('eats_id', str(assertion.get_id()))
 
     def _import_subject_identifier_assertions (self, entity, entity_element):

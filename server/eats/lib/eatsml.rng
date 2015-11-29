@@ -457,6 +457,7 @@
         <oneOrMore>
           <element name="note">
             <ref name="authority_attribute"/>
+            <ref name="is_note_internal_attribute"/>
             <optional>
               <ref name="eats_id_attribute"/>
             </optional>
@@ -528,6 +529,12 @@
   <define name="authority_attribute">
     <attribute name="authority">
       <data type="IDREF"/>
+    </attribute>
+  </define>
+
+  <define name="is_note_internal_attribute">
+    <attribute name="is_internal">
+      <data type="boolean"/>
     </attribute>
   </define>
 

@@ -10,21 +10,12 @@ NSMAP = {None: EATS_NAMESPACE}
 
 class EATSMLExporter (EATSMLHandler):
 
+    """Class for exporting EATS data as EATSML XML."""
+
     def __init__ (self, topic_map):
         super(EATSMLExporter, self).__init__(topic_map)
+        self._infrastructure_required = {}
         self._topic_map = topic_map
-        self._infrastructure_required = {
-            'authority': set(),
-            'calendar': set(),
-            'date_period': set(),
-            'date_type': set(),
-            'entity_relationship_type': set(),
-            'entity_type': set(),
-            'language': set(),
-            'name_part_type': set(),
-            'name_type': set(),
-            'script': set(),
-            }
         self._entities_required = set()
         self._user_authority = None
         self._user_language = None
@@ -33,6 +24,7 @@ class EATSMLExporter (EATSMLHandler):
     def export_full (self):
         """Returns an XML tree of all EATS data (infrastructure and
         entities) exported into EATSML."""
+        self._initialise_infrastructure()
         root = etree.Element(EATS + 'collection', nsmap=NSMAP)
         entities = Entity.objects.all()
         if entities:
@@ -72,6 +64,7 @@ class EATSMLExporter (EATSMLHandler):
         :rtype: `ElementTree`
 
         """
+        self._initialise_infrastructure()
         root = etree.Element(EATS + 'collection', nsmap=NSMAP)
         if user is not None:
             self._user_authority = user.get_current_authority()
@@ -401,6 +394,7 @@ class EATSMLExporter (EATSMLHandler):
         note_element = etree.SubElement(parent, EATS + 'note')
         note_element.set('authority', 'authority-%d' % authority.get_id())
         note_element.set('eats_id', str(assertion.get_id()))
+        note_element.set('is_internal', str(assertion.is_internal).lower())
         note_element.text = assertion.note
         self._infrastructure_required['authority'].add(authority)
 
@@ -1039,3 +1033,17 @@ class EATSMLExporter (EATSMLHandler):
         code_element.text = script.get_code()
         separator_element = etree.SubElement(script_element, EATS + 'separator')
         separator_element.text = script.separator
+
+    def _initialise_infrastructure (self):
+        self._infrastructure_required = {
+            'authority': set(),
+            'calendar': set(),
+            'date_period': set(),
+            'date_type': set(),
+            'entity_relationship_type': set(),
+            'entity_type': set(),
+            'language': set(),
+            'name_part_type': set(),
+            'name_type': set(),
+            'script': set(),
+            }

@@ -374,6 +374,7 @@ class EntityChangeViewTestCase (ViewTestCase):
         form = self.app.get(url, user='user').forms['entity-change-form']
         form['notes-0-DELETE'] = 'on'
         form['notes-1-note'] = 'Test 2'
+        form['notes-1-is_internal'] = True
         response = form.submit('_save').follow()
         self.assertEqual(response.request.url[len(response.request.host_url):],
                          url)
@@ -387,9 +388,11 @@ class EntityChangeViewTestCase (ViewTestCase):
         self.assertEqual(self.authority_id, assertion.authority.get_id())
         self.assertEqual(form_data['note'], assertion.note)
         self.assertEqual(form_data['note'], 'Test 2')
+        self.assertEqual(form_data['is_internal'], True)
         # Test updating an existing note.
         form = self.app.get(url, user='user').forms['entity-change-form']
         form['notes-0-note'] = 'Test'
+        form['notes-0-is_internal'] = False
         response = form.submit('_save').follow()
         self.assertEqual(response.request.url[len(response.request.host_url):],
                          url)
@@ -403,6 +406,7 @@ class EntityChangeViewTestCase (ViewTestCase):
         self.assertEqual(self.authority_id, assertion.authority.get_id())
         self.assertEqual(form_data['note'], assertion.note)
         self.assertEqual(form_data['note'], 'Test')
+        self.assertEqual(form_data['is_internal'], False)
 
     def test_post_subject_identifiers (self):
         entity = self.tm.create_entity(self.authority)

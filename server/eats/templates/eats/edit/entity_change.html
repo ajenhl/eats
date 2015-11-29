@@ -309,6 +309,7 @@ corrected before it will save.</p>
         <tr>
           <th scope="col">Delete?</th>
           <th scope="col">Note</th>
+          <th scope="col">Is internal?</th>
         </tr>
       </thead>
       <tbody class="eats-editable-pa">
@@ -319,6 +320,12 @@ corrected before it will save.</p>
             <div>{{ form.note }}</div>
             {% if form.errors.note %}
             <div class="errors">{{ form.errors.note }}</div>
+            {% endif %}
+          </td>
+          <td>
+            <div>{{ form.is_internal }}</div>
+            {% if form.errors.is_internal %}
+            <div class="errors">{{ form.errors.is_internal }}</div>
             {% endif %}
           </td>
         </tr>

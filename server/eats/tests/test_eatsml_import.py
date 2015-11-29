@@ -1281,7 +1281,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   <entities>
     <entity xml:id="entity-1">
       <notes>
-        <note authority="authority-1">This is a note.</note>
+        <note authority="authority-1" is_internal="true">This is a note.</note>
       </notes>
     </entity>
   </entities>
@@ -1291,6 +1291,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
         assertion = entity.get_notes()[0]
         self.assertEqual(assertion.note, 'This is a note.')
         self.assertEqual(assertion.authority, authority)
+        self.assertEqual(assertion.is_internal, True)
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
@@ -1301,7 +1302,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
   <entities>
     <entity xml:id="entity-1" eats_id="%(entity)d" url="%(entity_url)s">
       <notes>
-        <note authority="authority-1" eats_id="%(assertion)d">This is a note.</note>
+        <note authority="authority-1" eats_id="%(assertion)d" is_internal="true">This is a note.</note>
       </notes>
     </entity>
   </entities>
