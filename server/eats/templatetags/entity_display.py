@@ -100,7 +100,7 @@ def display_entity_search_result (context, entity):
     entity_type_values = set()
     for entity_type in entity_types:
         entity_type_values.add(entity_type.entity_type.get_admin_name())
-    notes = entity.get_notes()
+    notes = entity.get_notes(context['eats_user'])
     return {'dates': dates, 'entity': entity,
             'entity_relationships': entity_relationships,
             'entity_types': entity_type_values, 'notes': notes,

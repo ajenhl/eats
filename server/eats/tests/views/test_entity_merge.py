@@ -32,6 +32,24 @@ class EntityMergeViewTestCase (ViewTestCase):
         response = self.app.get(url, user='user')
         self.assertEqual(response.status_code, 200)
 
+    def test_internal_note (self):
+        # Test that an internal note from a non-editable authority
+        # disallows a merge.
+        authority2 = self.create_authority('new authority')
+        entity1 = self.tm.create_entity(self.authority)
+        entity2 = self.tm.create_entity(self.authority)
+        self.assertEqual(Entity.objects.count(), 2)
+        entity2.create_note_property_assertion(authority2, 'Test', True)
+        url = reverse('entity-merge', kwargs={'entity_id': entity1.get_id()})
+        response = self.app.get(url, user='user')
+        form = response.forms['entity-merge-form']
+        form['merge_entity_1'] = entity2.get_id()
+        response = form.submit()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Entity.objects.count(), 2)
+        self.assertEqual(len(entity1.get_notes_all()), 0)
+        self.assertEqual(len(entity2.get_notes_all()), 1)
+
     def test_non_existent_entity (self):
         url = reverse('entity-merge', kwargs={'entity_id': 0})
         self.app.get(url, status=404, user='user')

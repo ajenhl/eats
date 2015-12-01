@@ -9,11 +9,12 @@ from eats.models import EntityRelationshipType, EntityType, Language, \
 
 class PropertyAssertions (object):
 
-    def __init__ (self, topic_map, entity, authority, data):
+    def __init__ (self, topic_map, entity, authority, data, user=None):
         self.topic_map = topic_map
         self.entity = entity
         self.authority = authority
         self.data = data
+        self.user = user
         self._editable, self._non_editable = self.categorise_assertions()
 
     @property
@@ -155,7 +156,7 @@ class NotePropertyAssertions (PropertyAssertions):
         return self._create_formset(NoteFormSet, data)
 
     def categorise_assertions (self):
-        assertions = self.entity.get_notes()
+        assertions = self.entity.get_notes(self.user)
         return self.get_editable(assertions, self.authority)
 
 

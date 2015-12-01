@@ -1,4 +1,5 @@
 from django.core.urlresolvers import NoReverseMatch
+from django.db import transaction
 
 from tmapi.models import Association, Topic
 
@@ -386,15 +387,31 @@ class Entity (Topic):
         """
         return ExistencePropertyAssertion.objects.filter_by_entity(self)
 
-    def get_notes (self):
+    def get_notes (self, user):
+        """Returns this entity's note property assertions filtered by the
+        permission of `user` (to exclude internal notes).
+
+        :param user: user requesting the notes
+        :type user: `EATSUser`
+        :rtype: `QuerySet` of `NotePropertyAssertion`s
+
+        """
+        return NotePropertyAssertion.objects.filter_by_entity(self, user)
+
+    def get_notes_all (self):
         """Returns this entity's note property assertions.
+
+        Note that this method returns all such assertions; for
+        retrieving only those that an end user should be able to view
+        or interact with, use get_notes.
 
         :rtype: `QuerySet` of `NotePropertyAssertion`s
 
         """
-        return NotePropertyAssertion.objects.filter_by_entity(self)
+        return NotePropertyAssertion.objects.filter_by_entity_all(self)
 
     def get_preferred_name (self, authority, language, script):
+
         """Returns the name for this entity that best matches
         `authority`, `language` and `script`.
 
@@ -417,6 +434,7 @@ class Entity (Topic):
         except NamePropertyAssertion.DoesNotExist:
             return None
 
+    @transaction.atomic
     def merge_in (self, other):
         # Due to the caching involved in entity relationships, it is
         # unfortunately necessary to move them manually before using
@@ -436,7 +454,8 @@ class Entity (Topic):
         """Removes this entity from the EATS Topic Map."""
         assertion_getters = [self.get_eats_names, self.get_entity_relationships,
                              self.get_entity_types, self.get_existences,
-                             self.get_eats_subject_identifiers, self.get_notes]
+                             self.get_eats_subject_identifiers,
+                             self.get_notes_all]
         for assertion_getter in assertion_getters:
             for assertion in assertion_getter():
                 assertion.remove()

@@ -1,6 +1,14 @@
 from eats.models import EATSUser
 
 
+def get_eats_user (request):
+    """Returns the EATS user associated with `request` or None."""
+    try:
+        eats_user = request.user.eats_user
+    except (AttributeError, EATSUser.DoesNotExist):
+        eats_user = None
+    return eats_user
+
 def get_user_preferences (request):
     """Returns a dictionary of user preferences derived from `request`.
 
@@ -29,4 +37,3 @@ def user_is_editor (user):
     if not eats_user.is_editor():
         return False
     return True
-

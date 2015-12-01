@@ -90,6 +90,28 @@ class EntityTestCase (ModelTestCase):
         self.assertTrue(date2 in dates)
         self.assertTrue(date3 not in dates)
 
+    def test_get_notes (self):
+        entity = self.tm.create_entity(self.authority)
+        self.assertEqual(len(entity.get_notes_all()), 0)
+        note = entity.create_note_property_assertion(self.authority, 'Test',
+                                                     True)
+        self.assertEqual(len(entity.get_notes_all()), 1)
+        self.assertEqual(entity.get_notes_all()[0], note)
+        django_user = self.create_django_user('username', 'user@example.org',
+                                              'password')
+        user = self.create_user(django_user)
+        self.assertEqual(len(entity.get_notes(user)), 0)
+        user.editable_authorities = [self.authority]
+        self.assertEqual(len(entity.get_notes(user)), 1)
+        note2 = entity.create_note_property_assertion(self.authority, 'Test',
+                                                      False)
+        note3 = entity.create_note_property_assertion(self.authority2, 'Test',
+                                                      False)
+        note4 = entity.create_note_property_assertion(self.authority2, 'Test',
+                                                      True)
+        self.assertEqual(len(entity.get_notes_all()), 4)
+        self.assertEqual(set(entity.get_notes(user)), set([note, note2, note3]))
+
     def test_get_preferred_name (self):
         entity = self.tm.create_entity(self.authority)
         preferred_name = entity.get_preferred_name(

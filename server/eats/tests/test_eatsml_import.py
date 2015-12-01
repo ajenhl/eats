@@ -1288,7 +1288,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 </collection>''' % {'authority': authority.get_id()}
         annotated_import = self.importer.import_xml(import_xml, self.admin)[1]
         entity = Entity.objects.all()[0]
-        assertion = entity.get_notes()[0]
+        assertion = entity.get_notes_all()[0]
         self.assertEqual(assertion.note, 'This is a note.')
         self.assertEqual(assertion.authority, authority)
         self.assertEqual(assertion.is_internal, True)

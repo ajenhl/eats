@@ -67,7 +67,8 @@ def entity_change (request, topic_map, entity_id):
     entity_types = EntityTypePropertyAssertions(topic_map, entity, authority,
                                                 entity_data)
     names = NamePropertyAssertions(topic_map, entity, authority, entity_data)
-    notes = NotePropertyAssertions(topic_map, entity, authority, entity_data)
+    notes = NotePropertyAssertions(topic_map, entity, authority, entity_data,
+                                   editor)
     entity_relationships = EntityRelationshipPropertyAssertions(
         topic_map, entity, authority, entity_data)
     subject_identifiers = SubjectIdentifierPropertyAssertions(
@@ -142,7 +143,8 @@ def entity_delete (request, topic_map, entity_id):
     editable_authorities = request.user.eats_user.editable_authorities.all()
     assertion_getters = [entity.get_eats_names, entity.get_entity_relationships,
                          entity.get_entity_types, entity.get_existences,
-                         entity.get_eats_subject_identifiers, entity.get_notes]
+                         entity.get_eats_subject_identifiers,
+                         entity.get_notes_all]
     can_delete = True
     for assertion_getter in assertion_getters:
         for assertion in assertion_getter():
@@ -169,7 +171,7 @@ def entity_merge (request, topic_map, entity_id):
             editable_authorities = request.user.eats_user.editable_authorities.all()
             assertion_getters = ['get_eats_names', 'get_entity_relationships',
                                  'get_entity_types', 'get_existences',
-                                 'get_eats_subject_identifiers', 'get_notes']
+                                 'get_eats_subject_identifiers', 'get_notes_all']
             can_merge = True
             for assertion_getter in assertion_getters:
                 for assertion in getattr(merge_entity, assertion_getter)():

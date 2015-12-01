@@ -363,8 +363,8 @@ class EntityChangeViewTestCase (ViewTestCase):
         formset = response.context['note_formset']
         self.assertEqual(formset.initial_form_count(), 1,
                          'Expected one pre-filled note form')
-        self.assertEqual(entity.get_notes().count(), 1)
-        assertion = entity.get_notes()[0]
+        self.assertEqual(entity.get_notes(self.editor).count(), 1)
+        assertion = entity.get_notes(self.editor)[0]
         form_data = formset.initial_forms[0].initial
         self.assertEqual(form_data['assertion'], assertion.get_id())
         self.assertEqual(assertion.authority.get_id(), self.authority_id)
@@ -381,8 +381,8 @@ class EntityChangeViewTestCase (ViewTestCase):
         formset = response.context['note_formset']
         self.assertEqual(formset.initial_form_count(), 1,
                          'Expected one pre-filled note form')
-        self.assertEqual(entity.get_notes().count(), 1)
-        assertion = entity.get_notes()[0]
+        self.assertEqual(entity.get_notes(self.editor).count(), 1)
+        assertion = entity.get_notes(self.editor)[0]
         form_data = formset.initial_forms[0].initial
         self.assertEqual(form_data['assertion'], assertion.get_id())
         self.assertEqual(self.authority_id, assertion.authority.get_id())
@@ -399,8 +399,8 @@ class EntityChangeViewTestCase (ViewTestCase):
         formset = response.context['note_formset']
         self.assertEqual(formset.initial_form_count(), 1,
                          'Expected one pre-filled note form')
-        self.assertEqual(entity.get_notes().count(), 1)
-        assertion = entity.get_notes()[0]
+        self.assertEqual(entity.get_notes(self.editor).count(), 1)
+        assertion = entity.get_notes(self.editor)[0]
         form_data = formset.initial_forms[0].initial
         self.assertEqual(form_data['assertion'], assertion.get_id())
         self.assertEqual(self.authority_id, assertion.authority.get_id())

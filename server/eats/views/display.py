@@ -10,7 +10,7 @@ from eats.decorators import add_topic_map
 from eats.exceptions import EATSMergedIdentifierException
 from eats.forms.display import EntitySearchForm
 from eats.lib.eatsml_exporter import EATSMLExporter
-from eats.lib.user import get_user_preferences, user_is_editor
+from eats.lib.user import get_eats_user, get_user_preferences, user_is_editor
 from eats.lib.views import get_topic_or_404
 from eats.models import Authority, Entity, EntityRelationshipPropertyAssertion, EntityRelationshipType, EntityType, EntityTypePropertyAssertion
 
@@ -40,7 +40,7 @@ def entity_view (request, topic_map, entity_id):
     entity_type_pas = entity.get_entity_types()
     name_pas = entity.get_eats_names()
     relationship_pas = entity.get_entity_relationships()
-    note_pas = entity.get_notes()
+    note_pas = entity.get_notes(user=get_eats_user(request))
     subject_identifier_pas = entity.get_eats_subject_identifiers()
     context_data = {'entity': entity,
                     'preferred_authority': preferred_authority,
@@ -64,7 +64,8 @@ def entity_eatsml_view (request, topic_map, entity_id):
         entity = get_topic_or_404(Entity, entity_id)
     except EATSMergedIdentifierException as e:
         return redirect('entity-eatsml-view', entity_id=e.new_id, permanent=True)
-    tree = EATSMLExporter(topic_map).export_entities([entity])
+    eats_user = get_eats_user(request)
+    tree = EATSMLExporter(topic_map).export_entities([entity], eats_user)
     xml = etree.tostring(tree, encoding='utf-8', pretty_print=True)
     return HttpResponse(xml, content_type='text/xml')
 
@@ -93,6 +94,7 @@ def search (request, topic_map):
             results = paginator.page(paginator.num_pages)
         user_preferences = get_user_preferences(request)
     context_data = {
+        'eats_user': get_eats_user(request),
         'property_assertion_full_certainty': \
             topic_map.property_assertion_full_certainty,
         'search_form': form, 'search_results': results,
@@ -104,11 +106,8 @@ def search (request, topic_map):
 def search_eatsml (request, topic_map):
     name = request.GET.get('name', '')
     entities = topic_map.lookup_entities(name)
-    try:
-        user = request.user.eats_user
-    except AttributeError:
-        user = None
-    tree = EATSMLExporter(topic_map).export_entities(entities, user=user)
+    eats_user = get_eats_user(request)
+    tree = EATSMLExporter(topic_map).export_entities(entities, user=eats_user)
     xml = etree.tostring(tree, encoding='utf-8', pretty_print=True)
     return HttpResponse(xml, content_type='text/xml')
 

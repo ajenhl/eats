@@ -17,6 +17,7 @@ class EATSMLExporter (EATSMLHandler):
         self._infrastructure_required = {}
         self._topic_map = topic_map
         self._entities_required = set()
+        self._user = None
         self._user_authority = None
         self._user_language = None
         self._user_script = None
@@ -64,6 +65,7 @@ class EATSMLExporter (EATSMLHandler):
         :rtype: `ElementTree`
 
         """
+        self._user = user
         self._initialise_infrastructure()
         root = etree.Element(EATS + 'collection', nsmap=NSMAP)
         if user is not None:
@@ -375,7 +377,7 @@ class EATSMLExporter (EATSMLHandler):
         :type parent: `Element`
 
         """
-        notes = entity.get_notes()
+        notes = entity.get_notes(self._user)
         if notes:
             notes_element = etree.SubElement(parent, EATS + 'notes')
         for note in notes:

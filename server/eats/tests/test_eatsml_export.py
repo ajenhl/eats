@@ -348,13 +348,28 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
 ''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
        'note': note.get_id(), 'url': entity.get_eats_subject_identifier()}
         self._compare_XML(export, expected_xml)
-        # Use a different value of is_internal.
+        # An internal note exported by a user who is not an editor of
+        # the authority stating the note is not exported.
         note.update('A note.', True)
         export = self.exporter.export_entities([entity])
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <entities>
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d" url="%(url)s"></entity>
+  </entities>
+</collection>
+''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
+       'url': entity.get_eats_subject_identifier()}
+        self._compare_XML(export, expected_xml)
+        django_user = self.create_django_user('test', 'test@example.org',
+                                              'password')
+        user = self.create_user(django_user)
+        user.editable_authorities.add(authority)
+        export = self.exporter.export_entities([entity], user=user)
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
-    <authority xml:id="authority-%(authority)d" eats_id="%(authority)d">
+    <authority xml:id="authority-%(authority)d" eats_id="%(authority)d" user_preferred="true">
       <name>Test</name>
     </authority>
   </authorities>
