@@ -1114,6 +1114,7 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
 
     def test_import_new_entity_name (self):
         authority = self.create_authority('Test')
+        self.admin.editable_authorities.add(authority)
         language = self.create_language('English', 'en')
         name_type = self.create_name_type('regular')
         given_name_part_type = self.create_name_part_type('given')
@@ -1185,6 +1186,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
             <name_part name_part_type="name_part_type-1" language="language-1" script="script-1">Miriam</name_part>
             <name_part name_part_type="name_part_type-1" language="language-1" script="script-1">Clare</name_part>
           </name_parts>
+          <notes>
+            <note is_internal="true">Test</note>
+          </notes>
         </name>
       </names>
     </entity>
@@ -1213,6 +1217,10 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
         self.assertEqual(len(given_name_parts), 2)
         self.assertEqual(given_name_parts[0].display_form, 'Miriam')
         self.assertEqual(given_name_parts[1].display_form, 'Clare')
+        notes = assertion.get_notes(self.admin)
+        self.assertEqual(len(notes), 1)
+        self.assertEqual(notes[0].note, 'Test')
+        self.assertEqual(notes[0].is_internal, True)
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
@@ -1256,6 +1264,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
             <name_part name_part_type="name_part_type-1" language="language-1" script="script-1">Miriam</name_part>
             <name_part name_part_type="name_part_type-1" language="language-1" script="script-1">Clare</name_part>
           </name_parts>
+          <notes>
+            <note is_internal="true">Test</note>
+          </notes>
         </name>
       </names>
     </entity>
@@ -1421,6 +1432,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
                   <normalised>2010-03-21</normalised>
                 </date_part>
               </date_parts>
+              <notes>
+                <note is_internal="false">Test</note>
+              </notes>
             </date>
           </dates>
         </existence>
@@ -1453,6 +1467,10 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
         self.assertEqual(end.date_type, date_type2)
         self.assertEqual(end.get_normalised_value(), '2010-03-21')
         self.assertEqual(end.get_value(), '21 March 2010')
+        notes = date.get_notes(self.admin)
+        self.assertEqual(len(notes), 1)
+        self.assertEqual(notes[0].note, 'Test')
+        self.assertEqual(notes[0].is_internal, False)
         expected_xml = '''
 <collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
   <authorities>
@@ -1500,6 +1518,9 @@ class EATSMLImportTestCase (TestCase, BaseTestCase):
                   <normalised>2010-03-21</normalised>
                 </date_part>
               </date_parts>
+              <notes>
+                <note is_internal="false">Test</note>
+              </notes>
             </date>
           </dates>
         </existence>

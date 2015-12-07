@@ -1,8 +1,6 @@
-from tmapi.models import Association
-
 from .base_manager import BaseManager
 from .entity_type import EntityType
-from .property_assertion import PropertyAssertion
+from .property_assertion import NoteBearingPropertyAssertion
 
 
 class EntityTypePropertyAssertionManager (BaseManager):
@@ -22,7 +20,7 @@ class EntityTypePropertyAssertionManager (BaseManager):
         return qs.filter(type=assertion_type)
 
 
-class EntityTypePropertyAssertion (Association, PropertyAssertion):
+class EntityTypePropertyAssertion (NoteBearingPropertyAssertion):
 
     objects = EntityTypePropertyAssertionManager()
 

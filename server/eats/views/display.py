@@ -36,18 +36,19 @@ def entity_view (request, topic_map, entity_id):
             script=preferred_script).name.assembled_form
     except AttributeError:
         preferred_name_form = UNNAMED_ENTITY_NAME
-    existence_dates = entity.get_existence_dates()
+    existence_pas = entity.get_existences()
     entity_type_pas = entity.get_entity_types()
     name_pas = entity.get_eats_names()
     relationship_pas = entity.get_entity_relationships()
     note_pas = entity.get_notes(user=get_eats_user(request))
     subject_identifier_pas = entity.get_eats_subject_identifiers()
-    context_data = {'entity': entity,
+    context_data = {'eats_user': get_eats_user(request),
+                    'entity': entity,
                     'preferred_authority': preferred_authority,
                     'preferred_language': preferred_language,
                     'preferred_name_form': preferred_name_form,
                     'preferred_script': preferred_script,
-                    'existence_dates': existence_dates,
+                    'existence_pas': existence_pas,
                     'entity_type_pas': entity_type_pas, 'name_pas': name_pas,
                     'note_pas': note_pas,
                     'property_assertion_full_certainty':

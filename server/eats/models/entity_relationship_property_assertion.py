@@ -1,14 +1,12 @@
 from django.db import transaction
 from django.db.models import Q
 
-from tmapi.models import Association
-
 from eats.exceptions import EATSValidationException
 
 from .base_manager import BaseManager
 from .entity_relationship_cache import EntityRelationshipCache
 from .entity_relationship_type import EntityRelationshipType
-from .property_assertion import PropertyAssertion
+from .property_assertion import NoteBearingPropertyAssertion
 
 
 class EntityRelationshipPropertyAssertionManager (BaseManager):
@@ -30,7 +28,7 @@ class EntityRelationshipPropertyAssertionManager (BaseManager):
         return qs.filter(type=assertion_type)
 
 
-class EntityRelationshipPropertyAssertion (Association, PropertyAssertion):
+class EntityRelationshipPropertyAssertion (NoteBearingPropertyAssertion):
 
     objects = EntityRelationshipPropertyAssertionManager()
 

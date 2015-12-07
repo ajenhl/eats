@@ -1,11 +1,9 @@
 from django.db.models import Q
 
-from tmapi.models import Association
-
 from .base_manager import BaseManager
 from .name import Name
 from .name_cache import NameCache
-from .property_assertion import PropertyAssertion
+from .property_assertion import NoteBearingPropertyAssertion
 
 
 class NamePropertyAssertionManager (BaseManager):
@@ -131,7 +129,7 @@ class NamePropertyAssertionManager (BaseManager):
         return qs.filter(type=assertion_type)
 
 
-class NamePropertyAssertion (Association, PropertyAssertion):
+class NamePropertyAssertion (NoteBearingPropertyAssertion):
 
     objects = NamePropertyAssertionManager()
 

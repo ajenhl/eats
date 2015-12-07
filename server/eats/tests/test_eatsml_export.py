@@ -487,6 +487,289 @@ class EATSMLExportTestCase (TestCase, BaseTestCase):
        'url': entity.get_eats_subject_identifier()}
         self._compare_XML(export, expected_xml)
 
+    def test_export_entity_existence_note (self):
+        authority = self.create_authority('Test')
+        entity = self.tm.create_entity()
+        existence = entity.create_existence_property_assertion(authority)
+        note = existence.create_note('Test', False)
+        export = self.exporter.export_entities([entity])
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-%(authority)d" eats_id="%(authority)d">
+      <name>Test</name>
+    </authority>
+  </authorities>
+  <entities>
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d" url="%(url)s">
+      <existences>
+        <existence authority="authority-%(authority)d" eats_id="%(existence)d">
+          <notes>
+            <note is_internal="false">Test</note>
+          </notes>
+        </existence>
+      </existences>
+    </entity>
+  </entities>
+</collection>
+''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
+       'existence': existence.get_id(),
+       'url': entity.get_eats_subject_identifier()}
+        self._compare_XML(export, expected_xml)
+        note.update('Test', True)
+        export = self.exporter.export_entities([entity])
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-%(authority)d" eats_id="%(authority)d">
+      <name>Test</name>
+    </authority>
+  </authorities>
+  <entities>
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d" url="%(url)s">
+      <existences>
+        <existence authority="authority-%(authority)d" eats_id="%(existence)d"></existence>
+      </existences>
+    </entity>
+  </entities>
+</collection>
+''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
+       'existence': existence.get_id(),
+       'url': entity.get_eats_subject_identifier()}
+        self._compare_XML(export, expected_xml)
+        django_user = self.create_django_user('test', 'test@example.org',
+                                              'password')
+        user = self.create_user(django_user)
+        user.editable_authorities.add(authority)
+        export = self.exporter.export_entities([entity], user=user)
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-%(authority)d" eats_id="%(authority)d" user_preferred="true">
+      <name>Test</name>
+    </authority>
+  </authorities>
+  <entities>
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d" url="%(url)s">
+      <existences>
+        <existence authority="authority-%(authority)d" eats_id="%(existence)d">
+          <notes>
+            <note is_internal="true">Test</note>
+          </notes>
+        </existence>
+      </existences>
+    </entity>
+  </entities>
+</collection>
+''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
+       'existence': existence.get_id(),
+       'url': entity.get_eats_subject_identifier()}
+        self._compare_XML(export, expected_xml)
+
+    def test_export_entity_date_note (self):
+        authority = self.create_authority('Test')
+        calendar = self.create_calendar('Julian')
+        authority.set_calendars([calendar])
+        date_type = self.create_date_type('exact')
+        authority.set_date_types([date_type])
+        date_period = self.create_date_period('lifespan')
+        authority.set_date_periods([date_period])
+        entity = self.tm.create_entity(authority)
+        existence = entity.get_existences()[0]
+        certainty = self.tm.date_full_certainty
+        certainty_value = 'full'
+        date = existence.create_date({
+                'date_period': date_period, 'start': '1 January 2001',
+                'start_calendar': calendar, 'start_certainty': certainty,
+                'start_normalised': '2001-01-01', 'start_type': date_type,
+                })
+        note = date.create_note('Test', False)
+        export = self.exporter.export_entities([entity])
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-%(authority)d" eats_id="%(authority)d">
+      <name>Test</name>
+      <calendars>
+        <calendar ref="calendar-%(calendar)d"/>
+      </calendars>
+      <date_periods>
+        <date_period ref="date_period-%(date_period)d"/>
+      </date_periods>
+      <date_types>
+        <date_type ref="date_type-%(date_type)d"/>
+      </date_types>
+    </authority>
+  </authorities>
+  <calendars>
+    <calendar xml:id="calendar-%(calendar)d" eats_id="%(calendar)d">
+      <name>Julian</name>
+    </calendar>
+  </calendars>
+  <date_periods>
+    <date_period xml:id="date_period-%(date_period)d" eats_id="%(date_period)d">
+      <name>lifespan</name>
+    </date_period>
+  </date_periods>
+  <date_types>
+    <date_type xml:id="date_type-%(date_type)d" eats_id="%(date_type)d">
+      <name>exact</name>
+    </date_type>
+  </date_types>
+  <entities>
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d" url="%(url)s">
+      <existences>
+        <existence authority="authority-%(authority)d" eats_id="%(existence)d">
+          <dates>
+            <date date_period="date_period-%(date_period)d">
+              <assembled_form>%(date_assembled)s</assembled_form>
+              <date_parts>
+                <date_part type="start" calendar="calendar-%(calendar)d" date_type="date_type-%(date_type)d" certainty="%(certainty)s">
+                  <raw>1 January 2001</raw>
+                  <normalised>2001-01-01</normalised>
+                </date_part>
+              </date_parts>
+              <notes>
+                <note is_internal="false">Test</note>
+              </notes>
+            </date>
+          </dates>
+        </existence>
+      </existences>
+    </entity>
+  </entities>
+</collection>
+''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
+       'date_assembled': date.assembled_form, 'calendar': calendar.get_id(),
+       'date_type': date_type.get_id(), 'date_period': date_period.get_id(),
+       'certainty': certainty_value, 'existence': existence.get_id(),
+       'url': entity.get_eats_subject_identifier()}
+        self._compare_XML(export, expected_xml)
+        note.update('Test', True)
+        export = self.exporter.export_entities([entity])
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-%(authority)d" eats_id="%(authority)d">
+      <name>Test</name>
+      <calendars>
+        <calendar ref="calendar-%(calendar)d"/>
+      </calendars>
+      <date_periods>
+        <date_period ref="date_period-%(date_period)d"/>
+      </date_periods>
+      <date_types>
+        <date_type ref="date_type-%(date_type)d"/>
+      </date_types>
+    </authority>
+  </authorities>
+  <calendars>
+    <calendar xml:id="calendar-%(calendar)d" eats_id="%(calendar)d">
+      <name>Julian</name>
+    </calendar>
+  </calendars>
+  <date_periods>
+    <date_period xml:id="date_period-%(date_period)d" eats_id="%(date_period)d">
+      <name>lifespan</name>
+    </date_period>
+  </date_periods>
+  <date_types>
+    <date_type xml:id="date_type-%(date_type)d" eats_id="%(date_type)d">
+      <name>exact</name>
+    </date_type>
+  </date_types>
+  <entities>
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d" url="%(url)s">
+      <existences>
+        <existence authority="authority-%(authority)d" eats_id="%(existence)d">
+          <dates>
+            <date date_period="date_period-%(date_period)d">
+              <assembled_form>%(date_assembled)s</assembled_form>
+              <date_parts>
+                <date_part type="start" calendar="calendar-%(calendar)d" date_type="date_type-%(date_type)d" certainty="%(certainty)s">
+                  <raw>1 January 2001</raw>
+                  <normalised>2001-01-01</normalised>
+                </date_part>
+              </date_parts>
+            </date>
+          </dates>
+        </existence>
+      </existences>
+    </entity>
+  </entities>
+</collection>
+''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
+       'date_assembled': date.assembled_form, 'calendar': calendar.get_id(),
+       'date_type': date_type.get_id(), 'date_period': date_period.get_id(),
+       'certainty': certainty_value, 'existence': existence.get_id(),
+       'url': entity.get_eats_subject_identifier()}
+        self._compare_XML(export, expected_xml)
+        django_user = self.create_django_user('test', 'test@example.org',
+                                              'password')
+        user = self.create_user(django_user)
+        user.editable_authorities.add(authority)
+        export = self.exporter.export_entities([entity], user=user)
+        expected_xml = '''
+<collection xmlns="http://eats.artefact.org.nz/ns/eatsml/">
+  <authorities>
+    <authority xml:id="authority-%(authority)d" eats_id="%(authority)d" user_preferred="true">
+      <name>Test</name>
+      <calendars>
+        <calendar ref="calendar-%(calendar)d"/>
+      </calendars>
+      <date_periods>
+        <date_period ref="date_period-%(date_period)d"/>
+      </date_periods>
+      <date_types>
+        <date_type ref="date_type-%(date_type)d"/>
+      </date_types>
+    </authority>
+  </authorities>
+  <calendars>
+    <calendar xml:id="calendar-%(calendar)d" eats_id="%(calendar)d">
+      <name>Julian</name>
+    </calendar>
+  </calendars>
+  <date_periods>
+    <date_period xml:id="date_period-%(date_period)d" eats_id="%(date_period)d">
+      <name>lifespan</name>
+    </date_period>
+  </date_periods>
+  <date_types>
+    <date_type xml:id="date_type-%(date_type)d" eats_id="%(date_type)d">
+      <name>exact</name>
+    </date_type>
+  </date_types>
+  <entities>
+    <entity xml:id="entity-%(entity)d" eats_id="%(entity)d" url="%(url)s">
+      <existences>
+        <existence authority="authority-%(authority)d" eats_id="%(existence)d">
+          <dates>
+            <date date_period="date_period-%(date_period)d">
+              <assembled_form>%(date_assembled)s</assembled_form>
+              <date_parts>
+                <date_part type="start" calendar="calendar-%(calendar)d" date_type="date_type-%(date_type)d" certainty="%(certainty)s">
+                  <raw>1 January 2001</raw>
+                  <normalised>2001-01-01</normalised>
+                </date_part>
+              </date_parts>
+              <notes>
+                <note is_internal="true">Test</note>
+              </notes>
+            </date>
+          </dates>
+        </existence>
+      </existences>
+    </entity>
+  </entities>
+</collection>
+''' % {'authority': authority.get_id(), 'entity': entity.get_id(),
+       'date_assembled': date.assembled_form, 'calendar': calendar.get_id(),
+       'date_type': date_type.get_id(), 'date_period': date_period.get_id(),
+       'certainty': certainty_value, 'existence': existence.get_id(),
+       'url': entity.get_eats_subject_identifier()}
+        self._compare_XML(export, expected_xml)
+
     def test_export_infrastructure_full (self):
         authority1 = self.create_authority('Test1')
         authority2 = self.create_authority('Test2')

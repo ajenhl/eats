@@ -189,6 +189,7 @@ class EATSMLExporter (EATSMLHandler):
         else:
             self._entities_required.add(domain_entity)
         self._export_dates(assertion, assertion_element)
+        self._export_notes(assertion, assertion_element)
 
     def _export_entity_type_property_assertions (self, entity, parent):
         """Exports the entity types of `entity`.
@@ -226,6 +227,7 @@ class EATSMLExporter (EATSMLHandler):
         self._infrastructure_required['authority'].add(authority)
         self._infrastructure_required['entity_type'].add(entity_type)
         self._export_dates(assertion, assertion_element)
+        self._export_notes(assertion, assertion_element)
 
     def _export_existence_property_assertions (self, entity, parent):
         """Exports the existences of `entity`.
@@ -258,6 +260,7 @@ class EATSMLExporter (EATSMLHandler):
         assertion_element.set('eats_id', str(existence.get_id()))
         self._infrastructure_required['authority'].add(authority)
         self._export_dates(existence, assertion_element)
+        self._export_notes(existence, assertion_element)
 
     def _export_name_property_assertions (self, entity, parent):
         """Exports the names of `entity`.
@@ -337,6 +340,7 @@ class EATSMLExporter (EATSMLHandler):
             self._export_name_parts(name_part_type, name_parts,
                                     name_parts_element)
         self._export_dates(assertion, name_element)
+        self._export_notes(assertion, name_element)
 
     def _export_name_parts (self, name_part_type, name_parts,
                             name_parts_element):
@@ -443,14 +447,14 @@ class EATSMLExporter (EATSMLHandler):
         :param assertion: property assertion whose dates will be exported
         :type assertion: `PropertyAssertion`
         :param parent: XML element that will contain the exported dates
-        :type parent; `Element`
+        :type parent: `Element`
 
         """
         dates = assertion.get_dates()
         if dates:
             dates_element = etree.SubElement(parent, EATS + 'dates')
-        for date in dates:
-            self._export_date(date, dates_element)
+            for date in dates:
+                self._export_date(date, dates_element)
 
     def _export_date (self, date, parent):
         """Exports `date`, appending it to `parent`.
@@ -473,6 +477,7 @@ class EATSMLExporter (EATSMLHandler):
             date_part = getattr(date, date_part_name)
             self._export_date_part(date_part, date_part_name,
                                    date_parts_element)
+        self._export_notes(date, date_element)
 
     def _export_date_part (self, date_part, date_part_name, parent):
         """Exports `date_part` (if it has content), appending it to
@@ -508,6 +513,34 @@ class EATSMLExporter (EATSMLHandler):
             normalised_element = etree.SubElement(date_part_element, EATS +
                                                   'normalised')
             normalised_element.text = date_part.get_normalised_value()
+
+    def _export_notes (self, bearer, parent):
+        """Exports the notes associated with `bearer`.
+
+        :param bearer: property assertion or date whose notes will be exported
+        :type bearer: `NoteBearing`
+        :param parent: XML element that will contain the exported notes
+        :type parent: `Element`
+
+        """
+        notes = bearer.get_notes(self._user)
+        if notes:
+            notes_element = etree.SubElement(parent, EATS + 'notes')
+            for note in notes:
+                self._export_note(note, notes_element)
+
+    def _export_note (self, note, parent):
+        """Exports `note`, appending it to `parent`.
+
+        :param note: note to export
+        :type note: `Note`
+        :param parent: XML element that will contain the exported note
+        :type parent: `Element`
+
+        """
+        note_element = etree.SubElement(parent, EATS + 'note')
+        note_element.set('is_internal', str(note.is_internal).lower())
+        note_element.text = note.note
 
     def export_infrastructure (self, user=None):
         """Returns an XML tree of infrastructural elements, exported

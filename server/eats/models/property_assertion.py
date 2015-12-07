@@ -1,8 +1,12 @@
+from tmapi.models import Association
+
 from .authority import Authority
 from .date import Date
+from .note import Note
+from .note_bearing import NoteBearing
 
 
-class PropertyAssertion (object):
+class PropertyAssertion:
 
     @property
     def authority (self):
@@ -145,3 +149,40 @@ class PropertyAssertion (object):
 
         """
         raise NotImplementedError
+
+
+class NoteBearingPropertyAssertion (Association, PropertyAssertion,
+                                    NoteBearing):
+
+    class Meta:
+        proxy = True
+        app_label = 'eats'
+
+    def create_note (self, note, is_internal):
+        reifier = self.get_or_set_reifier()
+        return super().create_note(note, is_internal, reifier=reifier)
+
+    def get_note (self, user, note_id):
+        reifier = self.get_reifier()
+        note = None
+        if reifier is not None:
+            note = super().get_note(user, note_id, authority=self.authority,
+                                    reifier=reifier)
+        return note
+
+    def get_notes (self, user):
+        """Returns the `Note`s associated with this property assertion,
+        filtered by the permission of `user` (to exclude internal
+        notes).
+
+        :param user: user requesting the notes
+        :type user: `EATSUser`
+        :rtype: `QuerySet` of `Note`s
+
+        """
+        reifier = self.get_reifier()
+        notes = Note.objects.none()
+        if reifier is not None:
+            notes = super().get_notes(user, authority=self.authority,
+                                      reifier=reifier)
+        return notes

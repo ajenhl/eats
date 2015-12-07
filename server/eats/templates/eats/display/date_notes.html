@@ -1,0 +1,3 @@
+{% for note in notes %}
+[<span class="note-ref" title="{{ note.note }}{% if note.is_internal %} [internal]{% endif %}">{{ forloop.counter }}</span>]
+{% endfor %}

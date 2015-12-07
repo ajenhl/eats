@@ -1,0 +1,6 @@
+{% for note in notes %}
+<p>{{ note.note }}{% if entity_id %} — <a href="{% url 'pa-note-change' entity_id assertion_id note.get_id %}">Edit</a>{% endif %}</p>
+{% endfor %}
+{% if entity_id %}
+<p><a href="{% url 'pa-note-add' entity_id assertion_id %}">Add a note</a></p>
+{% endif %}

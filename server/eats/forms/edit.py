@@ -527,13 +527,16 @@ class NameForm (PropertyAssertionForm):
         return assertion
 
 
-class NoteForm (PropertyAssertionForm):
+class NoteForm (forms.Form):
 
     note = forms.CharField(widget=forms.Textarea(attrs={'rows': 5}))
     is_internal = forms.BooleanField(required=False)
 
+
+class NotePropertyAssertionForm (NoteForm, PropertyAssertionForm):
+
     def _assertion_to_dict (self, assertion):
-        data = super(NoteForm, self)._assertion_to_dict(assertion)
+        data = super()._assertion_to_dict(assertion)
         data['note'] = assertion.note
         data['is_internal'] = assertion.is_internal
         return data
@@ -548,6 +551,32 @@ class NoteForm (PropertyAssertionForm):
         else:
             # Update an existing assertion.
             self.instance.update(note, is_internal)
+
+
+class NoteBearingNoteForm (NoteForm):
+
+    def __init__ (self, bearer, data=None, instance=None, **kwargs):
+        self.bearer = bearer
+        self.instance = instance
+        if instance is None:
+            initial = {}
+        else:
+            initial = {'is_internal': instance.is_internal,
+                       'note': instance.note}
+        super().__init__(data, initial=initial, **kwargs)
+
+    def delete (self):
+        self.instance.remove()
+
+    def save (self):
+        note_text = self.cleaned_data['note']
+        is_internal = self.cleaned_data['is_internal']
+        if self.instance is None:
+            note = self.bearer.create_note(note_text, is_internal)
+        else:
+            self.instance.update(note_text, is_internal)
+            note = self.instance
+        return note.get_id()
 
 
 class SubjectIdentifierForm (PropertyAssertionForm):
@@ -901,7 +930,7 @@ NameFormSet = formset_factory(NameForm, can_delete=True, extra=2,
                               formset=NameAssertionFormSet)
 NamePartFormSet = formset_factory(NamePartForm, can_delete=True, extra=2,
                                   formset=NamePartInlineFormSet)
-NoteFormSet = formset_factory(NoteForm, can_delete=True, extra=1,
+NoteFormSet = formset_factory(NotePropertyAssertionForm, can_delete=True, extra=1,
                               formset=NoteAssertionFormSet)
 SubjectIdentifierFormSet = formset_factory(
     SubjectIdentifierForm, can_delete=True, extra=2,

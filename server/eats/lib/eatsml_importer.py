@@ -25,6 +25,7 @@ class EATSMLImporter (EATSMLHandler):
        * entities
        * property assertions (for both new and existing entities)
        * dates (for new property assertions only)
+       * non-assertion notes (for new property assertions only)
 
     Entity relationship property assertions, because they are
     bi-directional, are handled specially. A new assertion will be
@@ -461,6 +462,7 @@ class EATSMLImporter (EATSMLHandler):
                     authority, entity_type)
                 element.set('eats_id', str(assertion.get_id()))
                 self._import_dates(element, assertion)
+                self._import_notes(element, assertion)
 
     def _import_existence_assertions (self, entity, entity_element):
         """Imports existence assertions from `entity_element` into
@@ -483,6 +485,7 @@ class EATSMLImporter (EATSMLHandler):
                     authority)
                 element.set('eats_id', str(assertion.get_id()))
                 self._import_dates(element, assertion)
+                self._import_notes(element, assertion)
 
     def _import_name_assertions (self, entity, entity_element):
         """Imports name assertions from `entity_element` into
@@ -513,6 +516,7 @@ class EATSMLImporter (EATSMLHandler):
                 element.set('eats_id', str(assertion.get_id()))
                 self._import_name_parts(assertion.name, element)
                 self._import_dates(element, assertion)
+                self._import_notes(element, assertion)
 
     def _import_name_parts (self, name, name_element):
         """Imports name parts from `name_element` into `name`.
@@ -622,6 +626,7 @@ class EATSMLImporter (EATSMLHandler):
                 range_entity, certainty)
             element.set('eats_id', str(assertion.get_id()))
             self._import_dates(element, assertion)
+            self._import_notes(element, assertion)
 
     def _import_dates (self, assertion_element, assertion):
         """Imports any dates associated with `assertion_element`,
@@ -654,9 +659,19 @@ class EATSMLImporter (EATSMLHandler):
                     element, 'e:normalised')
                 data[date_part_type + '_type'] = self._get_mapped_object(
                     element, 'date_type', 'date_type')
-            assertion.create_date(data)
+            date = assertion.create_date(data)
+            self._import_notes(date_element, date)
+
+    def _import_notes (self, bearer_element, bearer):
+        """Imports any non-note-property-assertion notes associated with
+        `bearer_element`, assigning them to `bearer`."""
+        for note_element in bearer_element.xpath('e:notes/e:note',
+                                                 namespaces=NSMAP):
+            is_internal = self._get_boolean(note_element.get('is_internal'))
+            bearer.create_note(note_element.text, is_internal)
 
     def _add_mapping (self, object_type, xml_id, obj):
+
         """Adds a mapping between `xml_id` and `obj` within the
         mapping for `object_type`.
 

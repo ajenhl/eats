@@ -1,7 +1,5 @@
-from tmapi.models import Association
-
 from .base_manager import BaseManager
-from .property_assertion import PropertyAssertion
+from .property_assertion import NoteBearingPropertyAssertion
 
 
 class ExistencePropertyAssertionManager (BaseManager):
@@ -17,7 +15,7 @@ class ExistencePropertyAssertionManager (BaseManager):
         return qs.filter(type=assertion_type)
 
 
-class ExistencePropertyAssertion (Association, PropertyAssertion):
+class ExistencePropertyAssertion (NoteBearingPropertyAssertion):
 
     objects = ExistencePropertyAssertionManager()
 

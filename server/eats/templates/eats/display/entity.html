@@ -9,17 +9,16 @@
 
   {% if user_is_editor %}<p>[<a href="{% url 'entity-change' entity.get_id %}">Edit</a>]</p>{% endif %}
 
-  {% if existence_dates %}
+  {% if existence_pas %}
   <section>
     <h1>Dates</h1>
 
     <p>Dates expressing when this entity existed:</p>
 
     <ul>
-      {% for date in existence_dates %}
-      <li>
-        {{ date.assembled_form }}
-        {% display_property_assertion_authority date.property_assertion %}
+      {% for existence_pa in existence_pas %}
+      <li>{% display_property_assertion_authority existence_pa %}:
+        {% display_property_assertion_dates existence_pa eats_user %}
       </li>
       {% endfor %}
     </ul>
@@ -37,7 +36,8 @@
       <li>
         {{ entity_type_pa.entity_type.get_admin_name }}
         {% display_property_assertion_authority entity_type_pa %}
-        {% display_property_assertion_dates entity_type_pa %}
+        {% display_property_assertion_dates entity_type_pa eats_user %}
+        {% display_property_assertion_notes entity_type_pa eats_user %}
       </li>
       {% endfor %}
     </ul>
@@ -52,10 +52,14 @@
 
     <ul>
       {% for name_pa in name_pas %}
-      <li>{{ name_pa.name.assembled_form }}
-      {% display_property_assertion_authority name_pa %}
-      {% display_name_metadata name_pa.name %}
-      {% display_property_assertion_dates name_pa %}
+      <li>
+        {{ name_pa.name.assembled_form }}
+        {% display_property_assertion_authority name_pa %}
+        <div class="name-metadata">
+          {% display_name_metadata name_pa.name %}
+          {% display_property_assertion_dates name_pa eats_user %}
+          {% display_property_assertion_notes name_pa eats_user %}
+        </div>
       </li>
       {% endfor %}
     </ul>
@@ -73,7 +77,8 @@
       <li>
         {% display_entity_relationship_property_assertion entity relationship_pa %}
         {% display_property_assertion_authority relationship_pa %}
-        {% display_property_assertion_dates relationship_pa %}
+        {% display_property_assertion_dates relationship_pa eats_user %}
+        {% display_property_assertion_notes relationship_pa eats_user %}
       </li>
       {% endfor %}
     </ul>

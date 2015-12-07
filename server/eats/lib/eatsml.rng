@@ -337,6 +337,7 @@
               <ref name="eats_id_attribute"/>
             </optional>
             <ref name="dates"/>
+            <ref name="non_assertion_notes" />
           </element>
         </oneOrMore>
       </element>
@@ -356,6 +357,7 @@
               <data type="IDREF"/>
             </attribute>
             <ref name="dates"/>
+            <ref name="non_assertion_notes" />
           </element>
         </oneOrMore>
       </element>
@@ -403,6 +405,7 @@
               </element>
             </optional>
             <ref name="dates"/>
+            <ref name="non_assertion_notes" />
           </element>
         </oneOrMore>
       </element>
@@ -429,6 +432,7 @@
               <data type="IDREF"/>
             </attribute>
             <ref name="dates"/>
+            <ref name="non_assertion_notes" />
           </element>
         </oneOrMore>
       </element>
@@ -444,6 +448,19 @@
             <optional>
               <ref name="eats_id_attribute"/>
             </optional>
+            <text/>
+          </element>
+        </oneOrMore>
+      </element>
+    </optional>
+  </define>
+
+  <define name="non_assertion_notes">
+    <optional>
+      <element name="notes">
+        <oneOrMore>
+          <element name="note">
+            <ref name="is_note_internal_attribute"/>
             <text/>
           </element>
         </oneOrMore>
@@ -499,6 +516,7 @@
                 </element>
               </oneOrMore>
             </element>
+            <ref name="non_assertion_notes" />
           </element>
         </oneOrMore>
       </element>

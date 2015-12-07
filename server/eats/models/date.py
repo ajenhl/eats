@@ -3,6 +3,7 @@ from tmapi.models import Topic
 from .base_manager import BaseManager
 from .date_part import DatePart
 from .date_period import DatePeriod
+from .note_bearing import NoteBearing
 
 
 class DateManager (BaseManager):
@@ -46,7 +47,7 @@ class DateManager (BaseManager):
             types=self.eats_topic_map.date_type)
 
 
-class Date (Topic):
+class Date (Topic, NoteBearing):
 
     objects = DateManager()
 

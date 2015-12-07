@@ -13,12 +13,19 @@ from eats.constants import UNNAMED_ENTITY_NAME
 from eats.exceptions import EATSMergedIdentifierException
 from eats.lib.eatsml_exporter import EATSMLExporter
 from eats.lib.eatsml_importer import EATSMLImporter
-from eats.lib.property_assertions import EntityRelationshipPropertyAssertions, EntityTypePropertyAssertions, ExistencePropertyAssertions, NamePropertyAssertions, NotePropertyAssertions, SubjectIdentifierPropertyAssertions
+from eats.lib.property_assertions import (
+    EntityRelationshipPropertyAssertions, EntityTypePropertyAssertions,
+    ExistencePropertyAssertions, NamePropertyAssertions, NotePropertyAssertions,
+    SubjectIdentifierPropertyAssertions)
 from eats.lib.user import get_user_preferences, user_is_editor
 from eats.lib.views import get_topic_or_404
 from eats.decorators import add_topic_map
-from eats.forms.edit import CreateEntityForm, create_choice_list, CurrentAuthorityForm, DateForm, EATSMLImportForm, EntityMergeForm
-from eats.models import Authority, Calendar, DatePeriod, DateType, EATSMLImport, Entity, EntityType
+from eats.forms.edit import (
+    CreateEntityForm, create_choice_list, CurrentAuthorityForm, DateForm,
+    EATSMLImportForm, EntityMergeForm, NoteBearingNoteForm)
+from eats.models import (
+    Authority, Calendar, DatePeriod, DateType, EATSMLImport, Entity,
+    EntityType)
 
 
 @user_passes_test(user_is_editor)
@@ -50,7 +57,7 @@ def entity_change (request, topic_map, entity_id):
     except EATSMergedIdentifierException as e:
         return redirect('entity-change', entity_id=e.new_id, permanent=True)
     editor = request.user.eats_user
-    context_data = {'entity': entity, 'is_valid': True}
+    context_data = {'entity': entity, 'is_valid': True, 'user': editor}
     authority = editor.get_current_authority()
     editable_authorities = editor.editable_authorities.all()
     authority_data = {'current_authority': authority.get_id()}
@@ -191,13 +198,8 @@ def entity_merge (request, topic_map, entity_id):
 @user_passes_test(user_is_editor)
 @add_topic_map
 def date_add (request, topic_map, entity_id, assertion_id):
-    entity = get_topic_or_404(Entity, entity_id)
-    assertion = entity.get_assertion(assertion_id)
-    if assertion is None:
-        raise Http404
-    authority = assertion.authority
-    if authority != request.user.eats_user.get_current_authority():
-        raise Http404
+    entity, assertion, authority = _get_entity_assertion(request, entity_id,
+                                                         assertion_id)
     calendar_choices = create_choice_list(
         topic_map, Calendar.objects.filter_by_authority(authority))
     date_period_choices = create_choice_list(
@@ -226,15 +228,10 @@ def date_add (request, topic_map, entity_id, assertion_id):
 @user_passes_test(user_is_editor)
 @add_topic_map
 def date_change (request, topic_map, entity_id, assertion_id, date_id):
-    entity = get_topic_or_404(Entity, entity_id)
-    assertion = entity.get_assertion(assertion_id)
-    if assertion is None:
-        raise Http404
+    entity, assertion, authority = _get_entity_assertion(request, entity_id,
+                                                         assertion_id)
     date = assertion.get_date(date_id)
     if date is None:
-        raise Http404
-    authority = assertion.authority
-    if authority != request.user.eats_user.get_current_authority():
         raise Http404
     calendar_choices = create_choice_list(
         topic_map, Calendar.objects.filter_by_authority(authority))
@@ -260,7 +257,9 @@ def date_change (request, topic_map, entity_id, assertion_id, date_id):
     else:
         form = DateForm(topic_map, calendar_choices, date_period_choices,
                         date_type_choices, instance=date)
-    context_data = {'form': form}
+    context_data = {'form': form, 'entity_id': entity_id,
+                    'assertion_id': assertion_id, 'date_id': date_id,
+                    'notes': date.get_notes(request.user.eats_user)}
     return render(request, 'eats/edit/date_change.html', context_data)
 
 @user_passes_test(user_is_editor)
@@ -365,3 +364,126 @@ def display_eatsml_import_raw (request, import_id):
 def display_eatsml_import_annotated (request, import_id):
     eatsml_import = get_object_or_404(EATSMLImport, pk=import_id)
     return HttpResponse(eatsml_import.annotated_xml, content_type='text/xml')
+
+@user_passes_test(user_is_editor)
+@add_topic_map
+def pa_note_add (request, topic_map, entity_id, assertion_id):
+    entity, assertion, authority = _get_entity_assertion(request, entity_id,
+                                                         assertion_id)
+    if request.method == 'POST':
+        form = NoteBearingNoteForm(assertion, request.POST)
+        if form.is_valid():
+            note_id = form.save()
+            if '_continue' in form.data:
+                redirect_ids = {
+                    'assertion_id': assertion_id, 'entity_id': entity_id,
+                    'note_id': note_id}
+                redirect_url = reverse('pa-note-change', kwargs=redirect_ids)
+            else:
+                redirect_ids = {'entity_id': entity_id}
+                redirect_url = reverse('entity-change', kwargs=redirect_ids)
+            return redirect(redirect_url)
+    else:
+        form = NoteBearingNoteForm(assertion)
+    context_data = {'form': form}
+    return render(request, 'eats/edit/note_add.html', context_data)
+
+@user_passes_test(user_is_editor)
+@add_topic_map
+def pa_note_change (request, topic_map, entity_id, assertion_id, note_id):
+    entity, assertion, authority = _get_entity_assertion(request, entity_id,
+                                                         assertion_id)
+    editor = request.user.eats_user
+    note = assertion.get_note(editor, note_id)
+    if note is None:
+        raise Http404
+    if request.method == 'POST':
+        form = NoteBearingNoteForm(assertion, request.POST, instance=note)
+        redirect_ids = {'entity_id': entity_id}
+        redirect_url = reverse('entity-change', kwargs=redirect_ids)
+        if '_delete' in form.data:
+            form.delete()
+            return redirect(redirect_url)
+        if form.is_valid():
+            form.save()
+            if '_continue' in form.data:
+                redirect_ids = {'assertion_id': assertion_id,
+                                'entity_id': entity_id,
+                                'note_id': note_id}
+                redirect_url = reverse('pa-note-change', kwargs=redirect_ids)
+            return redirect(redirect_url)
+    else:
+        form = NoteBearingNoteForm(assertion, instance=note)
+    context_data = {'form': form}
+    return render(request, 'eats/edit/note_change.html', context_data)
+
+@user_passes_test(user_is_editor)
+@add_topic_map
+def date_note_add (request, topic_map, entity_id, assertion_id, date_id):
+    entity, assertion, authority = _get_entity_assertion(request, entity_id,
+                                                         assertion_id)
+    date = assertion.get_date(date_id)
+    if date is None:
+        raise Http404
+    if request.method == 'POST':
+        form = NoteBearingNoteForm(date, request.POST)
+        if form.is_valid():
+            note_id = form.save()
+            redirect_ids = {
+                'assertion_id': assertion_id, 'date_id': date_id,
+                'entity_id': entity_id, 'note_id': note_id}
+            if '_continue' in form.data:
+                redirect_url = reverse('date-note-change', kwargs=redirect_ids)
+            else:
+                del redirect_ids['note_id']
+                redirect_url = reverse('date-change', kwargs=redirect_ids)
+            return redirect(redirect_url)
+    else:
+        form = NoteBearingNoteForm(date)
+    context_data = {'form': form}
+    return render(request, 'eats/edit/note_add.html', context_data)
+
+@user_passes_test(user_is_editor)
+@add_topic_map
+def date_note_change (request, topic_map, entity_id, assertion_id, date_id,
+                      note_id):
+    entity, assertion, authority = _get_entity_assertion(request, entity_id,
+                                                         assertion_id)
+    date = assertion.get_date(date_id)
+    if date is None:
+        raise Http404
+    editor = request.user.eats_user
+    note = date.get_note(editor, note_id)
+    if note is None:
+        raise Http404
+    if request.method == 'POST':
+        form = NoteBearingNoteForm(date, request.POST, instance=note)
+        redirect_ids = {'assertion_id': assertion_id,
+                        'entity_id': entity_id, 'date_id': date_id}
+        redirect_url = reverse('date-change', kwargs=redirect_ids)
+        if '_delete' in form.data:
+            form.delete()
+            return redirect(redirect_url)
+        if form.is_valid():
+            form.save()
+            if '_continue' in form.data:
+                redirect_ids['note_id'] = note_id
+                redirect_url = reverse('date-note-change', kwargs=redirect_ids)
+            return redirect(redirect_url)
+    else:
+        form = NoteBearingNoteForm(date, instance=note)
+    context_data = {'form': form}
+    return render(request, 'eats/edit/note_change.html', context_data)
+
+def _get_entity_assertion (request, entity_id, assertion_id):
+    entity = get_topic_or_404(Entity, entity_id)
+    # Note that entity.get_assertion only gets Association assertions,
+    # which happens to be what is wanted when restricting assertions
+    # to those that can carry dates or notes.
+    assertion = entity.get_assertion(assertion_id)
+    if assertion is None:
+        raise Http404
+    authority = assertion.authority
+    if authority != request.user.eats_user.get_current_authority():
+        raise Http404
+    return entity, assertion, authority

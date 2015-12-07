@@ -9,6 +9,11 @@ from eats.constants import UNNAMED_ENTITY_NAME
 register = template.Library()
 
 
+@register.inclusion_tag('eats/display/date_notes.html')
+def display_date_notes (date, user):
+    notes = date.get_notes(user)
+    return {'notes': notes}
+
 @register.inclusion_tag('eats/display/duplicate_subject_identifiers.html',
                         takes_context=True)
 def display_duplicate_subject_identifiers (context, entity, subject_identifier,
@@ -121,12 +126,23 @@ def display_name_metadata (name):
 
 @register.inclusion_tag('eats/display/property_assertion_authority.html')
 def display_property_assertion_authority (property_assertion):
+
     """Returns a context dictionary for rendering the template
     displaying the authority of `property_assertion`."""
     return {'authority': property_assertion.authority}
 
 @register.inclusion_tag('eats/display/property_assertion_dates.html')
-def display_property_assertion_dates (property_assertion):
+def display_property_assertion_dates (property_assertion, user, entity_id=None):
     """Returns a context dictionary for rendering the template
     displaying the dates of `property_assertion`."""
-    return {'dates': property_assertion.get_dates()}
+    return {'assertion_id': property_assertion.get_id(),
+            'dates': property_assertion.get_dates(), 'entity_id': entity_id,
+            'user': user}
+
+@register.inclusion_tag('eats/edit/pa_notes.html')
+def display_property_assertion_notes (property_assertion, user, entity_id=None):
+    """Returns a context dictionary for rendering the template displaying
+    the notes associated with `property_assertion`."""
+    notes = property_assertion.get_notes(user)
+    return {'assertion_id': property_assertion.get_id(), 'entity_id': entity_id,
+            'notes': notes}

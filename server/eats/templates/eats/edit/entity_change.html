@@ -42,24 +42,25 @@ corrected before it will save.</p>
           <th scope="col">Delete?</th>
           <th scope="col">Authority</th>
           <th scope="col">Dates</th>
+          <th scope="col">Notes</th>
           <th></th>
         </tr>
       </thead>
       <tbody class="eats-editable-pa">
         {% for form in existence_formset %}
+        {% with instance=form.instance %}
         <tr>
-          <td>{% if form.instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
+          <td>{% if instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
           <td>{{ form.authority }}</td>
-          <td>{% if form.instance %}{% with dates=form.instance.get_dates %}{% if dates %}<ul>
-          {% for date in dates %}<li><a href="{% url 'date-change' entity_id form.assertion.value date.get_id %}">{{ date.assembled_form }}</a></li>{% endfor %}
-          </ul>{% endif %}{% endwith %}
-          <p><a href="{% url 'date-add' entity_id form.assertion.value %}">Add a date</a></p>{% endif %}</td>
+          <td>{% if instance %}{% display_property_assertion_dates instance user entity_id %}{% endif %}</td>
+          <td>{% if instance %}{% display_property_assertion_notes instance user entity_id %}{% endif %}</td>
           <td class="errors">{% if form.errors %}<ul>
           {% for error in form.errors.values %}
           <li>{{ error }}</li>
           {% endfor %}
           </ul>{% endif %}</td>
         </tr>
+        {% endwith %}
         {% endfor %}
       </tbody>
       <tbody class="eats-non-editable-pa">
@@ -67,9 +68,8 @@ corrected before it will save.</p>
         <tr>
           <td></td>
           <td>{{ assertion.authority.get_admin_name }}</td>
-          <td>{% with dates=assertion.get_dates %}{% if dates %}<ul>
-          {% for date in dates %}<li>{{ date.assembled_form }}</li>{% endfor %}
-          </ul>{% endif %}{% endwith %}</td>
+          <td>{% display_property_assertion_dates assertion user %}</td>
+          <td>{% display_property_assertion_notes assertion user %}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -87,25 +87,26 @@ corrected before it will save.</p>
           <th scope="col">Delete?</th>
           <th scope="col">Entity type</th>
           <th scope="col">Dates</th>
+          <th scope="col">Notes</th>
           <th></th>
         </tr>
       </thead>
       <tbody class="eats-editable-pa">
         {% for form in entity_type_formset %}
+        {% with instance=form.instance %}
         <tr>
-          <td>{% if form.instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
+          <td>{% if instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
           <td>
             <div>{{ form.entity_type }}</div>
             {% if form.errors.entity_type %}
             <div class="errors">{{ form.errors.entity_type }}</div>
             {% endif %}
           </td>
-          <td>{% if form.instance %}{% with dates=form.instance.get_dates %}{% if dates %}<ul>
-          {% for date in dates %}<li><a href="{% url 'date-change' entity_id form.assertion.value date.get_id %}">{{ date.assembled_form }}</a></li>{% endfor %}
-          </ul>{% endif %}{% endwith %}
-          <p><a href="{% url 'date-add' entity_id form.assertion.value %}">Add a date</a></p>{% endif %}</td>
+          <td>{% if instance %}{% display_property_assertion_dates instance user entity_id %}{% endif %}</td>
+          <td>{% if instance %}{% display_property_assertion_notes instance user entity_id %}{% endif %}</td>
           <td class="errors">{{ form.non_field_errors }}</td>
         </tr>
+        {% endwith %}
         {% endfor %}
       </tbody>
     </table>
@@ -119,7 +120,8 @@ corrected before it will save.</p>
         <li>
           {{ assertion.entity_type.get_admin_name }}
           {% display_property_assertion_authority assertion %}
-          {% display_property_assertion_dates assertion %}
+          {% display_property_assertion_dates assertion user %}
+          {% display_property_assertion_notes assertion user %}
         </li>
         {% endfor %}
       </ul>
@@ -143,19 +145,21 @@ corrected before it will save.</p>
           <th scope="col">Display form</th>
           <th scope="col">Is preferred?</th>
           <th scope="col">Dates</th>
+          <th scope="col">Notes</th>
           <th scope="col"></th>
         </tr>
       </thead>
       <tbody class="eats-editable-pa">
         {% for form in name_formset %}
-        {% if form.instance %}
+        {% with instance=form.instance %}
+        {% if instance %}
         <tr>
           <td></td>
           <td colspan="8">{{ form.instance.name.assembled_form }}</td>
         </tr>
         {% endif %}
         <tr>
-          <td>{% if form.instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
+          <td>{% if instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
           <td><span class="name-part-section-toggle">+</span></td>
           <td>
             <div>{{ form.name_type }}</div>
@@ -187,10 +191,8 @@ corrected before it will save.</p>
             <div class="errors">{{ form.errors.is_preferred }}</div>
             {% endif %}
           </td>
-          <td>{% if form.instance %}{% with dates=form.instance.get_dates %}{% if dates %}<ul>
-          {% for date in dates %}<li><a href="{% url 'date-change' entity_id form.assertion.value date.get_id %}">{{ date.assembled_form }}</a></li>{% endfor %}
-          </ul>{% endif %}{% endwith %}
-          <p><a href="{% url 'date-add' entity_id form.assertion.value %}">Add a date</a></p>{% endif %}</td>
+          <td>{% if instance %}{% display_property_assertion_dates instance user entity_id %}{% endif %}</td>
+          <td>{% if instance %}{% display_property_assertion_notes instance user entity_id %}{% endif %}</td>
           <td class="errors">{{ form.non_field_errors }}{{ form.name_part_formset.management_form }}</td>
         </tr>
         <tr class="name-part-section">
@@ -214,6 +216,7 @@ corrected before it will save.</p>
             </table>
           </td>
         </tr>
+        {% endwith %}
         {% endfor %}
       </tbody>
     </table>
@@ -228,7 +231,8 @@ corrected before it will save.</p>
           {{ assertion.name.assembled_form }}
           {% display_property_assertion_authority assertion %}
           {% display_name_metadata assertion.name %}
-          {% display_property_assertion_dates assertion %}
+          {% display_property_assertion_dates assertion user %}
+          {% display_property_assertion_notes assertion user %}
         </li>
         {% endfor %}
       </ul>
@@ -249,12 +253,14 @@ corrected before it will save.</p>
           <th scope="col">Related entity</th>
           <th scope="col">Certain?</th>
           <th scope="col">Dates</th>
+          <th scope="col">Notes</th>
         </tr>
       </thead>
       <tbody class="eats-editable-pa">
         {% for form in entity_relationship_formset %}
+        {% with instance=form.instance %}
         <tr>
-          <td>{% if form.instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
+          <td>{% if instance %}{{ form.DELETE }}{% endif %}{{ form.assertion }}</td>
           <td>
             <div>{{ form.relationship_type }}</div>
             {% if form.errors.relationship_type %}
@@ -262,7 +268,7 @@ corrected before it will save.</p>
             {% endif %}
           </td>
           <td>
-            <div>{{ form.related_entity }} {% if form.instance %}[<a href="{% url 'entity-view' form.related_entity.value %}">view record</a>]{% endif %}</div>
+            <div>{{ form.related_entity }} {% if instance %}[<a href="{% url 'entity-view' form.related_entity.value %}">view record</a>]{% endif %}</div>
             {% if form.errors.related_entity %}
             <div class="errors">{{ form.errors.related_entity }}</div>
             {% endif %}
@@ -273,11 +279,10 @@ corrected before it will save.</p>
             <div class="errors">{{ form.errors.certainty }}</div>
             {% endif %}
           </td>
-          <td>{% if form.instance %}{% with dates=form.instance.get_dates %}{% if dates %}<ul>
-          {% for date in dates %}<li><a href="{% url 'date-change' entity_id form.assertion.value date.get_id %}">{{ date.assembled_form }}</a></li>{% endfor %}
-          </ul>{% endif %}{% endwith %}
-          <p><a href="{% url 'date-add' entity_id form.assertion.value %}">Add a date</a></p>{% endif %}</td>
+          <td>{% if instance %}{% display_property_assertion_dates instance user entity_id %}{% endif %}</td>
+          <td>{% if instance %}{% display_property_assertion_notes instance user entity_id %}{% endif %}</td>
         </tr>
+        {% endwith %}
         {% endfor %}
       </tbody>
     </table>
@@ -291,7 +296,8 @@ corrected before it will save.</p>
         <li>
           {% display_entity_relationship_property_assertion entity assertion %}
           {% display_property_assertion_authority assertion %}
-          {% display_property_assertion_dates assertion %}
+          {% display_property_assertion_dates assertion user %}
+          {% display_property_assertion_notes assertion user %}
         </li>
         {% endfor %}
       </ul>

@@ -11,7 +11,7 @@ def add_topic_map (fn):
     :param fn: Function to be decorated
     :type fn: function
     :rtype: function
-    
+
     """
     def wrapper (request, *args, **kwargs):
         try:
@@ -27,4 +27,3 @@ def add_topic_map (fn):
             return render_to_response('eats/error.html', context_data)
         return fn(request, tm, *args, **kwargs)
     return wrapper
-
