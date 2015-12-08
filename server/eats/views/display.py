@@ -37,6 +37,7 @@ def entity_view (request, topic_map, entity_id):
     except AttributeError:
         preferred_name_form = UNNAMED_ENTITY_NAME
     existence_pas = entity.get_existences()
+    has_existence_dates = entity.get_existence_dates().count()
     entity_type_pas = entity.get_entity_types()
     name_pas = entity.get_eats_names()
     relationship_pas = entity.get_entity_relationships()
@@ -44,6 +45,7 @@ def entity_view (request, topic_map, entity_id):
     subject_identifier_pas = entity.get_eats_subject_identifiers()
     context_data = {'eats_user': get_eats_user(request),
                     'entity': entity,
+                    'has_existence_dates': has_existence_dates,
                     'preferred_authority': preferred_authority,
                     'preferred_language': preferred_language,
                     'preferred_name_form': preferred_name_form,

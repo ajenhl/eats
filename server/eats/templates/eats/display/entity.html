@@ -9,7 +9,7 @@
 
   {% if user_is_editor %}<p>[<a href="{% url 'entity-change' entity.get_id %}">Edit</a>]</p>{% endif %}
 
-  {% if existence_pas %}
+  {% if has_existence_dates %}
   <section>
     <h1>Dates</h1>
 
@@ -17,9 +17,11 @@
 
     <ul>
       {% for existence_pa in existence_pas %}
+      {% if existence_pa.get_dates %}
       <li>{% display_property_assertion_authority existence_pa %}:
         {% display_property_assertion_dates existence_pa eats_user %}
       </li>
+      {% endif %}
       {% endfor %}
     </ul>
   </section>
