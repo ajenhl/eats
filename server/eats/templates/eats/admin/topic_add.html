@@ -8,6 +8,8 @@
 <form action="" id="infrastructure-add-form" method="post">
   {% csrf_token %}
 
+  {% include help_template %}
+
   <table>
   {{ form.as_table }}
   </table>

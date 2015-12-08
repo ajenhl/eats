@@ -62,7 +62,10 @@ def create_topic_map (request):
 @add_topic_map
 def topic_list (request, topic_map, model):
     topics = model.objects.all()
-    context_data = {'opts': model._meta, 'topics': topics}
+    opts = model._meta
+    help_template = 'eats/admin/{}_list_help.html'.format(opts.model_name)
+    context_data = {'help_template': help_template, 'opts': opts,
+                    'topics': topics}
     return render(request, 'eats/admin/topic_list.html', context_data)
 
 @add_topic_map
@@ -77,7 +80,8 @@ def topic_add (request, topic_map, model):
             return HttpResponseRedirect(redirect_url)
     else:
         form = form_class(topic_map, model)
-    context_data = {'form': form, 'opts': opts}
+    help_template = 'eats/admin/{}_help.html'.format(opts.model_name)
+    context_data = {'form': form, 'opts': opts, 'help_template': help_template}
     return render(request, 'eats/admin/topic_add.html', context_data)
 
 @add_topic_map
@@ -93,12 +97,10 @@ def topic_change (request, topic_map, topic_id, model):
             return HttpResponseRedirect(redirect_url)
     else:
         form = form_class(topic_map, model, instance=topic)
-    context_data = {'form': form, 'opts': opts, 'name': topic.get_admin_name()}
+    help_template = 'eats/admin/{}_help.html'.format(opts.model_name)
+    context_data = {'form': form, 'opts': opts, 'name': topic.get_admin_name(),
+                    'help_template': help_template}
     return render(request, 'eats/admin/topic_change.html', context_data)
-
-@add_topic_map
-def topic_delete (request, topic_map, topic_id, model):
-    topic = get_topic_or_404(model, topic_id)
 
 def get_form_class (model):
     """Returns the class of the admin form to use for `model` topics.

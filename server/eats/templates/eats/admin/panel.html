@@ -32,6 +32,18 @@
 {% endif %}
 
 {% if has_tm %}
+<p>In order to describe entities, the terms with which they are
+described must be first created and then associated with an
+authority.</p>
+
+<p>While all of the types, languages, scripts, etc are able to be used
+by any authority, they must be explicitly associated with each
+authority by editing that authority and selecting them.</p>
+
+<p>In order to be able to create and edit entities, an existing user
+must first be activated (via the user list) and then selected as an
+editor for an authority (via the authority list).</p>
+
 <table id="admin-panel">
   <tr>
     <th scope="row"><a href="authority/">Authorities</a></th>
@@ -85,7 +97,7 @@
   </tr>
   <tr>
     <th scope="row"><a href="user/">Users</a></th>
-    <td><a href="user/add/" class="addlink">Add</a></td>
+    <td></td>
     <td><a href="user/" class="changelink">Change</a></td>
   </tr>
 </table>
