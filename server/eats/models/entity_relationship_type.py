@@ -25,7 +25,7 @@ class EntityRelationshipTypeManager (InfrastructureManager):
             types=self.eats_topic_map.entity_relationship_type_type)
 
 
-class EntityRelationshipType (Topic, Infrastructure):
+class EntityRelationshipType (Infrastructure, Topic):
 
     objects = EntityRelationshipTypeManager()
 

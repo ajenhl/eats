@@ -16,7 +16,7 @@ class DateTypeManager (InfrastructureManager):
             types=self.eats_topic_map.date_type_type)
 
 
-class DateType (Topic, Infrastructure):
+class DateType (Infrastructure, Topic):
 
     objects = DateTypeManager()
 

@@ -23,7 +23,7 @@ class ScriptManager (InfrastructureManager):
             types=self.eats_topic_map.script_type)
 
 
-class Script (Topic, Infrastructure):
+class Script (Infrastructure, Topic):
 
     objects = ScriptManager()
 

@@ -16,7 +16,7 @@ class EntityTypeManager (InfrastructureManager):
             types=self.eats_topic_map.entity_type_type)
 
 
-class EntityType (Topic, Infrastructure):
+class EntityType (Infrastructure, Topic):
 
     objects = EntityTypeManager()
 

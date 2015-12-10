@@ -22,7 +22,7 @@ class AuthorityManager (InfrastructureManager):
             types=self.eats_topic_map.authority_type)
 
 
-class Authority (Topic, Infrastructure):
+class Authority (Infrastructure, Topic):
 
     objects = AuthorityManager()
 

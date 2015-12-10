@@ -16,7 +16,7 @@ class CalendarManager (InfrastructureManager):
             types=self.eats_topic_map.calendar_type)
 
 
-class Calendar (Topic, Infrastructure):
+class Calendar (Infrastructure, Topic):
 
     objects = CalendarManager()
 

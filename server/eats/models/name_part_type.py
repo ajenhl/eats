@@ -16,7 +16,7 @@ class NamePartTypeManager (InfrastructureManager):
             types=self.eats_topic_map.name_part_type_type)
 
 
-class NamePartType (Topic, Infrastructure):
+class NamePartType (Infrastructure, Topic):
 
     objects = NamePartTypeManager()
 

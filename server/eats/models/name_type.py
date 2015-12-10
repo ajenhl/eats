@@ -16,7 +16,7 @@ class NameTypeManager (InfrastructureManager):
             types=self.eats_topic_map.name_type_type)
 
 
-class NameType (Topic, Infrastructure):
+class NameType (Infrastructure, Topic):
 
     objects = NameTypeManager()
 

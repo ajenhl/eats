@@ -27,7 +27,7 @@ class LanguageManager (InfrastructureManager):
             types=self.eats_topic_map.language_type)
 
 
-class Language (Topic, Infrastructure):
+class Language (Infrastructure, Topic):
 
     objects = LanguageManager()
 

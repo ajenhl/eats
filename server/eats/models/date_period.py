@@ -16,7 +16,7 @@ class DatePeriodManager (InfrastructureManager):
             types=self.eats_topic_map.date_period_type)
 
 
-class DatePeriod (Topic, Infrastructure):
+class DatePeriod (Infrastructure, Topic):
 
     objects = DatePeriodManager()
 
