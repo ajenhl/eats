@@ -46,22 +46,22 @@ import javax.swing.table.TableColumn;
 
 import uk.ac.kcl.cch.eats.dispatcher.Dispatcher;
 import uk.ac.kcl.cch.eats.dispatcher.DispatcherException;
-import uk.ac.kcl.cch.eats.eatsml.Authority;
-import uk.ac.kcl.cch.eats.eatsml.Collection;
-import uk.ac.kcl.cch.eats.eatsml.Collection.EntityTypes.EntityType;
-import uk.ac.kcl.cch.eats.eatsml.Date;
-import uk.ac.kcl.cch.eats.eatsml.Entities;
-import uk.ac.kcl.cch.eats.eatsml.Entity;
-import uk.ac.kcl.cch.eats.eatsml.EntityRelationship;
-import uk.ac.kcl.cch.eats.eatsml.EntityRelationships;
-import uk.ac.kcl.cch.eats.eatsml.Languages.Language;
-import uk.ac.kcl.cch.eats.eatsml.NamePart;
-import uk.ac.kcl.cch.eats.eatsml.NamePartTypes.NamePartType;
-import uk.ac.kcl.cch.eats.eatsml.NameTypes.NameType;
-import uk.ac.kcl.cch.eats.eatsml.Names.Name;
-import uk.ac.kcl.cch.eats.eatsml.Note;
-import uk.ac.kcl.cch.eats.eatsml.Scripts.Script;
-import uk.ac.kcl.cch.eats.eatsml.ext.EatsMlUtils;
+import nz.org.artefact.eats.ns.eatsml.Authority;
+import nz.org.artefact.eats.ns.eatsml.Collection;
+import nz.org.artefact.eats.ns.eatsml.Collection.EntityTypes.EntityType;
+import nz.org.artefact.eats.ns.eatsml.Date;
+import nz.org.artefact.eats.ns.eatsml.Entities;
+import nz.org.artefact.eats.ns.eatsml.Entity;
+import nz.org.artefact.eats.ns.eatsml.EntityRelationship;
+import nz.org.artefact.eats.ns.eatsml.EntityRelationships;
+import nz.org.artefact.eats.ns.eatsml.Languages.Language;
+import nz.org.artefact.eats.ns.eatsml.NamePart;
+import nz.org.artefact.eats.ns.eatsml.NamePartTypes.NamePartType;
+import nz.org.artefact.eats.ns.eatsml.NameTypes.NameType;
+import nz.org.artefact.eats.ns.eatsml.Names.Name;
+import nz.org.artefact.eats.ns.eatsml.Entity.Notes.Note;
+import nz.org.artefact.eats.ns.eatsml.Scripts.Script;
+import nz.org.artefact.eats.ns.eatsml.ext.EatsMlUtils;
 
 /**
  * This class serves as an interface between the eatsml library and the plugins.
@@ -682,10 +682,13 @@ public class LookupController implements ActionListener, DocumentListener,
 
 		if (entities != null) {
 			found = ((Entities) searchResults.getEntities()).getEntity().size();
+			int namePartTypesCols = 0;
+			if (namePartTypesTextFieldsHash != null) {
+				namePartTypesCols = namePartTypesTextFieldsHash.size();
+			}
 
 			for (Entity entity : entities.getEntity()) {
-				Object[] data = new Object[namePartTypesTextFieldsHash.size()
-						+ BASE_COLUMN_COUNT];
+				Object[] data = new Object[namePartTypesCols + BASE_COLUMN_COUNT];
 
 				data[ENTITY_COLUMN] = entity;
 

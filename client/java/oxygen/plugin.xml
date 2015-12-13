@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plugin SYSTEM "../plugin.dtd">
 <plugin
+    id="uk.ac.kcl.cch.plugin.EATSLookup"
     name="EATSLookup"
     description="Lookup a name in an EATS system"
-    version="1.0.0"
+    version="1.1.0"
     class="uk.ac.kcl.cch.eats.lookup.plugin.oxygen.LookupPlugin"
     classLoaderType="preferReferencedResources">
     <runtime>
@@ -19,6 +20,6 @@
         <library name="httpmime-4.0.1.jar"/>
         <library name="saxon9he.jar" />
     </runtime>
-    <extension type="selectionProcessor" 
-        class="uk.ac.kcl.cch.eats.lookup.plugin.oxygen.LookupPluginExtension"/>
+    <extension type="selectionProcessor"
+               class="uk.ac.kcl.cch.eats.lookup.plugin.oxygen.LookupPluginExtension"/>
 </plugin>

@@ -18,7 +18,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import uk.ac.kcl.cch.eats.eatsml.Collection;
+import nz.org.artefact.eats.ns.eatsml.Collection;
 
 /**
  * Utility class for the @see Dispather class.

@@ -51,8 +51,8 @@ import org.apache.http.util.EntityUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import uk.ac.kcl.cch.eats.eatsml.Collection;
-import uk.ac.kcl.cch.eats.eatsml.Entity;
+import nz.org.artefact.eats.ns.eatsml.Collection;
+import nz.org.artefact.eats.ns.eatsml.Entity;
 
 /**
  * This class connects to the EATS server and handles requests between the
@@ -540,18 +540,16 @@ public class Dispatcher {
 		File file = null;
 
 		try {
-			if (csrfToken == null || csrfToken.isEmpty()) {
-				// creates a new get request to get the login form
-				HttpGet get = new HttpGet(serverUrl + IMPORT_URL);
-				get.setParams(httpParams);
+			// creates a new get request to get the import form
+			HttpGet get = new HttpGet(serverUrl + IMPORT_URL);
+			get.setParams(httpParams);
 
-				// executes the get request
-				response = httpClient.execute(get, localContext);
+			// executes the get request
+			response = httpClient.execute(get, localContext);
 
-				if (response != null && response.getEntity() != null) {
-					// gets the crsf token
-					csrfToken = getCsrf(response.getEntity());
-				}
+			if (response != null && response.getEntity() != null) {
+				// gets the crsf token
+				csrfToken = getCsrf(response.getEntity());
 			}
 			
 			// creates a new temporary file to save the given collection
