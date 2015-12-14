@@ -169,6 +169,8 @@ class NameAssertionFormSet (PropertyAssertionFormSet):
                     # should not cause the entire formset to be invalid.
                     continue
             forms_valid &= is_valid
+            form.name_part_formset.set_name_language(form.cleaned_data.get(
+                'language'))
             if not form.name_part_formset.is_valid():
                 forms_valid = False
         return forms_valid and not bool(self.non_form_errors())
@@ -293,6 +295,12 @@ class NamePartInlineFormSet (BaseFormSet):
             self.new_objects.append(form.save(name_assertion))
         return self.new_objects
 
+    def set_name_language (self, language):
+        """Sets the language of the parent name for the forms in this
+        formset."""
+        for form in self.initial_forms + self.extra_forms:
+            form.set_name_language(language)
+
 
 class CreateEntityForm (forms.Form):
 
@@ -341,19 +349,16 @@ class PropertyAssertionForm (forms.Form):
         """
         return {'assertion': assertion.get_id()}
 
-    def _get_construct (self, name, proxy):
-        """Returns the construct specified by `name`.
+    def _get_construct (self, identifier, proxy):
+        """Returns the construct specified by `identifer`.
 
-        `name` corresponds to the name of one of the form's fields.
-
-        :param name: name of the construct to return
+        :param identifier: identifier of the construct to return
         :type name: string
         :param proxy: Django proxy model
         :type proxy: class
         :rtype: proxy object
 
         """
-        identifier = self.cleaned_data[name]
         return proxy.objects.get_by_identifier(identifier)
 
     def delete (self):
@@ -463,15 +468,21 @@ class EntityTypeForm (PropertyAssertionForm):
         data['entity_type'] = assertion.entity_type.get_id()
         return data
 
+    def clean (self):
+        cleaned_data = super().clean()
+        cleaned_data['entity_type'] = self._get_construct(
+            cleaned_data['entity_type'], EntityType)
+        self.cleaned_data = cleaned_data
+        return cleaned_data
+
     def save (self):
-        entity_type = self._get_construct('entity_type', EntityType)
         if self.instance is None:
             # Create a new assertion.
             self.entity.create_entity_type_property_assertion(
-                self.authority, entity_type)
+                self.authority, self.cleaned_data['entity_type'])
         else:
             # Update an existing assertion.
-            self.instance.update(entity_type)
+            self.instance.update(self.cleaned_data['entity_type'])
 
 
 class NameForm (PropertyAssertionForm):
@@ -503,15 +514,22 @@ class NameForm (PropertyAssertionForm):
 
     def clean (self):
         cleaned_data = super(NameForm, self).clean()
+        cleaned_data['name_type'] = self._get_construct(
+            cleaned_data['name_type'], NameType)
+        cleaned_data['language'] = self._get_construct(
+            cleaned_data['language'], Language)
+        cleaned_data['script'] = self._get_construct(
+            cleaned_data['script'], Script)
         # QAZ: Add check that we don't have a name part to add,
         # without this form either representing an existing name
         # instance or being valid to create one.
+        self.cleaned_data = cleaned_data
         return cleaned_data
 
     def save (self):
-        name_type = self._get_construct('name_type', NameType)
-        language = self._get_construct('language', Language)
-        script = self._get_construct('script', Script)
+        name_type = self.cleaned_data['name_type']
+        language = self.cleaned_data['language']
+        script = self.cleaned_data['script']
         display_form = self.cleaned_data['display_form']
         is_preferred = self.cleaned_data['is_preferred']
         if self.instance is None:
@@ -635,6 +653,35 @@ class NamePartForm (forms.Form):
         super(NamePartForm, self).__init__(initial=object_data, **kwargs)
         self.fields['name_part_type'].choices = name_part_type_choices
         self._create_form_fields(kwargs.get('data'), object_data)
+        self.name_language = None
+
+    def clean (self):
+        cleaned_data = super().clean()
+        for name, value in list(cleaned_data.items()):
+            if not value or name == 'name_part_type':
+                cleaned_data[name] = value
+            elif name.startswith('name_part_display_form'):
+                cleaned_data[name] = value
+            else:
+                if name.startswith('name_part_language'):
+                    model = Language
+                elif name.startswith('name_part_script'):
+                    model = Script
+                elif name.startswith('name_part_id'):
+                    model = NamePart
+                cleaned_data[name] = model.objects.get_by_identifier(value)
+        self.cleaned_data = cleaned_data
+        return cleaned_data
+
+    def clean_name_part_type (self):
+        """Validates the name_part_type field, and converts its cleaned form
+        into a model instance."""
+        name_part_type_id = self.cleaned_data['name_part_type']
+        name_part_type = NamePartType.objects.get_by_identifier(
+            name_part_type_id)
+        if name_part_type not in self.name_language.name_part_types:
+            raise forms.ValidationError("The selected name part type is not associated with the name's language")
+        return name_part_type
 
     def _create_form_fields (self, post_data, object_data):
         count = 2
@@ -692,42 +739,22 @@ class NamePartForm (forms.Form):
             data['name_part_script-' + suffix] = name_part.script.get_id()
         return data
 
-    def _objectify_data (self, base_data):
-        data = {}
-        for name, value in list(base_data.items()):
-            if not value:
-                data[name] = value
-            elif name.startswith('name_part_display_form'):
-                data[name] = value
-            else:
-                if name.startswith('name_part_language'):
-                    model = Language
-                elif name.startswith('name_part_script'):
-                    model = Script
-                elif name.startswith('name_part_id'):
-                    model = NamePart
-                elif name.startswith('name_part_type'):
-                    model = NamePartType
-                data[name] = model.objects.get_by_identifier(value)
-        return data
-
     def save (self, name_assertion):
-        data = self._objectify_data(self.cleaned_data)
         name = name_assertion.name
         i = 0
         while True:
             suffix = str(i)
-            name_part = data.get('name_part_id-' + suffix, False)
+            name_part = self.cleaned_data.get('name_part_id-' + suffix, False)
             if name_part is None:
                 # There is such a field, but it does not hold a name
                 # part.
-                if data['name_part_display_form-' + suffix]:
-                    save_data = self._save_data(name, data, suffix)
+                if self.cleaned_data['name_part_display_form-' + suffix]:
+                    save_data = self._save_data(name, self.cleaned_data, suffix)
                     self._save_new(name, save_data)
             elif name_part:
                 # There is such a field, and it holds a name part.
-                if data['name_part_display_form-' + suffix]:
-                    save_data = self._save_data(name, data, suffix)
+                if self.cleaned_data['name_part_display_form-' + suffix]:
+                    save_data = self._save_data(name, self.cleaned_data, suffix)
                     self._save_existing(name_part, save_data)
                 else:
                     # Delete the name part.
@@ -759,6 +786,10 @@ class NamePartForm (forms.Form):
         return name.create_name_part(
             data['name_part_type'], data['language'], data['script'],
             data['display_form'], data['order'])
+
+    def set_name_language (self, language):
+        """Sets the language of the parent name."""
+        self.name_language = language
 
 
 class DateForm (forms.Form):
@@ -858,64 +889,55 @@ class DateForm (forms.Form):
         self.fields['point_tpq_type'].choices = date_type_choices
 
     def clean (self):
-        cleaned_data = super(DateForm, self).clean()
+        data = super(DateForm, self).clean()
+        # In addition to performing some validation and objectifying
+        # of data (replacing model object ids with model objects),
+        # throw out all data that is associated with a blank date
+        # part.
+        new_data = {}
+        new_data['date_period'] = DatePeriod.objects.get_by_identifier(
+            data['date_period'])
         for prefix in ('start', 'start_taq', 'start_tpq', 'end', 'end_taq',
                        'end_tpq', 'point', 'point_taq', 'point_tpq'):
-            if cleaned_data.get(prefix):
+            if data.get(prefix):
                 # If a date string is given, there must be a calendar
                 # and date type for it. A normalised form is not
                 # required, and certainty may be empty (meaning no
                 # certainty).
                 for part in ('_calendar', '_type'):
-                    if not cleaned_data.get(prefix + part):
+                    if not data.get(prefix + part):
                         raise forms.ValidationError('A calendar and date type must be specified for each date part that is not blank')
-        return cleaned_data
+                new_data[prefix] = data[prefix]
+                new_data[prefix + '_normalised'] = data[prefix + '_normalised']
+                calendar_attr = prefix + '_calendar'
+                calendar_id = data[calendar_attr]
+                if calendar_id:
+                    new_data[calendar_attr] = Calendar.objects.get_by_identifier(
+                        calendar_id)
+                type_attr = prefix + '_type'
+                date_type_id = data.get(type_attr)
+                if date_type_id:
+                    new_data[type_attr] = DateType.objects.get_by_identifier(
+                        date_type_id)
+                certainty_attr = prefix + '_certainty'
+                if data[certainty_attr]:
+                    new_data[certainty_attr] = self.topic_map.date_full_certainty
+                else:
+                    new_data[certainty_attr] = self.topic_map.date_no_certainty
+        self.cleaned_data = new_data
+        return new_data
 
     def delete (self):
         self.instance.remove()
 
-    def _objectify_data (self, base_data):
-        # It would be nice to handle this process of converting
-        # submitted form data into model objects where appropriate in
-        # the same fashion as with ModelForms (that is, in each
-        # field's to_python method). However, since the rendering of
-        # the object relies on the authority and user preferences,
-        # which aren't passed in to the field, this doesn't seem
-        # possible, and so it is handled here.
-        data = {}
-        data['date_period'] = DatePeriod.objects.get_by_identifier(
-            base_data['date_period'])
-        for prefix in ('start', 'start_taq', 'start_tpq', 'end', 'end_taq',
-                       'end_tpq', 'point', 'point_taq', 'point_tpq'):
-            if base_data[prefix]:
-                data[prefix] = base_data.get(prefix)
-                data[prefix + '_normalised'] = base_data[prefix + '_normalised']
-                calendar_attr = prefix + '_calendar'
-                calendar_id = base_data[calendar_attr]
-                if calendar_id:
-                    data[calendar_attr] = Calendar.objects.get_by_identifier(
-                        calendar_id)
-                type_attr = prefix + '_type'
-                date_type_id = base_data.get(type_attr)
-                if date_type_id:
-                    data[type_attr] = DateType.objects.get_by_identifier(
-                        date_type_id)
-                certainty_attr = prefix + '_certainty'
-                if base_data[certainty_attr]:
-                    data[certainty_attr] = self.topic_map.date_full_certainty
-                else:
-                    data[certainty_attr] = self.topic_map.date_no_certainty
-        return data
-
     def save (self, assertion=None):
-        data = self._objectify_data(self.cleaned_data)
         date = self.instance
         if date is None:
             # Create a new date.
-            date = assertion.create_date(data)
+            date = assertion.create_date(self.cleaned_data)
         else:
             # Update an existing date.
-            date.update(data)
+            date.update(self.cleaned_data)
         return date.get_id()
 
 
