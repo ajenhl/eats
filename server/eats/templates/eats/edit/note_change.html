@@ -3,6 +3,9 @@
 {% block eats_content %}
 <h1>Edit note</h1>
 
+<p>This note is associated with a property assertion{% if for_date %}'s
+date{% endif %} for the entity "{{ preferred_name }}".</p>
+
 <form id="note-change-form" method="post" action="">
   {% csrf_token %}
 

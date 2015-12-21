@@ -9,7 +9,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from lxml import etree
 
-from eats.constants import UNNAMED_ENTITY_NAME
 from eats.exceptions import EATSMergedIdentifierException
 from eats.lib.eatsml_exporter import EATSMLExporter
 from eats.lib.eatsml_importer import EATSMLImporter
@@ -18,7 +17,8 @@ from eats.lib.property_assertions import (
     ExistencePropertyAssertions, NamePropertyAssertions, NotePropertyAssertions,
     SubjectIdentifierPropertyAssertions)
 from eats.lib.user import get_user_preferences, user_is_editor
-from eats.lib.views import get_topic_or_404
+from eats.lib.views import (get_topic_or_404, get_preferred_name,
+                            get_entity_assertion)
 from eats.decorators import add_topic_map
 from eats.forms.edit import (
     CreateEntityForm, create_choice_list, CurrentAuthorityForm, DateForm,
@@ -130,14 +130,8 @@ def entity_change (request, topic_map, entity_id):
         topic_map.property_assertion_full_certainty
     user_preferences = get_user_preferences(request)
     context_data.update(user_preferences)
-    preferred_name_assertion = entity.get_preferred_name(
-        user_preferences['preferred_authority'],
-        user_preferences['preferred_language'],
-        user_preferences['preferred_script'])
-    if preferred_name_assertion:
-        context_data['preferred_name'] = preferred_name_assertion.name.assembled_form
-    else:
-        context_data['preferred_name'] = UNNAMED_ENTITY_NAME
+    context_data['preferred_name'] = get_preferred_name(user_preferences,
+                                                        entity)
     return render(request, 'eats/edit/entity_change.html', context_data)
 
 @user_passes_test(user_is_editor)
@@ -198,8 +192,8 @@ def entity_merge (request, topic_map, entity_id):
 @user_passes_test(user_is_editor)
 @add_topic_map
 def date_add (request, topic_map, entity_id, assertion_id):
-    entity, assertion, authority = _get_entity_assertion(request, entity_id,
-                                                         assertion_id)
+    entity, assertion, authority = get_entity_assertion(request, entity_id,
+                                                        assertion_id)
     calendar_choices = create_choice_list(
         topic_map, Calendar.objects.filter_by_authority(authority))
     date_period_choices = create_choice_list(
@@ -223,13 +217,16 @@ def date_add (request, topic_map, entity_id, assertion_id):
         form = DateForm(topic_map, calendar_choices, date_period_choices,
                         date_type_choices)
     context_data = {'form': form}
+    user_preferences = get_user_preferences(request)
+    context_data['preferred_name'] = get_preferred_name(user_preferences,
+                                                        entity)
     return render(request, 'eats/edit/date_add.html', context_data)
 
 @user_passes_test(user_is_editor)
 @add_topic_map
 def date_change (request, topic_map, entity_id, assertion_id, date_id):
-    entity, assertion, authority = _get_entity_assertion(request, entity_id,
-                                                         assertion_id)
+    entity, assertion, authority = get_entity_assertion(request, entity_id,
+                                                        assertion_id)
     date = assertion.get_date(date_id)
     if date is None:
         raise Http404
@@ -260,6 +257,9 @@ def date_change (request, topic_map, entity_id, assertion_id, date_id):
     context_data = {'form': form, 'entity_id': entity_id,
                     'assertion_id': assertion_id, 'date_id': date_id,
                     'notes': date.get_notes(request.user.eats_user)}
+    user_preferences = get_user_preferences(request)
+    context_data['preferred_name'] = get_preferred_name(user_preferences,
+                                                        entity)
     return render(request, 'eats/edit/date_change.html', context_data)
 
 @user_passes_test(user_is_editor)
@@ -368,8 +368,8 @@ def display_eatsml_import_annotated (request, import_id):
 @user_passes_test(user_is_editor)
 @add_topic_map
 def pa_note_add (request, topic_map, entity_id, assertion_id):
-    entity, assertion, authority = _get_entity_assertion(request, entity_id,
-                                                         assertion_id)
+    entity, assertion, authority = get_entity_assertion(request, entity_id,
+                                                        assertion_id)
     if request.method == 'POST':
         form = NoteBearingNoteForm(assertion, request.POST)
         if form.is_valid():
@@ -385,14 +385,17 @@ def pa_note_add (request, topic_map, entity_id, assertion_id):
             return redirect(redirect_url)
     else:
         form = NoteBearingNoteForm(assertion)
-    context_data = {'form': form}
+    context_data = {'form': form, 'for_date': False}
+    user_preferences = get_user_preferences(request)
+    context_data['preferred_name'] = get_preferred_name(user_preferences,
+                                                        entity)
     return render(request, 'eats/edit/note_add.html', context_data)
 
 @user_passes_test(user_is_editor)
 @add_topic_map
 def pa_note_change (request, topic_map, entity_id, assertion_id, note_id):
-    entity, assertion, authority = _get_entity_assertion(request, entity_id,
-                                                         assertion_id)
+    entity, assertion, authority = get_entity_assertion(request, entity_id,
+                                                        assertion_id)
     editor = request.user.eats_user
     note = assertion.get_note(editor, note_id)
     if note is None:
@@ -414,14 +417,17 @@ def pa_note_change (request, topic_map, entity_id, assertion_id, note_id):
             return redirect(redirect_url)
     else:
         form = NoteBearingNoteForm(assertion, instance=note)
-    context_data = {'form': form}
+    context_data = {'form': form, 'for_date': False}
+    user_preferences = get_user_preferences(request)
+    context_data['preferred_name'] = get_preferred_name(user_preferences,
+                                                        entity)
     return render(request, 'eats/edit/note_change.html', context_data)
 
 @user_passes_test(user_is_editor)
 @add_topic_map
 def date_note_add (request, topic_map, entity_id, assertion_id, date_id):
-    entity, assertion, authority = _get_entity_assertion(request, entity_id,
-                                                         assertion_id)
+    entity, assertion, authority = get_entity_assertion(request, entity_id,
+                                                        assertion_id)
     date = assertion.get_date(date_id)
     if date is None:
         raise Http404
@@ -440,15 +446,18 @@ def date_note_add (request, topic_map, entity_id, assertion_id, date_id):
             return redirect(redirect_url)
     else:
         form = NoteBearingNoteForm(date)
-    context_data = {'form': form}
+    context_data = {'form': form, 'for_date': True}
+    user_preferences = get_user_preferences(request)
+    context_data['preferred_name'] = get_preferred_name(user_preferences,
+                                                        entity)
     return render(request, 'eats/edit/note_add.html', context_data)
 
 @user_passes_test(user_is_editor)
 @add_topic_map
 def date_note_change (request, topic_map, entity_id, assertion_id, date_id,
                       note_id):
-    entity, assertion, authority = _get_entity_assertion(request, entity_id,
-                                                         assertion_id)
+    entity, assertion, authority = get_entity_assertion(request, entity_id,
+                                                        assertion_id)
     date = assertion.get_date(date_id)
     if date is None:
         raise Http404
@@ -472,18 +481,8 @@ def date_note_change (request, topic_map, entity_id, assertion_id, date_id,
             return redirect(redirect_url)
     else:
         form = NoteBearingNoteForm(date, instance=note)
-    context_data = {'form': form}
+    context_data = {'form': form, 'for_date': True}
+    user_preferences = get_user_preferences(request)
+    context_data['preferred_name'] = get_preferred_name(user_preferences,
+                                                        entity)
     return render(request, 'eats/edit/note_change.html', context_data)
-
-def _get_entity_assertion (request, entity_id, assertion_id):
-    entity = get_topic_or_404(Entity, entity_id)
-    # Note that entity.get_assertion only gets Association assertions,
-    # which happens to be what is wanted when restricting assertions
-    # to those that can carry dates or notes.
-    assertion = entity.get_assertion(assertion_id)
-    if assertion is None:
-        raise Http404
-    authority = assertion.authority
-    if authority != request.user.eats_user.get_current_authority():
-        raise Http404
-    return entity, assertion, authority
