@@ -83,9 +83,9 @@ class Name (Topic, NameElement):
         :param name_part_type: type of the name part
         :type name_part_type: `NamePartType`
         :param language: language of the name part
-        :type language: `Language` or None
+        :type language: `Language`
         :param script: script of the name part
-        :type script: `Script` or None
+        :type script: `Script`
         :param display_form: form of the name part
         :type display_form: `str`
         :param order: order of name part
