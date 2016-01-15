@@ -669,7 +669,10 @@ class NamePartForm (forms.Form):
                     model = Script
                 elif name.startswith('name_part_id'):
                     model = NamePart
-                cleaned_data[name] = model.objects.get_by_identifier(value)
+                else:
+                    model = None
+                if model is not None:
+                    cleaned_data[name] = model.objects.get_by_identifier(value)
         self.cleaned_data = cleaned_data
         return cleaned_data
 

@@ -379,6 +379,30 @@ class EntityChangeViewTestCase (ViewTestCase):
         self.assertEqual(Name.objects.count(), 0)
         self.assertEqual(NamePart.objects.count(), 0)
 
+    def test_post_name_part_delete (self):
+        entity = self.tm.create_entity(self.authority)
+        name_type = self.create_name_type('regular')
+        language = self.create_language('English', 'en')
+        script = self.create_script('Latin', 'Latn', ' ')
+        name_part_type = self.create_name_part_type('given')
+        self.authority.set_name_types([name_type])
+        self.authority.set_languages([language])
+        self.authority.set_scripts([script])
+        self.authority.set_name_part_types([name_part_type])
+        language.name_part_types = [name_part_type]
+        name_pa = entity.create_name_property_assertion(
+            self.authority, name_type, language, script, '')
+        name_pa.name.create_name_part(name_part_type, language, script,
+                                      'Carrie', 1)
+        self.assertEqual(Name.objects.count(), 1)
+        self.assertEqual(NamePart.objects.count(), 1)
+        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['names-0-name_parts-0-DELETE'] = 'on'
+        form.submit('_save')
+        self.assertEqual(Name.objects.count(), 1)
+        self.assertEqual(NamePart.objects.count(), 0)
+
     def test_post_notes (self):
         entity = self.tm.create_entity(self.authority)
         url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
