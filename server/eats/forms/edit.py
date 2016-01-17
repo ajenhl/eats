@@ -898,8 +898,9 @@ class DateForm (forms.Form):
         # throw out all data that is associated with a blank date
         # part.
         new_data = {}
-        new_data['date_period'] = DatePeriod.objects.get_by_identifier(
-            data['date_period'])
+        if 'date_period' in data:
+            new_data['date_period'] = DatePeriod.objects.get_by_identifier(
+                data['date_period'])
         for prefix in ('start', 'start_taq', 'start_tpq', 'end', 'end_taq',
                        'end_tpq', 'point', 'point_taq', 'point_tpq'):
             if data.get(prefix):

@@ -148,3 +148,23 @@ class DateAddViewTestCase (ViewTestCase):
         response = form.submit('_save')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(existence.get_dates()), 0)
+
+    def test_invalid_post_request_no_date_period (self):
+        entity = self.tm.create_entity(self.authority)
+        existence = entity.get_existences()[0]
+        self.assertEqual(len(existence.get_dates()), 0)
+        url = reverse('date-add', kwargs={'entity_id': entity.get_id(),
+                                          'assertion_id': existence.get_id()})
+        calendar = self.create_calendar('Gregorian')
+        date_type = self.create_date_type('exact')
+        self.authority.set_calendars([calendar])
+        self.authority.set_date_types([date_type])
+        form = self.app.get(url, user='user').forms['date-add-form']
+        form['point_calendar'] = calendar.get_id()
+        form['point_certainty'] = 'on'
+        form['point'] = '9 February 2011'
+        form['point_normalised'] = '2011-02-09'
+        form['point_type'] = date_type.get_id()
+        response = form.submit('_save')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(existence.get_dates()), 0)
