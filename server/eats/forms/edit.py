@@ -514,12 +514,13 @@ class NameForm (PropertyAssertionForm):
 
     def clean (self):
         cleaned_data = super(NameForm, self).clean()
-        cleaned_data['name_type'] = self._get_construct(
-            cleaned_data['name_type'], NameType)
-        cleaned_data['language'] = self._get_construct(
-            cleaned_data['language'], Language)
-        cleaned_data['script'] = self._get_construct(
-            cleaned_data['script'], Script)
+        data = (('name_type', NameType), ('language', Language),
+                ('script', Script))
+        for field_name, model in data:
+            field_data = cleaned_data.get(field_name)
+            if field_data is not None:
+                cleaned_data[field_name] = self._get_construct(field_data,
+                                                               model)
         # QAZ: Add check that we don't have a name part to add,
         # without this form either representing an existing name
         # instance or being valid to create one.

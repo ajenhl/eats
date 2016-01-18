@@ -324,6 +324,40 @@ class EntityChangeViewTestCase (ViewTestCase):
         self.assertEqual(form_data['display_form'], name.display_form)
         self.assertEqual(form_data['is_preferred'], assertion.is_preferred)
 
+    def test_post_name_missing (self):
+        # Test that missing required name data neither creates a name
+        # nor raises an exception.
+        entity = self.tm.create_entity(self.authority)
+        name_type = self.create_name_type('regular')
+        language = self.create_language('English', 'en')
+        script = self.create_script('Latin', 'Latn', ' ')
+        self.authority.set_name_types([name_type])
+        self.authority.set_languages([language])
+        self.authority.set_scripts([script])
+        self.assertEqual(Name.objects.count(), 0)
+        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['names-0-language'] = language.get_id()
+        form['names-0-script'] = script.get_id()
+        form['names-0-display_form'] = 'Carl Philipp Emanuel Bach'
+        form['names-0-is_preferred'] = True
+        form.submit('_save')
+        self.assertEqual(Name.objects.count(), 0)
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['names-0-name_type'] = name_type.get_id()
+        form['names-0-script'] = script.get_id()
+        form['names-0-display_form'] = 'Carl Philipp Emanuel Bach'
+        form['names-0-is_preferred'] = True
+        form.submit('_save')
+        self.assertEqual(Name.objects.count(), 0)
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['names-0-name_type'] = name_type.get_id()
+        form['names-0-language'] = language.get_id()
+        form['names-0-display_form'] = 'Carl Philipp Emanuel Bach'
+        form['names-0-is_preferred'] = True
+        form.submit('_save')
+        self.assertEqual(Name.objects.count(), 0)
+
     def test_post_name_parts (self):
         entity = self.tm.create_entity(self.authority)
         name_type = self.create_name_type('regular')
