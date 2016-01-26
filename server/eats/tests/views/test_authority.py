@@ -183,17 +183,21 @@ class AuthorityViewsTestCase (ViewTestCase):
 
     def test_authority_illegal_remove (self):
         """Tests that an infrastructure element in use cannot be removed."""
+        calendar = self.create_calendar('Julian')
         entity_type1 = self.create_entity_type('Test1')
         entity_type2 = self.create_entity_type('Test2')
         self.authority.set_entity_types([entity_type1, entity_type2])
+        self.assertEqual(len(self.authority.get_calendars()), 0)
         entity = self.tm.create_entity(self.authority)
         entity.create_entity_type_property_assertion(self.authority,
                                                      entity_type1)
         url = reverse('authority-change', kwargs={
                 'topic_id': self.authority.get_id()})
         form = self.app.get(url).forms['infrastructure-change-form']
+        form['calendars'] = [calendar.get_id()]
         form['entity_types'] = [entity_type2.get_id()]
         response = form.submit('_save')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(set(self.authority.get_entity_types()),
                          set([entity_type1, entity_type2]))
+        self.assertEqual(len(self.authority.get_calendars()), 0)

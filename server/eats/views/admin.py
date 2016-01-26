@@ -86,7 +86,6 @@ def topic_add (request, topic_map, model):
     context_data = {'form': form, 'opts': opts, 'help_template': help_template}
     return render(request, 'eats/admin/topic_add.html', context_data)
 
-@transaction.atomic
 @add_topic_map
 def topic_change (request, topic_map, topic_id, model):
     topic = get_topic_or_404(model, topic_id)
@@ -97,7 +96,8 @@ def topic_change (request, topic_map, topic_id, model):
         form = form_class(topic_map, model, request.POST, instance=topic)
         if form.is_valid():
             try:
-                form.save()
+                with transaction.atomic():
+                    form.save()
                 redirect_url = get_redirect_url(form, opts, topic)
                 return HttpResponseRedirect(redirect_url)
             except EATSValidationException as e:
