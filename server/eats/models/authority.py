@@ -196,7 +196,7 @@ class Authority (Infrastructure, Topic):
         :param association_type: type of association
         :type association_type: `Topic`
         :param element_name: name of the element type
-        :type model: `str`
+        :type eleemnt_name: `str`
 
         """
         authority_role_type = self.eats_topic_map.authority_role_type
@@ -252,12 +252,15 @@ class Authority (Infrastructure, Topic):
 
         """
         removed = set(old_elements) - set(new_elements)
+        message = 'The {} "{}" is in use by this authority and cannot be removed'
         if removed:
             method_name = '_validate_element_removal_' + element_name
             validate = getattr(self, method_name)
             for element in removed:
                 if validate(element):
-                    raise EATSValidationException
+                    error = message.format(element_name,
+                                           element.get_admin_name())
+                    raise EATSValidationException(error)
 
     def _validate_element_removal_calendar (self, element):
         from eats.models import Date

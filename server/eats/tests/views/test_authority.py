@@ -22,7 +22,7 @@ class AuthorityViewsTestCase (ViewTestCase):
         url = reverse('authority-add')
         response = self.app.get(url)
         self.assertEqual(response.context['opts'], Authority._meta)
-        
+
     def test_authority_add_post_redirects (self):
         url = reverse('authority-add')
         form = self.app.get(url).forms['infrastructure-add-form']
@@ -100,7 +100,7 @@ class AuthorityViewsTestCase (ViewTestCase):
         response = form.submit('_save')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Authority.objects.count(), 1)
-        
+
     def test_authority_change_illegal_get (self):
         url = reverse('authority-change', kwargs={'topic_id': 0})
         self.app.get(url, status=404)
@@ -180,3 +180,20 @@ class AuthorityViewsTestCase (ViewTestCase):
         self.assertTrue(editor2 in self.authority.get_editors())
         self.assertTrue(self.authority in editor1.editable_authorities.all())
         self.assertTrue(self.authority in editor2.editable_authorities.all())
+
+    def test_authority_illegal_remove (self):
+        """Tests that an infrastructure element in use cannot be removed."""
+        entity_type1 = self.create_entity_type('Test1')
+        entity_type2 = self.create_entity_type('Test2')
+        self.authority.set_entity_types([entity_type1, entity_type2])
+        entity = self.tm.create_entity(self.authority)
+        entity.create_entity_type_property_assertion(self.authority,
+                                                     entity_type1)
+        url = reverse('authority-change', kwargs={
+                'topic_id': self.authority.get_id()})
+        form = self.app.get(url).forms['infrastructure-change-form']
+        form['entity_types'] = [entity_type2.get_id()]
+        response = form.submit('_save')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(set(self.authority.get_entity_types()),
+                         set([entity_type1, entity_type2]))

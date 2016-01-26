@@ -3,6 +3,7 @@ from urllib.parse import urljoin
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import redirect, render
 
@@ -10,6 +11,7 @@ from tmapi.exceptions import TopicMapExistsException
 from tmapi.models import TopicMap, TopicMapSystemFactory
 
 from eats.decorators import add_topic_map
+from eats.exceptions import EATSValidationException
 from eats.lib.views import get_topic_or_404
 from eats.models import (Authority, Calendar, DatePeriod, DateType, EATSUser,
                          EntityRelationshipType, EntityType, Language,
@@ -84,22 +86,28 @@ def topic_add (request, topic_map, model):
     context_data = {'form': form, 'opts': opts, 'help_template': help_template}
     return render(request, 'eats/admin/topic_add.html', context_data)
 
+@transaction.atomic
 @add_topic_map
 def topic_change (request, topic_map, topic_id, model):
     topic = get_topic_or_404(model, topic_id)
     opts = model._meta
+    context_data = {'opts': opts}
     form_class = get_form_class(model)
     if request.method == 'POST':
         form = form_class(topic_map, model, request.POST, instance=topic)
         if form.is_valid():
-            form.save()
-            redirect_url = get_redirect_url(form, opts, topic)
-            return HttpResponseRedirect(redirect_url)
+            try:
+                form.save()
+                redirect_url = get_redirect_url(form, opts, topic)
+                return HttpResponseRedirect(redirect_url)
+            except EATSValidationException as e:
+                context_data['error_message'] = str(e)
     else:
         form = form_class(topic_map, model, instance=topic)
     help_template = 'eats/admin/{}_help.html'.format(opts.model_name)
-    context_data = {'form': form, 'opts': opts, 'name': topic.get_admin_name(),
-                    'help_template': help_template}
+    context_data['form'] = form
+    context_data['name'] = topic.get_admin_name()
+    context_data['help_template'] = help_template
     return render(request, 'eats/admin/topic_change.html', context_data)
 
 def get_form_class (model):

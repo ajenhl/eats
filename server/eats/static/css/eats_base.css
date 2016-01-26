@@ -58,6 +58,8 @@
    padding: 0;
 }
 
+.errors { color: red; }
+
 .note-ref {
     border-bottom: 1px dotted;
 }

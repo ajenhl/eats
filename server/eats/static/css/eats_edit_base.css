@@ -3,7 +3,6 @@
    padding: 0;
    list-style-type: none;
 }
-.errors { color: red; }
 .npls-toggle, .name-part-section-toggle {
    color: #5B80B2;
    cursor: pointer;
