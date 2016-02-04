@@ -392,6 +392,40 @@ class EntityChangeViewTestCase (ViewTestCase):
         self.assertEqual(Name.objects.count(), 1)
         self.assertEqual(NamePart.objects.count(), 1)
 
+    def test_post_name_then_name_parts (self):
+        # Adding a name with a display name and no name parts, then
+        # removing the display name while adding a name part should
+        # work as you'd expect. The name cache should not make this
+        # fail.
+        entity = self.tm.create_entity(self.authority)
+        name_type = self.create_name_type('regular')
+        language = self.create_language('English', 'en')
+        script = self.create_script('Latin', 'Latn', ' ')
+        name_part_type = self.create_name_part_type('given')
+        language.name_part_types = [name_part_type]
+        self.authority.set_name_types([name_type])
+        self.authority.set_languages([language])
+        self.authority.set_scripts([script])
+        self.authority.set_name_part_types([name_part_type])
+        self.assertEqual(Name.objects.count(), 0)
+        self.assertEqual(NamePart.objects.count(), 0)
+        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['names-0-name_type'] = name_type.get_id()
+        form['names-0-language'] = language.get_id()
+        form['names-0-script'] = script.get_id()
+        form['names-0-display_form'] = 'Anne'
+        form.submit('_save')
+        self.assertEqual(Name.objects.count(), 1)
+        self.assertEqual(NamePart.objects.count(), 0)
+        form = self.app.get(url, user='user').forms['entity-change-form']
+        form['names-0-display_form'] = ''
+        form['names-0-name_parts-0-name_part_display_form-0'] = 'Anne'
+        form['names-0-name_parts-0-name_part_type'] = name_part_type.get_id()
+        form.submit('_save')
+        self.assertEqual(Name.objects.count(), 1)
+        self.assertEqual(NamePart.objects.count(), 1)
+
     def test_post_name_parts_without_language_association (self):
         entity = self.tm.create_entity(self.authority)
         name_type = self.create_name_type('regular')

@@ -42,21 +42,21 @@ class NameTestCase (ModelTestCase):
                           self.authority, self.name_type, self.language, script,
                           'Name')
         self.assertEqual(0, len(self.entity.get_eats_names()))
-    
+
     def test_create_name_property_assertion (self):
         self.assertEqual(0, len(self.entity.get_eats_names()))
         self.assertEqual(0, self.type_index.get_associations(
-                self.tm.is_in_language_type).count())
+            self.tm.is_in_language_type).count())
         self.assertEqual(0, self.type_index.get_associations(
-                self.tm.is_in_script_type).count())        
+            self.tm.is_in_script_type).count())
         assertion = self.entity.create_name_property_assertion(
             self.authority, self.name_type, self.language, self.script,
             'Name')
         self.assertEqual(1, len(self.entity.get_eats_names()))
         self.assertEqual(1, self.type_index.get_associations(
-                self.tm.is_in_language_type).count())
+            self.tm.is_in_language_type).count())
         self.assertEqual(1, self.type_index.get_associations(
-                self.tm.is_in_script_type).count())
+            self.tm.is_in_script_type).count())
         fetched_assertion = self.entity.get_eats_names()[0]
         self.assertEqual(assertion, fetched_assertion)
         name = assertion.name
@@ -76,9 +76,9 @@ class NameTestCase (ModelTestCase):
             'Name2')
         self.assertEqual(2, len(self.entity.get_eats_names()))
         self.assertEqual(2, self.type_index.get_associations(
-                self.tm.is_in_language_type).count())
+            self.tm.is_in_language_type).count())
         self.assertEqual(2, self.type_index.get_associations(
-                self.tm.is_in_script_type).count())
+            self.tm.is_in_script_type).count())
         name_part_type = self.create_name_part_type('given')
         assertion2.name.create_name_part(name_part_type, self.language,
                                          self.script, 'Part', 1)
@@ -86,18 +86,18 @@ class NameTestCase (ModelTestCase):
         assertion2.remove()
         self.assertEqual(1, len(self.entity.get_eats_names()))
         self.assertEqual(1, self.type_index.get_associations(
-                self.tm.is_in_language_type).count())
+            self.tm.is_in_language_type).count())
         self.assertEqual(1, self.type_index.get_associations(
-                self.tm.is_in_script_type).count())
+            self.tm.is_in_script_type).count())
         self.assertEqual(0, NamePart.objects.count())
         name1 = assertion1.name
         self.assertEqual(name1.display_form, 'Name1')
         assertion1.remove()
         self.assertEqual(0, len(self.entity.get_eats_names()))
         self.assertEqual(0, self.type_index.get_associations(
-                self.tm.is_in_language_type).count())
+            self.tm.is_in_language_type).count())
         self.assertEqual(0, self.type_index.get_associations(
-                self.tm.is_in_script_type).count())
+            self.tm.is_in_script_type).count())
 
     def test_illegal_update_name_property_assertion (self):
         assertion = self.entity.create_name_property_assertion(
@@ -129,13 +129,13 @@ class NameTestCase (ModelTestCase):
         self.assertEqual(name.display_form, 'Name')
         self.assertEqual(assertion.is_preferred, True)
         assertion.update(self.name_type2, self.language2,
-            self.script2, 'Name2', False)
+                         self.script2, 'Name2', False)
         self.assertEqual(name.name_type, self.name_type2)
         self.assertEqual(name.language, self.language2)
         self.assertEqual(name.script, self.script2)
         self.assertEqual(name.display_form, 'Name2')
         self.assertEqual(assertion.is_preferred, False)
-        
+
     def test_language (self):
         assertion = self.entity.create_name_property_assertion(
             self.authority, self.name_type, self.language, self.script,
@@ -144,7 +144,7 @@ class NameTestCase (ModelTestCase):
         self.assertEqual(self.language, name.language)
         name.language = self.language2
         self.assertEqual(self.language2, name.language)
-        
+
     def test_script (self):
         assertion = self.entity.create_name_property_assertion(
             self.authority, self.name_type, self.language, self.script,
@@ -170,7 +170,7 @@ class NameTestCase (ModelTestCase):
         self.assertEqual(assertion.is_preferred, True)
         assertion.is_preferred = False
         self.assertEqual(assertion.is_preferred, False)
-        
+
     def test_display_form (self):
         assertion = self.entity.create_name_property_assertion(
             self.authority, self.name_type, self.language, self.script,
@@ -216,11 +216,10 @@ class NameTestCase (ModelTestCase):
     def test_name_cache (self):
         cache_items = NameCache.objects.filter(entity=self.entity)
         self.assertEqual(cache_items.count(), 0)
-        # An empty name should not be stored in the cache.
         assertion = self.entity.create_name_property_assertion(
             self.authority, self.name_type, self.language, self.script, '')
         cache_items = NameCache.objects.filter(entity=self.entity)
-        self.assertEqual(cache_items.count(), 0)
+        self.assertEqual(cache_items.count(), 1)
         assertion.name.display_form = 'Dee'
         assertion.name.update_name_cache()
         cache_items = NameCache.objects.filter(entity=self.entity)

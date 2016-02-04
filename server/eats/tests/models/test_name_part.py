@@ -32,7 +32,8 @@ class NamePartTestCase (ModelTestCase):
                          self.name_part_type1)
         self.assertEqual(len(list(self.name.get_name_parts().values())), 1)
         self.assertEqual(len(list(self.name.get_name_parts().values())[0]), 1)
-        self.assertEqual(list(self.name.get_name_parts().values())[0][0], name_part)
+        self.assertEqual(list(self.name.get_name_parts().values())[0][0],
+                         name_part)
 
     def test_delete_name_part (self):
         self.assertEqual(len(self.name.get_name_parts()), 0)
@@ -140,7 +141,7 @@ class NamePartTestCase (ModelTestCase):
 
     def test_name_cache (self):
         cache_items = NameCache.objects.filter(entity=self.entity)
-        self.assertEqual(cache_items.count(), 0)
+        self.assertEqual(cache_items.count(), 1)
         name_part = self.name.create_name_part(
             self.name_part_type1, self.language, self.script, 'Sam', 1)
         cache_items = NameCache.objects.filter(entity=self.entity)
