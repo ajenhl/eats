@@ -58,6 +58,7 @@ import nz.org.artefact.eats.ns.eatsml.Languages.Language;
 import nz.org.artefact.eats.ns.eatsml.NamePart;
 import nz.org.artefact.eats.ns.eatsml.NamePartTypes.NamePartType;
 import nz.org.artefact.eats.ns.eatsml.NameTypes.NameType;
+import nz.org.artefact.eats.ns.eatsml.Names;
 import nz.org.artefact.eats.ns.eatsml.Names.Name;
 import nz.org.artefact.eats.ns.eatsml.Entity.Notes.Note;
 import nz.org.artefact.eats.ns.eatsml.Scripts.Script;
@@ -843,6 +844,25 @@ public class LookupController implements ActionListener, DocumentListener,
 				}
 
 				buffer.append("</ul>");
+			}
+			
+			List<Name> defaultNames = EatsMlUtils.getDefaultNames(entity);
+			if (defaultNames != null) {
+				Name defaultName = defaultNames.get(0);
+				List<Name> names = entity.getNames().getName();
+				if (names.size() > 1) {
+					buffer.append("<b>Other names</b>");
+					buffer.append("<ul style='list-style-type: none; margin-left: 10px'>");
+					for (Name name : names) {
+						if (name != defaultName) {
+							buffer.append("<li>");
+							buffer.append(name.getAssembledForm());
+							buffer.append("</li>");
+						}
+					}
+					buffer.append("</ul>");
+				}
+				
 			}
 
 			List<Note> noteList = EatsMlUtils.getNotes(authority, entity);
