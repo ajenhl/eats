@@ -9,7 +9,7 @@ class EntityDisplayViewTestCase (ViewTestCase):
     def setUp (self):
         super(EntityDisplayViewTestCase, self).setUp()
         self.entity = self.tm.create_entity(self.authority)
-        self.url = reverse('entity-view',
+        self.url = reverse('eats-entity-view',
                            kwargs={'entity_id': self.entity.get_id()})
 
     def test_no_entity_name (self):

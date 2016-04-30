@@ -7,7 +7,7 @@ from eats.tests.views.view_test_case import ViewTestCase
 class DateTypeViewsTestCase (ViewTestCase):
 
     def test_date_type_list (self):
-        url = reverse('datetype-list')
+        url = reverse('eats-datetype-list')
         response = self.app.get(url)
         self.assertEqual(response.context['opts'], DateType._meta)
         self.assertEqual(len(response.context['topics']), 0)
@@ -17,17 +17,17 @@ class DateTypeViewsTestCase (ViewTestCase):
         self.assertTrue(date_type in response.context['topics'])
 
     def test_date_type_add_get (self):
-        url = reverse('datetype-add')
+        url = reverse('eats-datetype-add')
         response = self.app.get(url)
         self.assertEqual(response.context['opts'], DateType._meta)
-        
+
     def test_date_type_add_post_redirects (self):
         self.assertEqual(DateType.objects.count(), 0)
-        url = reverse('datetype-add')
+        url = reverse('eats-datetype-add')
         form = self.app.get(url).forms['infrastructure-add-form']
         form['name'] = 'exact'
         response = form.submit('_save')
-        self.assertRedirects(response, reverse('datetype-list'))
+        self.assertRedirects(response, reverse('eats-datetype-list'))
         self.assertEqual(DateType.objects.count(), 1)
         form['name'] = 'circa'
         response = form.submit('_addanother')
@@ -36,14 +36,14 @@ class DateTypeViewsTestCase (ViewTestCase):
         form['name'] = 'roughly'
         response = form.submit('_continue')
         date_type = DateType.objects.get_by_admin_name('roughly')
-        redirect_url = reverse('datetype-change',
+        redirect_url = reverse('eats-datetype-change',
                                kwargs={'topic_id': date_type.get_id()})
         self.assertRedirects(response, redirect_url)
         self.assertEqual(DateType.objects.count(), 3)
 
     def test_date_type_add_illegal_post (self):
         self.assertEqual(DateType.objects.count(), 0)
-        url = reverse('datetype-add')
+        url = reverse('eats-datetype-add')
         # Missing date_type name.
         form = self.app.get(url).forms['infrastructure-add-form']
         form['name'] = ''
@@ -58,14 +58,14 @@ class DateTypeViewsTestCase (ViewTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(DateType.objects.count(), 1)
         self.assertTrue(date_type in DateType.objects.all())
-        
+
     def test_date_type_change_illegal_get (self):
-        url = reverse('datetype-change', kwargs={'topic_id': 0})
+        url = reverse('eats-datetype-change', kwargs={'topic_id': 0})
         self.app.get(url, status=404)
 
     def test_date_type_change_get (self):
         date_type = self.create_date_type('exact')
-        url = reverse('datetype-change', kwargs={
+        url = reverse('eats-datetype-change', kwargs={
                 'topic_id': date_type.get_id()})
         response = self.app.get(url)
         self.assertEqual(response.status_code, 200)
@@ -74,13 +74,12 @@ class DateTypeViewsTestCase (ViewTestCase):
     def test_date_type_change_post (self):
         self.assertEqual(DateType.objects.count(), 0)
         date_type = self.create_date_type('exact')
-        url = reverse('datetype-change', kwargs={
+        url = reverse('eats-datetype-change', kwargs={
                 'topic_id': date_type.get_id()})
         self.assertEqual(date_type.get_admin_name(), 'exact')
         form = self.app.get(url).forms['infrastructure-change-form']
         form['name'] = 'circa'
         response = form.submit('_save')
-        self.assertRedirects(response, reverse('datetype-list'))
+        self.assertRedirects(response, reverse('eats-datetype-list'))
         self.assertEqual(DateType.objects.count(), 1)
         self.assertEqual(date_type.get_admin_name(), 'circa')
-

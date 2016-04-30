@@ -14,10 +14,10 @@
   <h2>Notes</h2>
 
   {% for note in notes %}
-  <p>{{ note.note }}{% if note.is_internal %} [<i>internal</i>]{% endif %} — <a href="{% url 'date-note-change' entity_id assertion_id date_id note.get_id %}">Edit</a></p>
+  <p>{{ note.note }}{% if note.is_internal %} [<i>internal</i>]{% endif %} — <a href="{% url 'eats-date-note-change' entity_id assertion_id date_id note.get_id %}">Edit</a></p>
   {% endfor %}
 
-  <p><a href="{% url 'date-note-add' entity_id assertion_id date_id %}">Add a note</a></p>
+  <p><a href="{% url 'eats-date-note-add' entity_id assertion_id date_id %}">Add a note</a></p>
 
   <p><input class="button" type="submit" name="_save" value="Save"/> <input class="button" type="submit" name="_continue" value="Save and continue editing"/> <input class="button" type="submit" name="_delete" value="Delete"/></p>
 </form>

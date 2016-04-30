@@ -7,7 +7,7 @@
 <article class="entity-display">
   <h1>{{ preferred_name_form }}</h1>
 
-  {% if user_is_editor %}<p>[<a href="{% url 'entity-change' entity.get_id %}">Edit</a>]</p>{% endif %}
+  {% if user_is_editor %}<p>[<a href="{% url 'eats-entity-change' entity.get_id %}">Edit</a>]</p>{% endif %}
 
   {% if has_existence_dates %}
   <section>
@@ -134,7 +134,7 @@
     machine-processable forms:</p>
 
     <ul>
-      <li><a href="eatsml/"><abbr title="Entity Authority Tool Set">EATS</abbr> XML</a></li>
+      <li><a href="{% url 'eats-entity-eatsml-view' entity.get_id %}"><abbr title="Entity Authority Tool Set">EATS</abbr> XML</a></li>
     </ul>
   </section>
 

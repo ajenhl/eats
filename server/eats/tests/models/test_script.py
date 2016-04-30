@@ -12,7 +12,7 @@ class ScriptTestCase (ModelTestCase):
         self.assertEqual(script.get_admin_name(), 'Arabic')
         script2 = self.create_script('Gujarati', 'Gujr', ' ')
         self.assertRaises(Exception, script2.set_admin_name, 'Arabic')
-    
+
     def test_script_code (self):
         script = self.create_script('Latin', 'Latn', ' ')
         self.assertEqual(script.get_code(), 'Latn')

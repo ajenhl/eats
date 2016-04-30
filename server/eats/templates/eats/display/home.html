@@ -6,15 +6,14 @@
 <nav>
   <h1>Useful links</h1>
   <ul>
-    <li><a href="{% url 'statistics' %}">Statistics</a></li>
+    <li><a href="{% url 'eats-statistics' %}">Statistics</a></li>
     {% if user_is_editor %}
-    <li><a href="{% url 'administration-panel' %}">Administer EATS</a></li>
+    <li><a href="{% url 'eats-administration-panel' %}">Administer EATS</a></li>
     {% endif %}
   </ul>
 </nav>
 <section>
   <h1>Entity Authority Tool Set</h1>
 
-  
 </section>
 {% endblock eats_content %}

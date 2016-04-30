@@ -47,7 +47,7 @@ def create_topic_map (request):
 
     """
     if request.method == 'GET':
-        return redirect('administration-panel')
+        return redirect('eats-administration-panel')
     factory = TopicMapSystemFactory.new_instance()
     tms = factory.new_topic_map_system()
     try:
@@ -57,7 +57,7 @@ def create_topic_map (request):
         status = 'exists'
     except:
         status = 'failed'
-    redirect_url = urljoin(reverse('administration-panel'), '?tm_create=' +
+    redirect_url = urljoin(reverse('eats-administration-panel'), '?tm_create=' +
                            status)
     return HttpResponseRedirect(redirect_url)
 
@@ -143,12 +143,12 @@ def get_form_class (model):
 def get_redirect_url (form, opts, topic):
     object_type = opts.model_name
     if '_addanother' in form.data:
-        redirect_url = reverse(object_type + '-add')
+        redirect_url = reverse('eats-{}-add'.format(object_type))
     elif '_continue' in form.data:
-        redirect_url = reverse(object_type + '-change',
+        redirect_url = reverse('eats-{}-change'.format(object_type),
                                kwargs={'topic_id': topic.get_id()})
     else:
-        redirect_url = reverse(object_type + '-list')
+        redirect_url = reverse('eats-{}-list'.format(object_type))
     return redirect_url
 
 def user_list (request):
@@ -172,10 +172,10 @@ def user_change (request, eats_user_id):
         if form.is_valid():
             form.save()
             if '_continue' in form.data:
-                redirect_url = reverse('user-change', kwargs={
+                redirect_url = reverse('eats-user-change', kwargs={
                         'eats_user_id': eats_user.pk})
             else:
-                redirect_url = reverse('user-list')
+                redirect_url = reverse('eats-user-list')
             return HttpResponseRedirect(redirect_url)
     else:
         form = EATSUserForm(instance=eats_user)
@@ -184,7 +184,7 @@ def user_change (request, eats_user_id):
 
 def user_activate (request):
     """Creates an EATS user for the POSTed Django user ID."""
-    redirect_url = reverse('user-list')
+    redirect_url = reverse('eats-user-list')
     if request.method == 'POST':
         user_id = request.POST.get('user_id', None)
         if user_id is not None:
@@ -195,7 +195,7 @@ def user_activate (request):
                 except EATSUser.DoesNotExist:
                     eats_user = EATSUser(user=user)
                     eats_user.save()
-                    redirect_url = reverse('user-change', kwargs={
+                    redirect_url = reverse('eats-user-change', kwargs={
                             'eats_user_id': user_id})
             except User.DoesNotExist:
                 pass

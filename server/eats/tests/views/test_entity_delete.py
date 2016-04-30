@@ -12,9 +12,9 @@ class EntityDeleteViewTestCase (ViewTestCase):
         self.editor = self.create_user(user)
         self.editor.editable_authorities = [self.authority]
         self.editor.set_current_authority(self.authority)
-        
+
     def test_non_existent_entity (self):
-        url = reverse('entity-delete', kwargs={'entity_id': 0})
+        url = reverse('eats-entity-delete', kwargs={'entity_id': 0})
         self.app.get(url, status=404, user='user')
 
     def test_delete (self):
@@ -22,10 +22,11 @@ class EntityDeleteViewTestCase (ViewTestCase):
         # single authority that the user is an editor for.
         entity = self.tm.create_entity(self.authority)
         self.assertEqual(Entity.objects.count(), 1)
-        url = reverse('entity-delete', kwargs={'entity_id': entity.get_id()})
+        url = reverse('eats-entity-delete',
+                      kwargs={'entity_id': entity.get_id()})
         form = self.app.get(url, user='user').forms['entity-delete-form']
         response = form.submit('_delete')
-        self.assertRedirects(response, reverse('search'))
+        self.assertRedirects(response, reverse('eats-search'))
         self.assertEqual(Entity.objects.count(), 0)
         # Test for unsuccessful deletion of an entity associated with
         # two authorities, one of which the user is not an editor for.
@@ -33,7 +34,8 @@ class EntityDeleteViewTestCase (ViewTestCase):
         entity2 = self.tm.create_entity(self.authority)
         entity2.create_note_property_assertion(authority2, 'Test note')
         self.assertEqual(Entity.objects.count(), 1)
-        url = reverse('entity-delete', kwargs={'entity_id': entity2.get_id()})
+        url = reverse('eats-entity-delete',
+                      kwargs={'entity_id': entity2.get_id()})
         response = self.app.get(url, user='user')
         # There should be no delete form.
         self.assertTrue('entity-delete-form' not in response.forms)
@@ -52,5 +54,5 @@ class EntityDeleteViewTestCase (ViewTestCase):
         self.editor.editable_authorities = [self.authority, authority2]
         form = self.app.get(url, user='user').forms['entity-delete-form']
         response = form.submit('_delete')
-        self.assertRedirects(response, reverse('search'))
+        self.assertRedirects(response, reverse('eats-search'))
         self.assertEqual(Entity.objects.count(), 0)

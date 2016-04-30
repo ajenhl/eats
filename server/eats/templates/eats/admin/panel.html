@@ -46,59 +46,59 @@ editor for an authority (via the authority list).</p>
 
 <table id="admin-panel">
   <tr>
-    <th scope="row"><a href="authority/">Authorities</a></th>
-    <td><a href="authority/add/" class="addlink">Add</a></td>
-    <td><a href="authority/" class="changelink">Change</a></td>
+    <th scope="row"><a href="{% url 'eats-authority-list' %}">Authorities</a></th>
+    <td><a href="{% url 'eats-authority-add' %}" class="addlink">Add</a></td>
+    <td><a href="{% url 'eats-authority-list' %}" class="changelink">Change</a></td>
   </tr>
   <tr>
-    <th scope="row"><a href="entity-type/">Entity types</a></th>
-    <td><a href="entity-type/add/" class="addlink">Add</a></td>
-    <td><a href="entity-type/" class="changelink">Change</a></td>
+    <th scope="row"><a href="{% url 'eats-entitytype-list' %}">Entity types</a></th>
+    <td><a href="{% url 'eats-entitytype-add' %}" class="addlink">Add</a></td>
+    <td><a href="{% url 'eats-entitytype-list' %}" class="changelink">Change</a></td>
   </tr>
   <tr>
-    <th scope="row"><a href="name-type/">Name types</a></th>
-    <td><a href="name-type/add/" class="addlink">Add</a></td>
-    <td><a href="name-type/" class="changelink">Change</a></td>
+    <th scope="row"><a href="{% url 'eats-nametype-list' %}">Name types</a></th>
+    <td><a href="{% url 'eats-nametype-add' %}" class="addlink">Add</a></td>
+    <td><a href="{% url 'eats-nametype-list' %}" class="changelink">Change</a></td>
   </tr>
   <tr>
-    <th scope="row"><a href="name-part-type/">Name part types</a></th>
-    <td><a href="name-part-type/add/" class="addlink">Add</a></td>
-    <td><a href="name-part-type/" class="changelink">Change</a></td>
+    <th scope="row"><a href="{% url 'eats-nameparttype-list' %}">Name part types</a></th>
+    <td><a href="{% url 'eats-nameparttype-add' %}" class="addlink">Add</a></td>
+    <td><a href="{% url 'eats-nameparttype-list' %}" class="changelink">Change</a></td>
   </tr>
   <tr>
-    <th scope="row"><a href="language/">Languages</a></th>
-    <td><a href="language/add/" class="addlink">Add</a></td>
-    <td><a href="language/" class="changelink">Change</a></td>
+    <th scope="row"><a href="{% url 'eats-language-list' %}">Languages</a></th>
+    <td><a href="{% url 'eats-language-add' %}" class="addlink">Add</a></td>
+    <td><a href="{% url 'eats-language-list' %}" class="changelink">Change</a></td>
   </tr>
   <tr>
-    <th scope="row"><a href="script/">Scripts</a></th>
-    <td><a href="script/add/" class="addlink">Add</a></td>
-    <td><a href="script/" class="changelink">Change</a></td>
+    <th scope="row"><a href="{% url 'eats-script-list' %}">Scripts</a></th>
+    <td><a href="{% url 'eats-script-add' %}" class="addlink">Add</a></td>
+    <td><a href="{% url 'eats-script-list' %}" class="changelink">Change</a></td>
   </tr>
   <tr>
-    <th scope="row"><a href="entity-relationship-type/">Entity relationship types</a></th>
-    <td><a href="entity-relationship-type/add/" class="addlink">Add</a></td>
-    <td><a href="entity-relationship-type/" class="changelink">Change</a></td>
+    <th scope="row"><a href="{% url 'eats-entityrelationshiptype-list' %}">Entity relationship types</a></th>
+    <td><a href="{% url 'eats-entityrelationshiptype-add' %}" class="addlink">Add</a></td>
+    <td><a href="{% url 'eats-entityrelationshiptype-list' %}" class="changelink">Change</a></td>
   </tr>
   <tr>
-    <th scope="row"><a href="calendar/">Calendars</a></th>
-    <td><a href="calendar/add/" class="addlink">Add</a></td>
-    <td><a href="calendar/" class="changelink">Change</a></td>
+    <th scope="row"><a href="{% url 'eats-calendar-list' %}">Calendars</a></th>
+    <td><a href="{% url 'eats-calendar-add' %}" class="addlink">Add</a></td>
+    <td><a href="{% url 'eats-calendar-list' %}" class="changelink">Change</a></td>
   </tr>
   <tr>
-    <th scope="row"><a href="date-period/">Date periods</a></th>
-    <td><a href="date-period/add/" class="addlink">Add</a></td>
-    <td><a href="date-period/" class="changelink">Change</a></td>
+    <th scope="row"><a href="{% url 'eats-dateperiod-list' %}">Date periods</a></th>
+    <td><a href="{% url 'eats-dateperiod-add' %}" class="addlink">Add</a></td>
+    <td><a href="{% url 'eats-dateperiod-list' %}" class="changelink">Change</a></td>
   </tr>
   <tr>
-    <th scope="row"><a href="date-type/">Date types</a></th>
-    <td><a href="date-type/add/" class="addlink">Add</a></td>
-    <td><a href="date-type/" class="changelink">Change</a></td>
+    <th scope="row"><a href="{% url 'eats-datetype-list' %}">Date types</a></th>
+    <td><a href="{% url 'eats-datetype-add' %}" class="addlink">Add</a></td>
+    <td><a href="{% url 'eats-datetype-list' %}" class="changelink">Change</a></td>
   </tr>
   <tr>
-    <th scope="row"><a href="user/">Users</a></th>
+    <th scope="row"><a href="{% url 'eats-user-list' %}">Users</a></th>
     <td></td>
-    <td><a href="user/" class="changelink">Change</a></td>
+    <td><a href="{% url 'eats-user-list' %}" class="changelink">Change</a></td>
   </tr>
 </table>
 {% endif %}

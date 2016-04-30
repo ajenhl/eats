@@ -10,7 +10,7 @@ class EntityTypeTestCase (ModelTestCase):
         self.entity_type = self.create_entity_type('Person')
         self.entity_type2 = self.create_entity_type('Place')
         self.authority.set_entity_types([self.entity_type, self.entity_type2])
-        
+
     def test_create_entity_type_property_assertion (self):
         self.assertEqual(0, len(self.entity.get_entity_types()))
         assertion = self.entity.create_entity_type_property_assertion(
@@ -49,7 +49,7 @@ class EntityTypeTestCase (ModelTestCase):
         self.assertEqual(self.entity_type, assertion.entity_type)
         assertion.update(self.entity_type2)
         self.assertEqual(self.entity_type2, assertion.entity_type)
-        
+
     def test_illegal_update_entity_type_property_assertion (self):
         assertion = self.entity.create_entity_type_property_assertion(
             self.authority, self.entity_type)

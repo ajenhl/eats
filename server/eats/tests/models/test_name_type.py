@@ -18,7 +18,7 @@ class NameTypeTestCase (ModelTestCase):
         # authority.
         self.assertEqual(NameType.objects.count(), 0)
         name_type = self.create_name_type('regular')
-        self.assertEqual(NameType.objects.count(), 1)        
+        self.assertEqual(NameType.objects.count(), 1)
         authority = self.create_authority('test')
         authority.set_name_types([name_type])
         self.assertRaises(TopicInUseException, name_type.remove)

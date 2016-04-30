@@ -12,7 +12,7 @@ class EATSMLImportViewTestCase (ViewTestCase):
         user = self.create_django_user('user', 'user@example.org', 'password')
         self.editor = self.create_user(user)
         self.editor.editable_authorities = [self.authority]
-        self.url = reverse('import-eatsml')
+        self.url = reverse('eats-import-eatsml')
 
     def test_authentication (self):
         """Tests that only an editor can see the import page."""
@@ -54,7 +54,7 @@ class EATSMLImportViewTestCase (ViewTestCase):
         self.assertEqual(EATSMLImport.objects.count(), 1)
         eatsml_import = EATSMLImport.objects.all()[0]
         self.assertEqual(eatsml_import.description, description)
-        view_url = reverse('display-eatsml-import',
+        view_url = reverse('eats-display-eatsml-import',
                            kwargs={'import_id': eatsml_import.id})
         self.assertEqual(response.request.url[len(response.request.host_url):],
                          view_url)

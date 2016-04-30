@@ -268,7 +268,7 @@ corrected before it will save.</p>
             {% endif %}
           </td>
           <td>
-            <div>{{ form.related_entity }} {% if instance and form.related_entity.value %}[<a href="{% url 'entity-view' form.related_entity.value %}">view record</a>]{% endif %}</div>
+            <div>{{ form.related_entity }} {% if instance and form.related_entity.value %}[<a href="{% url 'eats-entity-view' form.related_entity.value %}">view record</a>]{% endif %}</div>
             {% if form.errors.related_entity %}
             <div class="errors">{{ form.errors.related_entity }}</div>
             {% endif %}
@@ -419,10 +419,10 @@ corrected before it will save.</p>
   </div>
 </form>
 
-<p>It may be possible for you to <a href="{% url 'entity-merge' entity_id %}">merge this entity
+<p>It may be possible for you to <a href="{% url 'eats-entity-merge' entity_id %}">merge this entity
   with another</a>.</p>
 
-<p>It may be possible for you to <a href="{% url 'entity-delete' entity_id %}">delete this entity</a>.</p>
+<p>It may be possible for you to <a href="{% url 'eats-entity-delete' entity_id %}">delete this entity</a>.</p>
 
 </article>
 {% endblock eats_content %}

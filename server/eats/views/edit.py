@@ -41,7 +41,7 @@ def entity_add (request, topic_map):
             if authority != editor.get_current_authority():
                 editor.set_current_authority(authority)
             entity = topic_map.create_entity(authority)
-            redirect_url = reverse('entity-change',
+            redirect_url = reverse('eats-entity-change',
                                    kwargs={'entity_id': entity.get_id()})
             return redirect(redirect_url)
     else:
@@ -55,7 +55,8 @@ def entity_change (request, topic_map, entity_id):
     try:
         entity = get_topic_or_404(Entity, entity_id)
     except EATSMergedIdentifierException as e:
-        return redirect('entity-change', entity_id=e.new_id, permanent=True)
+        return redirect('eats-entity-change', entity_id=e.new_id,
+                        permanent=True)
     editor = request.user.eats_user
     context_data = {'entity': entity, 'is_valid': True, 'user': editor}
     authority = editor.get_current_authority()
@@ -87,7 +88,8 @@ def entity_change (request, topic_map, entity_id):
     entity_relationships_formset = entity_relationships.formset
     subject_identifiers_formset = subject_identifiers.formset
     if request.method == 'POST':
-        redirect_url = reverse('entity-change', kwargs={'entity_id': entity_id})
+        redirect_url = reverse('eats-entity-change',
+                               kwargs={'entity_id': entity_id})
         if '_change_authority' in request.POST:
             if current_authority_form.is_valid():
                 authority_id = current_authority_form.cleaned_data[
@@ -110,7 +112,7 @@ def entity_change (request, topic_map, entity_id):
                 for formset in formsets:
                     formset.save()
                 if '_save_add' in request.POST:
-                    redirect_url = reverse('entity-add')
+                    redirect_url = reverse('eats-entity-add')
                 return redirect(redirect_url)
     context_data['entity_id'] = entity_id
     context_data['current_authority_form'] = current_authority_form
@@ -140,7 +142,8 @@ def entity_delete (request, topic_map, entity_id):
     try:
         entity = get_topic_or_404(Entity, entity_id)
     except EATSMergedIdentifierException as e:
-        return redirect('entity-delete', entity_id=e.new_id, permanent=True)
+        return redirect('eats-entity-delete', entity_id=e.new_id,
+                        permanent=True)
     editable_authorities = request.user.eats_user.editable_authorities.all()
     assertion_getters = [entity.get_eats_names, entity.get_entity_relationships,
                          entity.get_entity_types, entity.get_existences,
@@ -153,7 +156,7 @@ def entity_delete (request, topic_map, entity_id):
                 can_delete = False
     if request.method == 'POST' and can_delete:
         entity.remove()
-        return redirect(reverse('search'))
+        return redirect(reverse('eats-search'))
     context_data = {'can_delete': can_delete}
     return render(request, 'eats/edit/entity_delete.html', context_data)
 
@@ -163,7 +166,7 @@ def entity_merge (request, topic_map, entity_id):
     try:
         entity = get_topic_or_404(Entity, entity_id)
     except EATSMergedIdentifierException as e:
-        return redirect('entity-merge', entity_id=e.new_id, permanent=True)
+        return redirect('eats-entity-merge', entity_id=e.new_id, permanent=True)
     context_data = {}
     if request.method == 'POST':
         form = EntityMergeForm(request.POST)
@@ -181,7 +184,8 @@ def entity_merge (request, topic_map, entity_id):
             if can_merge:
                 entity.merge_in(merge_entity)
                 return redirect(
-                    reverse('entity-change', kwargs={'entity_id': entity_id}))
+                    reverse('eats-entity-change',
+                            kwargs={'entity_id': entity_id}))
             else:
                 context_data['unauthorised'] = True
     else:
@@ -208,10 +212,11 @@ def date_add (request, topic_map, entity_id, assertion_id):
             if '_continue' in form.data:
                 redirect_ids = {'assertion_id': assertion_id,
                                 'date_id': date_id, 'entity_id': entity_id}
-                redirect_url = reverse('date-change', kwargs=redirect_ids)
+                redirect_url = reverse('eats-date-change', kwargs=redirect_ids)
             else:
                 redirect_ids = {'entity_id': entity_id}
-                redirect_url = reverse('entity-change', kwargs=redirect_ids)
+                redirect_url = reverse('eats-entity-change',
+                                       kwargs=redirect_ids)
             return redirect(redirect_url)
     else:
         form = DateForm(topic_map, calendar_choices, date_period_choices,
@@ -240,7 +245,7 @@ def date_change (request, topic_map, entity_id, assertion_id, date_id):
         form = DateForm(topic_map, calendar_choices, date_period_choices,
                         date_type_choices, request.POST, instance=date)
         redirect_ids = {'entity_id': entity_id}
-        redirect_url = reverse('entity-change', kwargs=redirect_ids)
+        redirect_url = reverse('eats-entity-change', kwargs=redirect_ids)
         if '_delete' in form.data:
             form.delete()
             return redirect(redirect_url)
@@ -249,7 +254,7 @@ def date_change (request, topic_map, entity_id, assertion_id, date_id):
             if '_continue' in form.data:
                 redirect_ids['assertion_id'] = assertion_id
                 redirect_ids['date_id'] = date_id
-                redirect_url = reverse('date-change', kwargs=redirect_ids)
+                redirect_url = reverse('eats-date-change', kwargs=redirect_ids)
             return redirect(redirect_url)
     else:
         form = DateForm(topic_map, calendar_choices, date_period_choices,
@@ -330,7 +335,7 @@ def import_eatsml (request, topic_map):
                 importer=user, description=description, raw_xml=imported_xml,
                 annotated_xml=annotated_xml)
             eatsml_import.save()
-            redirect_url = reverse('display-eatsml-import',
+            redirect_url = reverse('eats-display-eatsml-import',
                                    kwargs={'import_id': eatsml_import.id})
             return redirect(redirect_url)
     else:
@@ -378,10 +383,12 @@ def pa_note_add (request, topic_map, entity_id, assertion_id):
                 redirect_ids = {
                     'assertion_id': assertion_id, 'entity_id': entity_id,
                     'note_id': note_id}
-                redirect_url = reverse('pa-note-change', kwargs=redirect_ids)
+                redirect_url = reverse('eats-pa-note-change',
+                                       kwargs=redirect_ids)
             else:
                 redirect_ids = {'entity_id': entity_id}
-                redirect_url = reverse('entity-change', kwargs=redirect_ids)
+                redirect_url = reverse('eats-entity-change',
+                                       kwargs=redirect_ids)
             return redirect(redirect_url)
     else:
         form = NoteBearingNoteForm(assertion)
@@ -403,7 +410,7 @@ def pa_note_change (request, topic_map, entity_id, assertion_id, note_id):
     if request.method == 'POST':
         form = NoteBearingNoteForm(assertion, request.POST, instance=note)
         redirect_ids = {'entity_id': entity_id}
-        redirect_url = reverse('entity-change', kwargs=redirect_ids)
+        redirect_url = reverse('eats-entity-change', kwargs=redirect_ids)
         if '_delete' in form.data:
             form.delete()
             return redirect(redirect_url)
@@ -413,7 +420,8 @@ def pa_note_change (request, topic_map, entity_id, assertion_id, note_id):
                 redirect_ids = {'assertion_id': assertion_id,
                                 'entity_id': entity_id,
                                 'note_id': note_id}
-                redirect_url = reverse('pa-note-change', kwargs=redirect_ids)
+                redirect_url = reverse('eats-pa-note-change',
+                                       kwargs=redirect_ids)
             return redirect(redirect_url)
     else:
         form = NoteBearingNoteForm(assertion, instance=note)
@@ -439,10 +447,11 @@ def date_note_add (request, topic_map, entity_id, assertion_id, date_id):
                 'assertion_id': assertion_id, 'date_id': date_id,
                 'entity_id': entity_id, 'note_id': note_id}
             if '_continue' in form.data:
-                redirect_url = reverse('date-note-change', kwargs=redirect_ids)
+                redirect_url = reverse('eats-date-note-change',
+                                       kwargs=redirect_ids)
             else:
                 del redirect_ids['note_id']
-                redirect_url = reverse('date-change', kwargs=redirect_ids)
+                redirect_url = reverse('eats-date-change', kwargs=redirect_ids)
             return redirect(redirect_url)
     else:
         form = NoteBearingNoteForm(date)
@@ -469,7 +478,7 @@ def date_note_change (request, topic_map, entity_id, assertion_id, date_id,
         form = NoteBearingNoteForm(date, request.POST, instance=note)
         redirect_ids = {'assertion_id': assertion_id,
                         'entity_id': entity_id, 'date_id': date_id}
-        redirect_url = reverse('date-change', kwargs=redirect_ids)
+        redirect_url = reverse('eats-date-change', kwargs=redirect_ids)
         if '_delete' in form.data:
             form.delete()
             return redirect(redirect_url)
@@ -477,7 +486,8 @@ def date_note_change (request, topic_map, entity_id, assertion_id, date_id,
             form.save()
             if '_continue' in form.data:
                 redirect_ids['note_id'] = note_id
-                redirect_url = reverse('date-note-change', kwargs=redirect_ids)
+                redirect_url = reverse('eats-date-note-change',
+                                       kwargs=redirect_ids)
             return redirect(redirect_url)
     else:
         form = NoteBearingNoteForm(date, instance=note)

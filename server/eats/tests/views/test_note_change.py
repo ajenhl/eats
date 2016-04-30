@@ -21,7 +21,7 @@ class NoteChangeViewTestCase (ViewTestCase):
         note = existence.create_note('Test', False)
         url_args = {'entity_id': entity.get_id(), 'note_id': note.get_id(),
                     'assertion_id': existence.get_id()}
-        url = reverse('pa-note-change', kwargs=url_args)
+        url = reverse('eats-pa-note-change', kwargs=url_args)
         self._authenticate_request(url)
 
     def test_authentication_date (self):
@@ -32,7 +32,7 @@ class NoteChangeViewTestCase (ViewTestCase):
         url_args = {'entity_id': entity.get_id(), 'date_id': date.get_id(),
                     'assertion_id': existence.get_id(),
                     'note_id': note.get_id()}
-        url = reverse('date-note-change', kwargs=url_args)
+        url = reverse('eats-date-note-change', kwargs=url_args)
         self._authenticate_request(url)
 
     def _authenticate_request (self, url):
@@ -55,31 +55,31 @@ class NoteChangeViewTestCase (ViewTestCase):
         assertion's note."""
         # Test with none of entity, assertion, and note existing.
         url_args = {'entity_id': 0, 'assertion_id': 0, 'note_id': 0}
-        self.app.get(reverse('pa-note-change', kwargs=url_args), status=404,
-                     user='user')
+        self.app.get(reverse('eats-pa-note-change', kwargs=url_args),
+                     status=404, user='user')
         # Test with only the entity existing.
         entity = self.tm.create_entity(self.authority)
         url_args['entity_id'] = entity.get_id()
-        self.app.get(reverse('pa-note-change', kwargs=url_args), status=404,
-                     user='user')
+        self.app.get(reverse('eats-pa-note-change', kwargs=url_args),
+                     status=404, user='user')
         # Test with only the entity and assertion existing.
         assertion = entity.get_existences()[0]
         url_args['assertion_id'] = assertion.get_id()
-        self.app.get(reverse('pa-note-change', kwargs=url_args), status=404,
-                     user='user')
+        self.app.get(reverse('eats-pa-note-change', kwargs=url_args),
+                     status=404, user='user')
         # Test that the assertion must be associated with the entity.
         note = assertion.create_note('Test', True)
         url_args['note_id'] = note.get_id()
         entity2 = self.tm.create_entity(self.authority)
         url_args['entity_id'] = entity2.get_id()
-        self.app.get(reverse('pa-note-change', kwargs=url_args), status=404,
-                     user='user')
+        self.app.get(reverse('eats-pa-note-change', kwargs=url_args),
+                     status=404, user='user')
         # Test that the note must be associated with the assertion.
         url_args['entity_id'] = entity.get_id()
         note2 = entity2.get_existences()[0].create_note('Test', True)
         url_args['note_id'] = note2.get_id()
-        self.app.get(reverse('pa-note-change', kwargs=url_args), status=404,
-                     user='user')
+        self.app.get(reverse('eats-pa-note-change', kwargs=url_args),
+                     status=404, user='user')
 
     def test_non_matching_date_note_change (self):
         """Tests that the entity, assertion, date and note match when
@@ -87,30 +87,30 @@ class NoteChangeViewTestCase (ViewTestCase):
         # Test with none of entity, assertion, date and note existing.
         url_args = {'entity_id': 0, 'assertion_id': 0, 'date_id': 0,
                     'note_id': 0}
-        self.app.get(reverse('date-note-change', kwargs=url_args), status=404,
-                     user='user')
+        self.app.get(reverse('eats-date-note-change', kwargs=url_args),
+                     status=404, user='user')
         # Test with only the entity existing.
         entity = self.tm.create_entity(self.authority)
         url_args['entity_id'] = entity.get_id()
-        self.app.get(reverse('date-note-change', kwargs=url_args), status=404,
-                     user='user')
+        self.app.get(reverse('eats-date-note-change', kwargs=url_args),
+                     status=404, user='user')
         # Test with only the entity and assertion existing.
         assertion = entity.get_existences()[0]
         url_args['assertion_id'] = assertion.get_id()
-        self.app.get(reverse('date-note-change', kwargs=url_args), status=404,
-                     user='user')
+        self.app.get(reverse('eats-date-note-change', kwargs=url_args),
+                     status=404, user='user')
         # Test that the assertion must be associated with the entity.
         date = assertion.create_date({'date_period': self.date_period})
         url_args['date_id'] = date.get_id()
         entity2 = self.tm.create_entity(self.authority)
         url_args['entity_id'] = entity2.get_id()
-        self.app.get(reverse('date-note-change', kwargs=url_args), status=404,
-                     user='user')
+        self.app.get(reverse('eats-date-note-change', kwargs=url_args),
+                     status=404, user='user')
         # Test that the date must be associated with the assertion.
         assertion2 = entity2.get_existences()[0]
         url_args['assertion_id'] = assertion2.get_id()
-        self.app.get(reverse('date-note-change', kwargs=url_args), status=404,
-                     user='user')
+        self.app.get(reverse('eats-date-note-change', kwargs=url_args),
+                     status=404, user='user')
         # Test that the note must be associated with the date.
         date2 = assertion.create_date({'date_period': self.date_period})
         note = date2.create_note('Test', True)
@@ -118,14 +118,14 @@ class NoteChangeViewTestCase (ViewTestCase):
                     'assertion_id': assertion.get_id(),
                     'date_id': date.get_id(),
                     'note_id': note.get_id()}
-        self.app.get(reverse('date-note-change', kwargs=url_args), status=404,
-                     user='user')
+        self.app.get(reverse('eats-date-note-change', kwargs=url_args),
+                     status=404, user='user')
 
     def test_get_request_pa (self):
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         note = existence.create_note('Test', True)
-        url = reverse('pa-note-change', kwargs={
+        url = reverse('eats-pa-note-change', kwargs={
             'entity_id': entity.get_id(), 'assertion_id': existence.get_id(),
             'note_id': note.get_id()})
         response = self.app.get(url, user='user')
@@ -137,7 +137,7 @@ class NoteChangeViewTestCase (ViewTestCase):
         existence = entity.get_existences()[0]
         date = existence.create_date({'date_period': self.date_period})
         note = date.create_note('Test', True)
-        url = reverse('date-note-change', kwargs={
+        url = reverse('eats-date-note-change', kwargs={
             'entity_id': entity.get_id(), 'assertion_id': existence.get_id(),
             'date_id': date.get_id(), 'note_id': note.get_id()})
         response = self.app.get(url, user='user')
@@ -151,7 +151,7 @@ class NoteChangeViewTestCase (ViewTestCase):
         url_args = {'entity_id': entity.get_id(),
                     'assertion_id': existence.get_id(),
                     'note_id': note.get_id()}
-        url = reverse('pa-note-change', kwargs=url_args)
+        url = reverse('eats-pa-note-change', kwargs=url_args)
         form = self.app.get(url, user='user').forms['note-change-form']
         form['note'] = 'Altered'
         form['is_internal'] = False
@@ -163,7 +163,8 @@ class NoteChangeViewTestCase (ViewTestCase):
         form['note'] = 'Altered again'
         form['is_internal'] = True
         response = form.submit('_save')
-        url2 = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        url2 = reverse('eats-entity-change',
+                       kwargs={'entity_id': entity.get_id()})
         self.assertRedirects(response, url2)
         note = existence.get_notes(self.editor)[0]
         self.assertEqual(note.note, 'Altered again')
@@ -178,7 +179,7 @@ class NoteChangeViewTestCase (ViewTestCase):
         url_args = {'entity_id': entity.get_id(),
                     'assertion_id': existence.get_id(),
                     'date_id': date.get_id(), 'note_id': note.get_id()}
-        url = reverse('date-note-change', kwargs=url_args)
+        url = reverse('eats-date-note-change', kwargs=url_args)
         form = self.app.get(url, user='user').forms['note-change-form']
         form['note'] = 'Altered'
         form['is_internal'] = False
@@ -191,7 +192,7 @@ class NoteChangeViewTestCase (ViewTestCase):
         form['is_internal'] = True
         response = form.submit('_save')
         del url_args['note_id']
-        url2 = reverse('date-change', kwargs=url_args)
+        url2 = reverse('eats-date-change', kwargs=url_args)
         self.assertRedirects(response, url2)
         note = date.get_notes(self.editor)[0]
         self.assertEqual(note.note, 'Altered again')
@@ -207,10 +208,11 @@ class NoteChangeViewTestCase (ViewTestCase):
         url_args = {'entity_id': entity.get_id(),
                     'assertion_id': existence.get_id(),
                     'note_id': note.get_id()}
-        url = reverse('pa-note-change', kwargs=url_args)
+        url = reverse('eats-pa-note-change', kwargs=url_args)
         form = self.app.get(url, user='user').forms['note-change-form']
         response = form.submit('_delete')
-        url2 = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        url2 = reverse('eats-entity-change',
+                       kwargs={'entity_id': entity.get_id()})
         self.assertRedirects(response, url2)
         self.assertEqual(0, len(existence.get_notes(self.editor)))
         self.assertEqual(1, len(entity.get_existences()))
@@ -227,11 +229,11 @@ class NoteChangeViewTestCase (ViewTestCase):
         url_args = {'entity_id': entity.get_id(),
                     'assertion_id': existence.get_id(),
                     'date_id': date.get_id(), 'note_id': note.get_id()}
-        url = reverse('date-note-change', kwargs=url_args)
+        url = reverse('eats-date-note-change', kwargs=url_args)
         form = self.app.get(url, user='user').forms['note-change-form']
         response = form.submit('_delete')
         del url_args['note_id']
-        url2 = reverse('date-change', kwargs=url_args)
+        url2 = reverse('eats-date-change', kwargs=url_args)
         self.assertRedirects(response, url2)
         self.assertEqual(0, len(date.get_notes(self.editor)))
         self.assertEqual(1, len(existence.get_dates()))

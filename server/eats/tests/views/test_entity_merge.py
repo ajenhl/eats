@@ -19,7 +19,7 @@ class EntityMergeViewTestCase (ViewTestCase):
 
     def test_authentication (self):
         entity = self.tm.create_entity(self.authority)
-        url = reverse('entity-merge', kwargs={'entity_id': entity.get_id()})
+        url = reverse('eats-entity-merge', kwargs={'entity_id': entity.get_id()})
         login_url = settings.LOGIN_URL + '?next=' + url
         response = self.app.get(url)
         self.assertRedirects(response, login_url)
@@ -40,7 +40,7 @@ class EntityMergeViewTestCase (ViewTestCase):
         entity2 = self.tm.create_entity(self.authority)
         self.assertEqual(Entity.objects.count(), 2)
         entity2.create_note_property_assertion(authority2, 'Test', True)
-        url = reverse('entity-merge', kwargs={'entity_id': entity1.get_id()})
+        url = reverse('eats-entity-merge', kwargs={'entity_id': entity1.get_id()})
         response = self.app.get(url, user='user')
         form = response.forms['entity-merge-form']
         form['merge_entity_1'] = entity2.get_id()
@@ -51,12 +51,12 @@ class EntityMergeViewTestCase (ViewTestCase):
         self.assertEqual(len(entity2.get_notes_all()), 1)
 
     def test_non_existent_entity (self):
-        url = reverse('entity-merge', kwargs={'entity_id': 0})
+        url = reverse('eats-entity-merge', kwargs={'entity_id': 0})
         self.app.get(url, status=404, user='user')
 
     def test_missing_merge_entity (self):
         entity = self.tm.create_entity(self.authority)
-        url = reverse('entity-merge', kwargs={'entity_id': entity.get_id()})
+        url = reverse('eats-entity-merge', kwargs={'entity_id': entity.get_id()})
         response = self.app.get(url, user='user')
         form = response.forms['entity-merge-form']
         form['merge_entity_1'] = None
@@ -79,7 +79,7 @@ class EntityMergeViewTestCase (ViewTestCase):
         entity2_type2 = entity2.create_entity_type_property_assertion(
             authority2, entity_type1)
         self.assertEqual(Entity.objects.count(), 2)
-        url = reverse('entity-merge', kwargs={'entity_id': entity1.get_id()})
+        url = reverse('eats-entity-merge', kwargs={'entity_id': entity1.get_id()})
         response = self.app.get(url, user='user')
         form = response.forms['entity-merge-form']
         form['merge_entity_1'] = entity2.get_id()
@@ -105,13 +105,13 @@ class EntityMergeViewTestCase (ViewTestCase):
         type3 = entity2.create_entity_type_property_assertion(self.authority,
                                                               entity_type1)
         self.assertEqual(Entity.objects.count(), 2)
-        url = reverse('entity-merge', kwargs={'entity_id': entity1.get_id()})
+        url = reverse('eats-entity-merge', kwargs={'entity_id': entity1.get_id()})
         response = self.app.get(url, user='user')
         form = response.forms['entity-merge-form']
         form['merge_entity_1'] = entity2.get_id()
         response = form.submit().follow()
         self.assertEqual(response.request.path_qs,
-                         reverse('entity-change',
+                         reverse('eats-entity-change',
                                  kwargs={'entity_id': entity1.get_id()}))
         self.assertEqual(Entity.objects.count(), 1)
         self.assertEqual(set(entity1.get_entity_types()),
@@ -123,14 +123,14 @@ class EntityMergeViewTestCase (ViewTestCase):
         # merged into.
         entity1 = self.tm.create_entity(self.authority)
         entity2 = self.tm.create_entity(self.authority)
-        views =  ('entity-view', 'entity-eatsml-view', 'entity-change',
-                  'entity-delete', 'entity-merge')
+        views = ('eats-entity-view', 'eats-entity-eatsml-view',
+                 'eats-entity-change', 'eats-entity-delete',
+                 'eats-entity-merge')
         for view in views:
             url = reverse(view, kwargs={'entity_id': entity2.get_id()})
             response = self.app.get(url, user='user')
             self.assertEqual(response.status_code, 200,
-                             'Got an incorrect response for the "%s" view'
-                             % view)
+                             'Got an incorrect response for the "{}" view'.format(view))
         entity1.merge_in(entity2)
         for view in views:
             url = reverse(view, kwargs={'entity_id': entity2.get_id()})
@@ -138,5 +138,4 @@ class EntityMergeViewTestCase (ViewTestCase):
             self.assertEqual(response.status_code, 301)
             redirect_url = reverse(view, kwargs={'entity_id': entity1.get_id()})
             self.assertRedirects(response, redirect_url, status_code=301,
-                                 msg_prefix='With the "%s" view'
-                                 % view)
+                                 msg_prefix='With the "{}" view'.format(view))

@@ -18,7 +18,7 @@ class EntityTypeTypeTestCase (ModelTestCase):
         # authority.
         self.assertEqual(EntityType.objects.count(), 0)
         entity_type = self.create_entity_type('person')
-        self.assertEqual(EntityType.objects.count(), 1)        
+        self.assertEqual(EntityType.objects.count(), 1)
         authority = self.create_authority('test')
         authority.set_entity_types([entity_type])
         self.assertRaises(TopicInUseException, entity_type.remove)

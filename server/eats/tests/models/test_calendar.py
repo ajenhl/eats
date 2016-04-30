@@ -18,7 +18,7 @@ class CalendarTestCase (ModelTestCase):
         # authority.
         self.assertEqual(Calendar.objects.count(), 0)
         calendar = self.create_calendar('Gregorian')
-        self.assertEqual(Calendar.objects.count(), 1)        
+        self.assertEqual(Calendar.objects.count(), 1)
         authority = self.create_authority('test')
         authority.set_calendars([calendar])
         self.assertRaises(TopicInUseException, calendar.remove)

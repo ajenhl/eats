@@ -17,8 +17,9 @@ class DateAddViewTestCase (ViewTestCase):
     def test_authentication (self):
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
-        url = reverse('date-add', kwargs={'entity_id': entity.get_id(),
-                                          'assertion_id': existence.get_id()})
+        url = reverse('eats-date-add',
+                      kwargs={'entity_id': entity.get_id(),
+                              'assertion_id': existence.get_id()})
         login_url = settings.LOGIN_URL + '?next=' + url
         response = self.app.get(url)
         self.assertRedirects(response, login_url)
@@ -38,25 +39,26 @@ class DateAddViewTestCase (ViewTestCase):
         date."""
         url_args = {'entity_id': 0, 'assertion_id': 0}
         # Test with non-existent entity and assertion.
-        self.app.get(reverse('date-add', kwargs=url_args), status=404,
+        self.app.get(reverse('eats-date-add', kwargs=url_args), status=404,
                      user='user')
         # Test with non-existent assertion.
         entity = self.tm.create_entity(self.authority)
         url_args['entity_id'] = entity.get_id()
-        self.app.get(reverse('date-add', kwargs=url_args), status=404,
+        self.app.get(reverse('eats-date-add', kwargs=url_args), status=404,
                      user='user')
         # Test with the assertion not belonging to the entity.
         entity2 = self.tm.create_entity(self.authority)
         assertion = entity2.get_existences()[0]
         url_args['assertion_id'] = assertion.get_id()
-        self.app.get(reverse('date-add', kwargs=url_args), status=404,
+        self.app.get(reverse('eats-date-add', kwargs=url_args), status=404,
                      user='user')
 
     def test_get_request (self):
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
-        url = reverse('date-add', kwargs={'entity_id': entity.get_id(),
-                                          'assertion_id': existence.get_id()})
+        url = reverse('eats-date-add',
+                      kwargs={'entity_id': entity.get_id(),
+                              'assertion_id': existence.get_id()})
         response = self.app.get(url, user='user')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'eats/edit/date_add.html')
@@ -65,8 +67,9 @@ class DateAddViewTestCase (ViewTestCase):
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         self.assertEqual(len(existence.get_dates()), 0)
-        url = reverse('date-add', kwargs={'entity_id': entity.get_id(),
-                                          'assertion_id': existence.get_id()})
+        url = reverse('eats-date-add',
+                      kwargs={'entity_id': entity.get_id(),
+                              'assertion_id': existence.get_id()})
         date_period = self.create_date_period('lifespan')
         calendar = self.create_calendar('Gregorian')
         date_type = self.create_date_type('exact')
@@ -89,7 +92,7 @@ class DateAddViewTestCase (ViewTestCase):
         self.assertEqual(date.point.date_type, date_type)
         self.assertEqual(date.point.get_value(), '9 February 2011')
         self.assertEqual(date.point.get_normalised_value(), '2011-02-09')
-        redirect_url = reverse('date-change',
+        redirect_url = reverse('eats-date-change',
                                kwargs={'entity_id': entity.get_id(),
                                        'assertion_id': existence.get_id(),
                                        'date_id': date.get_id()})
@@ -99,8 +102,9 @@ class DateAddViewTestCase (ViewTestCase):
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         self.assertEqual(len(existence.get_dates()), 0)
-        url = reverse('date-add', kwargs={'entity_id': entity.get_id(),
-                                          'assertion_id': existence.get_id()})
+        url = reverse('eats-date-add',
+                      kwargs={'entity_id': entity.get_id(),
+                              'assertion_id': existence.get_id()})
         date_period = self.create_date_period('lifespan')
         calendar = self.create_calendar('Gregorian')
         date_type = self.create_date_type('exact')
@@ -123,7 +127,7 @@ class DateAddViewTestCase (ViewTestCase):
         self.assertEqual(date.point.date_type, date_type)
         self.assertEqual(date.point.get_value(), '9 February 2011')
         self.assertEqual(date.point.get_normalised_value(), '2011-02-09')
-        redirect_url = reverse('entity-change',
+        redirect_url = reverse('eats-entity-change',
                                kwargs={'entity_id': entity.get_id()})
         self.assertRedirects(response, redirect_url)
 
@@ -131,8 +135,9 @@ class DateAddViewTestCase (ViewTestCase):
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         self.assertEqual(len(existence.get_dates()), 0)
-        url = reverse('date-add', kwargs={'entity_id': entity.get_id(),
-                                          'assertion_id': existence.get_id()})
+        url = reverse('eats-date-add',
+                      kwargs={'entity_id': entity.get_id(),
+                              'assertion_id': existence.get_id()})
         date_period = self.create_date_period('lifespan')
         calendar = self.create_calendar('Gregorian')
         self.authority.set_date_periods([date_period])
@@ -153,8 +158,9 @@ class DateAddViewTestCase (ViewTestCase):
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         self.assertEqual(len(existence.get_dates()), 0)
-        url = reverse('date-add', kwargs={'entity_id': entity.get_id(),
-                                          'assertion_id': existence.get_id()})
+        url = reverse('eats-date-add',
+                      kwargs={'entity_id': entity.get_id(),
+                              'assertion_id': existence.get_id()})
         calendar = self.create_calendar('Gregorian')
         date_type = self.create_date_type('exact')
         self.authority.set_calendars([calendar])

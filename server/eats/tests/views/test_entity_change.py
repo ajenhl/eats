@@ -21,7 +21,8 @@ class EntityChangeViewTestCase (ViewTestCase):
 
     def test_authentication (self):
         entity = self.tm.create_entity(self.authority)
-        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        url = reverse('eats-entity-change',
+                      kwargs={'entity_id': entity.get_id()})
         login_url = settings.LOGIN_URL + '?next=' + url
         response = self.app.get(url)
         self.assertRedirects(response, login_url)
@@ -35,13 +36,14 @@ class EntityChangeViewTestCase (ViewTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_non_existent_entity (self):
-        url = reverse('entity-change', kwargs={'entity_id': 0})
+        url = reverse('eats-entity-change', kwargs={'entity_id': 0})
         self.app.get(url, status=404, user='user')
 
     def test_empty_entity (self):
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
-        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        url = reverse('eats-entity-change',
+                      kwargs={'entity_id': entity.get_id()})
         response = self.app.get(url, user='user')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'eats/edit/entity_change.html')
@@ -62,10 +64,11 @@ class EntityChangeViewTestCase (ViewTestCase):
 
     def test_post_redirect_add (self):
         entity = self.tm.create_entity(self.authority)
-        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        url = reverse('eats-entity-change',
+                      kwargs={'entity_id': entity.get_id()})
         form = self.app.get(url, user='user').forms['entity-change-form']
         response = form.submit('_save_add').follow()
-        add_url = reverse('entity-add')
+        add_url = reverse('eats-entity-add')
         self.assertEqual(response.request.url[len(response.request.host_url):],
                          add_url)
 
@@ -75,7 +78,8 @@ class EntityChangeViewTestCase (ViewTestCase):
         rel_type = self.create_entity_relationship_type(
             'is child of', 'is parent of')
         self.authority.set_entity_relationship_types([rel_type])
-        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        url = reverse('eats-entity-change',
+                      kwargs={'entity_id': entity.get_id()})
         form = self.app.get(url, user='user').forms['entity-change-form']
         form['entity_relationships-0-relationship_type'] = \
             str(rel_type.get_id()) + FORWARD_RELATIONSHIP_MARKER
@@ -167,7 +171,8 @@ class EntityChangeViewTestCase (ViewTestCase):
         entity = self.tm.create_entity(self.authority)
         entity_type = self.create_entity_type('Person')
         self.authority.set_entity_types([entity_type])
-        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        url = reverse('eats-entity-change',
+                      kwargs={'entity_id': entity.get_id()})
         form = self.app.get(url, user='user').forms['entity-change-form']
         form['entity_types-0-entity_type'] = entity_type.get_id()
         response = form.submit('_save').follow()
@@ -221,7 +226,8 @@ class EntityChangeViewTestCase (ViewTestCase):
 
     def test_post_existences (self):
         entity = self.tm.create_entity(self.authority)
-        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        url = reverse('eats-entity-change',
+                      kwargs={'entity_id': entity.get_id()})
         form = self.app.get(url, user='user').forms['entity-change-form']
         response = form.submit('_save').follow()
         self.assertEqual(response.request.url[len(response.request.host_url):],
@@ -235,7 +241,8 @@ class EntityChangeViewTestCase (ViewTestCase):
         self.authority.set_name_types([name_type])
         self.authority.set_languages([language])
         self.authority.set_scripts([script])
-        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        url = reverse('eats-entity-change',
+                      kwargs={'entity_id': entity.get_id()})
         form = self.app.get(url, user='user').forms['entity-change-form']
         form['names-0-name_type'] = name_type.get_id()
         form['names-0-language'] = language.get_id()
@@ -335,7 +342,8 @@ class EntityChangeViewTestCase (ViewTestCase):
         self.authority.set_languages([language])
         self.authority.set_scripts([script])
         self.assertEqual(Name.objects.count(), 0)
-        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        url = reverse('eats-entity-change',
+                      kwargs={'entity_id': entity.get_id()})
         form = self.app.get(url, user='user').forms['entity-change-form']
         form['names-0-language'] = language.get_id()
         form['names-0-script'] = script.get_id()
@@ -373,7 +381,8 @@ class EntityChangeViewTestCase (ViewTestCase):
         self.assertEqual(NamePart.objects.count(), 0)
         # Not specifying a name part type should cause the creation of
         # both the name and name part to fail.
-        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        url = reverse('eats-entity-change',
+                      kwargs={'entity_id': entity.get_id()})
         form = self.app.get(url, user='user').forms['entity-change-form']
         form['names-0-name_type'] = name_type.get_id()
         form['names-0-language'] = language.get_id()
@@ -409,7 +418,8 @@ class EntityChangeViewTestCase (ViewTestCase):
         self.authority.set_name_part_types([name_part_type])
         self.assertEqual(Name.objects.count(), 0)
         self.assertEqual(NamePart.objects.count(), 0)
-        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        url = reverse('eats-entity-change',
+                      kwargs={'entity_id': entity.get_id()})
         form = self.app.get(url, user='user').forms['entity-change-form']
         form['names-0-name_type'] = name_type.get_id()
         form['names-0-language'] = language.get_id()
@@ -436,7 +446,8 @@ class EntityChangeViewTestCase (ViewTestCase):
         self.authority.set_languages([language])
         self.authority.set_scripts([script])
         self.authority.set_name_part_types([name_part_type])
-        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        url = reverse('eats-entity-change',
+                      kwargs={'entity_id': entity.get_id()})
         form = self.app.get(url, user='user').forms['entity-change-form']
         form['names-0-name_type'] = name_type.get_id()
         form['names-0-language'] = language.get_id()
@@ -464,7 +475,8 @@ class EntityChangeViewTestCase (ViewTestCase):
                                       'Carrie', 1)
         self.assertEqual(Name.objects.count(), 1)
         self.assertEqual(NamePart.objects.count(), 1)
-        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        url = reverse('eats-entity-change',
+                      kwargs={'entity_id': entity.get_id()})
         form = self.app.get(url, user='user').forms['entity-change-form']
         form['names-0-name_parts-0-DELETE'] = 'on'
         form.submit('_save')
@@ -473,7 +485,8 @@ class EntityChangeViewTestCase (ViewTestCase):
 
     def test_post_notes (self):
         entity = self.tm.create_entity(self.authority)
-        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        url = reverse('eats-entity-change',
+                      kwargs={'entity_id': entity.get_id()})
         form = self.app.get(url, user='user').forms['entity-change-form']
         form['notes-0-note'] = 'Test'
         response = form.submit('_save').follow()
@@ -529,7 +542,8 @@ class EntityChangeViewTestCase (ViewTestCase):
 
     def test_post_subject_identifiers (self):
         entity = self.tm.create_entity(self.authority)
-        url = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        url = reverse('eats-entity-change',
+                      kwargs={'entity_id': entity.get_id()})
         form = self.app.get(url, user='user').forms['entity-change-form']
         form['subject_identifiers-1-subject_identifier'] = \
             'http://www.example.org/test'
@@ -592,7 +606,8 @@ class EntityChangeViewTestCase (ViewTestCase):
     def test_post_subject_identifiers_illegal (self):
         entity1 = self.tm.create_entity(self.authority)
         self.assertEqual(entity1.get_eats_subject_identifiers().count(), 0)
-        url = reverse('entity-change', kwargs={'entity_id': entity1.get_id()})
+        url = reverse('eats-entity-change',
+                      kwargs={'entity_id': entity1.get_id()})
         form = self.app.get(url, user='user').forms['entity-change-form']
         form['subject_identifiers-0-subject_identifier'] = \
             'http://www.example.org/test'

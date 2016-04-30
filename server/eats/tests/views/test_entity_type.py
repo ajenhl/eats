@@ -7,7 +7,7 @@ from eats.tests.views.view_test_case import ViewTestCase
 class EntityTypeViewsTestCase (ViewTestCase):
 
     def test_entity_type_list (self):
-        url = reverse('entitytype-list')
+        url = reverse('eats-entitytype-list')
         response = self.app.get(url)
         self.assertEqual(response.context['opts'], EntityType._meta)
         self.assertEqual(len(response.context['topics']), 0)
@@ -17,17 +17,17 @@ class EntityTypeViewsTestCase (ViewTestCase):
         self.assertTrue(entity_type in response.context['topics'])
 
     def test_entity_type_add_get (self):
-        url = reverse('entitytype-add')
+        url = reverse('eats-entitytype-add')
         response = self.app.get(url)
         self.assertEqual(response.context['opts'], EntityType._meta)
-        
+
     def test_entity_type_add_post_redirects (self):
         self.assertEqual(EntityType.objects.count(), 0)
-        url = reverse('entitytype-add')
+        url = reverse('eats-entitytype-add')
         form = self.app.get(url).forms['infrastructure-add-form']
         form['name'] = 'person'
         response = form.submit('_save')
-        self.assertRedirects(response, reverse('entitytype-list'))
+        self.assertRedirects(response, reverse('eats-entitytype-list'))
         self.assertEqual(EntityType.objects.count(), 1)
         form['name'] = 'place'
         response = form.submit('_addanother')
@@ -36,14 +36,14 @@ class EntityTypeViewsTestCase (ViewTestCase):
         form['name'] = 'organisation'
         response = form.submit('_continue')
         entity_type = EntityType.objects.get_by_admin_name('organisation')
-        redirect_url = reverse('entitytype-change',
+        redirect_url = reverse('eats-entitytype-change',
                                kwargs={'topic_id': entity_type.get_id()})
         self.assertRedirects(response, redirect_url)
         self.assertEqual(EntityType.objects.count(), 3)
 
     def test_entity_type_add_illegal_post (self):
         self.assertEqual(EntityType.objects.count(), 0)
-        url = reverse('entitytype-add')
+        url = reverse('eats-entitytype-add')
         form = self.app.get(url).forms['infrastructure-add-form']
         # Missing entity_type name.
         form['name'] = ''
@@ -58,14 +58,14 @@ class EntityTypeViewsTestCase (ViewTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(EntityType.objects.count(), 1)
         self.assertTrue(entity_type in EntityType.objects.all())
-        
+
     def test_entity_type_change_illegal_get (self):
-        url = reverse('entitytype-change', kwargs={'topic_id': 0})
+        url = reverse('eats-entitytype-change', kwargs={'topic_id': 0})
         self.app.get(url, status=404)
 
     def test_entity_type_change_get (self):
         entity_type = self.create_entity_type('exact')
-        url = reverse('entitytype-change', kwargs={
+        url = reverse('eats-entitytype-change', kwargs={
                 'topic_id': entity_type.get_id()})
         response = self.app.get(url)
         self.assertEqual(response.status_code, 200)
@@ -75,12 +75,11 @@ class EntityTypeViewsTestCase (ViewTestCase):
         self.assertEqual(EntityType.objects.count(), 0)
         entity_type = self.create_entity_type('person')
         self.assertEqual(entity_type.get_admin_name(), 'person')
-        url = reverse('entitytype-change', kwargs={
+        url = reverse('eats-entitytype-change', kwargs={
                 'topic_id': entity_type.get_id()})
         form = self.app.get(url).forms['infrastructure-change-form']
         form['name'] = 'place'
         response = form.submit('_save')
-        self.assertRedirects(response, reverse('entitytype-list'))
+        self.assertRedirects(response, reverse('eats-entitytype-list'))
         self.assertEqual(EntityType.objects.count(), 1)
         self.assertEqual(entity_type.get_admin_name(), 'place')
-

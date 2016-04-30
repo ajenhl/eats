@@ -18,7 +18,7 @@ class DateChangeViewTestCase (ViewTestCase):
         self.editor = self.create_user(user)
         self.editor.editable_authorities = [self.authority]
         self.editor.set_current_authority(self.authority)
-    
+
     def test_authentication (self):
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
@@ -30,7 +30,7 @@ class DateChangeViewTestCase (ViewTestCase):
         date = existence.create_date(date_data)
         url_args = {'entity_id': entity.get_id(), 'date_id': date.get_id(),
                     'assertion_id': existence.get_id()}
-        url = reverse('date-change', kwargs=url_args)
+        url = reverse('eats-date-change', kwargs=url_args)
         login_url = settings.LOGIN_URL + '?next=' + url
         response = self.app.get(url)
         self.assertRedirects(response, login_url)
@@ -39,7 +39,7 @@ class DateChangeViewTestCase (ViewTestCase):
         self.assertRedirects(response, login_url)
         eats_user = self.create_user(user)
         response = self.app.get(url, user='user2')
-        self.assertRedirects(response, login_url)        
+        self.assertRedirects(response, login_url)
         authority = self.create_authority('Test2')
         eats_user.editable_authorities = [self.authority, authority]
         eats_user.set_current_authority(authority)
@@ -50,38 +50,39 @@ class DateChangeViewTestCase (ViewTestCase):
         editing a date."""
         # Test with none of entity, assertion and date existing.
         url_args = {'entity_id': 0, 'assertion_id': 0, 'date_id': 0}
-        self.app.get(reverse('date-change', kwargs=url_args), status=404,
+        self.app.get(reverse('eats-date-change', kwargs=url_args), status=404,
                      user='user')
         # Test with only the entity existing.
         entity = self.tm.create_entity(self.authority)
         url_args['entity_id'] = entity.get_id()
-        self.app.get(reverse('date-change', kwargs=url_args), status=404,
+        self.app.get(reverse('eats-date-change', kwargs=url_args), status=404,
                      user='user')
         # Test with only the entity and assertion existing.
         assertion = entity.get_existences()[0]
         url_args['assertion_id'] = assertion.get_id()
-        self.app.get(reverse('date-change', kwargs=url_args), status=404,
+        self.app.get(reverse('eats-date-change', kwargs=url_args), status=404,
                      user='user')
         # Test that the assertion must be associated with the entity.
         date = assertion.create_date({'date_period': self.date_period})
         url_args['date_id'] = date.get_id()
         entity2 = self.tm.create_entity(self.authority)
         url_args['entity_id'] = entity2.get_id()
-        self.app.get(reverse('date-change', kwargs=url_args), status=404,
+        self.app.get(reverse('eats-date-change', kwargs=url_args), status=404,
                      user='user')
         # Test that the date must be associated with the assertion.
         assertion2 = entity2.get_existences()[0]
         url_args['assertion_id'] = assertion2.get_id()
-        self.app.get(reverse('date-change', kwargs=url_args), status=404,
+        self.app.get(reverse('eats-date-change', kwargs=url_args), status=404,
                      user='user')
 
     def test_get_request (self):
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         date = existence.create_date({'date_period': self.date_period})
-        url = reverse('date-change', kwargs={'entity_id': entity.get_id(),
-                                             'assertion_id': existence.get_id(),
-                                             'date_id': date.get_id()})
+        url = reverse('eats-date-change',
+                      kwargs={'entity_id': entity.get_id(),
+                              'assertion_id': existence.get_id(),
+                              'date_id': date.get_id()})
         response = self.app.get(url, user='user')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'eats/edit/date_change.html')
@@ -98,7 +99,7 @@ class DateChangeViewTestCase (ViewTestCase):
         url_args = {'entity_id': entity.get_id(),
                     'assertion_id': existence.get_id(),
                     'date_id': date.get_id()}
-        url = reverse('date-change', kwargs=url_args)
+        url = reverse('eats-date-change', kwargs=url_args)
         date_period2 = self.create_date_period('floruit')
         self.authority.set_date_periods([self.date_period, date_period2])
         form = self.app.get(url, user='user').forms['date-change-form']
@@ -134,7 +135,7 @@ class DateChangeViewTestCase (ViewTestCase):
         form['point_taq'] = ''
         form['point_taq_normalised'] = ''
         response = form.submit('_save')
-        url2 = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        url2 = reverse('eats-entity-change', kwargs={'entity_id': entity.get_id()})
         self.assertRedirects(response, url2)
         date = existence.get_dates()[0]
         self.assertEqual(date.period, self.date_period)
@@ -161,10 +162,10 @@ class DateChangeViewTestCase (ViewTestCase):
         url_args = {'entity_id': entity.get_id(),
                     'assertion_id': existence.get_id(),
                     'date_id': date.get_id()}
-        url = reverse('date-change', kwargs=url_args)
+        url = reverse('eats-date-change', kwargs=url_args)
         form = self.app.get(url, user='user').forms['date-change-form']
         response = form.submit('_delete')
-        url2 = reverse('entity-change', kwargs={'entity_id': entity.get_id()})
+        url2 = reverse('eats-entity-change', kwargs={'entity_id': entity.get_id()})
         self.assertRedirects(response, url2)
         self.assertEqual(0, len(existence.get_dates()))
         self.assertEqual(1, len(entity.get_existences()))

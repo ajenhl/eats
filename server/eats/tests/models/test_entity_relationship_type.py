@@ -24,7 +24,7 @@ class EntityRelationshipTypeTestCase (ModelTestCase):
         authority.set_entity_relationship_types([])
         er_type.remove()
         self.assertEqual(EntityRelationshipType.objects.count(), 0)
-    
+
     def test_entity_relationship_type_forward_name (self):
         er_type = self.create_entity_relationship_type('Forward', 'Reverse')
         self.assertEqual(er_type.get_admin_forward_name(), 'Forward')

@@ -18,7 +18,7 @@ class DatePeriodTestCase (ModelTestCase):
         # authority.
         self.assertEqual(DatePeriod.objects.count(), 0)
         date_period = self.create_date_period('lifespan')
-        self.assertEqual(DatePeriod.objects.count(), 1)        
+        self.assertEqual(DatePeriod.objects.count(), 1)
         authority = self.create_authority('test')
         authority.set_date_periods([date_period])
         self.assertRaises(TopicInUseException, date_period.remove)

@@ -23,10 +23,10 @@
   <tbody>
     {% for import in imports.object_list %}
     <tr>
-      <td><a href="{% url 'display-eatsml-import' import.id %}">{{ import.import_date }}</a></td>
+      <td><a href="{% url 'eats-display-eatsml-import' import.id %}">{{ import.import_date }}</a></td>
       <td>{{ import.importer__user__username }}</td>
-      <td><a href="{% url 'display-eatsml-import-raw' import.id %}">Raw</a><br/>
-      <a href="{% url 'display-eatsml-import-annotated' import.id %}">Annotated</a></td>
+      <td><a href="{% url 'eats-display-eatsml-import-raw' import.id %}">Raw</a><br/>
+      <a href="{% url 'eats-display-eatsml-import-annotated' import.id %}">Annotated</a></td>
       <td>{{ import.description }}</td>
     </tr>
     {% endfor %}

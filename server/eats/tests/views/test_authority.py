@@ -7,7 +7,7 @@ from eats.tests.views.view_test_case import ViewTestCase
 class AuthorityViewsTestCase (ViewTestCase):
 
     def test_authority_list (self):
-        url = reverse('authority-list')
+        url = reverse('eats-authority-list')
         response = self.app.get(url)
         self.assertEqual(response.context['opts'], Authority._meta)
         self.assertEqual(len(response.context['topics']), 1)
@@ -19,16 +19,16 @@ class AuthorityViewsTestCase (ViewTestCase):
         self.assertTrue(authority2 in response.context['topics'])
 
     def test_authority_add_get (self):
-        url = reverse('authority-add')
+        url = reverse('eats-authority-add')
         response = self.app.get(url)
         self.assertEqual(response.context['opts'], Authority._meta)
 
     def test_authority_add_post_redirects (self):
-        url = reverse('authority-add')
+        url = reverse('eats-authority-add')
         form = self.app.get(url).forms['infrastructure-add-form']
         form['name'] = 'Test2'
         response = form.submit('_save')
-        self.assertRedirects(response, reverse('authority-list'))
+        self.assertRedirects(response, reverse('eats-authority-list'))
         self.assertEqual(Authority.objects.count(), 2)
         form = self.app.get(url).forms['infrastructure-add-form']
         form['name'] = 'Test3'
@@ -39,13 +39,13 @@ class AuthorityViewsTestCase (ViewTestCase):
         form['name'] = 'Test4'
         response = form.submit('_continue')
         authority = Authority.objects.get_by_admin_name('Test4')
-        redirect_url = reverse('authority-change',
+        redirect_url = reverse('eats-authority-change',
                                kwargs={'topic_id': authority.get_id()})
         self.assertRedirects(response, redirect_url)
         self.assertEqual(Authority.objects.count(), 4)
 
     def test_authority_add_post_content (self):
-        url = reverse('authority-add')
+        url = reverse('eats-authority-add')
         calendar1 = self.create_calendar('Test1')
         calendar2 = self.create_calendar('Test2')
         date_period = self.create_date_period('Test')
@@ -94,7 +94,7 @@ class AuthorityViewsTestCase (ViewTestCase):
 
     def test_authority_add_illegal_post (self):
         self.assertEqual(Authority.objects.count(), 1)
-        url = reverse('authority-add')
+        url = reverse('eats-authority-add')
         form = self.app.get(url).forms['infrastructure-add-form']
         form['name'] = 'Test'
         response = form.submit('_save')
@@ -102,11 +102,11 @@ class AuthorityViewsTestCase (ViewTestCase):
         self.assertEqual(Authority.objects.count(), 1)
 
     def test_authority_change_illegal_get (self):
-        url = reverse('authority-change', kwargs={'topic_id': 0})
+        url = reverse('eats-authority-change', kwargs={'topic_id': 0})
         self.app.get(url, status=404)
 
     def test_authority_change_get (self):
-        url = reverse('authority-change', kwargs={
+        url = reverse('eats-authority-change', kwargs={
                 'topic_id': self.authority.get_id()})
         response = self.app.get(url)
         self.assertEqual(response.status_code, 200)
@@ -114,7 +114,7 @@ class AuthorityViewsTestCase (ViewTestCase):
 
     def test_authority_change_post (self):
         self.assertEqual(Authority.objects.count(), 1)
-        url = reverse('authority-change', kwargs={
+        url = reverse('eats-authority-change', kwargs={
                 'topic_id': self.authority.get_id()})
         self.assertEqual(self.authority.get_admin_name(), 'Test')
         self.assertEqual(len(self.authority.get_calendars()), 0)
@@ -154,7 +154,7 @@ class AuthorityViewsTestCase (ViewTestCase):
         form['scripts'] = [script.get_id()]
         form['editors'] = [editor1.pk, editor2.pk]
         response = form.submit('_save')
-        self.assertRedirects(response, reverse('authority-list'))
+        self.assertRedirects(response, reverse('eats-authority-list'))
         self.assertEqual(Authority.objects.count(), 1)
         self.assertEqual(self.authority.get_admin_name(), 'Test1')
         self.assertEqual(len(self.authority.get_calendars()), 2)
@@ -191,7 +191,7 @@ class AuthorityViewsTestCase (ViewTestCase):
         entity = self.tm.create_entity(self.authority)
         entity.create_entity_type_property_assertion(self.authority,
                                                      entity_type1)
-        url = reverse('authority-change', kwargs={
+        url = reverse('eats-authority-change', kwargs={
                 'topic_id': self.authority.get_id()})
         form = self.app.get(url).forms['infrastructure-change-form']
         form['calendars'] = [calendar.get_id()]

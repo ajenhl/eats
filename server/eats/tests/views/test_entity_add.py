@@ -15,7 +15,7 @@ class EntityAddViewTestCase (ViewTestCase):
         self.editor.set_current_authority(self.authority)
 
     def test_authentication (self):
-        url = reverse('entity-add')
+        url = reverse('eats-entity-add')
         login_url = settings.LOGIN_URL + '?next=' + url
         response = self.app.get(url)
         self.assertRedirects(response, login_url)
@@ -30,13 +30,14 @@ class EntityAddViewTestCase (ViewTestCase):
 
     def test_add_entity (self):
         self.assertEqual(Entity.objects.count(), 0)
-        url = reverse('entity-add')
+        url = reverse('eats-entity-add')
         form = self.app.get(url, user='user').forms['entity-add-form']
         form['authority'] = self.authority.get_id()
         response = form.submit('_save')
         self.assertEqual(Entity.objects.count(), 1)
         entity_id = Entity.objects.all()[0].get_id()
-        redirect_url = reverse('entity-change', kwargs={'entity_id': entity_id})
+        redirect_url = reverse('eats-entity-change',
+                               kwargs={'entity_id': entity_id})
         self.assertRedirects(response, redirect_url)
 
     def test_change_current_authority (self):
@@ -44,7 +45,7 @@ class EntityAddViewTestCase (ViewTestCase):
         self.editor.editable_authorities = [self.authority, authority]
         self.assertEqual(self.editor.get_current_authority(), self.authority)
         self.assertEqual(Entity.objects.count(), 0)
-        url = reverse('entity-add')
+        url = reverse('eats-entity-add')
         form = self.app.get(url, user='user').forms['entity-add-form']
         form['authority'] = authority.get_id()
         response = form.submit('_save')
@@ -55,5 +56,6 @@ class EntityAddViewTestCase (ViewTestCase):
         # object.
         editor = EATSUser.objects.get(pk=self.editor.pk)
         self.assertEqual(editor.get_current_authority(), authority)
-        redirect_url = reverse('entity-change', kwargs={'entity_id': entity_id})
+        redirect_url = reverse('eats-entity-change',
+                               kwargs={'entity_id': entity_id})
         self.assertRedirects(response, redirect_url)

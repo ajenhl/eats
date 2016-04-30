@@ -11,13 +11,12 @@
 {{ import.importer.user }}.</p>
 
 <ul>
-<li><a href="raw/">Raw XML</a> — the document that was imported</li>
+<li><a href="{% url 'eats-display-eatsml-import-raw' import.id %}">Raw XML</a> — the document that was imported</li>
 
-<li><a href="annotated/">Annotated XML</a> — the imported document
+<li><a href="{% url 'eats-display-eatsml-import-annotated' import.id %}">Annotated XML</a> — the imported document
 annotated with the IDs of the created objects</li>
 </ul>
 
-<p><a href="../">All Imports</a></p>
+<p><a href="{% url 'eats-import-eatsml' %}">All Imports</a></p>
 
 {% endblock eats_content %}
-

@@ -25,7 +25,7 @@ def entity_view (request, topic_map, entity_id):
     try:
         entity = get_topic_or_404(Entity, entity_id)
     except EATSMergedIdentifierException as e:
-        return redirect('entity-view', entity_id=e.new_id, permanent=True)
+        return redirect('eats-entity-view', entity_id=e.new_id, permanent=True)
     user_preferences = get_user_preferences(request)
     preferred_authority = user_preferences['preferred_authority']
     preferred_language = user_preferences['preferred_language']
@@ -66,7 +66,8 @@ def entity_eatsml_view (request, topic_map, entity_id):
     try:
         entity = get_topic_or_404(Entity, entity_id)
     except EATSMergedIdentifierException as e:
-        return redirect('entity-eatsml-view', entity_id=e.new_id, permanent=True)
+        return redirect('eats-entity-eatsml-view', entity_id=e.new_id,
+                        permanent=True)
     eats_user = get_eats_user(request)
     tree = EATSMLExporter(topic_map).export_entities([entity], eats_user)
     xml = etree.tostring(tree, encoding='utf-8', pretty_print=True)

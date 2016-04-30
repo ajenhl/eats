@@ -2,8 +2,8 @@
 {% if dates %}
 <ul class="date-list">
   {% for date in dates %}
-  <li>{% if entity_id %}<a href="{% url 'date-change' entity_id assertion_id date.get_id %}">{% endif %}{{ date.assembled_form }}{% if entity_id %}</a>{% endif %}{% display_date_notes date user %}</li>
+  <li>{% if entity_id %}<a href="{% url 'eats-date-change' entity_id assertion_id date.get_id %}">{% endif %}{{ date.assembled_form }}{% if entity_id %}</a>{% endif %}{% display_date_notes date user %}</li>
   {% endfor %}
 </ul>
 {% endif %}
-{% if entity_id %}<p><a href="{% url 'date-add' entity_id assertion_id %}">Add a date</a></p>{% endif %}
+{% if entity_id %}<p><a href="{% url 'eats-date-add' entity_id assertion_id %}">Add a date</a></p>{% endif %}

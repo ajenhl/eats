@@ -18,7 +18,7 @@ class DateTypeTestCase (ModelTestCase):
         # authority.
         self.assertEqual(DateType.objects.count(), 0)
         date_type = self.create_date_type('exact')
-        self.assertEqual(DateType.objects.count(), 1)        
+        self.assertEqual(DateType.objects.count(), 1)
         authority = self.create_authority('test')
         authority.set_date_types([date_type])
         self.assertRaises(TopicInUseException, date_type.remove)

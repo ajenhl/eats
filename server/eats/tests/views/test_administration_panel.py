@@ -9,11 +9,11 @@ from eats.models import EATSTopicMap
 class AdministrationPanelTestCase (WebTest):
 
     def test_create_topic_map (self):
-        url = reverse('create-topic-map')
+        url = reverse('eats-create-topic-map')
         # A GET request ought to redirect to the administration panel
         # without consequence.
         response = self.app.get(url)
-        redirect_url = reverse('administration-panel')
+        redirect_url = reverse('eats-administration-panel')
         self.assertRedirects(response, redirect_url)
         self.assertRaises(EATSTopicMap.DoesNotExist, EATSTopicMap.objects.get,
                           iri=settings.EATS_TOPIC_MAP)

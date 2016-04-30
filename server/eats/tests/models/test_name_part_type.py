@@ -18,7 +18,7 @@ class NamePartTypeTestCase (ModelTestCase):
         # an authority.
         self.assertEqual(NamePartType.objects.count(), 0)
         name_part_type = self.create_name_part_type('given')
-        self.assertEqual(NamePartType.objects.count(), 1)        
+        self.assertEqual(NamePartType.objects.count(), 1)
         authority = self.create_authority('test')
         authority.set_name_part_types([name_part_type])
         self.assertRaises(TopicInUseException, name_part_type.remove)

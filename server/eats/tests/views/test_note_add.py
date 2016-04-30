@@ -19,7 +19,7 @@ class NoteAddViewTestCase (ViewTestCase):
     def test_authentication_assertion (self):
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
-        url = reverse('pa-note-add', kwargs={
+        url = reverse('eats-pa-note-add', kwargs={
             'entity_id': entity.get_id(), 'assertion_id': existence.get_id()})
         login_url = settings.LOGIN_URL + '?next=' + url
         response = self.app.get(url)
@@ -39,7 +39,7 @@ class NoteAddViewTestCase (ViewTestCase):
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         date = existence.create_date({'date_period': self.date_period})
-        url = reverse('date-note-add', kwargs={
+        url = reverse('eats-date-note-add', kwargs={
             'entity_id': entity.get_id(), 'assertion_id': existence.get_id(),
             'date_id': date.get_id()})
         login_url = settings.LOGIN_URL + '?next=' + url
@@ -59,18 +59,18 @@ class NoteAddViewTestCase (ViewTestCase):
         note to a property assertion."""
         url_args = {'entity_id': 0, 'assertion_id': 0}
         # Test with non-existent entity and assertion.
-        self.app.get(reverse('pa-note-add', kwargs=url_args), status=404,
+        self.app.get(reverse('eats-pa-note-add', kwargs=url_args), status=404,
                      user='user')
         # Test with non-existent assertion.
         entity = self.tm.create_entity(self.authority)
         url_args['entity_id'] = entity.get_id()
-        self.app.get(reverse('pa-note-add', kwargs=url_args), status=404,
+        self.app.get(reverse('eats-pa-note-add', kwargs=url_args), status=404,
                      user='user')
         # Test with the assertion not belonging to the entity.
         entity2 = self.tm.create_entity(self.authority)
         assertion = entity2.get_existences()[0]
         url_args['assertion_id'] = assertion.get_id()
-        self.app.get(reverse('pa-note-add', kwargs=url_args), status=404,
+        self.app.get(reverse('eats-pa-note-add', kwargs=url_args), status=404,
                      user='user')
 
     def test_non_matching_date_note_add (self):
@@ -78,29 +78,29 @@ class NoteAddViewTestCase (ViewTestCase):
         to a date."""
         url_args = {'entity_id': 0, 'assertion_id': 0, 'date_id': 0}
         # Test with non-existent entity, assertion and date.
-        self.app.get(reverse('date-note-add', kwargs=url_args), status=404,
+        self.app.get(reverse('eats-date-note-add', kwargs=url_args), status=404,
                      user='user')
         # Test with non-existent assertion and date.
         entity = self.tm.create_entity(self.authority)
         url_args['entity_id'] = entity.get_id()
-        self.app.get(reverse('date-note-add', kwargs=url_args), status=404,
+        self.app.get(reverse('eats-date-note-add', kwargs=url_args), status=404,
                      user='user')
         # Test with non-existent date.
         existence = entity.get_existences()[0]
         url_args['assertion_id'] = existence.get_id()
-        self.app.get(reverse('date-note-add', kwargs=url_args), status=404,
+        self.app.get(reverse('eats-date-note-add', kwargs=url_args), status=404,
                      user='user')
         date = existence.create_date({'date_period': self.date_period})
         url_args['date_id'] = date.get_id()
         # Test with the assertion not belonging to the entity.
         entity2 = self.tm.create_entity(self.authority)
         url_args['entity_id'] = entity2.get_id()
-        self.app.get(reverse('date-note-add', kwargs=url_args), status=404,
+        self.app.get(reverse('eats-date-note-add', kwargs=url_args), status=404,
                      user='user')
         # Test with the date not belonging to the assertion.
         existence2 = entity2.get_existences()[0]
         url_args['assertion_id'] = existence2.get_id()
-        self.app.get(reverse('date-note-add', kwargs=url_args), status=404,
+        self.app.get(reverse('eats-date-note-add', kwargs=url_args), status=404,
                      user='user')
 
     def test_wrong_assertion_type (self):
@@ -111,18 +111,18 @@ class NoteAddViewTestCase (ViewTestCase):
                                                         False)
         url_args = {'entity_id': entity.get_id(),
                     'assertion_id': note_pa.get_id()}
-        self.app.get(reverse('pa-note-add', kwargs=url_args), status=404,
+        self.app.get(reverse('eats-pa-note-add', kwargs=url_args), status=404,
                      user='user')
         si_pa = entity.create_subject_identifier_property_assertion(
             self.authority, 'http://www.example.org/')
         url_args['assertion_id'] = si_pa.get_id()
-        self.app.get(reverse('pa-note-add', kwargs=url_args), status=404,
+        self.app.get(reverse('eats-pa-note-add', kwargs=url_args), status=404,
                      user='user')
 
     def test_get_request_assertion (self):
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
-        url = reverse('pa-note-add', kwargs={
+        url = reverse('eats-pa-note-add', kwargs={
             'entity_id': entity.get_id(), 'assertion_id': existence.get_id()})
         response = self.app.get(url, user='user')
         self.assertEqual(response.status_code, 200)
@@ -132,7 +132,7 @@ class NoteAddViewTestCase (ViewTestCase):
         entity = self.tm.create_entity(self.authority)
         existence = entity.get_existences()[0]
         date = existence.create_date({'date_period': self.date_period})
-        url = reverse('date-note-add', kwargs={
+        url = reverse('eats-date-note-add', kwargs={
             'entity_id': entity.get_id(), 'assertion_id': existence.get_id(),
             'date_id': date.get_id()})
         response = self.app.get(url, user='user')
@@ -141,14 +141,14 @@ class NoteAddViewTestCase (ViewTestCase):
 
     def test_pa_valid_post_request_continue (self):
         response, url_args = self._post_valid_pa_note('_continue')
-        redirect_url = reverse('pa-note-change', kwargs=url_args)
+        redirect_url = reverse('eats-pa-note-change', kwargs=url_args)
         self.assertRedirects(response, redirect_url)
 
     def test_pa_valid_post_request_save (self):
         response, url_args = self._post_valid_pa_note('_save')
         del url_args['note_id']
         del url_args['assertion_id']
-        redirect_url = reverse('entity-change', kwargs=url_args)
+        redirect_url = reverse('eats-entity-change', kwargs=url_args)
         self.assertRedirects(response, redirect_url)
 
     def _post_valid_pa_note (self, submit_name):
@@ -157,7 +157,7 @@ class NoteAddViewTestCase (ViewTestCase):
         self.assertEqual(len(existence.get_notes(self.editor)), 0)
         url_args = {'entity_id': entity.get_id(),
                     'assertion_id': existence.get_id()}
-        url = reverse('pa-note-add', kwargs=url_args)
+        url = reverse('eats-pa-note-add', kwargs=url_args)
         form = self.app.get(url, user='user').forms['note-add-form']
         form['note'] = 'Test'
         form['is_internal'] = 'on'
@@ -173,13 +173,13 @@ class NoteAddViewTestCase (ViewTestCase):
 
     def test_date_valid_post_request_continue (self):
         response, url_args = self._post_valid_date_note('_continue')
-        redirect_url = reverse('date-note-change', kwargs=url_args)
+        redirect_url = reverse('eats-date-note-change', kwargs=url_args)
         self.assertRedirects(response, redirect_url)
 
     def test_date_valid_post_request_save (self):
         response, url_args = self._post_valid_date_note('_save')
         del url_args['note_id']
-        redirect_url = reverse('date-change', kwargs=url_args)
+        redirect_url = reverse('eats-date-change', kwargs=url_args)
         self.assertRedirects(response, redirect_url)
 
     def _post_valid_date_note (self, submit_name):
@@ -190,7 +190,7 @@ class NoteAddViewTestCase (ViewTestCase):
         url_args = {'entity_id': entity.get_id(),
                     'assertion_id': existence.get_id(),
                     'date_id': date.get_id()}
-        url = reverse('date-note-add', kwargs=url_args)
+        url = reverse('eats-date-note-add', kwargs=url_args)
         form = self.app.get(url, user='user').forms['note-add-form']
         form['note'] = 'Test'
         form['is_internal'] = 'on'

@@ -499,7 +499,7 @@ class EATSTopicMap (TopicMap):
         return assertion_class
 
     def get_entity_subject_identifier (self, entity_id):
-        view_url = reverse('entity-view', kwargs={'entity_id': entity_id})
+        view_url = reverse('eats-entity-view', kwargs={'entity_id': entity_id})
         url = 'http://%s%s' % (Site.objects.get_current().domain, view_url)
         return Locator(url)
 
