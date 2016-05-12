@@ -66,8 +66,7 @@ class PropertyAssertionFormSet (BaseFormSet):
             return []
         saved_assertions = []
         for form in self.initial_forms:
-            raw_id_value = form._raw_value('assertion')
-            id_value = form.fields['assertion'].clean(raw_id_value)
+            id_value = form.fields['assertion'].clean(form['assertion'].value())
             obj = self._existing_object(id_value)
             if self.can_delete and self._should_delete_form(form):
                 form.delete()
@@ -180,8 +179,8 @@ class NameAssertionFormSet (PropertyAssertionFormSet):
             return []
         saved_assertions = []
         for form in self.initial_forms:
-            raw_id_value = form._raw_value('assertion')
-            id_value = form.fields['assertion'].clean(raw_id_value)
+            id_value = form.fields['assertion'].clean(
+                form['assertion'].value())
             obj = self._existing_object(id_value)
             if self.can_delete and self._should_delete_form(form):
                 form.delete()
