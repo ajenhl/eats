@@ -1,41 +1,65 @@
+from django.conf import settings
 from django.core.urlresolvers import reverse
 
 from eats.models import Authority
-from eats.tests.views.view_test_case import ViewTestCase
+from .admin_view_test_case import AdminViewTestCase
 
 
-class AuthorityViewsTestCase (ViewTestCase):
+class AuthorityViewsTestCase (AdminViewTestCase):
+
+    def test_authentication (self):
+        url_data = [
+            ('eats-authority-list', {}),
+            ('eats-authority-add', {}),
+            ('eats-authority-change', {'topic_id': self.authority.get_id()})]
+        for url_name, kwargs in url_data:
+            url = reverse(url_name, kwargs=kwargs)
+            login_url = settings.LOGIN_URL + '?next=' + url
+            response = self.app.get(url)
+            self.assertRedirects(response, login_url,
+                                 msg_prefix='Anonymous user to {}'.format(
+                                     url_name))
+        for url_name, kwargs in url_data:
+            response = self.app.get(url, user='user')
+            self.assertRedirects(response, login_url,
+                                 msg_prefix='User to {}'.format(url_name))
+        for url_name, kwargs in url_data:
+            response = self.app.get(url, user='eats_user')
+            self.assertRedirects(response, login_url,
+                                 msg_prefix='EATS user to {}'.format(url_name))
+            response = self.app.get(url, user='staff')
+            self.assertEqual(response.status_code, 200)
 
     def test_authority_list (self):
         url = reverse('eats-authority-list')
-        response = self.app.get(url)
+        response = self.app.get(url, user='staff')
         self.assertEqual(response.context['opts'], Authority._meta)
         self.assertEqual(len(response.context['topics']), 1)
         self.assertTrue(self.authority in response.context['topics'])
         authority2 = self.create_authority('Test2')
-        response = self.app.get(url)
+        response = self.app.get(url, user='staff')
         self.assertEqual(len(response.context['topics']), 2)
         self.assertTrue(self.authority in response.context['topics'])
         self.assertTrue(authority2 in response.context['topics'])
 
     def test_authority_add_get (self):
         url = reverse('eats-authority-add')
-        response = self.app.get(url)
+        response = self.app.get(url, user='staff')
         self.assertEqual(response.context['opts'], Authority._meta)
 
     def test_authority_add_post_redirects (self):
         url = reverse('eats-authority-add')
-        form = self.app.get(url).forms['infrastructure-add-form']
+        form = self.app.get(url, user='staff').forms['infrastructure-add-form']
         form['name'] = 'Test2'
         response = form.submit('_save')
         self.assertRedirects(response, reverse('eats-authority-list'))
         self.assertEqual(Authority.objects.count(), 2)
-        form = self.app.get(url).forms['infrastructure-add-form']
+        form = self.app.get(url, user='staff').forms['infrastructure-add-form']
         form['name'] = 'Test3'
         response = form.submit('_addanother')
         self.assertRedirects(response, url)
         self.assertEqual(Authority.objects.count(), 3)
-        form = self.app.get(url).forms['infrastructure-add-form']
+        form = self.app.get(url, user='staff').forms['infrastructure-add-form']
         form['name'] = 'Test4'
         response = form.submit('_continue')
         authority = Authority.objects.get_by_admin_name('Test4')
@@ -58,7 +82,7 @@ class AuthorityViewsTestCase (ViewTestCase):
         script = self.create_script('Latin', 'Latn', ' ')
         user = self.create_django_user('user1', 'user1@example.org', 'password')
         editor = self.create_user(user)
-        form = self.app.get(url).forms['infrastructure-add-form']
+        form = self.app.get(url, user='staff').forms['infrastructure-add-form']
         form['name'] = 'Test1'
         form['calendars'] = [calendar1.get_id(), calendar2.get_id()]
         form['date_periods'] = [date_period.get_id()]
@@ -95,7 +119,7 @@ class AuthorityViewsTestCase (ViewTestCase):
     def test_authority_add_illegal_post (self):
         self.assertEqual(Authority.objects.count(), 1)
         url = reverse('eats-authority-add')
-        form = self.app.get(url).forms['infrastructure-add-form']
+        form = self.app.get(url, user='staff').forms['infrastructure-add-form']
         form['name'] = 'Test'
         response = form.submit('_save')
         self.assertEqual(response.status_code, 200)
@@ -103,12 +127,12 @@ class AuthorityViewsTestCase (ViewTestCase):
 
     def test_authority_change_illegal_get (self):
         url = reverse('eats-authority-change', kwargs={'topic_id': 0})
-        self.app.get(url, status=404)
+        self.app.get(url, status=404, user='staff')
 
     def test_authority_change_get (self):
         url = reverse('eats-authority-change', kwargs={
                 'topic_id': self.authority.get_id()})
-        response = self.app.get(url)
+        response = self.app.get(url, user='staff')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['form'].instance, self.authority)
 
@@ -142,7 +166,8 @@ class AuthorityViewsTestCase (ViewTestCase):
         user2 = self.create_django_user('user2', 'user2@example.org',
                                         'password')
         editor2 = self.create_user(user2)
-        form = self.app.get(url).forms['infrastructure-change-form']
+        form = self.app.get(url, user='staff').forms[
+            'infrastructure-change-form']
         form['name'] = 'Test1'
         form['calendars'] = [calendar1.get_id(), calendar2.get_id()]
         form['date_periods'] = [date_period.get_id()]
@@ -193,7 +218,8 @@ class AuthorityViewsTestCase (ViewTestCase):
                                                      entity_type1)
         url = reverse('eats-authority-change', kwargs={
                 'topic_id': self.authority.get_id()})
-        form = self.app.get(url).forms['infrastructure-change-form']
+        form = self.app.get(url, user='staff').forms[
+            'infrastructure-change-form']
         form['calendars'] = [calendar.get_id()]
         form['entity_types'] = [entity_type2.get_id()]
         response = form.submit('_save')

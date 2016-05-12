@@ -12,7 +12,7 @@ from eats.tests.views.view_test_case import ViewTestCase
 class EntityChangeViewTestCase (ViewTestCase):
 
     def setUp (self):
-        super(EntityChangeViewTestCase, self).setUp()
+        super().setUp()
         self.authority_id = self.authority.get_id()
         user = self.create_django_user('user', 'user@example.org', 'password')
         self.editor = self.create_user(user)

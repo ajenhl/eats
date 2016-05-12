@@ -1,6 +1,7 @@
 from urllib.parse import urljoin
 
 from django.conf import settings
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import transaction
@@ -22,6 +23,7 @@ from eats.forms.admin import (AuthorityForm, CalendarForm, DatePeriodForm,
                               NameTypeForm, ScriptForm)
 
 
+@staff_member_required(login_url=settings.LOGIN_URL)
 def administration_panel (request):
     """Show the EATS administration panel."""
     context_data = {'has_tm': False}
@@ -38,6 +40,7 @@ def administration_panel (request):
         context_data['has_tm'] = True
     return render(request, 'eats/admin/panel.html', context_data)
 
+@staff_member_required(login_url=settings.LOGIN_URL)
 def create_topic_map (request):
     """Creates the topic map to be used by the EATS application, and
     populates it with the base ontological data. Returns a status
@@ -61,6 +64,7 @@ def create_topic_map (request):
                            status)
     return HttpResponseRedirect(redirect_url)
 
+@staff_member_required(login_url=settings.LOGIN_URL)
 @add_topic_map
 def topic_list (request, topic_map, model):
     topics = model.objects.all()
@@ -70,6 +74,7 @@ def topic_list (request, topic_map, model):
                     'topics': topics}
     return render(request, 'eats/admin/topic_list.html', context_data)
 
+@staff_member_required(login_url=settings.LOGIN_URL)
 @add_topic_map
 def topic_add (request, topic_map, model):
     form_class = get_form_class(model)
@@ -86,6 +91,7 @@ def topic_add (request, topic_map, model):
     context_data = {'form': form, 'opts': opts, 'help_template': help_template}
     return render(request, 'eats/admin/topic_add.html', context_data)
 
+@staff_member_required(login_url=settings.LOGIN_URL)
 @add_topic_map
 def topic_change (request, topic_map, topic_id, model):
     topic = get_topic_or_404(model, topic_id)
@@ -151,12 +157,14 @@ def get_redirect_url (form, opts, topic):
         redirect_url = reverse('eats-{}-list'.format(object_type))
     return redirect_url
 
+@staff_member_required(login_url=settings.LOGIN_URL)
 def user_list (request):
     eats_users = EATSUser.objects.all()
     django_users = User.objects.filter(eats_user__isnull=True)
     context_data = {'eats_users': eats_users, 'django_users': django_users}
     return render(request, 'eats/admin/user_list.html', context_data)
 
+@staff_member_required(login_url=settings.LOGIN_URL)
 def user_change (request, eats_user_id):
     # This is a ridiculous workaround Django failing the
     # create_topic_map test if, in the course of reversing the
@@ -182,6 +190,7 @@ def user_change (request, eats_user_id):
     context_data = {'form': form, 'user': eats_user.user}
     return render(request, 'eats/admin/user_change.html', context_data)
 
+@staff_member_required(login_url=settings.LOGIN_URL)
 def user_activate (request):
     """Creates an EATS user for the POSTed Django user ID."""
     redirect_url = reverse('eats-user-list')

@@ -1,30 +1,55 @@
+from django.conf import settings
 from django.core.urlresolvers import reverse
 
 from eats.models import EntityRelationshipType
-from eats.tests.views.view_test_case import ViewTestCase
+from .admin_view_test_case import AdminViewTestCase
 
 
-class EntityRelationshipTypeViewsTestCase (ViewTestCase):
+class EntityRelationshipTypeViewsTestCase (AdminViewTestCase):
+
+    def test_authentication (self):
+        ert = self.create_entity_relationship_type('Forward', 'Reverse')
+        url_data = [
+            ('eats-entityrelationshiptype-list', {}),
+            ('eats-entityrelationshiptype-add', {}),
+            ('eats-entityrelationshiptype-change', {'topic_id': ert.get_id()})]
+        for url_name, kwargs in url_data:
+            url = reverse(url_name, kwargs=kwargs)
+            login_url = settings.LOGIN_URL + '?next=' + url
+            response = self.app.get(url)
+            self.assertRedirects(response, login_url,
+                                 msg_prefix='Anonymous user to {}'.format(
+                                     url_name))
+        for url_name, kwargs in url_data:
+            response = self.app.get(url, user='user')
+            self.assertRedirects(response, login_url,
+                                 msg_prefix='User to {}'.format(url_name))
+        for url_name, kwargs in url_data:
+            response = self.app.get(url, user='eats_user')
+            self.assertRedirects(response, login_url,
+                                 msg_prefix='EATS user to {}'.format(url_name))
+            response = self.app.get(url, user='staff')
+            self.assertEqual(response.status_code, 200)
 
     def test_entity_relationship_type_list (self):
         url = reverse('eats-entityrelationshiptype-list')
-        response = self.app.get(url)
+        response = self.app.get(url, user='staff')
         self.assertEqual(response.context['opts'], EntityRelationshipType._meta)
         self.assertEqual(len(response.context['topics']), 0)
         er_type = self.create_entity_relationship_type('Forward', 'Reverse')
-        response = self.app.get(url)
+        response = self.app.get(url, user='staff')
         self.assertEqual(len(response.context['topics']), 1)
         self.assertTrue(er_type in response.context['topics'])
 
     def test_entity_relationship_type_add_get (self):
         url = reverse('eats-entityrelationshiptype-add')
-        response = self.app.get(url)
+        response = self.app.get(url, user='staff')
         self.assertEqual(response.context['opts'], EntityRelationshipType._meta)
 
     def test_entity_relationship_type_add_post_redirects (self):
         self.assertEqual(EntityRelationshipType.objects.count(), 0)
         url = reverse('eats-entityrelationshiptype-add')
-        form = self.app.get(url).forms['infrastructure-add-form']
+        form = self.app.get(url, user='staff').forms['infrastructure-add-form']
         form['name'] = 'Forward'
         form['reverse_name'] = 'Reverse'
         response = form.submit('_save')
@@ -48,7 +73,7 @@ class EntityRelationshipTypeViewsTestCase (ViewTestCase):
     def test_entity_relationship_type_add_illegal_post (self):
         self.assertEqual(EntityRelationshipType.objects.count(), 0)
         url = reverse('eats-entityrelationshiptype-add')
-        form = self.app.get(url).forms['infrastructure-add-form']
+        form = self.app.get(url, user='staff').forms['infrastructure-add-form']
         # Missing entity_relationship_type name.
         form['name'] = ''
         form['reverse_name'] = 'Reverse'
@@ -74,13 +99,13 @@ class EntityRelationshipTypeViewsTestCase (ViewTestCase):
     def test_entity_relationship_type_change_illegal_get (self):
         url = reverse('eats-entityrelationshiptype-change',
                       kwargs={'topic_id': 0})
-        self.app.get(url, status=404)
+        self.app.get(url, status=404, user='staff')
 
     def test_entity_relationship_type_change_get (self):
         er_type = self.create_entity_relationship_type('Forward', 'Reverse')
         url = reverse('eats-entityrelationshiptype-change', kwargs={
                 'topic_id': er_type.get_id()})
-        response = self.app.get(url)
+        response = self.app.get(url, user='staff')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['form'].instance, er_type)
 
@@ -90,7 +115,8 @@ class EntityRelationshipTypeViewsTestCase (ViewTestCase):
         url = reverse('eats-entityrelationshiptype-change', kwargs={
                 'topic_id': er_type.get_id()})
         self.assertEqual(er_type.get_admin_name(), 'Forward / Reverse')
-        form = self.app.get(url).forms['infrastructure-change-form']
+        form = self.app.get(url, user='staff').forms[
+            'infrastructure-change-form']
         form['name'] = 'Forward2'
         form['reverse_name'] = 'Reverse2'
         response = form.submit('_save')
