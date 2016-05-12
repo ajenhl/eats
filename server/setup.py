@@ -13,7 +13,7 @@ setup(
     author_email = 'jamie@artefact.org.nz',
     license = 'GNU General Public License v3',
     packages = find_packages(),
-    install_requires = ['Django>=1.8', 'lxml', 'django_tmapi',
+    install_requires = ['Django>=1.9', 'lxml', 'django_tmapi',
                         'django-selectable'],
     classifiers = [
         'Framework :: Django',
