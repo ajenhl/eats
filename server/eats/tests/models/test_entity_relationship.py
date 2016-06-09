@@ -123,7 +123,7 @@ class EntityRelationshipTestCase (ModelTestCase):
                           entity_relationship_type, self.entity, self.entity2,
                           self.tm.property_assertion_full_certainty)
 
-    def test_relationship_cache(self):
+    def test_relationship_cache (self):
         cache = EntityRelationshipCache.objects.filter(
             domain_entity=self.entity)
         self.assertEqual(0, cache.count())
@@ -168,3 +168,38 @@ class EntityRelationshipTestCase (ModelTestCase):
         cache = EntityRelationshipCache.objects.filter(
             domain_entity=self.entity)
         self.assertEqual(1, cache.count())
+
+    def test_relationship_cache_names (self):
+        self.entity.create_entity_relationship_property_assertion(
+            self.authority, self.entity_relationship_type, self.entity,
+            self.entity2, self.tm.property_assertion_full_certainty)
+        cache1 = EntityRelationshipCache.objects.filter(
+            domain_entity=self.entity)[0]
+        self.entity.create_entity_relationship_property_assertion(
+            self.authority, self.entity_relationship_type2, self.entity2,
+            self.entity, self.tm.property_assertion_full_certainty)
+        cache2 = EntityRelationshipCache.objects.filter(
+            domain_entity=self.entity2)[0]
+        self.assertEqual(self.entity_relationship_type.get_admin_forward_name(),
+                         cache1.forward_relationship_name)
+        self.assertEqual(self.entity_relationship_type.get_admin_reverse_name(),
+                         cache1.reverse_relationship_name)
+        self.assertEqual(self.entity_relationship_type2.get_admin_forward_name(),
+                         cache2.forward_relationship_name)
+        self.assertEqual(self.entity_relationship_type2.get_admin_reverse_name(),
+                         cache2.reverse_relationship_name)
+        # Rename the entity relationship type.
+        self.entity_relationship_type.set_admin_name('test forward',
+                                                     'test reverse')
+        cache1 = EntityRelationshipCache.objects.filter(
+            domain_entity=self.entity)[0]
+        cache2 = EntityRelationshipCache.objects.filter(
+            domain_entity=self.entity2)[0]
+        self.assertEqual(self.entity_relationship_type.get_admin_forward_name(),
+                         cache1.forward_relationship_name)
+        self.assertEqual(self.entity_relationship_type.get_admin_reverse_name(),
+                         cache1.reverse_relationship_name)
+        self.assertEqual(self.entity_relationship_type2.get_admin_forward_name(),
+                         cache2.forward_relationship_name)
+        self.assertEqual(self.entity_relationship_type2.get_admin_reverse_name(),
+                         cache2.reverse_relationship_name)

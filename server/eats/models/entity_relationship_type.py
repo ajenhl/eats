@@ -1,5 +1,6 @@
 from tmapi.models import Topic
 
+from .entity_relationship_cache import EntityRelationshipCache
 from .infrastructure import Infrastructure
 from .infrastructure_manager import InfrastructureManager
 
@@ -60,3 +61,9 @@ class EntityRelationshipType (Infrastructure, Topic):
             pass
         self.get_names(self.eats_topic_map.relationship_name_type)[0].set_value(name)
         self.get_names(self.eats_topic_map.reverse_relationship_name_type)[0].set_value(reverse_name)
+        # Update the EntityRelationshipCache.
+        for item in EntityRelationshipCache.objects.filter(
+                relationship_type=self):
+            item.forward_relationship_name = name
+            item.reverse_relationship_name = reverse_name
+            item.save()
