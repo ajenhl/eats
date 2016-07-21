@@ -110,7 +110,7 @@ class EATSTopicMapTestCase (ModelTestCase):
 
     def test_lookup_entities (self):
         self.assertEqual(Entity.objects.count(), 0)
-        self.assertEqual(self.tm.lookup_entities('Johann'), [])
+        self.assertEqual(list(self.tm.lookup_entities('Johann')), [])
         language = self.create_language('English', 'en')
         name_part_type1 = self.create_name_part_type('given')
         name_part_type2 = self.create_name_part_type('family')
@@ -124,13 +124,13 @@ class EATSTopicMapTestCase (ModelTestCase):
         entity1_name1 = entity1.create_name_property_assertion(
             self.authority, name_type, language, script,
             'Johann Sebastian Bach')
-        self.assertEqual(self.tm.lookup_entities('Johann'), [entity1])
+        self.assertEqual(list(self.tm.lookup_entities('Johann')), [entity1])
         # Partial (initial) matches are allowed.
-        self.assertEqual(self.tm.lookup_entities('Seb'), [entity1])
+        self.assertEqual(list(self.tm.lookup_entities('Seb')), [entity1])
         # Case does not matter.
-        self.assertEqual(self.tm.lookup_entities('ba'), [entity1])
+        self.assertEqual(list(self.tm.lookup_entities('ba')), [entity1])
         # Order of search terms need not match order in name.
-        self.assertEqual(self.tm.lookup_entities('B J'), [entity1])
+        self.assertEqual(list(self.tm.lookup_entities('B J')), [entity1])
         # Searching over name parts should be the same as searching
         # over a name's display form.
         entity1_name1.name.create_name_part(name_part_type1, language, script,
@@ -140,32 +140,32 @@ class EATSTopicMapTestCase (ModelTestCase):
         entity1_name1.name.create_name_part(name_part_type2, language, script,
                                            'Bach', 1)
         entity1_name1.name.update(name_type, language, script, '')
-        self.assertEqual(self.tm.lookup_entities('Johann'), [entity1])
+        self.assertEqual(list(self.tm.lookup_entities('Johann')), [entity1])
         # Partial (initial) matches are allowed.
-        self.assertEqual(self.tm.lookup_entities('Seb'), [entity1])
+        self.assertEqual(list(self.tm.lookup_entities('Seb')), [entity1])
         # Punctuation does not matter.
-        self.assertEqual(self.tm.lookup_entities('J. Sebastian Bach'),
+        self.assertEqual(list(self.tm.lookup_entities('J. Sebastian Bach')),
                          [entity1])
         # Case does not matter.
-        self.assertEqual(self.tm.lookup_entities('ba'), [entity1])
+        self.assertEqual(list(self.tm.lookup_entities('ba')), [entity1])
         # Order of search terms need not match order in name.
-        self.assertEqual(self.tm.lookup_entities('B J'), [entity1])
-        entity1_name2 = entity1.create_name_property_assertion(
+        self.assertEqual(list(self.tm.lookup_entities('B J')), [entity1])
+        entity1.create_name_property_assertion(
             self.authority, name_type, language, script, 'Alfred')
-        self.assertEqual(self.tm.lookup_entities('Alf'), [entity1])
+        self.assertEqual(list(self.tm.lookup_entities('Alf')), [entity1])
         # Individual query elements need not refer to the same name.
-        self.assertEqual(self.tm.lookup_entities('Al B'), [entity1])
+        self.assertEqual(list(self.tm.lookup_entities('Al B')), [entity1])
         entity2 = self.tm.create_entity(self.authority)
-        entity2_name1 = entity2.create_name_property_assertion(
+        entity2.create_name_property_assertion(
             self.authority, name_type, language, script, 'Duns Scotus')
         self.assertEqual(set(self.tm.lookup_entities('S')),
                          set([entity1, entity2]))
-        self.assertEqual(self.tm.lookup_entities('B s'), [entity1])
-        self.assertEqual(self.tm.lookup_entities('u'), [])
+        self.assertEqual(list(self.tm.lookup_entities('B s')), [entity1])
+        self.assertEqual(list(self.tm.lookup_entities('u')), [])
 
     def test_lookup_entities_alternate (self):
         self.assertEqual(Entity.objects.count(), 0)
-        self.assertEqual(self.tm.lookup_entities('Maori'), [])
+        self.assertEqual(list(self.tm.lookup_entities('Maori')), [])
         language = self.create_language('English', 'en')
         name_part_type1 = self.create_name_part_type('given')
         name_part_type2 = self.create_name_part_type('family')
@@ -179,9 +179,9 @@ class EATSTopicMapTestCase (ModelTestCase):
         entity1.create_name_property_assertion(
             self.authority, name_type, language, script,
             'Māori')
-        self.assertEqual(self.tm.lookup_entities('Māori'), [entity1])
-        self.assertEqual(self.tm.lookup_entities('Maori'), [entity1])
-        self.assertEqual(self.tm.lookup_entities('Maaori'), [entity1])
+        self.assertEqual(list(self.tm.lookup_entities('Māori')), [entity1])
+        self.assertEqual(list(self.tm.lookup_entities('Maori')), [entity1])
+        self.assertEqual(list(self.tm.lookup_entities('Maaori')), [entity1])
         entity2 = self.tm.create_entity(self.authority)
         entity2.create_name_property_assertion(
             self.authority, name_type, language, script, 'Maori')
@@ -189,7 +189,7 @@ class EATSTopicMapTestCase (ModelTestCase):
                          set([entity1, entity2]))
         self.assertEqual(set(self.tm.lookup_entities('Maori')),
                          set([entity1, entity2]))
-        self.assertEqual(self.tm.lookup_entities('Maaori'), [entity1])
+        self.assertEqual(list(self.tm.lookup_entities('Maaori')), [entity1])
 
     def test_lookup_entities_entity_type (self):
         # Test lookups with an entity type specified.
@@ -215,9 +215,9 @@ class EATSTopicMapTestCase (ModelTestCase):
             self.authority, entity_type2)
         entity2.create_name_property_assertion(
             self.authority, name_type, language, script, 'Paris')
-        self.assertEqual(self.tm.lookup_entities('Paris', entity_type1),
+        self.assertEqual(list(self.tm.lookup_entities('Paris', entity_type1)),
                          [entity1])
-        self.assertEqual(self.tm.lookup_entities('Paris', entity_type2),
+        self.assertEqual(list(self.tm.lookup_entities('Paris', entity_type2)),
                          [entity2])
         self.assertEqual(set(self.tm.lookup_entities('Paris')),
                          set([entity1, entity2]))
