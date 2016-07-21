@@ -1,8 +1,9 @@
+from django.conf import settings
 from django.contrib.sites.models import Site
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 
+import ddh_utils.utils
 from lxml import etree
 
 from eats.constants import UNNAMED_ENTITY_NAME
@@ -79,7 +80,7 @@ def search (request, topic_map):
     entity_types = EntityType.objects.all()
     form = EntitySearchForm(topic_map, data=form_data,
                             entity_types=entity_types)
-    results = []
+    entities = []
     user_preferences = {}
     if form.is_valid():
         name = form.cleaned_data['name']
@@ -87,21 +88,20 @@ def search (request, topic_map):
         entity_type = None
         if entity_type_id:
             entity_type = EntityType.objects.get_by_identifier(entity_type_id)
-        results_list = topic_map.lookup_entities(name, entity_type)
-        paginator = Paginator(results_list, 10)
-        page = request.GET.get('page')
+        results = topic_map.lookup_entities(name, entity_type)
+        page_number = request.GET.get('page')
         try:
-            results = paginator.page(page)
-        except PageNotAnInteger:
-            results = paginator.page(1)
-        except EmptyPage:
-            results = paginator.page(paginator.num_pages)
+            results_per_page = settings.EATS_RESULTS_PER_PAGE
+        except AttributeError:
+            results_per_page = 10
+        paginator, entities = ddh_utils.utils.create_pagination(
+            results, results_per_page, page_number)
         user_preferences = get_user_preferences(request)
     context_data = {
-        'eats_user': get_eats_user(request),
-        'property_assertion_full_certainty': \
-            topic_map.property_assertion_full_certainty,
-        'search_form': form, 'search_results': results,
+        'eats_user': get_eats_user(request), 'entities': entities,
+        'property_assertion_full_certainty':
+        topic_map.property_assertion_full_certainty,
+        'querydict': request.GET, 'search_form': form,
         'user_is_editor': user_is_editor(request.user)}
     context_data.update(user_preferences)
     return render(request, 'eats/display/search.html', context_data)

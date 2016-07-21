@@ -1,5 +1,6 @@
 {% extends "eats/display/base.html" %}
 {% load entity_display %}
+{% load ddh_utils_tags %}
 
 {% block eats_title %}{{ block.super }} Search entities{% endblock eats_title %}
 
@@ -11,28 +12,16 @@
 <input class="button" type="submit" name="search" value="Search"/>
 </form>
 
-{% if search_results %}
+{% if entities %}
 <h2>Results</h2>
 
 <div id="search-results">
-  {% for entity in search_results %}
+  {% for entity in entities %}
   {% display_entity_search_result entity %}
   {% endfor %}
 </div>
 
-<div class="pagination">
-  <span class="step-links">
-    {% if search_results.has_previous %}
-      <a href="?name={{ search_form.name.value }}&page={{ search_results.previous_page_number }}" title="Previous page of results">&lt;</a>
-    {% endif %}
-    <span class="current">
-      Page {{ search_results.number }} of {{ search_results.paginator.num_pages }}.
-    </span>
-    {% if search_results.has_next %}
-      <a href="?name={{ search_form.name.value }}&page={{ search_results.next_page_number }}" title="Next page of results">&gt;</a>
-    {% endif %}
-  </span>
-</div>
+{% display_pagination querydict entities %}
 
 {% else %}
 {% if search_form.is_bound %}
