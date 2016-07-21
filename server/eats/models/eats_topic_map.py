@@ -562,21 +562,13 @@ class EATSTopicMap (TopicMap):
         for name in names:
             query = self._create_lookup_query(str(name))
             queries.append(query)
-        sets = []
-        for query in queries:
-            if entity_type:
-                results = Entity.objects.filter_by_entity_type(entity_type)
-            else:
-                results = Entity.objects.all()
-            sets.append(set(results.filter(query)))
-        if len(sets) == 0:
-            intersected_set = set()
+        if entity_type:
+            results = Entity.objects.filter_by_entity_type(entity_type)
         else:
-            intersected_set = sets[0]
-        for i in range(1, len(sets)):
-            intersected_set = intersected_set.intersection(sets[i])
-        # QAZ: Is there any reason to return a list rather than a set?
-        return list(intersected_set)
+            results = Entity.objects.all()
+        for query in queries:
+            results = results.filter(query)
+        return results.distinct()
 
     def _create_lookup_query (self, name):
         query = None
