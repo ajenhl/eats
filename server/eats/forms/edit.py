@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 from django.forms.formsets import formset_factory, BaseFormSet
 
 import selectable.forms as selectable
@@ -945,21 +946,41 @@ class DateForm (forms.Form):
         return date.get_id()
 
 
+
+extra_existence_forms = getattr(settings, 'EATS_EXTRA_EXISTENCE_FORMS', 1)
 ExistenceFormSet = formset_factory(ExistenceForm, can_delete=True,
+                                   extra=extra_existence_forms,
                                    formset=ExistenceAssertionFormSet)
+
+extra_relationship_forms = getattr(
+    settings, 'EATS_EXTRA_ENTITY_RELATIONSHIP_FORMS', 2)
 EntityRelationshipFormSet = formset_factory(
-    EntityRelationshipForm, can_delete=True, extra=2,
+    EntityRelationshipForm, can_delete=True, extra=extra_relationship_forms,
     formset=EntityRelationshipAssertionFormSet)
-EntityTypeFormSet = formset_factory(EntityTypeForm, can_delete=True, extra=1,
+
+extra_entity_type_forms = getattr(settings, 'EATS_EXTRA_ENTITY_TYPE_FORMS', 1)
+EntityTypeFormSet = formset_factory(EntityTypeForm, can_delete=True,
+                                    extra=extra_entity_type_forms,
                                     formset=EntityTypeAssertionFormSet)
-NameFormSet = formset_factory(NameForm, can_delete=True, extra=2,
+
+extra_name_forms = getattr(settings, 'EATS_EXTRA_NAME_FORMS', 2)
+NameFormSet = formset_factory(NameForm, can_delete=True, extra=extra_name_forms,
                               formset=NameAssertionFormSet)
-NamePartFormSet = formset_factory(NamePartForm, can_delete=True, extra=2,
+
+extra_name_part_forms = getattr(settings, 'EATS_EXTRA_NAME_PART_FORMS', 2)
+NamePartFormSet = formset_factory(NamePartForm, can_delete=True,
+                                  extra=extra_name_part_forms,
                                   formset=NamePartInlineFormSet)
-NoteFormSet = formset_factory(NotePropertyAssertionForm, can_delete=True, extra=1,
+
+extra_note_forms = getattr(settings, 'EATS_EXTRA_NOTE_FORMS', 1)
+NoteFormSet = formset_factory(NotePropertyAssertionForm, can_delete=True,
+                              extra=extra_note_forms,
                               formset=NoteAssertionFormSet)
+
+extra_si_forms = getattr(
+    settings, 'EATS_EXTRA_SUBJECT_IDENTIFIER_FORMS', 2)
 SubjectIdentifierFormSet = formset_factory(
-    SubjectIdentifierForm, can_delete=True, extra=2,
+    SubjectIdentifierForm, can_delete=True, extra=extra_si_forms,
     formset=SubjectIdentifierAssertionFormSet)
 
 
