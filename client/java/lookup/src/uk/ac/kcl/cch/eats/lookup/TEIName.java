@@ -225,13 +225,13 @@ public class TEIName {
     }
 
     /**
-     * Sets the key attribute in the XML to key.
+     * Sets the ref attribute in the XML to ref.
      * 
-     * @param key
-     *            the key
+     * @param ref
+     *            the ref
      */
-    public void setKey(String key) {
-        nameElement.setAttribute("key", key);
+    public void setRef(String ref) {
+        nameElement.setAttribute("ref", ref);
     }
 
     /**

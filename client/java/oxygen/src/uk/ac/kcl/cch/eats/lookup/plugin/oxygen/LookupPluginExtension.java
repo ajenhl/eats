@@ -82,10 +82,10 @@ public class LookupPluginExtension extends DefaultHandler implements
 
 			lookupController.showView(teiName.getNameString(), "person");
 
-			String key = lookupController.getKey();
+			String ref = lookupController.getRef();
 
-			if (key != null && key.length() > 0) {
-				teiName.setKey(key);
+			if (ref != null && ref.length() > 0) {
+				teiName.setRef(ref);
 
 				String type = lookupController.getType();
 

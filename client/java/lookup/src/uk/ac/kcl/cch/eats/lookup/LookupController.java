@@ -126,9 +126,9 @@ public class LookupController implements ActionListener, DocumentListener,
 	private Collection searchResults = null;
 
 	/**
-	 * Key of the selected entity.
+	 * Ref of the selected entity.
 	 */
-	private String key = null;
+	private String ref = null;
 
 	/**
 	 * Type of the selected entity.
@@ -259,7 +259,7 @@ public class LookupController implements ActionListener, DocumentListener,
 
 					// double click
 					if (e.getClickCount() == 2) {
-						setKeyAndType(null);
+						setRefAndType(null);
 						closeWindow();
 					}
 				}
@@ -273,7 +273,7 @@ public class LookupController implements ActionListener, DocumentListener,
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					setKeyAndType(null);
+					setRefAndType(null);
 					closeWindow();
 				}
 			});
@@ -550,7 +550,7 @@ public class LookupController implements ActionListener, DocumentListener,
 			try {
 				waitCursor();
 
-				setKeyAndType(newAction());
+				setRefAndType(newAction());
 
 				for (JTextField t : texts) {
 					t.setText("");
@@ -659,7 +659,7 @@ public class LookupController implements ActionListener, DocumentListener,
 
 		if (imported == null) {
 			throw new DispatcherException(
-					"Failed to get the key for the imported entity. The entity has been created, try using search.");
+					"Failed to get the ref for the imported entity. The entity has been created, try using search.");
 		}
 
 		entity = imported.getEntities().getEntity().get(0);
@@ -939,12 +939,12 @@ public class LookupController implements ActionListener, DocumentListener,
 	//
 
 	/**
-	 * Sets the key and type using the current selected entity.
+	 * Sets the ref and type using the current selected entity.
 	 * 
 	 * @param e
 	 *            the entity. If null uses the current selected entity
 	 */
-	private void setKeyAndType(Entity entity) {
+	private void setRefAndType(Entity entity) {
 
 		if (entity == null) {
 			int viewRowIndex = table.getSelectedRow();
@@ -965,7 +965,7 @@ public class LookupController implements ActionListener, DocumentListener,
 					.getName();
 		}
 
-		key = entity.getUrl();
+		ref = entity.getUrl();
 
 	}
 
@@ -993,7 +993,7 @@ public class LookupController implements ActionListener, DocumentListener,
 			}
 		}
 
-		key = null;
+		ref = null;
 		type = null;
 
 		clearResults();
@@ -1057,10 +1057,10 @@ public class LookupController implements ActionListener, DocumentListener,
 	}
 
 	/**
-	 * @return the key
+	 * @return the ref
 	 */
-	public String getKey() {
-		return key;
+	public String getRef() {
+		return ref;
 	}
 
 	/**

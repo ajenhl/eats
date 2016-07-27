@@ -2,7 +2,7 @@
 
 The EATS oXygen plugin is a tool for performing searches across the
 entities in an EATS server instance, creating new entities, and
-marking up TEI documents with keyed name markup, all within the
+marking up TEI documents with refed name markup, all within the
 oXygen XML editor.
 
 Its use is straightforward. The user selects a piece of text within
@@ -20,12 +20,12 @@ form.
 
 On selecting an existing entity, or creating a new entity, the
 selected text in oXygen is replaced by that text wrapped in a TEI name
-element, with a key attribute set to the key associated with the
+element, with a ref attribute set to the ref associated with the
 entity.
 
 If the selected text consists entirely of a single TEI name element,
 then no new name element is created, but rather the existing element
-has its type and key added or changed, as appropriate, to those of the
+has its type and ref added or changed, as appropriate, to those of the
 chosen entity.
 
 
@@ -124,7 +124,7 @@ entity are shown in the box below the results.
 
 If a result row is activated (eg, by double-clicking it), the plugin
 window closes and the selected text in oXygen is replaced by that text
-wrapped in a TEI name element, with a key attribute set to the key
+wrapped in a TEI name element, with a ref attribute set to the ref
 associated with the activated entity.
 
 
@@ -133,7 +133,7 @@ associated with the activated entity.
 When there is no matching entity in the EATS system, a new entity must
 be created. All of the information in the search form becomes part of
 the created record. The new entity is automatically given a new
-authority record which carries the key used in the TEI name markup. On
+authority record which carries the ref used in the TEI name markup. On
 creating an entity, the plugin window disappears.
 
 
