@@ -9,6 +9,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -226,7 +229,7 @@ public class Dispatcher {
 
 		try {
 			// creates a new get request to get the base document
-			HttpGet get = new HttpGet(serverUrl + BASE_DOCUMENT_URL);
+			HttpGet get = new HttpGet(joinUrl(serverUrl, BASE_DOCUMENT_URL));
 			get.setParams(httpParams);
 
 			// executes the request and gets the response
@@ -245,11 +248,10 @@ public class Dispatcher {
 			if (status == HttpStatus.SC_MOVED_TEMPORARILY) {
 				// gets the login url
 				String loginUrl = response.getHeaders("Location")[0].getValue();
-
+				String fullLoginUrl = joinUrl(serverUrl, loginUrl);
 				// creates a new get request to get the login form
-				get = new HttpGet(loginUrl);
+				get = new HttpGet(fullLoginUrl);
 				get.setParams(httpParams);
-
 				// executes the get request
 				response = httpClient.execute(get, localContext);
 
@@ -273,10 +275,12 @@ public class Dispatcher {
 						DEFAULT_ENCODING);
 
 				// creates a new post request
-				HttpPost post = new HttpPost(loginUrl);
+				HttpPost post = new HttpPost(fullLoginUrl);
 
 				// adds the form entity to the post request
 				post.setEntity(entity);
+				// Set the Referer header, which prevents an HTTP 403 response.
+				post.setHeader("Referer", serverUrl);
 
 				// executes the post request to login
 				response = httpClient.execute(post, localContext);
@@ -310,6 +314,10 @@ public class Dispatcher {
 			consumeResponseEntity(response);
 		}
 
+	}
+
+	private String joinUrl(String baseUrl, String relativeUrl) throws MalformedURLException {
+		return new URL(new URL(baseUrl), relativeUrl).toString();
 	}
 
 	/**
@@ -403,7 +411,7 @@ public class Dispatcher {
 			// checks if the base document hasn't been requested before
 			if (baseDoc == null) {
 				// creates a new get request to get the base document
-				HttpGet get = new HttpGet(serverUrl + BASE_DOCUMENT_URL);
+				HttpGet get = new HttpGet(joinUrl(serverUrl, BASE_DOCUMENT_URL));
 
 				// executes the request and gets the response
 				HttpResponse response = httpClient.execute(get, localContext);
@@ -472,7 +480,7 @@ public class Dispatcher {
 
 		try {
 			// creates a new get request for the lookup name
-			HttpGet get = new HttpGet(serverUrl + LOOKUP_NAME_URL + "?name="
+			HttpGet get = new HttpGet(joinUrl(serverUrl, LOOKUP_NAME_URL) + "?name="
 					+ URLEncoder.encode(name, DEFAULT_ENCODING));
 
 			// executes the request and gets the response
@@ -502,14 +510,15 @@ public class Dispatcher {
 	 * @param entity
 	 *            entity to get the URL.
 	 * @return Edit URL, or null if the entity is invalid.
+	 * @throws MalformedURLException
 	 */
-	public String getEditUrl(Entity entity) {
+	public String getEditUrl(Entity entity) throws MalformedURLException {
 
 		if (entity == null) {
 			return null;
 		}
 
-		return serverUrl + EDIT_ENTITY_PREFIX_URL + entity.getEatsId() + EDIT_ENTITY_SUFFIX_URL;
+		return joinUrl(serverUrl, EDIT_ENTITY_PREFIX_URL + entity.getEatsId() + EDIT_ENTITY_SUFFIX_URL);
 
 	}
 
@@ -541,7 +550,7 @@ public class Dispatcher {
 
 		try {
 			// creates a new get request to get the import form
-			HttpGet get = new HttpGet(serverUrl + IMPORT_URL);
+			HttpGet get = new HttpGet(joinUrl(serverUrl, IMPORT_URL));
 			get.setParams(httpParams);
 
 			// executes the get request
@@ -566,8 +575,9 @@ public class Dispatcher {
 			fos.close();
 
 			// creates a new post request to upload the file
-			HttpPost post = new HttpPost(serverUrl + IMPORT_URL);
-			post.addHeader("Referer", serverUrl + IMPORT_URL);
+			String importUrl = joinUrl(serverUrl, IMPORT_URL);
+			HttpPost post = new HttpPost(importUrl);
+			post.addHeader("Referer", importUrl);
 
 			// creates a new multipart entity to set the post parameters
 			MultipartEntity entity = new MultipartEntity();
@@ -634,7 +644,7 @@ public class Dispatcher {
 
 		try {
 			// creates a new get request
-			HttpGet get = new HttpGet(url + PROCESSED_IMPORT_URL);
+			HttpGet get = new HttpGet(joinUrl(url, PROCESSED_IMPORT_URL));
 
 			// executes the processed import request
 			HttpResponse response = httpClient.execute(get, localContext);
