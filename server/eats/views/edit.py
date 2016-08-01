@@ -157,7 +157,10 @@ def entity_delete (request, topic_map, entity_id):
     if request.method == 'POST' and can_delete:
         entity.remove()
         return redirect(reverse('eats-search'))
-    context_data = {'can_delete': can_delete}
+    user_preferences = get_user_preferences(request)
+    context_data = {'can_delete': can_delete,
+                    'preferred_name': get_preferred_name(user_preferences,
+                                                         entity)}
     return render(request, 'eats/edit/entity_delete.html', context_data)
 
 @user_passes_test(user_is_editor)
