@@ -531,7 +531,6 @@ class EATSTopicMap (TopicMap):
 
     @property
     def is_preferred (self):
-
         """Returns the is_preferred topic, that is used as a scoping
         topic for all preferred property assertions.
 
@@ -556,14 +555,26 @@ class EATSTopicMap (TopicMap):
         return self.create_topic_by_subject_identifier(Locator(
                 LANGUAGE_TYPE_IRI), '_language_type')
 
-    def lookup_entities (self, query, entity_type=None):
+    def lookup_entities (self, query, entity_types=None):
+        """Returns entities that match `query` that are of the supplied entity
+        types.
+
+        If no entity types are supplied, any entity type is acceptable.
+
+        :param query: search query
+        :type query: `str`
+        :param entity_types: entity types to restrict search to
+        :type entity_types: `list`
+        :rtype: `QuerySet` of `Entity`
+
+        """
         names = query.split()
         queries = []
         for name in names:
             query = self._create_lookup_query(str(name))
             queries.append(query)
-        if entity_type:
-            results = Entity.objects.filter_by_entity_type(entity_type)
+        if entity_types:
+            results = Entity.objects.filter_by_entity_types(entity_types)
         else:
             results = Entity.objects.all()
         for query in queries:
@@ -610,7 +621,8 @@ class EATSTopicMap (TopicMap):
     def name_part_type_order_in_language_type (self):
         return self.create_topic_by_subject_identifier(
             Locator(NAME_PART_TYPE_ORDER_IN_LANGUAGE_TYPE_IRI),
-            '_name_part_type_order_in_language_type')
+
+        '_name_part_type_order_in_language_type')
 
     @property
     def name_part_type_type (self):

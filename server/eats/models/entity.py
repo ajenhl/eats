@@ -46,13 +46,20 @@ class EntityManager (BaseManager):
                                    occurrences__scope=authority)
         return entities.exclude(id=entity.id)
 
-    def filter_by_entity_type (self, entity_type):
+    def filter_by_entity_types (self, entity_types):
+        """Return this manager's queryset filtered by `entity_types`.
+
+        :param entity_types: entity types to filter by
+        :type entity_types: `list` of `EntityType`
+        :rtype: `QuerySet` of `Entity`s
+
+        """
         assertion_type = self.eats_topic_map.entity_type_assertion_type
         role_type = self.eats_topic_map.property_role_type
         return self.filter(
             roles__association__type=assertion_type,
             roles__association__roles__type=role_type,
-            roles__association__roles__player=entity_type)
+            roles__association__roles__player__in=entity_types)
 
     def get_by_identifier (self, identifier):
         # This method actually retrieves by Subject Identifier (based

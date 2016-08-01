@@ -84,11 +84,10 @@ def search (request, topic_map):
     user_preferences = {}
     if form.is_valid():
         name = form.cleaned_data['name']
-        entity_type_id = form.cleaned_data['entity_type']
-        entity_type = None
-        if entity_type_id:
-            entity_type = EntityType.objects.get_by_identifier(entity_type_id)
-        results = topic_map.lookup_entities(name, entity_type)
+        entity_type_ids = form.cleaned_data['entity_types']
+        entity_types = [EntityType.objects.get_by_identifier(entity_type_id) for
+                        entity_type_id in entity_type_ids]
+        results = topic_map.lookup_entities(name, entity_types)
         page_number = request.GET.get('page')
         try:
             results_per_page = settings.EATS_RESULTS_PER_PAGE

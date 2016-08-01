@@ -996,17 +996,21 @@ class EntityMergeForm (forms.Form):
         lookup_class=EntityLookup)
 
 
-def create_choice_list (topic_map, queryset, default=False):
+def create_choice_list (topic_map, queryset, default=False, multiple=False):
     """Return a list of 2-tuples created from the items in
     `queryset`.
 
-    If `queryset` contains only one record, and `default` is True, do
-    not provide an empty option.
+    If `multiple` is True, or if `queryset` contains only one record
+    and `default` is True, do not provide an empty option.
 
     :param topic_map: the EATS topic map
     :type topic_map: `TopicMap`
     :param queryset: source of data for choices
     :type queryset: `QuerySet`
+    :param default:
+    :type default: `bool`
+    :param multiple: whether multiple choices are allowed
+    :type multiple: `bool`
     :rtype: list
 
     """
@@ -1015,6 +1019,6 @@ def create_choice_list (topic_map, queryset, default=False):
     choices = [(str(item.get_id()), item.get_admin_name())
                for item in queryset]
     choices.sort(key=lambda x: x[1])
-    if not (len(queryset) == 1 and default):
+    if not (multiple or (len(queryset) == 1 and default)):
         choices = [('', '----------')] + choices
     return choices

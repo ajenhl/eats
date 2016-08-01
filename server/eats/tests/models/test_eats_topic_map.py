@@ -215,9 +215,11 @@ class EATSTopicMapTestCase (ModelTestCase):
             self.authority, entity_type2)
         entity2.create_name_property_assertion(
             self.authority, name_type, language, script, 'Paris')
-        self.assertEqual(list(self.tm.lookup_entities('Paris', entity_type1)),
-                         [entity1])
-        self.assertEqual(list(self.tm.lookup_entities('Paris', entity_type2)),
-                         [entity2])
         self.assertEqual(set(self.tm.lookup_entities('Paris')),
                          set([entity1, entity2]))
+        self.assertEqual(list(self.tm.lookup_entities('Paris', [entity_type1])),
+                         [entity1])
+        self.assertEqual(list(self.tm.lookup_entities('Paris', [entity_type2])),
+                         [entity2])
+        self.assertEqual(set(self.tm.lookup_entities(
+            'Paris', [entity_type1, entity_type2])), set([entity1, entity2]))

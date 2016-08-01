@@ -195,38 +195,56 @@ class EntityTestCase (ModelTestCase):
         entity_type_1 = self.create_entity_type('person')
         entity_type_2 = self.create_entity_type('place')
         self.authority.set_entity_types([entity_type_1, entity_type_2])
-        self.assertEqual(Entity.objects.filter_by_entity_type(
-                entity_type_1.id).count(), 0)
-        self.assertEqual(Entity.objects.filter_by_entity_type(
-                entity_type_2.id).count(), 0)
+        self.assertEqual(Entity.objects.filter_by_entity_types(
+            [entity_type_1]).count(), 0)
+        self.assertEqual(Entity.objects.filter_by_entity_types(
+            [entity_type_2]).count(), 0)
         entity = self.tm.create_entity(self.authority)
         self.assertEqual(Entity.objects.count(), 1)
-        self.assertEqual(Entity.objects.filter_by_entity_type(
-                entity_type_1.id).count(), 0)
-        self.assertEqual(Entity.objects.filter_by_entity_type(
-                entity_type_2.id).count(), 0)
+        self.assertEqual(Entity.objects.filter_by_entity_types(
+            [entity_type_1]).count(), 0)
+        self.assertEqual(Entity.objects.filter_by_entity_types(
+            [entity_type_2]).count(), 0)
         assertion1 = entity.create_entity_type_property_assertion(
             self.authority, entity_type_1)
-        self.assertEqual(Entity.objects.filter_by_entity_type(
-                entity_type_1.id).count(), 1)
-        self.assertEqual(Entity.objects.filter_by_entity_type(
-                entity_type_2.id).count(), 0)
+        self.assertEqual(Entity.objects.filter_by_entity_types(
+            [entity_type_1]).count(), 1)
+        self.assertEqual(Entity.objects.filter_by_entity_types(
+            [entity_type_2]).count(), 0)
         assertion2 = entity.create_entity_type_property_assertion(
             self.authority, entity_type_2)
-        self.assertEqual(Entity.objects.filter_by_entity_type(
-                entity_type_1.id).count(), 1)
-        self.assertEqual(Entity.objects.filter_by_entity_type(
-                entity_type_2.id).count(), 1)
+        self.assertEqual(Entity.objects.filter_by_entity_types(
+            [entity_type_1]).count(), 1)
+        self.assertEqual(Entity.objects.filter_by_entity_types(
+            [entity_type_2]).count(), 1)
         assertion1.remove()
-        self.assertEqual(Entity.objects.filter_by_entity_type(
-                entity_type_1.id).count(), 0)
-        self.assertEqual(Entity.objects.filter_by_entity_type(
-                entity_type_2.id).count(), 1)
+        self.assertEqual(Entity.objects.filter_by_entity_types(
+            [entity_type_1]).count(), 0)
+        self.assertEqual(Entity.objects.filter_by_entity_types(
+            [entity_type_2]).count(), 1)
         assertion2.remove()
-        self.assertEqual(Entity.objects.filter_by_entity_type(
-                entity_type_1.id).count(), 0)
-        self.assertEqual(Entity.objects.filter_by_entity_type(
-                entity_type_2.id).count(), 0)
+        self.assertEqual(Entity.objects.filter_by_entity_types(
+            [entity_type_1]).count(), 0)
+        self.assertEqual(Entity.objects.filter_by_entity_types(
+            [entity_type_2]).count(), 0)
+
+    def test_manager_filter_by_entity_type_multiple (self):
+        self.assertEqual(Entity.objects.count(), 0)
+        entity_type_1 = self.create_entity_type('person')
+        entity_type_2 = self.create_entity_type('place')
+        self.authority.set_entity_types([entity_type_1, entity_type_2])
+        self.assertEqual(Entity.objects.filter_by_entity_types(
+            [entity_type_1, entity_type_2]).count(), 0)
+        entity_1 = self.tm.create_entity(self.authority)
+        entity_1.create_entity_type_property_assertion(
+            self.authority, entity_type_1)
+        self.assertEqual(Entity.objects.filter_by_entity_types(
+            [entity_type_1, entity_type_2]).count(), 1)
+        entity_2 = self.tm.create_entity(self.authority)
+        entity_2.create_entity_type_property_assertion(
+            self.authority, entity_type_2)
+        self.assertEqual(Entity.objects.filter_by_entity_types(
+            [entity_type_1, entity_type_2]).count(), 2)
 
     def test_simple_merge (self):
         # Test merging of two entities that only have property
