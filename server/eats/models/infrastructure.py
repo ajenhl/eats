@@ -14,7 +14,7 @@ class Infrastructure:
         if name == self.get_admin_name():
             return
         try:
-            self._default_manager.get_by_admin_name(name)
+            self.__class__._default_manager.get_by_admin_name(name)
             # QAZ: Raise a specific exception with error message.
             raise Exception
         except self.DoesNotExist:

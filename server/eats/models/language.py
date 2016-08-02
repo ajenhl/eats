@@ -99,7 +99,7 @@ class Language (Infrastructure, Topic):
         if code == self.get_code():
             return
         try:
-            self._default_manager.get_by_code(code)
+            self.__class__._default_manager.get_by_code(code)
             # QAZ: Raise a specific exception with error message.
             raise Exception
         except self.DoesNotExist:
