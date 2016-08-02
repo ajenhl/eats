@@ -148,7 +148,7 @@ class NamePropertyAssertion (NoteBearingPropertyAssertion):
             self.add_theme(self.eats_topic_map.is_preferred)
         else:
             self.remove_theme(self.eats_topic_map.is_preferred)
-        cached_name = self.cached_name
+        cached_name = self.cached_name_for_assertion
         cached_name.is_preferred = is_preferred
         cached_name.save()
 

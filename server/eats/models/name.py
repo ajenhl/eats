@@ -127,7 +127,7 @@ class Name (Topic, NameElement):
     def _delete_name_cache (self):
         """Deletes the cache for this name."""
         try:
-            self.cached_name.delete()
+            self.cached_name_for_name.delete()
         except NameCache.DoesNotExist:
             pass
 

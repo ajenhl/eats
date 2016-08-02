@@ -13,15 +13,15 @@ class NameCache (models.Model):
 
     """
 
-    entity = models.ForeignKey('Entity', related_name='cached_names')
+    entity = models.ForeignKey('Entity', related_name='cached_names_for_entity')
     assertion = models.OneToOneField('NamePropertyAssertion',
-                                     related_name='cached_name')
-    name = models.OneToOneField('Name', related_name='cached_name')
-    authority = models.ForeignKey('Authority')
+                                     related_name='cached_name_for_assertion')
+    name = models.OneToOneField('Name', related_name='cached_name_for_name')
+    authority = models.ForeignKey('Authority', related_name='cached_names_for_authority')
     form = models.CharField(max_length=800)
     is_preferred = models.BooleanField(default=False)
-    language = models.ForeignKey('Language')
-    script = models.ForeignKey('Script')
+    language = models.ForeignKey('Language', related_name='cached_names_for_language')
+    script = models.ForeignKey('Script', related_name='cached_names_for_script')
 
     class Meta:
         app_label = 'eats'
