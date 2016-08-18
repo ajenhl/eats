@@ -52,6 +52,13 @@ public class LookupPreferences {
 	private String proxyPassword = null;
 	private static final String PROXY_PASSWORD_KEY = "proxy.password";
 	private static final String PROXY_PASSWORD_DEFAULT = "";
+        
+        /**
+         * Reference Tool URL.
+         */
+        private String refsUrl = null;
+        private static final String REFS_URL_KEY = "refsUrl";
+        private static final String REFS_URL_DEFAULT = "";
 
 	/**
      * 
@@ -75,6 +82,7 @@ public class LookupPreferences {
 				PROXY_USERNAME_DEFAULT));
 		setProxyPassword(preferences.get(PROXY_PASSWORD_KEY,
 				PROXY_PASSWORD_DEFAULT));
+                setRefsUrl(preferences.get(REFS_URL_KEY, REFS_URL_DEFAULT));
 
 	}
 
@@ -97,6 +105,8 @@ public class LookupPreferences {
 		preferences.put(PROXY_PASSWORD_KEY,
 				(getProxyPassword() != null ? getProxyPassword()
 						: PROXY_PASSWORD_DEFAULT));
+                preferences.put(REFS_URL_KEY, (getRefsUrl() != null ? getRefsUrl()
+                        : REFS_URL_DEFAULT));
 		preferences.flush();
 
 	}
@@ -186,5 +196,19 @@ public class LookupPreferences {
 	public void setProxyPassword(String proxyPassword) {
 		this.proxyPassword = proxyPassword;
 	}
+        
+        /**
+         * @return the refsUrl
+         */
+        public String getRefsUrl() {
+            return refsUrl;
+        }
+        
+        /**
+         * @param refsUrl the refsUrl to set
+         */
+        public void setRefsUrl(String refsUrl) {
+            this.refsUrl = refsUrl;
+        }
 
 }

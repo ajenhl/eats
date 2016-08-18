@@ -16,6 +16,7 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -181,11 +182,11 @@ public class LookupController implements ActionListener, DocumentListener,
 	 * 
 	 * @param preferences
 	 *            the Dispatcher
-	 * @param frame
+	 * @param parent
 	 *            parent Frame
-	 * @param title
+	 * @param viewTitle
 	 *            the window title
-	 * @param modal
+	 * @param viewModality
 	 *            True if the window should be modal
 	 */
 	public LookupController(LookupPreferencesController preferences,
@@ -230,6 +231,8 @@ public class LookupController implements ActionListener, DocumentListener,
 			view.findButton.addActionListener(this);
 			view.editButton.addActionListener(this);
 			view.editButton.setEnabled(false);
+			view.refsButton.addActionListener(this);
+			view.refsButton.setEnabled(false);
 
 			// adds a document listener to the display name JTextField
 			view.displayNameText.getDocument().addDocumentListener(this);
@@ -544,6 +547,8 @@ public class LookupController implements ActionListener, DocumentListener,
 			}
 		} else if (e.getSource().equals(view.editButton)) {
 			editEntityAction();
+        } else if (e.getSource().equals(view.refsButton)) {
+        	refsAction();
 		} else if (e.getSource().equals(view.cancelButton)) {
 			closeWindow();
 		} else if (e.getSource().equals(view.newButton)) {
@@ -727,6 +732,38 @@ public class LookupController implements ActionListener, DocumentListener,
 				+ (found == 1 ? " entity" : " entities"));
 
 	}
+        
+	/**
+	 * Opens a link in a browser to show references to the selected entity.
+	 */
+	private void refsAction() {
+
+		// gets the selected entity position
+		int viewRowIndex = table.getSelectedRow();
+		int modelRowIndex = table.convertRowIndexToModel(viewRowIndex);
+
+		// gets the selected entity
+		Entity e = (Entity) table.getModel().getValueAt(modelRowIndex,
+				ENTITY_COLUMN);
+
+		if (e != null) {
+			if (Desktop.isDesktopSupported()) {
+				Desktop desktop = Desktop.getDesktop();
+
+				try {
+					desktop.browse(new URI(this.preferences.getLookupPreferences().getRefsUrl() +
+							URLEncoder.encode(e.getUrl(), "UTF-8")));
+				} catch (NullPointerException ex) {
+					showExceptionDialog(ex);
+				} catch (IOException ex) {
+					showExceptionDialog(ex);
+				} catch (URISyntaxException ex) {
+					showExceptionDialog(ex);
+				}
+			}
+		}
+
+	}
 
 	private void clearResults() {
 
@@ -813,11 +850,13 @@ public class LookupController implements ActionListener, DocumentListener,
 
 		if (viewRowIndex < 0) {
 			view.editButton.setEnabled(false);
+			view.refsButton.setEnabled(false);
 
 			// selection got filtered away
 			textPane.setText("<html />");
 		} else {
 			view.editButton.setEnabled(true);
+			view.refsButton.setEnabled(true);
 
 			int modelRowIndex = table.convertRowIndexToModel(viewRowIndex);
 			Entity entity = (Entity) table.getModel().getValueAt(modelRowIndex,
