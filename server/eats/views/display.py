@@ -77,7 +77,7 @@ def entity_eatsml_view (request, topic_map, entity_id):
 @add_topic_map
 def search (request, topic_map):
     form_data = request.GET or None
-    entity_types = EntityType.objects.all()
+    entity_types = EntityType.objects.filter_by_used_by_authority()
     form = EntitySearchForm(topic_map, data=form_data,
                             entity_types=entity_types)
     entities = []

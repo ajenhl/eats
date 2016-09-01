@@ -11,6 +11,11 @@ class EntityTypeManager (InfrastructureManager):
         return super(EntityTypeManager, self).filter_by_authority(
             authority, association_type)
 
+    def filter_by_used_by_authority (self):
+        association_type = self.eats_topic_map.authority_has_entity_type_association_type
+        return super(EntityTypeManager, self).filter_by_used_by_authority(
+            association_type)
+
     def get_queryset (self):
         return super(EntityTypeManager, self).get_queryset().filter(
             types=self.eats_topic_map.entity_type_type)

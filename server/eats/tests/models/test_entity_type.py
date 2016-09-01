@@ -1,4 +1,5 @@
 from eats.exceptions import EATSValidationException
+from eats.models import EntityType
 from eats.tests.models.model_test_case import ModelTestCase
 
 
@@ -41,6 +42,20 @@ class EntityTypeTestCase (ModelTestCase):
         self.assertEqual(1, len(self.entity.get_entity_types()))
         assertion1.remove()
         self.assertEqual(0, len(self.entity.get_entity_types()))
+
+    def test_filter_by_used_by_authority (self):
+        authority_types = EntityType.objects.filter_by_used_by_authority()
+        self.assertEqual(set(authority_types), set([self.entity_type,
+                                                    self.entity_type2]))
+        entity_type3 = self.create_entity_type('Group')
+        authority_types = EntityType.objects.filter_by_used_by_authority()
+        self.assertEqual(set(authority_types), set([self.entity_type,
+                                                    self.entity_type2]))
+        authority2 = self.create_authority('new')
+        authority2.set_entity_types([entity_type3])
+        authority_types = EntityType.objects.filter_by_used_by_authority()
+        self.assertEqual(set(authority_types), set(
+            [self.entity_type, self.entity_type2, entity_type3]))
 
     def test_update_entity_type_property_assertion (self):
         assertion = self.entity.create_entity_type_property_assertion(
