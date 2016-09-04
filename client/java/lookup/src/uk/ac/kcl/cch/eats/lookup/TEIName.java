@@ -159,7 +159,7 @@ public class TEIName {
      */
     private String transform(String input, File xslt) throws TEINameException {
 
-        String message = "Could not transform XML string using: " + xslt;
+        String message = "Could not transform XML string using: " + xslt + ".";
 
         try {
             // gets a new transformer factory to create the transformers
@@ -176,17 +176,24 @@ public class TEIName {
 
             return output.toString(XML_ENCODING_UTF_8);
         } catch (TransformerConfigurationException e) {
-            throw new TEINameException(message, e);
+            extendExceptionMessage(e, message);
         } catch (FileNotFoundException e) {
-            throw new TEINameException(message, e);
+            extendExceptionMessage(e, message);
         } catch (UnsupportedEncodingException e) {
-            throw new TEINameException(message, e);
+            extendExceptionMessage(e, message);
         } catch (TransformerFactoryConfigurationError e) {
-            throw new TEINameException(message, e.getException());
+            extendExceptionMessage(e.getException(), message);
         } catch (TransformerException e) {
-            throw new TEINameException(message, e);
+            extendExceptionMessage(e, message);
         }
+        return null;
+    }
 
+    private void extendExceptionMessage(Exception e, String message) throws TEINameException {
+        if (e.getMessage() != null) {
+            message = message + " " + e.getMessage();
+        }
+        throw new TEINameException(message, e);
     }
 
     /**
@@ -213,15 +220,15 @@ public class TEIName {
 
             return root;
         } catch (UnsupportedEncodingException e) {
-            throw new TEINameException(message, e);
+        	extendExceptionMessage(e, message);
         } catch (ParserConfigurationException e) {
-            throw new TEINameException(message, e);
+        	extendExceptionMessage(e, message);
         } catch (SAXException e) {
-            throw new TEINameException(message, e);
+        	extendExceptionMessage(e, message);
         } catch (IOException e) {
-            throw new TEINameException(message, e);
+        	extendExceptionMessage(e, message);
         }
-
+        return null;
     }
 
     /**
@@ -285,14 +292,15 @@ public class TEIName {
 
             return xml;
         } catch (TransformerConfigurationException e) {
-            throw new TEINameException(message, e);
+        	extendExceptionMessage(e, message);
         } catch (IllegalArgumentException e) {
-            throw new TEINameException(message, e);
+        	extendExceptionMessage(e, message);
         } catch (TransformerFactoryConfigurationError e) {
-            throw new TEINameException(message, e.getException());
+        	extendExceptionMessage(e.getException(), message);
         } catch (TransformerException e) {
-            throw new TEINameException(message, e);
+        	extendExceptionMessage(e, message);
         }
+        return null;
 
     }
 
