@@ -101,8 +101,12 @@ public class TEIName {
 
                 if (prefix != null && prefix.length() > 0) {
                     nameAsXml += " xmlns:" + prefix + "=\"" + uri + "\"";
+                /* This causes problems in the overwhelmingly common case of the
+                 * TEI namespace having no prefix, when the name string contains
+                 *  markup in the TEI namespace.
                 } else {
                     nameAsXml += " xmlns=\"" + uri + "\"";
+                 */
                 }
             }
         }
