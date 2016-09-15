@@ -644,7 +644,7 @@ public class Dispatcher {
 
 		try {
 			// creates a new get request
-			HttpGet get = new HttpGet(joinUrl(url, PROCESSED_IMPORT_URL));
+			HttpGet get = new HttpGet(joinUrl(joinUrl(serverUrl, url), PROCESSED_IMPORT_URL));
 
 			// executes the processed import request
 			HttpResponse response = httpClient.execute(get, localContext);
