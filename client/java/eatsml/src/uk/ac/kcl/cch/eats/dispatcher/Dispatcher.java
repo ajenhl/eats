@@ -4,27 +4,20 @@
  */
 package uk.ac.kcl.cch.eats.dispatcher;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.JAXBException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
+
+import nz.org.artefact.eats.ns.eatsml.Collection;
+import nz.org.artefact.eats.ns.eatsml.Entity;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -51,11 +44,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
-
-import nz.org.artefact.eats.ns.eatsml.Collection;
-import nz.org.artefact.eats.ns.eatsml.Entity;
+import org.jsoup.Jsoup;
 
 /**
  * This class connects to the EATS server and handles requests between the
@@ -256,7 +245,7 @@ public class Dispatcher {
 				response = httpClient.execute(get, localContext);
 
 				if (response != null && response.getEntity() != null) {
-					// gets the crsf token
+					// gets the CSRF token
 					csrfToken = getCsrf(response.getEntity());
 				} else {
 					throw new DispatcherException(
@@ -303,12 +292,6 @@ public class Dispatcher {
 					"connection problem/connection aborted", e);
 		} catch (ParseException e) {
 			throw new DispatcherException("failed to parse the login form", e);
-		} catch (XPathExpressionException e) {
-			throw new DispatcherException("failed to parse the login form", e);
-		} catch (ParserConfigurationException e) {
-			throw new DispatcherException("failed to parse the login form", e);
-		} catch (SAXException e) {
-			throw new DispatcherException("failed to parse the login form", e);
 		} finally {
 			// releases resources
 			consumeResponseEntity(response);
@@ -332,46 +315,10 @@ public class Dispatcher {
 	 * @throws ParseException
 	 * @throws XPathExpressionException
 	 */
-	private String getCsrf(HttpEntity entity)
-			throws ParserConfigurationException, ParseException, SAXException,
-			IOException, XPathExpressionException {
-
-		// gets a DOM builder factory
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-
-		// sets namespace awareness
-		dbf.setNamespaceAware(false);
-
-		// disables validation
-		dbf.setValidating(false);
-		dbf.setFeature(
-				"http://apache.org/xml/features/nonvalidating/load-dtd-grammar",
-				false);
-		dbf.setFeature(
-				"http://apache.org/xml/features/nonvalidating/load-external-dtd",
-				false);
-
-		// creates a new document builder from the factory
-		DocumentBuilder builder = dbf.newDocumentBuilder();
-
+	private String getCsrf(HttpEntity entity) throws IOException {
 		String entityContent = EntityUtils.toString(entity);
-		
-		// parses the response
-		Document doc = builder.parse(new ByteArrayInputStream(entityContent.getBytes()));
-
-		// gets a XPathFactory
-		XPathFactory factory = XPathFactory.newInstance();
-
-		// creates a new XPath
-		XPath xpath = factory.newXPath();
-
-		// compiles the XPath expression to get the csrf token
-		XPathExpression expr = xpath
-				.compile("//*[@name = 'csrfmiddlewaretoken']/@value");
-
-		// evaluates the compiled XPath expression an returns the result
-		return (String) expr.evaluate(doc, XPathConstants.STRING);
-
+		org.jsoup.nodes.Document html = Jsoup.parse(entityContent);
+		return html.select("input[name=csrfmiddlewaretoken]").attr("value");
 	}
 
 	/**
@@ -611,12 +558,6 @@ public class Dispatcher {
 		} catch (IOException e) {
 			throw new DispatcherException(e.getMessage(), e);
 		} catch (ParseException e) {
-			throw new DispatcherException(e.getMessage(), e);
-		} catch (XPathExpressionException e) {
-			throw new DispatcherException(e.getMessage(), e);
-		} catch (ParserConfigurationException e) {
-			throw new DispatcherException(e.getMessage(), e);
-		} catch (SAXException e) {
 			throw new DispatcherException(e.getMessage(), e);
 		} finally {
 			// releases resources

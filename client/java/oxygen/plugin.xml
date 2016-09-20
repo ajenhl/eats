@@ -18,6 +18,7 @@
         <library name="httpclient-4.0.1.jar"/>
         <library name="httpcore-4.0.1.jar"/>
         <library name="httpmime-4.0.1.jar"/>
+        <library name="jsoup-1.9.2.jar"/>
         <library name="saxon9he.jar" />
     </runtime>
     <extension type="selectionProcessor"

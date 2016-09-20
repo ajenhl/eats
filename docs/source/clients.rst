@@ -26,3 +26,8 @@ user to select some text, perform a lookup against an EATS instance
 using that text, and add in appropriate TEI XML markup reference the
 selected entity. It handles creating new name markup as well as
 modifying existing name markup.
+
+Most of the JARs that this plugin requires come bundled with it. The
+exception is jsoup, available at https://jsoup.org/. The JAR filename
+specified in plugin.xml must match the actual jsoup JAR filename; this
+file should be placed in the EATS plugin directory.
