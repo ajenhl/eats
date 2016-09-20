@@ -80,6 +80,8 @@ public class LookupPreferencesController implements ActionListener {
 		dialog.jProxyPasswordField
 				.setText(lookupPreferences.getProxyPassword());
                 dialog.jRefsUrlTextField.setText(lookupPreferences.getRefsUrl());
+                dialog.autoEditInBrowserCheckBox.setSelected(
+                        lookupPreferences.getAutoEditInBrowser());
 
 		dialog.getRootPane().setDefaultButton(dialog.jOkButton);
 
@@ -111,6 +113,8 @@ public class LookupPreferencesController implements ActionListener {
 			lookupPreferences.setProxyPassword(new String(
 					dialog.jProxyPasswordField.getPassword()).trim());
                         lookupPreferences.setRefsUrl(dialog.jRefsUrlTextField.getText().trim());
+                        lookupPreferences.setAutoEditInBrowser(dialog.autoEditInBrowserCheckBox
+                                        .isSelected());
 
 			try {
 				lookupPreferences.save();

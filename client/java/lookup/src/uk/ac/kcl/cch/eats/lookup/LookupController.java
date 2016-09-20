@@ -14,6 +14,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -605,18 +607,10 @@ public class LookupController implements ActionListener, DocumentListener,
 				ENTITY_COLUMN);
 
 		if (e != null) {
-			if (Desktop.isDesktopSupported()) {
-				Desktop desktop = Desktop.getDesktop();
-
-				try {
-					desktop.browse(new URI(dispatcher.getEditUrl(e)));
-				} catch (NullPointerException ex) {
-					showExceptionDialog(ex);
-				} catch (IOException ex) {
-					showExceptionDialog(ex);
-				} catch (URISyntaxException ex) {
-					showExceptionDialog(ex);
-				}
+			try {
+				openUrl(dispatcher.getEditUrl(e));
+			} catch (MalformedURLException ex) {
+				showExceptionDialog(ex);
 			}
 		}
 
@@ -668,6 +662,14 @@ public class LookupController implements ActionListener, DocumentListener,
 		}
 
 		entity = imported.getEntities().getEntity().get(0);
+		
+		if (this.preferences.getLookupPreferences().getAutoEditInBrowser()) {
+			try {
+				openUrl(dispatcher.getEditUrl(entity));
+			} catch (MalformedURLException ex) {
+				showExceptionDialog(ex);
+			}
+		}
 
 		return entity;
 
@@ -735,6 +737,7 @@ public class LookupController implements ActionListener, DocumentListener,
         
 	/**
 	 * Opens a link in a browser to show references to the selected entity.
+	 * 
 	 */
 	private void refsAction() {
 
@@ -747,20 +750,14 @@ public class LookupController implements ActionListener, DocumentListener,
 				ENTITY_COLUMN);
 
 		if (e != null) {
-			if (Desktop.isDesktopSupported()) {
-				Desktop desktop = Desktop.getDesktop();
-
-				try {
-					desktop.browse(new URI(this.preferences.getLookupPreferences().getRefsUrl() +
-							URLEncoder.encode(e.getUrl(), "UTF-8")));
-				} catch (NullPointerException ex) {
-					showExceptionDialog(ex);
-				} catch (IOException ex) {
-					showExceptionDialog(ex);
-				} catch (URISyntaxException ex) {
-					showExceptionDialog(ex);
-				}
+			String url = null;
+			try {
+				url = this.preferences.getLookupPreferences().getRefsUrl() +
+						URLEncoder.encode(e.getUrl(), "UTF-8");
+			} catch (UnsupportedEncodingException ex) {
+				return;
 			}
+			openUrl(url);
 		}
 
 	}
@@ -957,13 +954,20 @@ public class LookupController implements ActionListener, DocumentListener,
 	 */
 	@Override
 	public void hyperlinkUpdate(HyperlinkEvent e) {
-
 		if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-			if (Desktop.isDesktopSupported()) {
-				Desktop desktop = Desktop.getDesktop();
-
+			openUrl(e.getURL().toString());
+		}
+	}
+	
+	/**
+	 * Open the supplied URL in the default browser.
+	 */
+	public void openUrl(String url) {
+		if (Desktop.isDesktopSupported()) {
+			Desktop desktop = Desktop.getDesktop();
+			if (desktop.isSupported(java.awt.Desktop.Action.BROWSE)) {
 				try {
-					desktop.browse(new URI(e.getURL().toString()));
+					desktop.browse(new URI(url));
 				} catch (NullPointerException ex) {
 					showExceptionDialog(ex);
 				} catch (IOException ex) {

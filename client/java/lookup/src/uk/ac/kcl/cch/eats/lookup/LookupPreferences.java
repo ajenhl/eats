@@ -59,6 +59,13 @@ public class LookupPreferences {
         private String refsUrl = null;
         private static final String REFS_URL_KEY = "refsUrl";
         private static final String REFS_URL_DEFAULT = "";
+        
+        /**
+         * Auto edit in browser checkbox.
+         */
+        private Boolean isAutoEditInBrowser = null;
+        private static final String AUTO_EDIT_IN_BROWSER_KEY = "autoEditInBrowser";
+        private static final Boolean AUTO_EDIT_IN_BROWSER_DEFAULT = false;
 
 	/**
      * 
@@ -83,6 +90,8 @@ public class LookupPreferences {
 		setProxyPassword(preferences.get(PROXY_PASSWORD_KEY,
 				PROXY_PASSWORD_DEFAULT));
                 setRefsUrl(preferences.get(REFS_URL_KEY, REFS_URL_DEFAULT));
+                setAutoEditInBrowser(preferences.getBoolean(AUTO_EDIT_IN_BROWSER_KEY,
+                        AUTO_EDIT_IN_BROWSER_DEFAULT));
 
 	}
 
@@ -107,6 +116,9 @@ public class LookupPreferences {
 						: PROXY_PASSWORD_DEFAULT));
                 preferences.put(REFS_URL_KEY, (getRefsUrl() != null ? getRefsUrl()
                         : REFS_URL_DEFAULT));
+                preferences.putBoolean(AUTO_EDIT_IN_BROWSER_KEY,
+                        (getAutoEditInBrowser() != null ? getAutoEditInBrowser() :
+                                AUTO_EDIT_IN_BROWSER_DEFAULT));
 		preferences.flush();
 
 	}
@@ -209,6 +221,14 @@ public class LookupPreferences {
          */
         public void setRefsUrl(String refsUrl) {
             this.refsUrl = refsUrl;
+        }
+        
+        public Boolean getAutoEditInBrowser() {
+            return this.isAutoEditInBrowser;
+        }
+        
+        public void setAutoEditInBrowser(Boolean isSelected) {
+            this.isAutoEditInBrowser = isSelected;
         }
 
 }
