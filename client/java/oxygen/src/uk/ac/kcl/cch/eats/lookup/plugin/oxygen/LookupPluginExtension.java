@@ -4,6 +4,8 @@
  */
 package uk.ac.kcl.cch.eats.lookup.plugin.oxygen;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Hashtable;
 
 import javax.swing.JOptionPane;
@@ -40,7 +42,15 @@ public class LookupPluginExtension extends DefaultHandler implements
 
 		String jarPath = getClass().getProtectionDomain().getCodeSource()
 				.getLocation().getPath();
-		jarPath = jarPath.substring(0, jarPath.lastIndexOf("/"));
+		try {
+			jarPath = URLDecoder.decode(jarPath.substring(0, jarPath.lastIndexOf("/")),
+					"UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(context.getFrame(), e.getMessage(),
+					"Exception", JOptionPane.ERROR_MESSAGE);
+			return null;
+		}
 
 		String xsltPath = jarPath + "/xslt";
 
